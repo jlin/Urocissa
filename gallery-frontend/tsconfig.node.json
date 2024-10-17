@@ -1,0 +1,17 @@
+{
+  "include": ["vite.config.ts"],
+  "compilerOptions": {
+    "types": ["node", "vuetify"],
+    "lib": ["webworker"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true
+  }
+}

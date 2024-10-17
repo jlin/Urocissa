@@ -1,0 +1,9 @@
+@use 'vuetify';
+
+html{
+  overflow-y: hidden;
+}
+
+.v-card {
+  cursor: default !important;
+}
