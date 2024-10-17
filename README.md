@@ -56,6 +56,7 @@ Make sure the following software is installed on your system:
 
    ```bash
    cp config.default.json config.json
+   cp Rocket.default.toml Rocket.toml
    ```
 
    - **`config.json` Settings:**
@@ -77,6 +78,9 @@ Make sure the following software is installed on your system:
      - `disableImg`: For debugging purposes (leave it as `false`).
      - `discordHookUrl`: (Optional) Fill in your Discord webhook URL to receive error notifications.
 
+   - **`Rocket.toml` Settings:**
+     - `port`: Default is `4000`. You can change this to your desired port number.
+
 ---
 
 ### 4. Build the Backend
@@ -84,7 +88,7 @@ Make sure the following software is installed on your system:
 Navigate to `gallery-backend` and build the backend using Cargo:
 
 ```bash
-cargo run build
+cargo run build --release
 ```
 
 ---
@@ -129,4 +133,11 @@ npm run build
 
 ### 8. Run the Application
 
-Now, your app is configured and built! Follow the steps above to launch the backend and frontend successfully.
+Navigate to the `gallery-backend` directory and run the following command to start the app:
+
+```bash
+cargo run --release
+```
+
+Now, your app is configured and built! 
+
