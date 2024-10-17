@@ -32,10 +32,6 @@ This demo is currently in read-only mode, and uploading files or editing tags is
 
 3. **Single User Only**: Only supports personal use and cannot create multiple user accounts.
 
-[Demo](https://demo.photoserver.tw)
-
-Experience the Urocissa gallery in action. This demo showcases the app's ability to handle large collections of photos and videos, giving you a real feel of its performance and features. Explore the interface, try the scrubbable timeline, and see how quickly you can search and filter through images.
-
 ## Steps to Set Up and Use the App
 
 Follow these instructions to set up and run the Urocissa app.
