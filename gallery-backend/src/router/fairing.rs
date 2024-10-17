@@ -24,13 +24,12 @@ pub fn auth_request_fairing() -> AdHoc {
     AdHoc::on_request("Auth Request", |req, _| {
         Box::pin(async move {
             let uri = req.uri().to_string();
-            if uri.ends_with(".js")
-                || uri.ends_with(".css")
-                || uri.contains("/share")
-                || uri.contains("/assets")
-                || uri.contains("/compressed")
-                || uri.contains("/thumb")
-            {
+            if matches!(uri.ends_with(".js") || uri.ends_with(".css") || uri.contains("/share") || uri.contains("/assets") || uri.contains("/compressed") || uri.contains("/thumb"), true) {
+                return;
+            }
+            if PRIVATE_CONFIG.read_only_mode && (req.method() != rocket::http::Method::Get && !uri.starts_with("/get/")) {
+                let forbidden_uri = Origin::parse("/forbidden").unwrap();
+                req.set_uri(forbidden_uri);
                 return;
             }
             let cookies = req.cookies();
@@ -45,3 +44,4 @@ pub fn auth_request_fairing() -> AdHoc {
         })
     })
 }
+
