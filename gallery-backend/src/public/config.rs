@@ -8,6 +8,7 @@ pub struct PrivateConfig {
     pub read_only_mode: bool,
     pub sync_path: Vec<PathBuf>,
     pub discord_hook_url: Option<String>,
+    pub disable_img: bool,
 }
 
 pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> =
