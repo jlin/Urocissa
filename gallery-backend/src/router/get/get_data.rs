@@ -1,11 +1,9 @@
 use crate::public::config::{PrivateConfig, PRIVATE_CONFIG};
-use crate::public::database_struct::database::definition::DataBase;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
 use crate::public::redb::DATA_TABLE;
 use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snap_shot_in_memory::ReducedData;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -15,10 +13,7 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::UNIX_EPOCH;
-use std::{
-    sync::atomic::Ordering,
-    time::{Instant, SystemTime},
-};
+use std::time::{Instant, SystemTime};
 #[post("/get/get-db-length?<locate>", format = "json", data = "<query_data>")]
 pub async fn get_data_length(
     query_data: Option<Json<Expression>>,
@@ -188,17 +183,6 @@ pub async fn get_tags() -> Json<Vec<TagInfo>> {
     })
     .await
     .unwrap()
-}
-
-#[get("/get/generate_random_data?<number>")]
-pub async fn generate_random_data(number: usize) {
-    let data_vec: Vec<DataBase> = (0..number)
-        .into_par_iter()
-        .map(|_| DataBase::generate_random_data())
-        .collect();
-    TREE.insert_tree_api(&data_vec).unwrap();
-    SHOULD_RESET.store(true, Ordering::SeqCst);
-    println!("insert random data complete")
 }
 
 #[get("/get/get-rows?<index>&<timestamp>")]

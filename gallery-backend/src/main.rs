@@ -13,10 +13,7 @@ use rocket::fs::FileServer;
 use router::fairing::{auth_request_fairing, cache_control_fairing};
 use router::{
     delete::delete_data::delete_data,
-    get::get_data::{
-        generate_random_data, get_config, get_data, get_data_length, get_rows, get_scroll_bar,
-        get_tags,
-    },
+    get::get_data::{get_config, get_data, get_data_length, get_rows, get_scroll_bar, get_tags},
     get::get_img::compressed_file,
     get::get_page::{
         all, all_view, archived, archived_view, catch_view_routes, favicon, favorite,
@@ -24,7 +21,7 @@ use router::{
         tags, trashed, trashed_view,
     },
     post::post_upload::upload,
-    put::{edit_tag::edit_tag, regenerate_preview::regenerate_preview},
+    put::{edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview},
 };
 use std::sync::atomic::Ordering;
 use std::{
