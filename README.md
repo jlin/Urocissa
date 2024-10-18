@@ -17,10 +17,9 @@ This demo showcases the typical usage of PhotoServer, allowing you to experience
 [https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
 **Password:** `password`  
 
-This demo demonstrates the app’s ability to manage **1,000,000 photos**, showcasing the power and scalability of PhotoServer. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
+This demo demonstrates the app’s ability to manage 1,000,000 photos, showcasing the power and scalability of Urocissa. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
 
-**Note:**  
-Both demos are currently in **read-only mode**, and **uploading files or editing tags is not permitted** at this time.
+Both demos are currently in read-only mode, and uploading files or editing tags is not permitted at this time.
 
 ## Features
 
