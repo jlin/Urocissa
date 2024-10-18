@@ -3,6 +3,11 @@
 
 Urocissa is a self-hosted gallery designed to serve massive collections, capable of handling millions of images and videos. It is built using Rust and Vue.
 
+## Motivation
+
+The goal of this project is to efficiently serve one million photos on a 4 GB RAM server, providing smooth scrubbable scrolling, infinite photo streams, and instant search and selection, without waiting for the entire database to load in the browser.
+
+
 ## Demo
 
 You can explore the features of PhotoServer through the following demos:
