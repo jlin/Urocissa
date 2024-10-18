@@ -16,7 +16,7 @@ You can explore the features of PhotoServer through the following demos:
 [https://demo.photoserver.tw](https://demo.photoserver.tw)  
 **Password:** `password`  
 
-This demo showcases the typical usage of PhotoServer, allowing you to experience its core features and user interface.
+This demo showcases the typical usage of Urocissa, allowing you to experience its core features and user interface.
 
 ### One Million Photo Demo  
 [https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
