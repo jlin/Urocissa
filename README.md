@@ -33,7 +33,7 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 - **Infinite Photo Stream**: Endeless scrolling without pagination, making browsing large collections easy.
 
-- **Advanced Virtual Scrolling**: Urocissa has no virtual scrolling DOM height limitation of 33,554,400px. For example, see [here](https://github.com/TanStack/virtual/issues/616).
+- **Advanced Virtual Scrolling**: Urocissa has no virtual scrolling DOM height limitation of 33,554,400px. For example, see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616).
 
 - **Instant Select All**: Select all photos instantly without needing to load the entire database.
 
