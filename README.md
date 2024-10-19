@@ -7,7 +7,6 @@ Urocissa is a self-hosted gallery designed to serve massive collections, capable
 
 The goal of this project is to efficiently serve one million photos on a 4 GB RAM server, providing smooth scrubbable scrolling, infinite photo streams, and instant search and selection, without waiting for the entire database to load in the browser.
 
-
 ## Demo
 
 You can explore the features of PhotoServer through the following demos:
@@ -28,11 +27,11 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Features
 
-- **Blazing Fast Performance**: Search and filter millions of photos in under a second for an efficient and smooth user experience.
+- **Blazing Fast Performance**: Instantly search and filter through millions of photos in less than a second.
 
-- **Scrubbable Timeline**: Navigate to specific dates effortlessly using the scrubbable timeline, providing precise control.
+- **Scrubbable Timeline**: Navigate to specific dates effortlessly using the scrubbable timeline.
 
-- **Infinite Timeline View**: Enjoy seamless scrolling without pagination, making browsing large collections easy.
+- **Infinite Photo Stream**: Endeless scrolling without pagination, making browsing large collections easy.
 
 - **Advanced Virtual Scrolling**: Urocissa has no virtual scrolling DOM height limitation of 33,554,400px. For example, see [here](https://github.com/TanStack/virtual/issues/616).
 
@@ -139,7 +138,7 @@ cargo run build --release
 
 ---
 
-### 5. Configure Frontend Settings (Optional for Advanced Users)
+### 5. Configure Frontend Settings
 
 1. Navigate to the `gallery-frontend` directory:
 
