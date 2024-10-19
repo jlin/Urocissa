@@ -17,7 +17,7 @@ You can explore the features of Urocissa through the following demos:
 
 This demo showcases the typical usage of Urocissa, allowing you to experience its core features and user interface.
 
-### One Million Photo Demo  
+### One Million Photos Demo  
 [https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
 **Password:** `password`  
 
