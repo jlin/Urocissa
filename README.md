@@ -9,7 +9,7 @@ The goal of this project is to efficiently serve one million photos on a 4 GB RA
 
 ## Demo
 
-You can explore the features of PhotoServer through the following demos:
+You can explore the features of Urocissa through the following demos:
 
 ### Standard Demo  
 [https://demo.photoserver.tw](https://demo.photoserver.tw)  
