@@ -17,25 +17,23 @@ You can explore the features of Urocissa through the following demos:
 
 This demo showcases the typical usage of Urocissa, allowing you to experience its core features and user interface.
 
-### One Million Photos Demo  
+### One-Million-Photo Demo  
 [https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
 **Password:** `password`  
 
-This demo demonstrates the app’s ability to manage 1,000,000 photos, showcasing the power and scalability of Urocissa. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
+This demo demonstrates Urocissa's ability to manage 1,000,000 photos, showcasing the power and scalability of Urocissa. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
 
 Both demos are currently in read-only mode, and uploading files or editing tags is not permitted at this time.
 
 ## Features
 
-- **Blazing Fast Performance**: Instantly search and filter through millions of photos in less than a second.
+- **Blazing Fast Performance**: Indexing photos with a pure Rust crate. Instantly serve, search, and filter one million photos in under a second using an in-memory cached database.
 
-- **Scrubbable Timeline**: Navigate to specific dates effortlessly using the scrubbable timeline.
+- **Memory Efficient**: Even with the entire database cached in memory, both the standard demo and the one-million-photo demo can still run seamlessly on a single server with just 4 GB of RAM.
 
-- **Infinite Photo Stream**: Endeless scrolling without pagination, making browsing large collections easy.
+- **Infinite Photo Stream**: Endless scrolling without pagination. No lazy loading is needed. Urocissa uses advanced virtual scrolling to serve one million photos, overcoming the DOM height limit of 33,554,400px (see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616)).
 
-- **Advanced Virtual Scrolling**: Urocissa has no virtual scrolling DOM height limitation of 33,554,400px. For example, see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616).
-
-- **Instant Select All**: Select all photos instantly without needing to load the entire database.
+- **Instant Select All**: Select all photos instantly without loading the entire database.
 
 - **Responsive Layout**: Adaptive design that allows browsing on mobile devices.
 
