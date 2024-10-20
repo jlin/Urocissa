@@ -24,17 +24,27 @@ pub fn auth_request_fairing() -> AdHoc {
     AdHoc::on_request("Auth Request", |req, _| {
         Box::pin(async move {
             let uri = req.uri().to_string();
-            if matches!(uri.ends_with(".js") || uri.ends_with(".css") || uri.contains("/share") || uri.contains("/assets") || uri.contains("/compressed") || uri.contains("/thumb"), true) {
+            if matches!(
+                uri.ends_with(".js")
+                    || uri.ends_with(".css")
+                    || uri.contains("/share")
+                    || uri.contains("/assets")
+                    || uri.contains("/compressed")
+                    || uri.contains("/thumb"),
+                true
+            ) {
                 return;
             }
-            if PRIVATE_CONFIG.read_only_mode && (req.method() != rocket::http::Method::Get && !uri.starts_with("/get/")) {
+            if PRIVATE_CONFIG.read_only_mode
+                && (req.method() != rocket::http::Method::Get && !uri.starts_with("/get/"))
+            {
                 let forbidden_uri = Origin::parse("/forbidden").unwrap();
                 req.set_uri(forbidden_uri);
                 return;
             }
             let cookies = req.cookies();
             let password_cookie = cookies.get("password");
-            if req.uri().path() != "/login"
+            if (req.uri().path() != "/login" && req.uri().path() != "/post/authenticate")
                 && (password_cookie.is_none()
                     || password_cookie.unwrap().value() != PRIVATE_CONFIG.password)
             {
@@ -44,4 +54,3 @@ pub fn auth_request_fairing() -> AdHoc {
         })
     })
 }
-
