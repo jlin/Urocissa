@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::public::config::PRIVATE_CONFIG;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
+pub struct Claims {
     exp: usize,
 }
 
