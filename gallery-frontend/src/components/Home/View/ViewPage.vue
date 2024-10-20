@@ -43,7 +43,7 @@
                 controls
                 autoplay
                 v-if="metadata?.ext_type === 'video'"
-                :src="getSrc(hash, false, 'mp4', Cookies.get('password')!, undefined)"
+                :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
                 :style="{
                   width: `${metadata.width}px`,
                   height: `${metadata.height}px`,
@@ -268,7 +268,7 @@ import { batchNumber } from '@/script/common/commonType'
 import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { useDataLengthStore } from '@/store/dataLengthStore'
-import { getSrc } from '@/../config'
+import { getSrc } from '@/../config.ts'
 
 interface ExifData {
   FNumber: string // Aperture value as a string, e.g., "f/2.8"
@@ -359,7 +359,7 @@ const checkAndFetch = (index: number): boolean => {
       hash: dataStore.data.get(index)!.hash,
       s3: configStore.enableS3,
       devicePixelRatio: window.devicePixelRatio,
-      password: Cookies.get('password')!
+      jwt: Cookies.get('jwt')!
     })
     return false
   } else {

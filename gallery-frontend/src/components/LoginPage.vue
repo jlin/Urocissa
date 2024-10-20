@@ -30,15 +30,14 @@ const handleLogin = async () => {
         });
         token.value = response.data;
 
-        // Store the JWT token in a cookie with security attributes
-        Cookies.set('jwtToken', token.value, {
+        // Store the JWT in a cookie with security attributes
+        Cookies.set('jwt', token.value, {
             httpOnly: false,  // Set to true for better security (cannot access via JavaScript)
             secure: true,      // Ensure it's only sent over HTTPS
             sameSite: 'Strict', // Prevent CSRF attacks
             expires: 1,        // Optional: Expires in 1 day
         });
 
-        Cookies.set('password', password.value)
         await router.push('/')
     } catch (error) {
         console.error(error);

@@ -25,8 +25,8 @@ const NavBarLoaded = ref(false)
 
 // Function to check if cookie has no password field
 async function checkCookieAndRedirect() {
-  const password = Cookies.get('password')
-  if (!password) {
+  const jwt = Cookies.get('jwt')
+  if (!jwt) {
     router.push('/login')
   } else {
     NavBarLoaded.value = true

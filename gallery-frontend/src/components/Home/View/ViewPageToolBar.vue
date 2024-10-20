@@ -25,7 +25,7 @@
         <v-list-item
           prepend-icon="mdi-open-in-new"
           value="view-original-file"
-          :href="getSrc(props.metadata!.hash, true, props.metadata!.ext, Cookies.get('password')!, undefined )"
+          :href="getSrc(props.metadata!.hash, true, props.metadata!.ext, Cookies.get('jwt')!, undefined )"
           target="_blank"
         >
           <v-list-item-title class="wrap">{{ 'View Original File' }}</v-list-item-title>
@@ -33,7 +33,7 @@
         <v-list-item
           prepend-icon="mdi-download"
           value="download-original-file"
-          :href="getSrc(props.metadata!.hash,  true, props.metadata!.ext, Cookies.get('password')!, undefined)"
+          :href="getSrc(props.metadata!.hash,  true, props.metadata!.ext, Cookies.get('jwt')!, undefined)"
           :download="`${props.metadata!.hash}.${props.metadata!.ext}`"
         >
           <v-list-item-title class="wrap">{{ 'Download Original File' }}</v-list-item-title>

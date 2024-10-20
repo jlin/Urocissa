@@ -1,7 +1,10 @@
+use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::fairing::AdHoc;
 use rocket::http::uri::Origin;
 
 use crate::public::config::PRIVATE_CONFIG;
+
+use super::post::authenticate::Claims;
 
 pub fn cache_control_fairing() -> AdHoc {
     AdHoc::on_response("Add Cache-Control header", |req, res| {
@@ -42,11 +45,34 @@ pub fn auth_request_fairing() -> AdHoc {
                 req.set_uri(forbidden_uri);
                 return;
             }
+
             let cookies = req.cookies();
-            let password_cookie = cookies.get("password");
+            let jwt_cookie = cookies.get("jwt");
+
+            let auth_pass = {
+                if jwt_cookie.is_none() {
+                    false
+                } else {
+                    let token = jwt_cookie.unwrap().value();
+                    let validation = Validation::new(Algorithm::HS256);
+                    match decode::<Claims>(
+                        token,
+                        &DecodingKey::from_secret(PRIVATE_CONFIG.password.as_ref()),
+                        &validation,
+                    ) {
+                        Ok(_) => {
+                            println!("JWT validation succeeded.");
+                            true
+                        }
+                        Err(_) => {
+                            println!("JWT validation failed.");
+                            false
+                        }
+                    }
+                }
+            };
             if (req.uri().path() != "/login" && req.uri().path() != "/post/authenticate")
-                && (password_cookie.is_none()
-                    || password_cookie.unwrap().value() != PRIVATE_CONFIG.password)
+                && !auth_pass
             {
                 let forbidden_uri = Origin::parse("/redirect-to-login").unwrap();
                 req.set_uri(forbidden_uri);

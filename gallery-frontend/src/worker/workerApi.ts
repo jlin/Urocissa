@@ -30,7 +30,7 @@ export type processSmallImagePayload = {
   width: number
   height: number
   devicePixelRatio: number
-  password: string
+  jwt: string
 }
 
 export type processImagePayload = {
@@ -38,7 +38,7 @@ export type processImagePayload = {
   hash: string
   s3: boolean
   devicePixelRatio: number
-  password: string
+  jwt: string
 }
 
 export type processAbortPayload = {

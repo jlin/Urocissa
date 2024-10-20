@@ -223,7 +223,7 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
-        password: Cookies.get('password')!
+        jwt: Cookies.get('jwt')!
       })
     } else {
       console.error('workerStore.postToWorkerList is undefined')

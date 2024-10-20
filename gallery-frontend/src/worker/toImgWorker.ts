@@ -40,7 +40,7 @@ const handler = createHandler<typeof toImgWorker>({
       const controller = new AbortController()
       controllerMap.set(event.index, controller)
       const response = await axios.get(
-        getSrc(event.hash, false, 'jpg', event.password, undefined),
+        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
         {
           signal: controller.signal,
           responseType: 'blob'
@@ -66,7 +66,7 @@ const handler = createHandler<typeof toImgWorker>({
   async processImage(event: processImagePayload) {
     try {
       const response = await axios.get(
-        getSrc(event.hash, false, 'jpg', event.password, undefined),
+        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
         {
           responseType: 'blob'
         }
