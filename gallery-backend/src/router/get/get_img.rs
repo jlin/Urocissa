@@ -1,9 +1,6 @@
-use crate::public::config::PRIVATE_CONFIG;
-use crate::public::redb::DATA_TABLE;
-use crate::public::tree::TREE;
+use rocket::fs::NamedFile;
 use rocket::http::Status;
 use rocket::response::Responder;
-use rocket::{fs::NamedFile, http::CookieJar};
 use rocket_seek_stream::SeekStream;
 use std::path::{Path, PathBuf};
 #[derive(Responder)]
@@ -14,7 +11,6 @@ pub enum CompressedFileResponse<'a> {
 
 #[get("/object/compressed/<file_path..>")]
 pub async fn compressed_file(
-    cookies: &CookieJar<'_>,
     file_path: PathBuf,
 ) -> Result<CompressedFileResponse<'static>, Status> {
     let compressed_file_path = Path::new("./object/compressed").join(&file_path);
