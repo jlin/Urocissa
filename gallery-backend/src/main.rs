@@ -20,8 +20,10 @@ use router::{
         favorite_view, login, redirect_to_login, redirect_to_photo, redirect_to_photo_2, setting,
         tags, trashed, trashed_view,
     },
-    post::post_upload::upload,
-    put::{edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview},
+    post::{authenticate::authenticate, post_upload::upload},
+    put::{
+        edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview,
+    },
 };
 use std::sync::atomic::Ordering;
 use std::{
@@ -105,7 +107,8 @@ async fn rocket() -> _ {
                 trashed,
                 trashed_view,
                 get_scroll_bar,
-                regenerate_preview
+                regenerate_preview,
+                authenticate
             ],
         )
 }
