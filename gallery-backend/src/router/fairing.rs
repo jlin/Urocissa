@@ -26,14 +26,16 @@ pub fn cache_control_fairing() -> AdHoc {
 pub fn auth_request_fairing() -> AdHoc {
     AdHoc::on_request("Auth Request", |req, _| {
         Box::pin(async move {
-            let uri = req.uri().to_string();
+            let uri = req.uri().path().to_string();
             if matches!(
                 uri.ends_with(".js")
                     || uri.ends_with(".css")
                     || uri.contains("/share")
                     || uri.contains("/assets")
                     || uri.contains("/compressed")
-                    || uri.contains("/thumb"),
+                    || uri.contains("/thumb")
+                    || uri == "/login"
+                    || uri == "/post/authenticate",
                 true
             ) {
                 return;
@@ -71,9 +73,7 @@ pub fn auth_request_fairing() -> AdHoc {
                     }
                 }
             };
-            if (req.uri().path() != "/login" && req.uri().path() != "/post/authenticate")
-                && !auth_pass
-            {
+            if !auth_pass {
                 let forbidden_uri = Origin::parse("/redirect-to-login").unwrap();
                 req.set_uri(forbidden_uri);
             }
