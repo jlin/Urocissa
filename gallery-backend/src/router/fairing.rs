@@ -2,7 +2,7 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::fairing::AdHoc;
 use rocket::http::uri::Origin;
 
-use crate::public::config::PRIVATE_CONFIG;
+use crate::public::config::{PRIVATE_CONFIG, PUBLIC_CONFIG};
 
 use super::post::authenticate::Claims;
 
@@ -40,7 +40,7 @@ pub fn auth_request_fairing() -> AdHoc {
             ) {
                 return;
             }
-            if PRIVATE_CONFIG.read_only_mode
+            if PUBLIC_CONFIG.read_only_mode
                 && (req.method() != rocket::http::Method::Get && !uri.starts_with("/get/"))
             {
                 let forbidden_uri = Origin::parse("/forbidden").unwrap();

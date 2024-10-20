@@ -4,7 +4,7 @@ extern crate rocket;
 use crate::public::error_data::{handle_error, ErrorData};
 use log::warn;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
-use public::config::PRIVATE_CONFIG;
+use public::config::{PRIVATE_CONFIG, PUBLIC_CONFIG};
 use public::redb::DATA_TABLE;
 use public::tree::start_loop::SHOULD_RESET;
 use public::tree::TREE;
