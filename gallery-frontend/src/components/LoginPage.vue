@@ -39,6 +39,7 @@ const handleLogin = async () => {
         });
 
         await router.push('/')
+        window.location.reload()
     } catch (error) {
         console.error(error);
     }
