@@ -1,4 +1,4 @@
-use crate::public::config::{PrivateConfig, PRIVATE_CONFIG};
+use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
 use crate::public::redb::DATA_TABLE;
@@ -153,8 +153,8 @@ pub async fn get_data(
 }
 
 #[get("/get/get-config.json")]
-pub async fn get_config() -> Json<&'static PrivateConfig> {
-    Json(&*PRIVATE_CONFIG)
+pub async fn get_config() -> Json<&'static PublicConfig> {
+    Json(&*PUBLIC_CONFIG)
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
