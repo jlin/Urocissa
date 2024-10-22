@@ -23,7 +23,7 @@
       @touchend="handleTouchEnd"
       @touchmove="handleTouchMove"
     >
-      <v-sheet class="position-relative w-100 h-100" :style="{}">
+      <v-sheet class="position-relative w-100 h-100">
         <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
         <v-sheet
           v-if="scrollbarStore.initialized"
@@ -148,7 +148,7 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
     const clickPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
 
     const targetRowIndex = clamp(
-      Math.floor((rowLength.value * clickPositionRelative) / scrollbar.height), // (rowLength.value - 1) * (clicked height percentage)
+      Math.floor((rowLength.value * clickPositionRelative) / scrollbar.height),
       0,
       rowLength.value - 1
     )
@@ -170,7 +170,7 @@ const handleMouseMove = (event: MouseEvent) => {
     const scrollbar = scrollbarElement.getBoundingClientRect()
     const hoverPositionRelative = event.clientY - scrollbar.top // relative to the top of the scroll bar
     const targetRowIndex = clamp(
-      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height), // (rowLength.value - 1) * (clicked height percentage)
+      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height),
       0,
       rowLength.value - 1
     )
