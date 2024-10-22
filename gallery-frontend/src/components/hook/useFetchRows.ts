@@ -60,23 +60,29 @@ export function useFetchRows(
         const fixedHeight = 2400
         const startHeightOffseted = startHeight.value - offSetSumOfAboveRowsIndex - fixedHeight
         const endHeightOffseted = endHeight.value - offSetSumOfAboveRowsIndex + fixedHeight
-        const startIndex = Math.max(Math.floor(startHeightOffseted / fixedHeight), 0)
+        const startIndex = Math.max(
+          Math.floor(startHeightOffseted / fixedHeight),
+          0 //first batch index
+        )
         const endIndex = Math.min(
           Math.ceil(endHeightOffseted / fixedHeight),
-          dataLengthStore.dataLength / layoutBatchNumber
+          dataLengthStore.rowLength - 1 //last batch index
         )
 
         for (let i = startIndex; i < endIndex; i++) {
           fetchRowInWorker(i)
         }
 
-        const prependBatch = Math.max(Math.floor(startHeightOffseted / fixedHeight) - 1, 0)
+        const prependBatch = Math.max(
+          Math.floor(startHeightOffseted / fixedHeight) - 1,
+          0 //first batch index
+        )
 
         fetchRowInWorker(prependBatch)
 
         const appendBatch = Math.min(
           Math.ceil(endHeightOffseted / fixedHeight) + 1,
-          Math.floor(dataLengthStore.dataLength / layoutBatchNumber)
+          dataLengthStore.rowLength - 1 //last batch index
         )
 
         fetchRowInWorker(appendBatch)
