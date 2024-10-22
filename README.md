@@ -131,7 +131,7 @@ Make sure the following software is installed on your system:
 Navigate to `gallery-backend` and build the backend using Cargo:
 
 ```bash
-cargo run build --release
+cargo build --release
 ```
 
 ---
