@@ -63,7 +63,6 @@ pub fn auth_request_fairing() -> AdHoc {
                         &validation,
                     ) {
                         Ok(_) => {
-                            println!("JWT validation succeeded.");
                             true
                         }
                         Err(_) => {
