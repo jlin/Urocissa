@@ -118,7 +118,7 @@ const rowIndexDifferenceLowerBound = computed(() => {
 
 const { height: scrollbarHeight } = useElementSize(imageContainerRef)
 
-const currentLocationIndex = computed(() => {
+const currentBatchIndex = computed(() => {
   return Math.floor(locationStore.locationIndex! / layoutBatchNumber)
 })
 
@@ -210,7 +210,7 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 const handleMouseLeave = () => {
-  hoverLabelRowIndex.value = currentLocationIndex.value
+  hoverLabelRowIndex.value = currentBatchIndex.value
   isDragging.value = false
 }
 
@@ -250,8 +250,8 @@ watch(
   () => locationStore.locationIndex,
   () => {
     isScrolling.value = true
-    hoverLabelRowIndex.value = currentLocationIndex.value
-    currentDateChipIndex.value = currentLocationIndex.value
+    hoverLabelRowIndex.value = currentBatchIndex.value
+    currentDateChipIndex.value = currentBatchIndex.value
   }
 )
 </script>
