@@ -8,8 +8,8 @@ export const useDataLengthStore = defineStore({
     timestamp: string | null
     totalHeight: number
     totalHeightOriginal: number
-    dataLength: number
-    rowLength: number
+    dataLength: number // length of all photos
+    rowLength: number // length of all photo batches
     locateTo: number | null
     updateVisibleRowTrigger: boolean
     updateFetchRowTrigger: boolean
@@ -25,6 +25,12 @@ export const useDataLengthStore = defineStore({
     updateFetchRowTrigger: false
   }),
   actions: {
+    calculateLength(dataLength: number) {
+      this.dataLength = dataLength
+      this.rowLength = Math.ceil(dataLength / layoutBatchNumber)
+      this.totalHeight = Math.ceil(dataLength / layoutBatchNumber) * fixedBigRowHeight
+      this.totalHeightOriginal = this.totalHeight
+    },
     clearAll() {
       this.timestamp = null
       this.totalHeight = 0

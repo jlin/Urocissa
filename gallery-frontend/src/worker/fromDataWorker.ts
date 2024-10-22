@@ -78,11 +78,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       const result: Prefetch = payload.result
       dataLengthStore.timestamp = result.timestamp
       dataLengthStore.updateVisibleRowTrigger = !dataLengthStore.updateVisibleRowTrigger
-      dataLengthStore.dataLength = result.dataLength
-      dataLengthStore.rowLength = Math.ceil(result.dataLength / layoutBatchNumber)
-      dataLengthStore.totalHeight =
-        Math.ceil(result.dataLength / layoutBatchNumber) * fixedBigRowHeight
-      dataLengthStore.totalHeightOriginal = dataLengthStore.totalHeight
+      dataLengthStore.calculateLength(result.dataLength)
       dataLengthStore.locateTo = result.locateTo
       initializedStore.initialized = true
 
