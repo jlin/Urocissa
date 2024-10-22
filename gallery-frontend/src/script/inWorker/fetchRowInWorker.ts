@@ -11,8 +11,6 @@ import { bindActionDispatch } from 'typesafe-agent-events'
  * @param {number} index - The index of the row to fetch.
  */
 export function fetchRowInWorker(index: number) {
-  console.log('fetching')
-
   const queueStore = useQueueStore()
   if (queueStore.row.has(index)) {
     return
