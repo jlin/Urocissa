@@ -40,7 +40,8 @@ export function fetchRowInWorker(index: number) {
     postToWorker.fetchRow({
       index: index,
       timestamp: timestamp,
-      windowWidth: dataLengthStore.windowWidth
+      windowWidth: dataLengthStore.windowWidth,
+      isLastRow: index === dataLengthStore.rowLength - 1
     })
   }
 }

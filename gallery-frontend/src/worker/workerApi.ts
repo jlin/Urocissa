@@ -70,7 +70,7 @@ export const fromImgWorker = createActionCreators({
 
 // Define the parameter types for different actions to manage data and UI state
 type FetchDataParams = { batch: number; timestamp: string }
-type FetchRowParams = { index: number; timestamp: string; windowWidth: number }
+type FetchRowParams = { index: number; timestamp: string; windowWidth: number; isLastRow: boolean }
 type PrefetchParams = {
   filterJsonString: string | null
   priorityId: string

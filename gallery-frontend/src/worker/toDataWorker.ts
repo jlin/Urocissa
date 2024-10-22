@@ -54,9 +54,9 @@ self.addEventListener('message', (e) => {
       }
     },
     fetchRow: async (payload) => {
-      const { index, timestamp, windowWidth } = payload
+      const { index, timestamp, windowWidth, isLastRow } = payload
       try {
-        const rowWithOffset = await fetchRow(index, timestamp, windowWidth)
+        const rowWithOffset = await fetchRow(index, timestamp, windowWidth, isLastRow)
         if (rowWithOffset !== undefined) {
           const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
           postToMain.fetchRowReturn({
@@ -220,7 +220,8 @@ async function fetchData(batchIndex: number, timestamp: string) {
 async function fetchRow(
   index: number,
   timestamp: string,
-  windowWidth: number
+  windowWidth: number,
+  isLastRow: boolean
 ): Promise<RowWithOffset | undefined> {
   let row: Row
 
@@ -246,7 +247,7 @@ async function fetchRow(
   row.topPixelAccumulated = row.rowIndex * fixedBigRowHeight
 
   const subRows = KnuthPlassLayout(row, windowWidth)
-  const scaledTotalHeight = normalizeSubrow(subRows, windowWidth)
+  const scaledTotalHeight = normalizeSubrows(subRows, windowWidth, isLastRow)
   row.rowHeight = scaledTotalHeight
   const offset = scaledTotalHeight - fixedBigRowHeight
 
@@ -353,49 +354,71 @@ function KnuthPlassLayout(row: Row, windowWidth: number): SubRow[] {
  *
  * @param subRows - Array of subrows to normalize.
  * @param windowWidth - The width of the window/container.
+ * @param paddingLastSubrow - Whether to skip scaling logic for the last subrow.
  * @returns The total scaled height of all subrows.
  */
-function normalizeSubrow(subRows: SubRow[], windowWidth: number): number {
+function normalizeSubrows(
+  subRows: SubRow[],
+  windowWidth: number,
+  paddingLastSubrow: boolean
+): number {
   let scaledTotalHeight = 0
   let displayTopPixelAccumulated = 0
   const subRowHeight = Math.min(Math.round(windowWidth) / 2, 250)
 
-  let widthSum = 0
-  subRows.forEach((subRow) => {
+  subRows.forEach((subRow, rowIndex) => {
+    let widthSum = 0
+
+    // Adjust for the last subrow if paddingLastSubrow is true
+    const isLastSubrow = paddingLastSubrow && rowIndex === subRows.length - 1
+    // Scale elements in the subrow
     subRow.displayElements.forEach((displayElement) => {
       const width = displayElement.displayWidth
       const height = displayElement.displayHeight
 
-      const scaled_width = (width * subRowHeight) / height
-      displayElement.displayWidth = scaled_width
+      const scaledWidth = (width * subRowHeight) / height
+      displayElement.displayWidth = scaledWidth
       displayElement.displayHeight = subRowHeight
     })
+    if (!isLastSubrow) {
+      // Calculate total width of elements in the subrow
+      widthSum = subRow.displayElements.reduce(
+        (sum, displayElement) => sum + displayElement.displayWidth,
+        0
+      )
 
-    widthSum = 0
+      const ratio = (windowWidth - subRow.displayElements.length * 8) / widthSum
+      const scaledHeight = subRowHeight * ratio
 
-    subRow.displayElements.forEach((displayElement) => {
-      widthSum += displayElement.displayWidth
-    })
+      // Adjust elements' width and height based on the ratio
+      widthSum = 4 // Reset width sum with initial padding
+      subRow.displayElements.forEach((displayElement, index) => {
+        if (index < subRow.displayElements.length - 1) {
+          displayElement.displayWidth = Math.round(displayElement.displayWidth * ratio)
+          displayElement.displayHeight = Math.round(scaledHeight)
+          widthSum += displayElement.displayWidth + 8
+        } else {
+          displayElement.displayWidth = windowWidth - widthSum - 4
+          displayElement.displayHeight = Math.round(scaledHeight)
+        }
+        displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
+      })
 
-    const ratio = (windowWidth - subRow.displayElements.length * 8) / widthSum
-
-    const scaledHeight = subRowHeight * ratio
-
-    widthSum = 4
-    subRow.displayElements.forEach((displayElement, index) => {
-      if (index < subRow.displayElements.length - 1) {
-        displayElement.displayWidth = Math.round(displayElement.displayWidth * ratio)
-        displayElement.displayHeight = Math.round(scaledHeight)
+      displayTopPixelAccumulated += scaledHeight + 8
+      scaledTotalHeight += scaledHeight + 8
+    } else {
+      // Skip scaling logic, use fixed subRowHeight for the last subrow
+      subRow.displayElements.forEach((displayElement) => {
+        displayElement.displayHeight = subRowHeight
         widthSum += displayElement.displayWidth + 8
-      } else {
-        displayElement.displayWidth = windowWidth - widthSum - 4
-        displayElement.displayHeight = Math.round(scaledHeight)
-      }
-      displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
-    })
-    displayTopPixelAccumulated = displayTopPixelAccumulated + scaledHeight + 8
-    scaledTotalHeight = scaledTotalHeight + scaledHeight + 8
+        displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
+      })
+
+      displayTopPixelAccumulated += subRowHeight + 8
+      scaledTotalHeight += subRowHeight + 8
+    }
   })
+
   return scaledTotalHeight
 }
 
