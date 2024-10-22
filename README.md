@@ -100,7 +100,7 @@ Make sure the following software is installed on your system:
    cp Rocket.default.toml Rocket.toml
    ```
 
-   **Settings:**
+   **config.json:**
 
    ```json
    {
@@ -112,7 +112,7 @@ Make sure the following software is installed on your system:
    }
    ```
 
-   **Explanation:**
+   *Explanation:*
 
    - `password`: Your password for the app.
    - `readOnlyMode`: Set to `false` to allow changes.
@@ -120,7 +120,7 @@ Make sure the following software is installed on your system:
    - `disableImg`: For debugging purposes (leave it as `false`).
    - `discordHookUrl`: (Optional) Fill in your Discord webhook URL to receive error notifications.
 
-   **Additional Settings:**
+   **Rocket.toml:**
 
    - `port`: Default is `4000`. You can change this to your desired port number.
 
