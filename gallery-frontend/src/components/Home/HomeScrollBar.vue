@@ -108,6 +108,25 @@ const rowLength = computed(() => dataLengthStore.rowLength)
 const isScrolling = ref(false)
 const currentDateChipIndex = ref(0)
 const chipSize = 25
+
+/*
+0───┐<─── 0% height
+    │
+1───┤
+    │
+2───┤
+    │
+    ⋮
+k───┤
+    │<─── t% height
+k+1─┤
+    │
+    ⋮
+n───┤
+    │
+────┘<─── 100% height
+*/
+
 const singleRowChipHeight = computed(() => {
   return scrollbarHeight.value / rowLength.value
 })
