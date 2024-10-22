@@ -137,6 +137,9 @@ const rowIndexDifferenceLowerBound = computed(() => {
 
 const { height: scrollbarHeight } = useElementSize(imageContainerRef)
 
+/**
+ * Index of the first batch that appears (partially) in the viewport
+ */
 const currentBatchIndex = computed(() => {
   return Math.floor(locationStore.locationIndex! / layoutBatchNumber)
 })
