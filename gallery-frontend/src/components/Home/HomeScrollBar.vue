@@ -146,8 +146,10 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
     const clickPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
-    const targetRowIndex = Math.min(
-      Math.max(0, Math.floor((rowLength.value * clickPositionRelative) / scrollbar.height)),
+
+    const targetRowIndex = clamp(
+      Math.floor((rowLength.value * clickPositionRelative) / scrollbar.height), // (rowLength.value - 1) * (clicked height percentage)
+      0,
       rowLength.value - 1
     )
 
@@ -159,6 +161,26 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
     rowStore.clearForResize()
     scrollTop.value = targetRowIndex * fixedBigRowHeight
     debouncedFetchRow(targetRowIndex)
+  }
+}
+
+const handleMouseMove = (event: MouseEvent) => {
+  const scrollbarElement = event.currentTarget
+  if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
+    const scrollbar = scrollbarElement.getBoundingClientRect()
+    const hoverPositionRelative = event.clientY - scrollbar.top // relative to the top of the scroll bar
+    const targetRowIndex = clamp(
+      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height), // (rowLength.value - 1) * (clicked height percentage)
+      0,
+      rowLength.value - 1
+    )
+
+    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
+      if (isDragging.value) {
+        handleClickScroll(event)
+      }
+      hoverLabelRowIndex.value = targetRowIndex
+    }
   }
 }
 
@@ -190,25 +212,6 @@ function clamp(givenNumber: number, min: number, max: number): number {
   return Math.min(Math.max(givenNumber, min), max)
 }
 
-const handleMouseMove = (event: MouseEvent) => {
-  const scrollbarElement = event.currentTarget
-  if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
-    const scrollbar = scrollbarElement.getBoundingClientRect()
-    const hoverPositionRelative = event.clientY - scrollbar.top // relative to the top of the scroll bar
-    const targetRowIndex = clamp(
-      Math.floor(((rowLength.value - 1) * hoverPositionRelative) / scrollbar.height), // (rowLength.value - 1) * (clicked height percentage)
-      0,
-      rowLength.value - 1
-    )
-    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (isDragging.value) {
-        handleClickScroll(event)
-      }
-      hoverLabelRowIndex.value = targetRowIndex
-    }
-  }
-}
-
 const handleMouseLeave = () => {
   hoverLabelRowIndex.value = currentBatchIndex.value
   isDragging.value = false
@@ -229,9 +232,10 @@ const handleTouchMove = (event: TouchEvent) => {
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
     const hoverPositionRelative = event.touches[0].clientY - scrollbar.top // relative to the top of the scroll bar
-    const targetRowIndex = Math.min(
-      Math.max(0, Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height)),
-      rowLength.value
+    const targetRowIndex = clamp(
+      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height),
+      0,
+      rowLength.value - 1
     )
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value) {
       if (isDragging.value) {
