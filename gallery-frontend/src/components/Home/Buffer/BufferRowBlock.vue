@@ -219,7 +219,6 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
       workerStore.postToWorkerList[workerIndex].processSmallImage({
         index: index,
         hash: dataStore.data.get(index)!.hash,
-        s3: configStore.enableS3,
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,

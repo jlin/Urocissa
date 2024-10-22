@@ -26,7 +26,6 @@ import { createActionCreators } from 'typesafe-agent-events'
 export type processSmallImagePayload = {
   index: number
   hash: string
-  s3: boolean
   width: number
   height: number
   devicePixelRatio: number
@@ -36,7 +35,6 @@ export type processSmallImagePayload = {
 export type processImagePayload = {
   index: number
   hash: string
-  s3: boolean
   devicePixelRatio: number
   jwt: string
 }

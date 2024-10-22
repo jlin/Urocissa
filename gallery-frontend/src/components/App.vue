@@ -33,7 +33,6 @@ async function checkCookieAndRedirect() {
     // Perform initialization:
     try {
       const response = await axios.get('/get/get-config.json')
-      configStore.enableS3 = response.data.enableS3
       configStore.disableImg = response.data.disableImg
     } catch (error) {
       console.error('Error fetching config:', error)

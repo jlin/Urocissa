@@ -257,7 +257,6 @@ import { useInfoStore } from '@/store/infoStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
-import { useConfigStore } from '@/store/configStore'
 import { filesize } from 'filesize'
 import { useImgStore } from '@/store/imgStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
@@ -280,7 +279,6 @@ const dataLengthStore = useDataLengthStore()
 const workerStore = useWorkerStore()
 const queueStore = useQueueStore()
 const imgStore = useImgStore()
-const configStore = useConfigStore()
 const initializedStore = useInitializedStore()
 const modalStore = useModalStore()
 const infoStore = useInfoStore()
@@ -357,7 +355,6 @@ const checkAndFetch = (index: number): boolean => {
     postToWorker.processImage({
       index: index,
       hash: dataStore.data.get(index)!.hash,
-      s3: configStore.enableS3,
       devicePixelRatio: window.devicePixelRatio,
       jwt: Cookies.get('jwt')!
     })
