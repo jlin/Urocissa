@@ -6,7 +6,6 @@ import debounce from 'lodash/debounce'
 import { useDataLengthStore } from '@/store/dataLengthStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
-import { layoutBatchNumber } from '@/script/common/commonType'
 
 /**
  * Computes the sum of offsets for rows above the given scroll position.

@@ -1,10 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import {
-  fixedBigRowHeight,
-  layoutBatchNumber,
-  Prefetch,
-  SlicedDataItem
-} from '@/script/common/commonType'
+import { Prefetch, SlicedDataItem } from '@/script/common/commonType'
 import { useDataLengthStore } from '@/store/dataLengthStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useInitializedStore } from '@/store/initializedStore'
