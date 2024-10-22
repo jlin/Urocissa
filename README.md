@@ -182,5 +182,4 @@ Navigate to the `gallery-backend` directory and run the following command to sta
 cargo run --release
 ```
 
-Now, your app is configured and built!
-
+You can now access the app via http://127.0.0.1:4000 or http://127.0.0.1:<your_port> if you configured a custom port in Rocket.toml.
