@@ -1,11 +1,21 @@
 use jsonwebtoken::{encode, EncodingKey, Header};
+use rand::{rngs::OsRng, RngCore};
 use rocket::post;
 use rocket::serde::json::Json;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    sync::LazyLock,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use serde::{Deserialize, Serialize};
 
 use crate::public::config::PRIVATE_CONFIG;
+
+pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<[u8; 32]> = LazyLock::new(|| {
+    let mut secret = [0u8; 32]; // Inline 32-byte secret key length
+    OsRng.fill_bytes(&mut secret); // Use OsRng to securely fill the random bytes
+    secret
+});
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -16,7 +26,7 @@ pub struct Claims {
 pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'static str> {
     let input_password = password.into_inner();
 
-    // Verify the password (hardcoded for a single user)
+    // Verify the password
     if input_password == PRIVATE_CONFIG.password {
         // Create expiration timestamp (valid for 1 hour)
         let expiration = SystemTime::now()
@@ -34,7 +44,7 @@ pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'stat
         let token = encode(
             &Header::default(),
             &claims,
-            &EncodingKey::from_secret(PRIVATE_CONFIG.password.as_ref()),
+            &EncodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
         )
         .map_err(|_| "Token generation failed")?;
 

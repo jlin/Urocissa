@@ -2,9 +2,9 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::fairing::AdHoc;
 use rocket::http::uri::Origin;
 
-use crate::public::config::{PRIVATE_CONFIG, PUBLIC_CONFIG};
+use crate::public::config::PUBLIC_CONFIG;
 
-use super::post::authenticate::Claims;
+use super::post::authenticate::{Claims, JSON_WEB_TOKEN_SECRET_KEY};
 
 pub fn cache_control_fairing() -> AdHoc {
     AdHoc::on_response("Add Cache-Control header", |req, res| {
@@ -59,12 +59,10 @@ pub fn auth_request_fairing() -> AdHoc {
                     let validation = Validation::new(Algorithm::HS256);
                     match decode::<Claims>(
                         token,
-                        &DecodingKey::from_secret(PRIVATE_CONFIG.password.as_ref()),
+                        &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
                         &validation,
                     ) {
-                        Ok(_) => {
-                            true
-                        }
+                        Ok(_) => true,
                         Err(_) => {
                             println!("JWT validation failed.");
                             false
