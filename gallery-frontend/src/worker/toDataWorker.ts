@@ -384,12 +384,12 @@ function normalizeSubrow(subRows: SubRow[], windowWidth: number): number {
     widthSum = 4
     subRow.displayElements.forEach((displayElement, index) => {
       if (index < subRow.displayElements.length - 1) {
-        displayElement.displayWidth = displayElement.displayWidth * ratio
-        displayElement.displayHeight = scaledHeight
+        displayElement.displayWidth = Math.round(displayElement.displayWidth * ratio)
+        displayElement.displayHeight = Math.round(scaledHeight)
         widthSum += displayElement.displayWidth + 8
       } else {
         displayElement.displayWidth = windowWidth - widthSum - 4
-        displayElement.displayHeight = scaledHeight
+        displayElement.displayHeight = Math.round(scaledHeight)
       }
       displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
     })

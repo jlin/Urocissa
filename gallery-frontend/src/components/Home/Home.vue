@@ -99,7 +99,7 @@ const throttledHandleScroll = handleScroll(
 watch(windowWidth, () => {
   // Handles browser resizing.
   locationStore.triggerForResize()
-  dataLengthStore.windowWidth = windowWidth.value
+  dataLengthStore.windowWidth = Math.round(windowWidth.value)
   dataLengthStore.clearForResize()
   rowStore.clearForResize()
   offsetStore.clearAll()
