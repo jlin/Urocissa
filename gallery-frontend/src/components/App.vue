@@ -14,12 +14,10 @@
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, defineAsyncComponent, onMounted } from 'vue'
-import { useConfigStore } from '@/store/configStore'
 import Cookies from 'js-cookie'
-import axios from 'axios'
 import { useInitializedStore } from '@/store/initializedStore'
 const initializedStore = useInitializedStore()
-const configStore = useConfigStore()
+
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
 
 // Function to check if cookie has no password field
@@ -29,14 +27,6 @@ async function checkCookieAndRedirect() {
     router.push('/login')
   } else {
     initializedStore.login = true
-    // Perform initialization:
-    try {
-      const response = await axios.get('/get/get-config.json')
-      configStore.disableImg = response.data.disableImg
-    } catch (error) {
-      console.error('Error fetching config:', error)
-      throw error
-    }
   }
 }
 
