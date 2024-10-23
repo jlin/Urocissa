@@ -21,7 +21,7 @@ pub fn redirect_to_photo_2(_path: PathBuf) -> content::RawHtml<String> {
 
 #[get("/login")]
 pub async fn login() -> Option<NamedFile> {
-    NamedFile::open(Path::new("../gallery-frontend/dist/login.html"))
+    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
 }
