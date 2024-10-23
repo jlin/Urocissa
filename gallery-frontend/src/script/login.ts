@@ -5,15 +5,17 @@
 import { createApp } from 'vue'
 import router from '@/script/routes'
 import LoginPage from '@/components/LoginPage.vue'
+import { createPinia } from 'pinia'
 
 // Importing global styles
 import '@/style/common.scss'
 
 // Create Vue application instance with the LoginPage component
 const app = createApp(LoginPage)
+const pinia = createPinia()
 
 // Apply the router to the app
 app.use(router)
-
+app.use(pinia)
 // Mount the Vue application to the DOM
 app.mount('#app')

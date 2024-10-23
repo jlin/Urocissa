@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <component :is="NavBar" v-if="NavBarLoaded" />
+    <component :is="NavBar" v-if="initializedStore.login" />
     <v-main class="h-screen">
       <router-view v-slot="{ Component }" :key="routeKey">
         <component :is="Component" />
@@ -13,15 +13,14 @@
 <script setup lang="ts">
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted } from 'vue'
 import { useConfigStore } from '@/store/configStore'
 import Cookies from 'js-cookie'
 import axios from 'axios'
-
+import { useInitializedStore } from '@/store/initializedStore'
+const initializedStore = useInitializedStore()
 const configStore = useConfigStore()
-
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
-const NavBarLoaded = ref(false)
 
 // Function to check if cookie has no password field
 async function checkCookieAndRedirect() {
@@ -29,7 +28,7 @@ async function checkCookieAndRedirect() {
   if (!jwt) {
     router.push('/login')
   } else {
-    NavBarLoaded.value = true
+    initializedStore.login = true
     // Perform initialization:
     try {
       const response = await axios.get('/get/get-config.json')
