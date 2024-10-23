@@ -9,7 +9,7 @@ The goal of this project is to efficiently serve one million photos on a 4 GB RA
 
 ## Demo
 
-You can explore the features of Urocissa through the following demos on Chrome:
+You can explore the features of Urocissa through the following demos:
 
 ### Standard Demo  
 [https://demo.photoserver.tw](https://demo.photoserver.tw)  
@@ -39,7 +39,7 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Limitations
 
-1. **Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome, and other browsers, such as Firefox, may not render the app correctly.
+1. **Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome and Firefox on Windows and Android, but it may encounter issues on iOS or Linux.
 
 2. **No AI Face Recognition**: The app currently does not support AI-based face recognition.
 
