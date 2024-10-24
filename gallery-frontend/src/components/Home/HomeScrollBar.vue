@@ -17,11 +17,11 @@
       @click="handleClickScroll"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
-      @mousemove="handleMouseMove"
+      @mousemove="handleMove"
       @mouseleave="handleMouseLeave"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
-      @touchmove="handleTouchMove"
+      @touchmove="handleMove"
     >
       <v-sheet class="position-relative w-100 h-100">
         <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
@@ -109,7 +109,12 @@ const isScrolling = ref(false)
 const currentDateChipIndex = ref(0)
 const chipSize = 25
 
-/*
+function clamp(givenNumber: number, min: number, max: number): number {
+  return Math.min(Math.max(givenNumber, min), max)
+}
+
+const getTargetRowIndex = (percentage: number) => {
+  /*
 0───┐<─── 0% height
     │
 1───┤
@@ -125,7 +130,12 @@ k+1─┤
 n───┤
     │
 ────┘<─── 100% height
+Given t, reutrn k, where n = rowLength - 1
 */
+  const targetRowIndex = Math.floor(rowLength.value * percentage)
+  const clampedTargetRowIndex = clamp(targetRowIndex, 0, rowLength.value - 1)
+  return clampedTargetRowIndex
+}
 
 const singleRowChipHeight = computed(() => {
   return scrollbarHeight.value / rowLength.value
@@ -163,6 +173,7 @@ const debouncedFetchRow = debounce((index: number) => {
 
 const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   const scrollbarElement = event.currentTarget
+
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
 
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
@@ -186,17 +197,13 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   }
 }
 
-const handleMouseMove = (event: MouseEvent) => {
+const handleMove = (event: MouseEvent | TouchEvent) => {
   const scrollbarElement = event.currentTarget
+  const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
-    const hoverPositionRelative = event.clientY - scrollbar.top // relative to the top of the scroll bar
-    const targetRowIndex = clamp(
-      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height),
-      0,
-      rowLength.value - 1
-    )
-
+    const hoverPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
+    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbar.height)
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
       if (isDragging.value) {
         handleClickScroll(event)
@@ -230,10 +237,6 @@ watchEffect(() => {
   displayScrollbarDataArrayYear.value = array
 })
 
-function clamp(givenNumber: number, min: number, max: number): number {
-  return Math.min(Math.max(givenNumber, min), max)
-}
-
 const handleMouseLeave = () => {
   hoverLabelRowIndex.value = currentBatchIndex.value
   isDragging.value = false
@@ -247,25 +250,6 @@ const handleTouchStart = (event: TouchEvent) => {
   isScrolling.value = true
   isDragging.value = true
   handleClickScroll(event)
-}
-
-const handleTouchMove = (event: TouchEvent) => {
-  const scrollbarElement = event.currentTarget
-  if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
-    const scrollbar = scrollbarElement.getBoundingClientRect()
-    const hoverPositionRelative = event.touches[0].clientY - scrollbar.top // relative to the top of the scroll bar
-    const targetRowIndex = clamp(
-      Math.floor((rowLength.value * hoverPositionRelative) / scrollbar.height),
-      0,
-      rowLength.value - 1
-    )
-    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value) {
-      if (isDragging.value) {
-        handleClickScroll(event)
-      }
-      hoverLabelRowIndex.value = targetRowIndex
-    }
-  }
 }
 
 const handleTouchEnd = () => {
