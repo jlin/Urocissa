@@ -179,12 +179,7 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
     const clickPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
-
-    const targetRowIndex = clamp(
-      Math.floor((rowLength.value * clickPositionRelative) / scrollbar.height),
-      0,
-      rowLength.value - 1
-    )
+    const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbar.height)
 
     currentDateChipIndex.value = targetRowIndex
     locationStore.anchor = targetRowIndex
