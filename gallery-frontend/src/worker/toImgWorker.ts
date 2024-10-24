@@ -39,13 +39,10 @@ const handler = createHandler<typeof toImgWorker>({
     try {
       const controller = new AbortController()
       controllerMap.set(event.index, controller)
-      const response = await axios.get(
-        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
-        {
-          signal: controller.signal,
-          responseType: 'blob'
-        }
-      )
+      const response = await axios.get(getSrc(event.hash, false, 'jpg', event.jwt, undefined), {
+        signal: controller.signal,
+        responseType: 'blob'
+      })
       controllerMap.delete(event.index)
       const blob = response.data
       const img = await createImageBitmap(blob)
@@ -60,17 +57,18 @@ const handler = createHandler<typeof toImgWorker>({
       const objectUrl = URL.createObjectURL(converted)
       postToMain.smallImageProcessed({ index: event.index, url: objectUrl })
     } catch (error) {
+      if (axios.isCancel(error)) {
+        // Do nothing if the error is due to cancellation
+        return
+      }
       console.error(error)
     }
   },
   async processImage(event: processImagePayload) {
     try {
-      const response = await axios.get(
-        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
-        {
-          responseType: 'blob'
-        }
-      )
+      const response = await axios.get(getSrc(event.hash, false, 'jpg', event.jwt, undefined), {
+        responseType: 'blob'
+      })
       const blob = response.data
       const img = await createImageBitmap(blob)
 
