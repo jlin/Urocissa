@@ -80,80 +80,63 @@
 </template>
 
 <script setup lang="ts">
-import { useDataLengthStore } from '@/store/dataLengthStore'
 import { ref, inject, Ref, computed, watch, watchEffect } from 'vue'
-import { fixedBigRowHeight, layoutBatchNumber, ScrollbarData } from '@/script/common/commonType'
+import { debounce } from 'lodash'
+import { useElementSize } from '@vueuse/core'
+import { useDataLengthStore } from '@/store/dataLengthStore'
 import { useScrollbarStore } from '@/store/scrollbarStore'
-import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useLocationStore } from '@/store/locationStore'
-import { debounce } from 'lodash'
-import { scrollBarWidth } from '@/script/common/commonType'
-import { useElementSize } from '@vueuse/core'
+import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import {
+  fixedBigRowHeight,
+  layoutBatchNumber,
+  ScrollbarData,
+  scrollBarWidth
+} from '@/script/common/commonType'
 
 const isDragging = ref(false)
+const isScrolling = ref(false)
+const hoverLabelRowIndex = ref(0)
+const currentDateChipIndex = ref(0)
+const chipSize = 25
+
 const locationStore = useLocationStore()
 const dataLengthStore = useDataLengthStore()
-const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
-const scrollTop = inject<Ref<number>>('scrollTop')
-const scrollBarRef = ref<HTMLElement | null>(null)
 const scrollbarStore = useScrollbarStore()
 const rowStore = useRowStore()
 const offsetStore = useOffsetStore()
 const queueStore = useQueueStore()
-const hoverLabelRowIndex = ref(0)
+
+const scrollTop = inject<Ref<number>>('scrollTop')
+const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
+const scrollBarRef = ref<HTMLElement | null>(null)
+
 const rowLength = computed(() => dataLengthStore.rowLength)
-const isScrolling = ref(false)
-const currentDateChipIndex = ref(0)
-const chipSize = 25
-
-function clamp(givenNumber: number, min: number, max: number): number {
-  return Math.min(Math.max(givenNumber, min), max)
-}
-
-const getTargetRowIndex = (percentage: number) => {
-  /*
-0───┐<─── 0% height
-    │
-1───┤
-    │
-2───┤
-    │
-    ⋮
-k───┤
-    │<─── t% height
-k+1─┤
-    │
-    ⋮
-n───┤
-    │
-────┘<─── 100% height
-Given t, reutrn k, where n = rowLength - 1
-*/
-  const targetRowIndex = Math.floor(rowLength.value * percentage)
-  const clampedTargetRowIndex = clamp(targetRowIndex, 0, rowLength.value - 1)
-  return clampedTargetRowIndex
-}
-
-const singleRowChipHeight = computed(() => {
-  return scrollbarHeight.value / rowLength.value
-})
-
-const rowIndexDifferenceLowerBound = computed(() => {
-  return Math.ceil(chipSize / singleRowChipHeight.value)
-})
-
 const { height: scrollbarHeight } = useElementSize(imageContainerRef)
 
 /**
- * Index of the first batch that appears (partially) in the viewport
+ * Calculate the height of a single row chip.
  */
-const currentBatchIndex = computed(() => {
-  return Math.floor(locationStore.locationIndex! / layoutBatchNumber)
-})
+const singleRowChipHeight = computed(() => scrollbarHeight.value / rowLength.value)
 
+/**
+ * Compute the minimum number of row indices needed to separate batches.
+ */
+const rowIndexDifferenceLowerBound = computed(() => Math.ceil(chipSize / singleRowChipHeight.value))
+
+/**
+ * Index of the first batch that appears (partially) in the viewport.
+ */
+const currentBatchIndex = computed(() =>
+  Math.floor(locationStore.locationIndex! / layoutBatchNumber)
+)
+
+/**
+ * Get the hover label's corresponding date based on the row index.
+ */
 const hoverLabelDate = computed(() => {
   let returnedString = ''
   for (let scrollbarData of scrollbarStore.scrollbarDataArray) {
@@ -167,18 +150,51 @@ const hoverLabelDate = computed(() => {
   return returnedString
 })
 
-const debouncedFetchRow = debounce((index: number) => {
-  fetchRowInWorker(index)
-}, 100)
+const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
 
+/**
+ * Clamp a given number between a minimum and maximum value.
+ */
+function clamp(givenNumber: number, min: number, max: number): number {
+  return Math.min(Math.max(givenNumber, min), max)
+}
+
+/**
+ * Given a percentage t of scrollbar height, return the corresponding row index k, where n = rowLength - 1.
+ *
+ * 0───┐<─── 0% height
+ *     │
+ * 1───┤
+ *     │
+ * 2───┤
+ *     │
+ *     ⋮
+ * k───┤
+ *     │<─── t% height
+ * k+1─┤
+ *     │
+ *     ⋮
+ * n───┤
+ *     │
+ * ────┘<─── 100% height
+ */
+const getTargetRowIndex = (percentage: number) => {
+  const targetRowIndex = Math.floor(rowLength.value * percentage)
+  return clamp(targetRowIndex, 0, rowLength.value - 1)
+}
+
+const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index), 100)
+
+/**
+ * Handle a click event on the scrollbar.
+ */
 const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   const scrollbarElement = event.currentTarget
-
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
 
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
-    const clickPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
+    const clickPositionRelative = clientY - scrollbar.top // Relative to the top of the scrollbar
     const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbar.height)
 
     currentDateChipIndex.value = targetRowIndex
@@ -192,17 +208,20 @@ const handleClickScroll = (event: MouseEvent | TouchEvent) => {
   }
 }
 
+/**
+ * Handle movement over the scrollbar.
+ */
 const handleMove = (event: MouseEvent | TouchEvent) => {
   const scrollbarElement = event.currentTarget
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
+
   if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
     const scrollbar = scrollbarElement.getBoundingClientRect()
-    const hoverPositionRelative = clientY - scrollbar.top // relative to the top of the scroll bar
+    const hoverPositionRelative = clientY - scrollbar.top // Relative to the top of the scrollbar
     const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbar.height)
+
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (isDragging.value) {
-        handleClickScroll(event)
-      }
+      if (isDragging.value) handleClickScroll(event)
       hoverLabelRowIndex.value = targetRowIndex
     }
   }
@@ -212,25 +231,6 @@ const handleMouseDown = () => {
   isScrolling.value = true
   isDragging.value = true
 }
-
-const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
-watchEffect(() => {
-  let array: ScrollbarData[] = []
-  let lastIndex: number | null = null
-  scrollbarStore.scrollbarDataArrayYear.forEach((scrollbarData) => {
-    if (
-      lastIndex === null ||
-      (Math.floor(scrollbarData.index / layoutBatchNumber) - lastIndex >=
-        rowIndexDifferenceLowerBound.value &&
-        Math.floor(scrollbarData.index / layoutBatchNumber) <
-          rowLength.value - rowIndexDifferenceLowerBound.value)
-    ) {
-      lastIndex = Math.floor(scrollbarData.index / layoutBatchNumber)
-      array.push(scrollbarData)
-    }
-  })
-  displayScrollbarDataArrayYear.value = array
-})
 
 const handleMouseLeave = () => {
   hoverLabelRowIndex.value = currentBatchIndex.value
@@ -251,6 +251,30 @@ const handleTouchEnd = () => {
   isDragging.value = false
 }
 
+/**
+ * Watch for changes in scrollbar data and update the displayed year data array.
+ */
+watchEffect(() => {
+  const array: ScrollbarData[] = []
+  let lastIndex: number | null = null
+
+  scrollbarStore.scrollbarDataArrayYear.forEach((scrollbarData) => {
+    const index = Math.floor(scrollbarData.index / layoutBatchNumber)
+    if (
+      lastIndex === null ||
+      (index - lastIndex >= rowIndexDifferenceLowerBound.value &&
+        index < rowLength.value - rowIndexDifferenceLowerBound.value)
+    ) {
+      lastIndex = index
+      array.push(scrollbarData)
+    }
+  })
+  displayScrollbarDataArrayYear.value = array
+})
+
+/**
+ * Watch for changes in location index and update scroll state accordingly.
+ */
 watch(
   () => locationStore.locationIndex,
   () => {
