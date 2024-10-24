@@ -93,6 +93,7 @@ import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import {
   fixedBigRowHeight,
   layoutBatchNumber,
+  paddingPixel,
   ScrollbarData,
   scrollBarWidth
 } from '@/script/common/commonType'
@@ -110,6 +111,15 @@ const rowStore = useRowStore()
 const offsetStore = useOffsetStore()
 const queueStore = useQueueStore()
 
+const reachBottom = computed(() => {
+  return (
+    scrollTop !== undefined &&
+    windowHeight !== undefined &&
+    scrollTop!.value === dataLengthStore.totalHeight - windowHeight.value - paddingPixel
+  )
+})
+
+const windowHeight = inject<Ref<number>>('windowHeight')!
 const scrollTop = inject<Ref<number>>('scrollTop')
 const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
 const scrollBarRef = ref<HTMLElement | null>(null)
@@ -233,7 +243,11 @@ const handleMouseDown = () => {
 }
 
 const handleMouseLeave = () => {
-  hoverLabelRowIndex.value = currentBatchIndex.value
+  if (reachBottom.value) {
+    hoverLabelRowIndex.value = rowLength.value - 1
+  } else {
+    hoverLabelRowIndex.value = currentBatchIndex.value
+  }
   isDragging.value = false
 }
 
@@ -275,12 +289,15 @@ watchEffect(() => {
 /**
  * Watch for changes in location index and update scroll state accordingly.
  */
-watch(
-  () => locationStore.locationIndex,
-  () => {
-    isScrolling.value = true
+
+watch([() => locationStore.locationIndex, reachBottom], () => {
+  isScrolling.value = true
+  if (reachBottom.value) {
+    hoverLabelRowIndex.value = rowLength.value - 1
+    currentDateChipIndex.value = rowLength.value - 1
+  } else {
     hoverLabelRowIndex.value = currentBatchIndex.value
     currentDateChipIndex.value = currentBatchIndex.value
   }
-)
+})
 </script>
