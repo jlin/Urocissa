@@ -26,6 +26,11 @@ const shouldProcessBatch: number[] = []
 
 const fetchedRowData: Map<number, Row> = new Map()
 
+function unauthorized() {
+  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+  postToMain.unauthorized()
+}
+
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
     fetchData: async (payload) => {
@@ -451,12 +456,23 @@ const editTags = async (
 
     console.log('Successfully edited tags.')
     return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
-  } catch (err) {
-    console.error('An error occurred while editing tags.', err)
-    return {
-      result: 'An error occurred. Please try again.',
-      warn: true
+  } catch (err: any) {
+    let message = 'An error occurred. Please try again.'
+
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          message = 'Unauthorized.'
+          break
+        case 500:
+          message = 'Internal Server Error. Please try again later.'
+          break
+      }
     }
+
+    console.error('Error occurred while editing tags:', err)
+    return { result: message, warn: true }
   }
 }
 
