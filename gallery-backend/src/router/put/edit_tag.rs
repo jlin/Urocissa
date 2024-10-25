@@ -7,10 +7,7 @@ use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::start_loop::SHOULD_RESET;
 
 use redb::ReadableTable;
-use rocket::{
-    http::Status,
-    serde::{json::Json, Deserialize},
-};
+use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
 pub struct EditTagsData {
     #[serde(rename = "indexArray")]
@@ -22,7 +19,7 @@ pub struct EditTagsData {
     timestamp: String,
 }
 #[put("/put/edit_tag", format = "json", data = "<json_data>")]
-pub async fn edit_tag(json_data: Json<EditTagsData>) -> Result<Json<Vec<TagInfo>>, Status> {
+pub async fn edit_tag(json_data: Json<EditTagsData>) -> Json<Vec<TagInfo>> {
     tokio::task::spawn_blocking(move || {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
@@ -49,7 +46,7 @@ pub async fn edit_tag(json_data: Json<EditTagsData>) -> Result<Json<Vec<TagInfo>
         txn.commit().unwrap();
         let vec_tags_info = TREE_SNAPSHOT.read_tags();
         SHOULD_RESET.store(true, Ordering::SeqCst);
-        Ok(Json(vec_tags_info))
+        Json(vec_tags_info)
     })
     .await
     .unwrap()

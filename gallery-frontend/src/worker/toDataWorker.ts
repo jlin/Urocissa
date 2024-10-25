@@ -445,36 +445,17 @@ const editTags = async (
       removeTagsArray,
       timestamp
     })
+
     const tagsArraySchema = z.array(tagInfoSchema)
     const response = tagsArraySchema.parse(axiosResponse.data)
 
     console.log('Successfully edited tags.')
     return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
   } catch (err) {
-    if (axios.isAxiosError(err)) {
-      switch (err.response?.status) {
-        case 400: {
-          console.error('Index out of range.')
-          return { result: 'Index out of range.', warn: true }
-        }
-        case 401: {
-          console.error('Session token has expired; please reload.')
-          return { result: 'Session token has expired; please reload.', warn: true }
-        }
-        case 404: {
-          console.error('Some data may have been removed. Please reload the page to update.')
-          return {
-            result: 'Some data may have been removed. Please reload the page to update.',
-            warn: true
-          }
-        }
-        default: {
-          console.error('An unknown error occurred. Please try again.')
-          return { result: 'An unknown error occurred. Please try again.', warn: true }
-        }
-      }
-    } else {
-      return { result: `There was a problem with the fetch operation: ${err}`, warn: true }
+    console.error('An error occurred while editing tags.', err)
+    return {
+      result: 'An error occurred. Please try again.',
+      warn: true
     }
   }
 }
