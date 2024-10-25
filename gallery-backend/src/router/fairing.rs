@@ -1,6 +1,6 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
-use rocket::fairing::AdHoc;
 use rocket::http::uri::Origin;
+use rocket::{fairing::AdHoc, http::Method};
 
 use crate::public::config::PUBLIC_CONFIG;
 
@@ -35,6 +35,7 @@ pub fn auth_request_fairing() -> AdHoc {
                     || uri.contains("/compressed")
                     || uri.contains("/thumb")
                     || uri == "/login"
+                    || uri == "/unauthorized"
                     || uri == "/post/authenticate",
                 true
             ) {
@@ -71,7 +72,8 @@ pub fn auth_request_fairing() -> AdHoc {
                 }
             };
             if !auth_pass {
-                let forbidden_uri = Origin::parse("/redirect-to-login").unwrap();
+                let forbidden_uri = Origin::parse("/unauth").unwrap();
+                req.set_method(Method::Get);
                 req.set_uri(forbidden_uri);
             }
         })
