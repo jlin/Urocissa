@@ -32,7 +32,6 @@ pub fn auth_request_fairing() -> AdHoc {
                     || uri.ends_with(".css")
                     || uri.contains("/share")
                     || uri.contains("/assets")
-                    || uri.contains("/compressed")
                     || uri.contains("/thumb")
                     || uri == "/login"
                     || uri == "/unauthorized"
