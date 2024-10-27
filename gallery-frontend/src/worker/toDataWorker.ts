@@ -146,11 +146,17 @@ async function prefetch(
     } else {
       return prefetch
     }
-  } catch (err) {
+  } catch (err: any) {
     if (err instanceof ZodError) {
       console.error(err.errors)
     } else {
-      console.error(err)
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          break
+        default:
+          console.error(`Unhandled status code: ${err.response.status}`)
+      }
     }
   }
 }
@@ -197,6 +203,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
       switch (error.response.status) {
         case 401:
           console.error('Session token has expired; please reload.')
+          unauthorized()
           return { result: 'Session token has expired; please reload.', warn: true }
         case 500:
           console.error('Internal server error.')
@@ -233,17 +240,25 @@ async function fetchRow(
   if (fetchedRowData.has(index)) {
     row = fetchedRowData.get(index)!
   } else {
-    const response = await axios.get<Row>(
-      `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(windowWidth)}`
-    )
     try {
+      const response = await axios.get<Row>(
+        `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(
+          windowWidth
+        )}`
+      )
       row = rowSchema.parse(response.data)
       fetchedRowData.set(row.rowIndex, structuredClone(row))
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ZodError) {
         console.error(err.errors)
       } else {
-        console.error(err)
+        switch (err.response.status) {
+          case 401:
+            unauthorized()
+            break
+          default:
+            console.error(`Unhandled status code: ${err.response.status}`)
+        }
       }
       return undefined
     }
