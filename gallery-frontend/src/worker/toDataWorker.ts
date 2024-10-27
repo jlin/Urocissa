@@ -26,6 +26,11 @@ const shouldProcessBatch: number[] = []
 
 const fetchedRowData: Map<number, Row> = new Map()
 
+function unauthorized() {
+  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+  postToMain.unauthorized()
+}
+
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
     fetchData: async (payload) => {
@@ -141,11 +146,17 @@ async function prefetch(
     } else {
       return prefetch
     }
-  } catch (err) {
+  } catch (err: any) {
     if (err instanceof ZodError) {
       console.error(err.errors)
     } else {
-      console.error(err)
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          break
+        default:
+          console.error(`Unhandled status code: ${err.response.status}`)
+      }
     }
   }
 }
@@ -192,6 +203,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
       switch (error.response.status) {
         case 401:
           console.error('Session token has expired; please reload.')
+          unauthorized()
           return { result: 'Session token has expired; please reload.', warn: true }
         case 500:
           console.error('Internal server error.')
@@ -228,17 +240,25 @@ async function fetchRow(
   if (fetchedRowData.has(index)) {
     row = fetchedRowData.get(index)!
   } else {
-    const response = await axios.get<Row>(
-      `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(windowWidth)}`
-    )
     try {
+      const response = await axios.get<Row>(
+        `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(
+          windowWidth
+        )}`
+      )
       row = rowSchema.parse(response.data)
       fetchedRowData.set(row.rowIndex, structuredClone(row))
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof ZodError) {
         console.error(err.errors)
       } else {
-        console.error(err)
+        switch (err.response.status) {
+          case 401:
+            unauthorized()
+            break
+          default:
+            console.error(`Unhandled status code: ${err.response.status}`)
+        }
       }
       return undefined
     }
@@ -445,37 +465,30 @@ const editTags = async (
       removeTagsArray,
       timestamp
     })
+
     const tagsArraySchema = z.array(tagInfoSchema)
     const response = tagsArraySchema.parse(axiosResponse.data)
 
     console.log('Successfully edited tags.')
     return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      switch (err.response?.status) {
-        case 400: {
-          console.error('Index out of range.')
-          return { result: 'Index out of range.', warn: true }
-        }
-        case 401: {
-          console.error('Session token has expired; please reload.')
-          return { result: 'Session token has expired; please reload.', warn: true }
-        }
-        case 404: {
-          console.error('Some data may have been removed. Please reload the page to update.')
-          return {
-            result: 'Some data may have been removed. Please reload the page to update.',
-            warn: true
-          }
-        }
-        default: {
-          console.error('An unknown error occurred. Please try again.')
-          return { result: 'An unknown error occurred. Please try again.', warn: true }
-        }
+  } catch (err: any) {
+    let message = 'An error occurred. Please try again.'
+
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          message = 'Unauthorized.'
+          break
+        case 500:
+          message =
+            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
+          break
       }
-    } else {
-      return { result: `There was a problem with the fetch operation: ${err}`, warn: true }
     }
+
+    console.error('Error occurred while editing tags:', err)
+    return { result: message, warn: true }
   }
 }
 
@@ -489,39 +502,28 @@ const editTags = async (
 async function deleteData(indexArray: number[], timestamp: string) {
   try {
     await axios.delete('/delete/delete-data', {
-      data: { deleteList: indexArray, timestamp: timestamp }
+      data: { deleteList: indexArray, timestamp }
     })
     console.log('Successfully deleted data.')
     return { result: 'Successfully deleted data.', warn: false }
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      switch (err.response?.status) {
-        case 400: {
-          console.error('Index out of range.')
-          return { result: 'Index out of range.', warn: true }
-        }
-        case 401: {
-          console.error('Session token has expired; please reload.')
-          return { result: 'Session token has expired; please reload.', warn: true }
-        }
-        case 404: {
-          console.error('Some data may have been removed. Please reload the page to update.')
-          return {
-            result: 'Some data may have been removed. Please reload the page to update.',
-            warn: true
-          }
-        }
-        default: {
-          console.error('An unknown error occurred. Please try again.')
-          return { result: 'An unknown error occurred. Please try again.', warn: true }
-        }
+  } catch (err: any) {
+    let message = 'An error occurred.'
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          message = 'Unauthorized.'
+          break
+        case 500:
+          message =
+            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
+          break
       }
-    } else {
-      return { result: `There was a problem with the fetch operation: ${err}`, warn: true }
     }
+
+    return { result: message, warn: true }
   }
 }
-
 /**
  * Fetches scrollbar data based on the provided timestamp.
  *

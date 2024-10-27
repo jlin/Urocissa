@@ -59,7 +59,8 @@ export const toImgWorker = createActionCreators({
 // Define actions to be received from the image processing worker
 export const fromImgWorker = createActionCreators({
   smallImageProcessed: (payload: { index: number; url: string }) => payload,
-  imageProcessed: (payload: { index: number; url: string }) => payload
+  imageProcessed: (payload: { index: number; url: string }) => payload,
+  unauthorized: (payload: {}) => payload
 })
 
 /* ================================================================================
@@ -121,5 +122,6 @@ export const fromDataWorker = createActionCreators({
   prefetchReturn: (payload: PrefetchReturnParams) => payload,
   editTagsReturn: (payload: EditTagsReturnParams) => payload,
   deleteDataReturn: (payload: DeleteDataReturnParams) => payload,
-  fetchScrollbarReturn: (payload: FetchScrollBarReturnParams) => payload
+  fetchScrollbarReturn: (payload: FetchScrollBarReturnParams) => payload,
+  unauthorized: () => ({})
 })

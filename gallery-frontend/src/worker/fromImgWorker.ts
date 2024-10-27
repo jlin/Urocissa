@@ -1,7 +1,7 @@
 import { useImgStore } from '@/store/imgStore'
 import { createHandler } from 'typesafe-agent-events'
 import { fromImgWorker } from '@/worker/workerApi'
-
+import router from '@/script/routes'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleImgWorker(imgWorker: Worker) {
@@ -13,6 +13,9 @@ export function handleImgWorker(imgWorker: Worker) {
     },
     imageProcessed({ index, url }) {
       imgStore.imgOriginal.set(index, url)
+    },
+    unauthorized: () => {
+      router.push('/login')
     }
   })
 

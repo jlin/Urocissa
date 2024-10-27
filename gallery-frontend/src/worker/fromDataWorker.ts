@@ -12,7 +12,7 @@ import { useRowStore } from '@/store/rowStore'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchScrollbarInWorker } from '@/script/inWorker/fetchScrollbarInWorker'
 import { useModalStore } from '@/store/modalStore'
-
+import router from '@/script/routes'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker) {
@@ -103,6 +103,9 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
     fetchScrollbarReturn: (payload) => {
       console.log('payload.scrollbarDataArray is ', payload.scrollbarDataArray)
       scrollbarStore.initialize(payload.scrollbarDataArray)
+    },
+    unauthorized: () => {
+      router.push('/login')
     }
   })
 
