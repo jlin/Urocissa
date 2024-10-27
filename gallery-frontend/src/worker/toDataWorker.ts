@@ -466,7 +466,8 @@ const editTags = async (
           message = 'Unauthorized.'
           break
         case 500:
-          message = 'Internal Server Error. Please try again later.'
+          message =
+            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
           break
       }
     }
@@ -486,39 +487,28 @@ const editTags = async (
 async function deleteData(indexArray: number[], timestamp: string) {
   try {
     await axios.delete('/delete/delete-data', {
-      data: { deleteList: indexArray, timestamp: timestamp }
+      data: { deleteList: indexArray, timestamp }
     })
     console.log('Successfully deleted data.')
     return { result: 'Successfully deleted data.', warn: false }
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      switch (err.response?.status) {
-        case 400: {
-          console.error('Index out of range.')
-          return { result: 'Index out of range.', warn: true }
-        }
-        case 401: {
-          console.error('Session token has expired; please reload.')
-          return { result: 'Session token has expired; please reload.', warn: true }
-        }
-        case 404: {
-          console.error('Some data may have been removed. Please reload the page to update.')
-          return {
-            result: 'Some data may have been removed. Please reload the page to update.',
-            warn: true
-          }
-        }
-        default: {
-          console.error('An unknown error occurred. Please try again.')
-          return { result: 'An unknown error occurred. Please try again.', warn: true }
-        }
+  } catch (err: any) {
+    let message = 'An error occurred.'
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          message = 'Unauthorized.'
+          break
+        case 500:
+          message =
+            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
+          break
       }
-    } else {
-      return { result: `There was a problem with the fetch operation: ${err}`, warn: true }
     }
+
+    return { result: message, warn: true }
   }
 }
-
 /**
  * Fetches scrollbar data based on the provided timestamp.
  *
