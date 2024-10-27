@@ -17,8 +17,8 @@ use router::{
     get::get_img::compressed_file,
     get::get_page::{
         all, all_view, archived, archived_view, catch_view_routes, favicon, favorite,
-        favorite_view, login, redirect_to_photo, redirect_to_photo_2, setting, tags, trashed,
-        trashed_view, unauthorized,
+        favorite_view, login, redirect_to_login, redirect_to_photo, redirect_to_photo_2, setting,
+        tags, trashed, trashed_view, unauthorized,
     },
     post::{authenticate::authenticate, post_upload::upload},
     put::{
@@ -108,7 +108,8 @@ async fn rocket() -> _ {
                 trashed_view,
                 get_scroll_bar,
                 regenerate_preview,
-                authenticate
+                authenticate,
+                redirect_to_login
             ],
         )
 }

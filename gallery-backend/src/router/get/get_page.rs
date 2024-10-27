@@ -1,6 +1,6 @@
 use rocket::fs::NamedFile;
 use rocket::http::Status;
-use rocket::response::content;
+use rocket::response::{content, Redirect};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
@@ -25,6 +25,11 @@ pub async fn login() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
+}
+
+#[get("/redirect-to-login")]
+pub fn redirect_to_login() -> Redirect {
+    Redirect::to(uri!("/login"))
 }
 
 #[get("/unauthorized")]

@@ -104,8 +104,8 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       console.log('payload.scrollbarDataArray is ', payload.scrollbarDataArray)
       scrollbarStore.initialize(payload.scrollbarDataArray)
     },
-    unauthorized: () => {
-      router.push('/login')
+    unauthorized: async () => {
+      await router.push('/login')
     }
   })
 
