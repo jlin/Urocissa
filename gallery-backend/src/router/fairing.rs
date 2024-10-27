@@ -71,7 +71,7 @@ pub fn auth_request_fairing() -> AdHoc {
                 }
             };
             if !auth_pass {
-                let forbidden_uri = Origin::parse("/unauth").unwrap();
+                let forbidden_uri = Origin::parse("/unauthorized").unwrap();
                 req.set_method(Method::Get);
                 req.set_uri(forbidden_uri);
             }
