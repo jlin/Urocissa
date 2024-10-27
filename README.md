@@ -183,3 +183,49 @@ cargo run --release
 ```
 
 You can now access the app via http://127.0.0.1:4000 or http://127.0.0.1:<your_port> if you configured a custom port in Rocket.toml.
+
+## Update
+
+### 1. Pull the Latest Changes from the Repository
+
+Navigate to the project directory and pull the latest updates:
+
+```bash
+git pull
+```
+
+---
+
+### 2. Rebuild the Frontend
+
+1. Navigate to the `gallery-frontend` directory:
+
+   ```bash
+   cd ./Urocissa/gallery-frontend
+   ```
+
+2. Build the frontend:
+
+   ```bash
+   npm run build
+   ```
+
+---
+
+### 3. Rebuild the Backend
+
+1. Navigate to the `gallery-backend` directory:
+
+   ```bash
+   cd ./Urocissa/gallery-backend
+   ```
+
+2. Build and run the backend using Cargo:
+
+   ```bash
+   cargo run --release
+   ```
+
+---
+
+After following these steps, your Urocissa app will be updated to the latest version.
