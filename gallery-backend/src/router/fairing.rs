@@ -40,6 +40,7 @@ pub fn auth_request_fairing() -> AdHoc {
             ) {
                 return;
             }
+
             if PUBLIC_CONFIG.read_only_mode
                 && (req.method() != rocket::http::Method::Get && !uri.starts_with("/get/"))
             {
@@ -70,10 +71,25 @@ pub fn auth_request_fairing() -> AdHoc {
                     }
                 }
             };
+
+            // Simplified distinction based on the Accept header
+            let accept_header = req.headers().get_one("Accept").unwrap_or("");
+            let is_browser_request = accept_header.contains("text/html");
+
             if !auth_pass {
-                let forbidden_uri = Origin::parse("/unauth").unwrap();
-                req.set_method(Method::Get);
-                req.set_uri(forbidden_uri);
+                if is_browser_request {
+                    // Redirect to login for browser requests
+                    println!("Unauthorized access attempt via browser, redirecting to login.");
+                    let redirect_uri = Origin::parse("/redirect-to-login").unwrap();
+                    req.set_method(Method::Get);
+                    req.set_uri(redirect_uri);
+                } else {
+                    // Unauthorized response for Axios/fetch requests
+                    println!("Unauthorized access attempt via fetch.");
+                    let unauthorized_uri = Origin::parse("/unauthorized").unwrap();
+                    req.set_method(Method::Get);
+                    req.set_uri(unauthorized_uri);
+                }
             }
         })
     })
