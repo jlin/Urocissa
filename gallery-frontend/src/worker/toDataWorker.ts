@@ -31,7 +31,7 @@ function unauthorized() {
   postToMain.unauthorized()
 }
 
-function handleAxiosError(err: unknown): { result: string; warn: boolean } {
+function handleAxiosError(err: unknown): string {
   let message = 'An error occurred. Please try again.'
   if (axios.isAxiosError(err)) {
     if (err.response) {
@@ -47,7 +47,7 @@ function handleAxiosError(err: unknown): { result: string; warn: boolean } {
     }
     console.error('Axios error:', err)
   }
-  return { result: message, warn: true }
+  return message
 }
 
 self.addEventListener('message', (e) => {
@@ -169,13 +169,7 @@ async function prefetch(
     if (err instanceof ZodError) {
       console.error(err.errors)
     } else {
-      switch (err.response.status) {
-        case 401:
-          unauthorized()
-          break
-        default:
-          console.error(`Unhandled status code: ${err.response.status}`)
-      }
+      handleAxiosError(err)
     }
   }
 }
@@ -217,23 +211,8 @@ async function fetchData(batchIndex: number, timestamp: string) {
       }
     }
     return data
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      switch (error.response.status) {
-        case 401:
-          console.error('Session token has expired; please reload.')
-          unauthorized()
-          return { result: 'Session token has expired; please reload.', warn: true }
-        case 500:
-          console.error('Internal server error.')
-          return { result: 'Internal server error.', warn: true }
-        default:
-          console.error('An unknown error occurred. Please try again.')
-          return { result: 'An unknown error occurred. Please try again.', warn: true }
-      }
-    } else {
-      console.error('An error occurred:', error)
-    }
+  } catch (err) {
+    handleAxiosError(err)
   }
 }
 
@@ -271,13 +250,7 @@ async function fetchRow(
       if (err instanceof ZodError) {
         console.error(err.errors)
       } else {
-        switch (err.response.status) {
-          case 401:
-            unauthorized()
-            break
-          default:
-            console.error(`Unhandled status code: ${err.response.status}`)
-        }
+        handleAxiosError(err)
       }
       return undefined
     }
@@ -491,7 +464,8 @@ const editTags = async (
     console.log('Successfully edited tags.')
     return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
   } catch (err) {
-    return handleAxiosError(err)
+    const message = handleAxiosError(err)
+    return { result: message, warn: true }
   }
 }
 
@@ -510,7 +484,8 @@ async function deleteData(indexArray: number[], timestamp: string) {
     console.log('Successfully deleted data.')
     return { result: 'Successfully deleted data.', warn: false }
   } catch (err) {
-    return handleAxiosError(err)
+    const message = handleAxiosError(err)
+    return { result: message, warn: true }
   }
 }
 
@@ -527,7 +502,7 @@ async function fetchScrollbar(timestamp: string) {
     const scrollBarDataArray = z.array(scrollbarDataSchema).parse(response.data)
     return { scrollbarDataArray: scrollBarDataArray }
   } catch (err) {
-    console.error(err)
+    handleAxiosError(err)
   }
   return { scrollbarDataArray: [] }
 }
