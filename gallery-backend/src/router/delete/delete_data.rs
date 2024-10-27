@@ -3,8 +3,6 @@ use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use redb::ReadableTable;
-use rocket::http::Status;
-use rocket::response::status::Custom;
 use rocket::serde::{json::Json, Deserialize};
 use std::sync::atomic::Ordering;
 #[derive(Debug, Deserialize)]

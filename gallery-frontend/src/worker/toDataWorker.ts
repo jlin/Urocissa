@@ -31,6 +31,25 @@ function unauthorized() {
   postToMain.unauthorized()
 }
 
+function handleAxiosError(err: unknown): { result: string; warn: boolean } {
+  let message = 'An error occurred. Please try again.'
+  if (axios.isAxiosError(err)) {
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          unauthorized()
+          message = 'Unauthorized.'
+          break
+        case 500:
+          message = 'Internal Server Error.'
+          break
+      }
+    }
+    console.error('Axios error:', err)
+  }
+  return { result: message, warn: true }
+}
+
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
     fetchData: async (payload) => {
@@ -471,24 +490,8 @@ const editTags = async (
 
     console.log('Successfully edited tags.')
     return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
-  } catch (err: any) {
-    let message = 'An error occurred. Please try again.'
-
-    if (err.response) {
-      switch (err.response.status) {
-        case 401:
-          unauthorized()
-          message = 'Unauthorized.'
-          break
-        case 500:
-          message =
-            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
-          break
-      }
-    }
-
-    console.error('Error occurred while editing tags:', err)
-    return { result: message, warn: true }
+  } catch (err) {
+    return handleAxiosError(err)
   }
 }
 
@@ -506,24 +509,11 @@ async function deleteData(indexArray: number[], timestamp: string) {
     })
     console.log('Successfully deleted data.')
     return { result: 'Successfully deleted data.', warn: false }
-  } catch (err: any) {
-    let message = 'An error occurred.'
-    if (err.response) {
-      switch (err.response.status) {
-        case 401:
-          unauthorized()
-          message = 'Unauthorized.'
-          break
-        case 500:
-          message =
-            typeof err.response.data === 'string' ? err.response.data : 'Internal Server Error.'
-          break
-      }
-    }
-
-    return { result: message, warn: true }
+  } catch (err) {
+    return handleAxiosError(err)
   }
 }
+
 /**
  * Fetches scrollbar data based on the provided timestamp.
  *
