@@ -17,6 +17,19 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import axios from 'axios'
+
+// Response interceptor to handle 401 Unauthorized
+axios.interceptors.response.use(
+  (response) => response, // Pass through valid responses
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn('401 Unauthorized detected, redirecting to /login')
+      await router.push('/login') // Redirect to login page
+    }
+    return Promise.reject(error) // Always reject the error to maintain default behavior
+  }
+)
 
 // Create Vue application instance
 const app = createApp(App)
