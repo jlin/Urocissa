@@ -60,6 +60,8 @@ self.addEventListener('message', (e) => {
         const startIndex = batch * batchNumber
         const endIndex = (batch + 1) * batchNumber
         const indices = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)
+
+        //Push the result Map into a SlicedData[]
         const slicedDataArray: SlicedData[] = []
         for (let i = 0; i < indices.length; i++) {
           const index = indices[i]
@@ -68,6 +70,7 @@ self.addEventListener('message', (e) => {
             slicedDataArray.push({ index, data: getResult })
           }
         }
+
         const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
         postToMain.returnData({ batch: batch, slicedDataArray: slicedDataArray })
       }
@@ -178,7 +181,6 @@ async function fetchData(batchIndex: number, timestamp: string) {
   const response = await axios.get<DataBase[]>(fetchUrl)
   const databaseTimestampArray = z.array(DataBaseTimestampForConstructorSchema).parse(response.data)
 
-  const newData: DataBase[] = []
   const data: Map<number, DataBase> = new Map()
 
   for (let index = 0; index < databaseTimestampArray.length; index++) {
@@ -187,7 +189,6 @@ async function fetchData(batchIndex: number, timestamp: string) {
     }
     const item = databaseTimestampArray[index]
     const dataBaseInstance = new DataBase(item)
-    newData.push(dataBaseInstance)
     const key = batchIndex * batchNumber + index
     data.set(key, dataBaseInstance)
     if (index % 100 === 0) {
