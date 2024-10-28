@@ -23,7 +23,12 @@
       @touchend="handleTouchEnd"
       @touchmove="handleMove"
     >
-      <v-sheet class="position-relative w-100 h-100">
+      <v-sheet
+        class="position-relative w-100 h-100"
+        :style="{
+          pointerEvents: 'none'
+        }"
+      >
         <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
         <v-sheet
           v-if="scrollbarStore.initialized"
@@ -55,8 +60,7 @@
           class="w-100 position-absolute bg-grey-darken-2"
           :style="{
             height: `${scrollbarHeight / rowLength}px`,
-            top: `${(hoverLabelRowIndex / rowLength) * 100}%`,
-            pointerEvents: 'none'
+            top: `${(hoverLabelRowIndex / rowLength) * 100}%`
           }"
         >
           <!-- Chip to show the current view year and month label. -->
