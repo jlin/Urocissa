@@ -48,25 +48,26 @@ self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
     fetchData: async (payload) => {
       const { batch, timestamp } = payload
+      // if there are too many batch are processed then try to terminate the oldest request
       if (shouldProcessBatch.length >= 6) {
         shouldProcessBatch.shift()
       }
       shouldProcessBatch.push(batch)
+
       const result = await fetchData(batch, timestamp)
-      if (result instanceof Map && result.size > 0) {
+
+      if (result.size > 0) {
         const startIndex = batch * batchNumber
         const endIndex = (batch + 1) * batchNumber
         const indices = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)
-        const slicedDataArray: SlicedData[] = indices
-          .map((index) => {
-            const getResult = result.get(index)
-            if (getResult === undefined) {
-              return null
-            } else {
-              return { index, data: getResult }
-            }
-          })
-          .filter((item): item is SlicedData => item !== null)
+        const slicedDataArray: SlicedData[] = []
+        for (let i = 0; i < indices.length; i++) {
+          const index = indices[i]
+          const getResult = result.get(index)
+          if (getResult !== undefined) {
+            slicedDataArray.push({ index, data: getResult })
+          }
+        }
         const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
         postToMain.returnData({ batch: batch, slicedDataArray: slicedDataArray })
       }
