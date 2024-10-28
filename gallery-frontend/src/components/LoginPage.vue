@@ -23,9 +23,7 @@ import { ref } from 'vue'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { useInitializedStore } from '@/store/initializedStore'
 import { useConfigStore } from '@/store/configStore'
-const initializedStore = useInitializedStore()
 const password = ref('')
 const token = ref<string>('') // To store the JWT token
 const router = useRouter()
@@ -46,7 +44,6 @@ const handleLogin = async () => {
       sameSite: 'Strict', // Prevent CSRF attacks
       expires: 1 // Optional: Expires in 1 day
     })
-    initializedStore.login = true
     // Perform initialization:
     try {
       const response = await axios.get('/get/get-config.json')

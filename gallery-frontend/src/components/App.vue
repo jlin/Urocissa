@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <component :is="NavBar" v-if="initializedStore.login" />
+    <component :is="NavBar" v-if="route.name !== 'LoginPage'" />
     <v-main class="h-screen">
       <router-view v-slot="{ Component }" :key="routeKey">
         <component :is="Component" />
@@ -15,8 +15,6 @@ import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, defineAsyncComponent, onMounted } from 'vue'
 import Cookies from 'js-cookie'
-import { useInitializedStore } from '@/store/initializedStore'
-const initializedStore = useInitializedStore()
 
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
 
@@ -25,8 +23,6 @@ async function checkCookieAndRedirect() {
   const jwt = Cookies.get('jwt')
   if (!jwt) {
     router.push('/login')
-  } else {
-    initializedStore.login = true
   }
 }
 

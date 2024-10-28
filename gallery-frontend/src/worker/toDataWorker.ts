@@ -37,9 +37,12 @@ axios.interceptors.response.use(
   async (error) => {
     if (error.response && error.response.status === 401) {
       unauthorized()
+      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+      postToMain.notification({ message: 'Unauthorized. Please log in.', messageType: 'warn' })
+    } else {
+      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+      postToMain.notification({ message: 'An error occured', messageType: 'warn' })
     }
-    const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-    postToMain.notification({ message: 'An error occured', messageType: 'warn' })
     return Promise.reject(error) // Always reject the error to maintain default behavior
   }
 )

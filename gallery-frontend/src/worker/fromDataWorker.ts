@@ -110,7 +110,6 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       messageStore.showMessage = true
     },
     unauthorized: async () => {
-      initializedStore.login = false
       await router.push('/login')
     }
   })
