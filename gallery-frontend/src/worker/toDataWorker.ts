@@ -31,24 +31,18 @@ function unauthorized() {
   postToMain.unauthorized()
 }
 
-function handleAxiosError(err: unknown): string {
-  let message = 'An error occurred. Please try again.'
-  if (axios.isAxiosError(err)) {
-    if (err.response) {
-      switch (err.response.status) {
-        case 401:
-          unauthorized()
-          message = 'Unauthorized.'
-          break
-        case 500:
-          message = 'Internal Server Error.'
-          break
-      }
+// Response interceptor to handle 401 Unauthorized
+axios.interceptors.response.use(
+  (response) => response, // Pass through valid responses
+  async (error) => {
+    if (error.response && error.response.status === 401) {
+      unauthorized()
     }
-    console.error('Axios error:', err)
+    const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+    postToMain.notification({ message: 'An error occured', messageType: 'warn' })
+    return Promise.reject(error) // Always reject the error to maintain default behavior
   }
-  return message
-}
+)
 
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
@@ -151,26 +145,18 @@ async function prefetch(
   void reverse
   const fetchUrl = `/get/get-db-length?${locate ? `locate=${locate}` : ''}`
 
-  try {
-    const axiosResponse = await axios.post<Prefetch>(fetchUrl, filterJsonString, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-
-    const prefetch = prefetchSchema.parse(axiosResponse.data)
-
-    if (prefetch === null) {
-      return
-    } else {
-      return prefetch
+  const axiosResponse = await axios.post<Prefetch>(fetchUrl, filterJsonString, {
+    headers: {
+      'Content-Type': 'application/json'
     }
-  } catch (err: any) {
-    if (err instanceof ZodError) {
-      console.error(err.errors)
-    } else {
-      handleAxiosError(err)
-    }
+  })
+
+  const prefetch = prefetchSchema.parse(axiosResponse.data)
+
+  if (prefetch === null) {
+    return
+  } else {
+    return prefetch
   }
 }
 
@@ -187,33 +173,28 @@ async function fetchData(batchIndex: number, timestamp: string) {
   const fetchUrl = `/get/get-data?timestamp=${timestamp}&start=${batchIndex * batchNumber}&end=${
     (batchIndex + 1) * batchNumber
   }`
-  try {
-    const response = await axios.get<DataBase[]>(fetchUrl)
-    const databaseTimestampArray = z
-      .array(DataBaseTimestampForConstructorSchema)
-      .parse(response.data)
 
-    const newData: DataBase[] = []
-    const data: Map<number, DataBase> = new Map()
+  const response = await axios.get<DataBase[]>(fetchUrl)
+  const databaseTimestampArray = z.array(DataBaseTimestampForConstructorSchema).parse(response.data)
 
-    for (let index = 0; index < databaseTimestampArray.length; index++) {
-      if (!shouldProcessBatch.includes(batchIndex)) {
-        break // Stop processing further if the batch should no longer be processed
-      }
-      const item = databaseTimestampArray[index]
-      const dataBaseInstance = new DataBase(item)
-      newData.push(dataBaseInstance)
-      const key = batchIndex * batchNumber + index
-      data.set(key, dataBaseInstance)
-      if (index % 100 === 0) {
-        // Yield after every 100 items
-        await new Promise((resolve) => setTimeout(resolve, 0))
-      }
+  const newData: DataBase[] = []
+  const data: Map<number, DataBase> = new Map()
+
+  for (let index = 0; index < databaseTimestampArray.length; index++) {
+    if (!shouldProcessBatch.includes(batchIndex)) {
+      break // Stop processing further if the batch should no longer be processed
     }
-    return data
-  } catch (err) {
-    handleAxiosError(err)
+    const item = databaseTimestampArray[index]
+    const dataBaseInstance = new DataBase(item)
+    newData.push(dataBaseInstance)
+    const key = batchIndex * batchNumber + index
+    data.set(key, dataBaseInstance)
+    if (index % 100 === 0) {
+      // Yield after every 100 items
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    }
   }
+  return data
 }
 
 /**
@@ -249,8 +230,6 @@ async function fetchRow(
     } catch (err: any) {
       if (err instanceof ZodError) {
         console.error(err.errors)
-      } else {
-        handleAxiosError(err)
       }
       return undefined
     }
@@ -450,23 +429,18 @@ const editTags = async (
   removeTagsArray: string[],
   timestamp: string
 ): Promise<{ result: string; warn: boolean; returnedTagsArray?: TagInfo[] }> => {
-  try {
-    const axiosResponse = await axios.put<TagInfo[]>('/put/edit_tag', {
-      indexArray,
-      addTagsArray,
-      removeTagsArray,
-      timestamp
-    })
+  const axiosResponse = await axios.put<TagInfo[]>('/put/edit_tag', {
+    indexArray,
+    addTagsArray,
+    removeTagsArray,
+    timestamp
+  })
 
-    const tagsArraySchema = z.array(tagInfoSchema)
-    const response = tagsArraySchema.parse(axiosResponse.data)
+  const tagsArraySchema = z.array(tagInfoSchema)
+  const response = tagsArraySchema.parse(axiosResponse.data)
 
-    console.log('Successfully edited tags.')
-    return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
-  } catch (err) {
-    const message = handleAxiosError(err)
-    return { result: message, warn: true }
-  }
+  console.log('Successfully edited tags.')
+  return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
 }
 
 /**
@@ -477,16 +451,11 @@ const editTags = async (
  * @returns A promise that resolves to an object containing the result message and a warning flag.
  */
 async function deleteData(indexArray: number[], timestamp: string) {
-  try {
-    await axios.delete('/delete/delete-data', {
-      data: { deleteList: indexArray, timestamp }
-    })
-    console.log('Successfully deleted data.')
-    return { result: 'Successfully deleted data.', warn: false }
-  } catch (err) {
-    const message = handleAxiosError(err)
-    return { result: message, warn: true }
-  }
+  await axios.delete('/delete/delete-data', {
+    data: { deleteList: indexArray, timestamp }
+  })
+  console.log('Successfully deleted data.')
+  return { result: 'Successfully deleted data.', warn: false }
 }
 
 /**
@@ -497,12 +466,7 @@ async function deleteData(indexArray: number[], timestamp: string) {
  *          or an empty array if an error occurs.
  */
 async function fetchScrollbar(timestamp: string) {
-  try {
-    const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`)
-    const scrollBarDataArray = z.array(scrollbarDataSchema).parse(response.data)
-    return { scrollbarDataArray: scrollBarDataArray }
-  } catch (err) {
-    handleAxiosError(err)
-  }
-  return { scrollbarDataArray: [] }
+  const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`)
+  const scrollBarDataArray = z.array(scrollbarDataSchema).parse(response.data)
+  return { scrollbarDataArray: scrollBarDataArray }
 }
