@@ -20,7 +20,7 @@ import {
 import axios from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
 import { fromDataWorker, toDataWorker } from './workerApi'
-import { z, ZodError } from 'zod'
+import { z } from 'zod'
 
 const shouldProcessBatch: number[] = []
 
@@ -77,17 +77,14 @@ self.addEventListener('message', (e) => {
     },
     fetchRow: async (payload) => {
       const { index, timestamp, windowWidth, isLastRow } = payload
-      try {
-        const rowWithOffset = await fetchRow(index, timestamp, windowWidth, isLastRow)
-        if (rowWithOffset !== undefined) {
-          const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-          postToMain.fetchRowReturn({
-            rowWithOffset: rowWithOffset,
-            timestamp: timestamp
-          })
-        }
-      } catch (error) {
-        console.log('fetch empty rows')
+
+      const rowWithOffset = await fetchRow(index, timestamp, windowWidth, isLastRow)
+      if (rowWithOffset !== undefined) {
+        const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+        postToMain.fetchRowReturn({
+          rowWithOffset: rowWithOffset,
+          timestamp: timestamp
+        })
       }
     },
     prefetch: async (payload) => {
