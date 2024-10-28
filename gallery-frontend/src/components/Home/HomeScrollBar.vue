@@ -14,7 +14,7 @@
         backgroundColor: `#424242`,
         marginTop: '8px'
       }"
-      @click="handleClickScroll"
+      @click="handleClick"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
       @mousemove="handleMove"
@@ -191,7 +191,7 @@ const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index), 1
 /**
  * Handle a click event on the scrollbar.
  */
-const handleClickScroll = (event: MouseEvent | TouchEvent) => {
+const handleClick = (event: MouseEvent | TouchEvent) => {
   const scrollbarElement = event.currentTarget
   const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
 
@@ -224,7 +224,7 @@ const handleMove = (event: MouseEvent | TouchEvent) => {
     const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbar.height)
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (isDragging.value) handleClickScroll(event)
+      if (isDragging.value) handleClick(event)
       hoverLabelRowIndex.value = targetRowIndex
     }
   }
@@ -251,7 +251,7 @@ const handleMouseUp = () => {
 const handleTouchStart = (event: TouchEvent) => {
   isScrolling.value = true
   isDragging.value = true
-  handleClickScroll(event)
+  handleClick(event)
 }
 
 const handleTouchEnd = () => {
