@@ -80,9 +80,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       if (!tagStore.fetched) {
         await tagStore.fetchTags()
       }
-      if (result.dataLength > 0) {
-        fetchScrollbarInWorker()
-      }
+      fetchScrollbarInWorker()
 
       dataLengthStore.updateFetchRowTrigger = !dataLengthStore.updateFetchRowTrigger
     },

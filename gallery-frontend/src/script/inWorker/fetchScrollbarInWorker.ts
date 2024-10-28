@@ -14,6 +14,11 @@ export function fetchScrollbarInWorker() {
 
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
   const timestamp = dataLengthStore.timestamp
+
+  if (dataLengthStore.dataLength === 0) {
+    return
+  }
+
   if (timestamp !== null) {
     postToWorker.fetchScrollbar({
       timestamp: timestamp
