@@ -12,7 +12,7 @@
     >
     </v-progress-linear>
   </v-app-bar>
-  <v-navigation-drawer v-model="showDrawer" temporary touchless width="150">
+  <v-navigation-drawer v-model="showDrawer" temporary touchless width="150" class="no-select">
     <v-list nav :key="route.fullPath">
       <v-list-item slim to="/" prepend-icon="mdi-home" title="Home"></v-list-item>
       <v-list-item slim to="/tags" prepend-icon="mdi-tag-multiple" title="Tags"></v-list-item>
@@ -71,3 +71,12 @@ function extractDynamicBase(path: string) {
 }
 provide('showDrawer', showDrawer)
 </script>
+
+<style scoped>
+.no-select {
+  user-select: none;
+}
+.no-select * {
+  user-select: none;
+}
+</style>

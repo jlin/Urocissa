@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 d-flex flex-wrap row-flex-container">
+  <div class="w-100 d-flex flex-wrap row-flex-container no-select">
     <div
       v-for="(data, subIndex) in row.displayElements"
       :key="`${row.start}-${subIndex}-${dataLengthStore.timestamp}`"
@@ -98,8 +98,7 @@
                 "
                 :style="{
                   zIndex: 2,
-                  position: 'absolute',
-                  userSelect: 'none'
+                  position: 'absolute'
                 }"
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
@@ -112,8 +111,7 @@
                   :key="row.start + subIndex"
                   :style="{
                     position: 'absolute',
-                    zIndex: 1,
-                    userSelect: 'none'
+                    zIndex: 1
                   }"
                   class="w-100 h-100 bg-grey-darken-2"
                   :src="dataStore.data.get(row.start + subIndex)!.thumbhashUrl"
@@ -284,5 +282,11 @@ onBeforeUnmount(() => {
   }
 })
 </script>
-
-<style scoped></style>
+<style scoped>
+.no-select {
+  user-select: none;
+}
+.no-select * {
+  user-select: none;
+}
+</style>
