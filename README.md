@@ -204,7 +204,13 @@ git pull
    cd ./Urocissa/gallery-frontend
    ```
 
-2. Build the frontend:
+2. Install dependencies to ensure all packages are properly installed:
+
+   ```bash
+   npm install
+   ```
+
+3. Build the frontend:
 
    ```bash
    npm run build
