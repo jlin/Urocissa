@@ -71,6 +71,11 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
     },
     prefetchReturn: async (payload) => {
       const result: Prefetch = payload.result
+      if (result.dataLength === 0) {
+        messageStore.message = "Wow, so empty! Try adding some photos here!"
+        messageStore.warn = false
+        messageStore.showMessage = true
+      }
       dataLengthStore.timestamp = result.timestamp
       dataLengthStore.updateVisibleRowTrigger = !dataLengthStore.updateVisibleRowTrigger
       dataLengthStore.calculateLength(result.dataLength)
