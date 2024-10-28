@@ -215,51 +215,42 @@ async function fetchRow(
   timestamp: string,
   windowWidth: number,
   isLastRow: boolean
-): Promise<RowWithOffset | undefined> {
+): Promise<RowWithOffset> {
   let row: Row
 
+  // Obtain row
   if (fetchedRowData.has(index)) {
     row = fetchedRowData.get(index)!
   } else {
-    try {
-      const response = await axios.get<Row>(
-        `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(
-          windowWidth
-        )}`
-      )
-      row = rowSchema.parse(response.data)
-      fetchedRowData.set(row.rowIndex, structuredClone(row))
-    } catch (err: any) {
-      if (err instanceof ZodError) {
-        console.error(err.errors)
-      }
-      return undefined
-    }
+    const response = await axios.get<Row>(
+      `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(windowWidth)}`
+    )
+    row = rowSchema.parse(response.data)
+    fetchedRowData.set(row.rowIndex, structuredClone(row))
   }
 
+  // Setting row.topPixelAccumulated
   row.topPixelAccumulated = row.rowIndex * fixedBigRowHeight
 
+  // Perform Algorithm to wrap row into subrows
   const subRows = KnuthPlassLayout(row, windowWidth)
+
+  // Normalize subrows by scaling their widths and heights to fit within the window width
   const scaledTotalHeight = normalizeSubrows(subRows, windowWidth, isLastRow)
+
+  // Setting row.rowHeight
   row.rowHeight = scaledTotalHeight
+
+  // Calculate the offset, which represents the difference between the original default height and the actual wrapped height
   const offset = scaledTotalHeight - fixedBigRowHeight
 
-  try {
-    const rowWithOffset = rowWithOffsetSchema.parse({
-      row: row,
-      offset: offset,
-      windowWidth
-    })
+  const rowWithOffset = rowWithOffsetSchema.parse({
+    row: row,
+    offset: offset,
+    windowWidth
+  })
 
-    return rowWithOffset
-  } catch (err) {
-    if (err instanceof ZodError) {
-      console.error(err.errors)
-    } else {
-      console.error(err)
-    }
-    return undefined
-  }
+  return rowWithOffset
 }
 
 /**
