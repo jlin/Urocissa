@@ -104,6 +104,11 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       console.log('payload.scrollbarDataArray is ', payload.scrollbarDataArray)
       scrollbarStore.initialize(payload.scrollbarDataArray)
     },
+    notification: function (payload: { message: string; messageType: 'info' | 'warn' }): void {
+      messageStore.message = payload.message
+      messageStore.warn = payload.messageType === 'warn'
+      messageStore.showMessage = true
+    },
     unauthorized: async () => {
       await router.push('/login')
     }

@@ -114,6 +114,7 @@ type EditTagsReturnParams = {
 }
 type DeleteDataReturnParams = { result: string; warn: boolean }
 type FetchScrollBarReturnParams = { scrollbarDataArray: ScrollbarData[] }
+type NotificationReturnParams = { message: string; messageType: 'info' | 'warn' }
 
 // Define actions for the worker to send responses back to the main thread
 export const fromDataWorker = createActionCreators({
@@ -123,5 +124,6 @@ export const fromDataWorker = createActionCreators({
   editTagsReturn: (payload: EditTagsReturnParams) => payload,
   deleteDataReturn: (payload: DeleteDataReturnParams) => payload,
   fetchScrollbarReturn: (payload: FetchScrollBarReturnParams) => payload,
+  notification: (payload: NotificationReturnParams) => payload,
   unauthorized: () => ({})
 })
