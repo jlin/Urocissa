@@ -1,6 +1,6 @@
 <template>
   <AppBar />
-  <v-app-bar flat height="2">
+  <v-app-bar flat height="2" class="no-select">
     <v-progress-linear
       v-if="!initializedStore.initialized"
       indeterminate
