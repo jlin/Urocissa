@@ -93,13 +93,6 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
         console.warn('editTags did not find tags')
       }
       modalStore.showEditTagsModal = false
-      messageStore.message = payload.result
-      messageStore.warn = payload.warn
-      messageStore.showMessage = true
-    },
-    deleteDataReturn: (payload) => {
-      messageStore.message = payload.result
-      messageStore.warn = payload.warn
       messageStore.showMessage = true
     },
     fetchScrollbarReturn: (payload) => {

@@ -101,7 +101,7 @@ self.addEventListener('message', (e) => {
     },
     editTags: async (payload) => {
       const { indexArray, addTagsArray, removeTagsArray, timestamp } = payload
-      const { result, warn, returnedTagsArray } = await editTags(
+      const { returnedTagsArray } = await editTags(
         indexArray,
         addTagsArray,
         removeTagsArray,
@@ -109,16 +109,12 @@ self.addEventListener('message', (e) => {
       )
       const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
       postToMain.editTagsReturn({
-        result: result,
-        warn: warn,
         returnedTagsArray: returnedTagsArray
       })
     },
     deleteData: async (payload) => {
       const { indexArray, timestamp } = payload
-      const { result, warn } = await deleteData(indexArray, timestamp)
-      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-      postToMain.deleteDataReturn({ result: result, warn: warn })
+      await deleteData(indexArray, timestamp)
     },
     fetchScrollbar: async (payload) => {
       const { timestamp } = payload
@@ -421,7 +417,7 @@ const editTags = async (
   addTagsArray: string[],
   removeTagsArray: string[],
   timestamp: string
-): Promise<{ result: string; warn: boolean; returnedTagsArray?: TagInfo[] }> => {
+): Promise<{ returnedTagsArray?: TagInfo[] }> => {
   const axiosResponse = await axios.put<TagInfo[]>('/put/edit_tag', {
     indexArray,
     addTagsArray,
@@ -433,7 +429,9 @@ const editTags = async (
   const response = tagsArraySchema.parse(axiosResponse.data)
 
   console.log('Successfully edited tags.')
-  return { result: 'Successfully edited tags.', warn: false, returnedTagsArray: response }
+  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+  postToMain.notification({ message: 'Successfully edited tags.', messageType: 'info' })
+  return { returnedTagsArray: response }
 }
 
 /**
@@ -448,7 +446,8 @@ async function deleteData(indexArray: number[], timestamp: string) {
     data: { deleteList: indexArray, timestamp }
   })
   console.log('Successfully deleted data.')
-  return { result: 'Successfully deleted data.', warn: false }
+  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+  postToMain.notification({ message: 'Successfully deleted data.', messageType: 'info' })
 }
 
 /**

@@ -108,11 +108,8 @@ type ReturnDataParams = { batch: number; slicedDataArray: SlicedData[] }
 type FetchRowReturnParams = { rowWithOffset: RowWithOffset; timestamp: string }
 type PrefetchReturnParams = { result: Prefetch }
 type EditTagsReturnParams = {
-  result: string
-  warn: boolean
   returnedTagsArray: TagInfo[] | undefined
 }
-type DeleteDataReturnParams = { result: string; warn: boolean }
 type FetchScrollBarReturnParams = { scrollbarDataArray: ScrollbarData[] }
 type NotificationReturnParams = { message: string; messageType: 'info' | 'warn' }
 
@@ -122,7 +119,6 @@ export const fromDataWorker = createActionCreators({
   fetchRowReturn: (payload: FetchRowReturnParams) => payload,
   prefetchReturn: (payload: PrefetchReturnParams) => payload,
   editTagsReturn: (payload: EditTagsReturnParams) => payload,
-  deleteDataReturn: (payload: DeleteDataReturnParams) => payload,
   fetchScrollbarReturn: (payload: FetchScrollBarReturnParams) => payload,
   notification: (payload: NotificationReturnParams) => payload,
   unauthorized: () => ({})
