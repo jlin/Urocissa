@@ -81,7 +81,7 @@
 
 <script setup lang="ts">
 import { ref, inject, Ref, computed, watch, watchEffect } from 'vue'
-import { debounce } from 'lodash'
+import { clamp, debounce } from 'lodash'
 import { useElementSize } from '@vueuse/core'
 import { useDataLengthStore } from '@/store/dataLengthStore'
 import { useScrollbarStore } from '@/store/scrollbarStore'
@@ -161,13 +161,6 @@ const hoverLabelDate = computed(() => {
 })
 
 const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
-
-/**
- * Clamp a given number between a minimum and maximum value.
- */
-function clamp(givenNumber: number, min: number, max: number): number {
-  return Math.min(Math.max(givenNumber, min), max)
-}
 
 /**
  * Given a percentage t of scrollbar height, return the corresponding row index k, where n = rowLength - 1.

@@ -3,6 +3,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
+import { clamp } from 'lodash'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
 /**
@@ -11,20 +12,24 @@ import { bindActionDispatch } from 'typesafe-agent-events'
  * @param {number} index - The index of the row to fetch.
  */
 export function fetchRowInWorker(index: number) {
-  const queueStore = useQueueStore()
-  if (queueStore.row.has(index)) {
-    return
-  }
-  // If a specific row is anchored, fetch only that row
-  const locationStore = useLocationStore()
-  if (locationStore.anchor !== null && locationStore.anchor !== index) {
-    return
-  }
   const dataLengthStore = useDataLengthStore()
+  const locationStore = useLocationStore()
+  const queueStore = useQueueStore()
 
-  if (index > dataLengthStore.rowLength - 1 || index < 0) {
-    return
+  if (dataLengthStore.rowLength === 0) {
+    return // No data to fetch
   }
+
+  index = clamp(index, 0, dataLengthStore.rowLength - 1)
+
+  if (queueStore.row.has(index)) {
+    return // Already fetched
+  }
+
+  if (locationStore.anchor !== null && locationStore.anchor !== index) {
+    return // If a specific row is anchored, this make sure to fetch only that row
+  }
+
   const workerStore = useWorkerStore()
 
   if (workerStore.worker === null) {
