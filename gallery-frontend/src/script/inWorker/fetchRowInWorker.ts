@@ -22,7 +22,7 @@ export function fetchRowInWorker(index: number) {
   }
   const dataLengthStore = useDataLengthStore()
 
-  if (index > dataLengthStore.rowLength - 1) {
+  if (index > dataLengthStore.rowLength - 1 || index < 0) {
     return
   }
   const workerStore = useWorkerStore()
