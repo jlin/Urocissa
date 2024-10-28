@@ -87,6 +87,7 @@
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
               <img
+                draggable="false"
                 @click="($event) => handleClick($event, row.start + subIndex)"
                 v-if="
                   !mobile &&
@@ -97,7 +98,8 @@
                 "
                 :style="{
                   zIndex: 2,
-                  position: 'absolute'
+                  position: 'absolute',
+                  userSelect: 'none'
                 }"
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
@@ -105,11 +107,13 @@
 
               <transition name="slide-fade" appear>
                 <img
+                  draggable="false"
                   v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg"
                   :key="row.start + subIndex"
                   :style="{
                     position: 'absolute',
-                    zIndex: 1
+                    zIndex: 1,
+                    userSelect: 'none'
                   }"
                   class="w-100 h-100 bg-grey-darken-2"
                   :src="dataStore.data.get(row.start + subIndex)!.thumbhashUrl"
