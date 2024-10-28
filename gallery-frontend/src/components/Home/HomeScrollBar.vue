@@ -162,26 +162,26 @@ const hoverLabelDate = computed(() => {
 
 const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
 
-/**
- * Given a percentage t of scrollbar height, return the corresponding row index k, where n = rowLength - 1.
- *
- * 0───┐<─── 0% height
- *     │
- * 1───┤
- *     │
- * 2───┤
- *     │
- *     ⋮
- * k───┤
- *     │<─── t% height
- * k+1─┤
- *     │
- *     ⋮
- * n───┤
- *     │
- * ────┘<─── 100% height
- */
 const getTargetRowIndex = (percentage: number) => {
+  /**
+   * Given a percentage t of scrollbar height, return the corresponding row index k, where n = rowLength - 1.
+   *
+   * 0───┐<─── 0% height
+   *     │
+   * 1───┤
+   *     │
+   * 2───┤
+   *     │
+   *     ⋮
+   * k───┤
+   *     │<─── t% height
+   * k+1─┤
+   *     │
+   *     ⋮
+   * n───┤
+   *     │
+   * ────┘<─── 100% height
+   */
   const targetRowIndex = Math.floor(rowLength.value * percentage)
   return clamp(targetRowIndex, 0, rowLength.value - 1)
 }
@@ -199,6 +199,10 @@ const handleClick = (event: MouseEvent | TouchEvent) => {
     const scrollbar = scrollbarElement.getBoundingClientRect()
     const clickPositionRelative = clientY - scrollbar.top // Relative to the top of the scrollbar
     const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbar.height)
+
+    if (targetRowIndex === currentDateChipIndex.value) {
+      return
+    }
 
     currentDateChipIndex.value = targetRowIndex
     locationStore.anchor = targetRowIndex
