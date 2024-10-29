@@ -53,5 +53,11 @@ pub async fn start_sync(
         }
     });
 
+    // This thread is used to perform video_compression
+    tokio::task::spawn_blocking(move || loop {
+        std::thread::sleep(std::time::Duration::from_secs(3));
+        //todo!()
+    });
+
     Ok(())
 }
