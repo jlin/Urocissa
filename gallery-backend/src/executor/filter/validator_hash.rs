@@ -30,19 +30,21 @@ pub fn validator(
                     let read_table = TREE.read_tree_api();
                     match read_table.get(&*hash).unwrap() {
                         Some(guard) => {
+                            // If this file is already in database
                             let mut database = guard.value();
                             database.alias.push(file_modify);
                             TREE.insert_tree_api(&vec![database]).unwrap();
                             scaned_number.fetch_add(1, Ordering::SeqCst);
                         }
                         None => {
-                            //if this is a new file
-                            //if the new file is duplicated in this batch
+                            // If this file is not in database
+                            // but the is duplicated in this batch
                             if let Some(mut duplicated_alias) = dashmap_of_hash_alias.get_mut(&hash)
                             {
                                 duplicated_alias.alias.alias.push(file_modify);
                                 duplicated_files_number.fetch_add(1, Ordering::SeqCst);
                             } else {
+                                // If this is indeed a new file 
                                 dashmap_of_hash_alias.insert(
                                     hash,
                                     AliasSize::new(
