@@ -37,6 +37,9 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 - **Responsive Layout**: Adaptive design that allows browsing on mobile devices.
 
+- **Instant Data Search**: Search data using boolean operators such as 'and', 'or', or 'not'. You can find examples of search queries [here](https://github.com/hsa00000/Urocissa/blob/main/SEARCH.md).
+
+
 ## Limitations
 
 1. **Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome and Firefox on Windows and Android, but it may encounter issues for browsers on iOS or Linux.
