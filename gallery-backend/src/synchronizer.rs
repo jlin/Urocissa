@@ -1,4 +1,5 @@
 use crate::executor::executor;
+use crate::public::database_struct::database::definition::DataBase;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{
     collections::HashSet,
@@ -23,7 +24,10 @@ pub async fn start_sync(
                 .extend(event_paths);
         }
     });
-    // Operations in the main thread
+
+    let (video_queue_sender, video_queue_receiver) =
+        tokio::sync::mpsc::unbounded_channel::<Vec<DataBase>>();
+
     // CPU-intensive work is wrapped in tokio::task::spawn_blocking for async runtime
     tokio::task::spawn_blocking(move || {
         loop {
