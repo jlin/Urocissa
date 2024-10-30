@@ -39,6 +39,22 @@
                 </template>
               </v-hover>
               <v-chip
+                prepend-icon="mdi-alert-circle-outline"
+                density="comfortable"
+                size="small"
+                v-if="dataStore.data.get(row.start + subIndex)?.pending"
+                color="grey"
+                variant="flat"
+                class="position-absolute ma-2"
+                :style="{
+                  top: '0px',
+                  right: '0px',
+                  zIndex: 4
+                }"
+              >
+                {{ 'Processing' }}
+              </v-chip>
+              <v-chip
                 density="comfortable"
                 size="small"
                 v-if="
