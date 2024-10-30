@@ -1,4 +1,5 @@
 use self::image_compressor::image_compressor;
+use self::video_compressor::video_compressor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
 use crate::VIDEO_QUEUE_SENDER;
@@ -48,20 +49,29 @@ where
                     }
                 }
             } else {
-                database.pending = true;
-                let write_txn = TREE.in_disk.begin_write().unwrap();
-                {
-                    let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-                    write_table.insert(&*database.hash, &database).unwrap();
+                match video_compressor(&mut database) {
+                    Ok(_) => {
+                        processed_count.fetch_add(1, Ordering::SeqCst);
+                        VIDEO_QUEUE_SENDER
+                            .get()
+                            .unwrap()
+                            .send(database.hash)
+                            .unwrap();
+                        processed_count.fetch_add(1, Ordering::SeqCst);
+                        None
+                    }
+                    Err(error) => {
+                        handle_error(ErrorData::new(
+                            error.to_string(),
+                            format!("An error occurred while processing file",),
+                            Some(database.hash),
+                            Some(database.imported_path()),
+                            Location::caller(),
+                        ));
+                        processed_count.fetch_add(1, Ordering::SeqCst);
+                        None
+                    }
                 }
-                write_txn.commit().unwrap();
-                VIDEO_QUEUE_SENDER
-                    .get()
-                    .unwrap()
-                    .send(database.hash)
-                    .unwrap();
-                processed_count.fetch_add(1, Ordering::SeqCst);
-                None
             }
         })
         .collect();

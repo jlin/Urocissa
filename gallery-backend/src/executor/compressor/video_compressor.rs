@@ -20,6 +20,40 @@ use std::{
 use super::{video_ffprobe::video_duration, video_preview::generate_preview};
 
 pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+    let mut width = video_width_height("width", &database.imported_path_string())?;
+    let mut height = video_width_height("height", &database.imported_path_string())?;
+    let should_swap_video_width_height = {
+        if let Some(rotation) = database.exif_vec.get("rotation") {
+            SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())
+        } else {
+            false
+        }
+    };
+    if should_swap_video_width_height {
+        (width, height) = (height, width)
+    }
+    database.width = width;
+    database.height = height;
+    std::fs::create_dir_all(database.compressed_path_parent()).with_context(|| {
+        format!(
+            "video_compressor: failed to create directory for {:?}",
+            database.imported_path_string()
+        )
+    })?;
+    generate_preview(database)?; // Get preview image
+    database.pending = true;
+    let write_txn = TREE.in_disk.begin_write().unwrap();
+    {
+        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
+        write_table.insert(&*database.hash, &*database).unwrap();
+    }
+    write_txn.commit().unwrap();
+    SHOULD_RESET.store(true, Ordering::SeqCst);
+
+    Ok(())
+}
+
+pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {
@@ -45,28 +79,6 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
             }
         }
     };
-    let mut width = video_width_height("width", &database.imported_path_string())?;
-    let mut height = video_width_height("height", &database.imported_path_string())?;
-    let should_swap_video_width_height = {
-        if let Some(rotation) = database.exif_vec.get("rotation") {
-            SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())
-        } else {
-            false
-        }
-    };
-    if should_swap_video_width_height {
-        (width, height) = (height, width)
-    }
-    database.width = width;
-    database.height = height;
-    let duration_f64 = duration as f64;
-    std::fs::create_dir_all(database.compressed_path_parent()).with_context(|| {
-        format!(
-            "video_compressor: failed to create directory for {:?}",
-            database.imported_path_string()
-        )
-    })?;
-
     let mut cmd = Command::new("ffmpeg")
         .args(&[
             "-y", // Add this line to allow automatic file overwrite
@@ -75,7 +87,7 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
             "-vf",
             &format!(
                 "scale=trunc((oh*a)/2)*2:{}",
-                (cmp::min(height, 720) / 2) * 2
+                (cmp::min(database.height, 720) / 2) * 2
             ),
             "-movflags",
             "faststart",
@@ -107,7 +119,7 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
                 match processed_time_str.parse::<f64>() {
                     Ok(processed_time_f64) => {
                         // Microseconds
-                        let x = ((processed_time_f64 / 1000000.0) / duration_f64) * 100.0;
+                        let x = ((processed_time_f64 / 1000000.0) / duration) * 100.0;
                         println!(
                             "Percentage: {:.2}% for {}",
                             x,
@@ -122,7 +134,6 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
         }
     }
     cmd.wait().unwrap();
-    // Get preview image
-    generate_preview(database)?;
+
     Ok(())
 }

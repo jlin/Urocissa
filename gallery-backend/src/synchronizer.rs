@@ -1,4 +1,4 @@
-use crate::executor::compressor::video_compressor::video_compressor;
+use crate::executor::compressor::video_compressor::generate_compressed;
 use crate::executor::executor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::DATA_TABLE;
@@ -103,7 +103,7 @@ pub async fn start_sync(
                     None => None,
                 }
             });
-            database_vec.for_each(|mut database| match video_compressor(&mut database) {
+            database_vec.for_each(|mut database| match generate_compressed(&mut database) {
                 Ok(_) => {
                     database.pending = false;
                     let write_txn = TREE.in_disk.begin_write().unwrap();
