@@ -42,7 +42,7 @@
               <video
                 controls
                 autoplay
-                v-if="metadata?.ext_type === 'video'"
+                v-if="metadata?.ext_type === 'video' && !metadata?.pending"
                 :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
                 :style="{
                   width: `${metadata.width}px`,
