@@ -37,6 +37,7 @@ where
                         Some(database)
                     }
                     Err(error) => {
+                        processed_count.fetch_add(1, Ordering::SeqCst);
                         handle_error(ErrorData::new(
                             error.to_string(),
                             format!("An error occurred while processing file",),
@@ -44,7 +45,7 @@ where
                             Some(database.imported_path()),
                             Location::caller(),
                         ));
-                        processed_count.fetch_add(1, Ordering::SeqCst);
+
                         None
                     }
                 }
@@ -57,10 +58,11 @@ where
                             .unwrap()
                             .send(database.hash)
                             .unwrap();
-                        processed_count.fetch_add(1, Ordering::SeqCst);
+
                         None
                     }
                     Err(error) => {
+                        processed_count.fetch_add(1, Ordering::SeqCst);
                         handle_error(ErrorData::new(
                             error.to_string(),
                             format!("An error occurred while processing file",),
@@ -68,7 +70,6 @@ where
                             Some(database.imported_path()),
                             Location::caller(),
                         ));
-                        processed_count.fetch_add(1, Ordering::SeqCst);
                         None
                     }
                 }
