@@ -124,13 +124,5 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     cmd.wait().unwrap();
     // Get preview image
     generate_preview(database)?;
-    database.pending = false;
-    let write_txn = TREE.in_disk.begin_write().unwrap();
-    {
-        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-        write_table.insert(&*database.hash, &*database).unwrap();
-    }
-    write_txn.commit().unwrap();
-    SHOULD_RESET.store(true, Ordering::SeqCst);
     Ok(())
 }

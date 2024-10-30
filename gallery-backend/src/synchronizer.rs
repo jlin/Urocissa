@@ -2,6 +2,7 @@ use crate::executor::compressor::video_compressor::video_compressor;
 use crate::executor::executor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::DATA_TABLE;
+use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use arrayvec::ArrayString;
 use std::panic::Location;
@@ -104,12 +105,14 @@ pub async fn start_sync(
             });
             database_vec.for_each(|mut database| match video_compressor(&mut database) {
                 Ok(_) => {
+                    database.pending = false;
                     let write_txn = TREE.in_disk.begin_write().unwrap();
                     {
                         let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
                         write_table.insert(&*database.hash, &database).unwrap();
                     }
                     write_txn.commit().unwrap();
+                    SHOULD_RESET.store(true, Ordering::SeqCst);
                 }
                 Err(error) => {
                     handle_error(ErrorData::new(
