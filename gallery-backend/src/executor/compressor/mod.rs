@@ -1,6 +1,7 @@
-use self::{image_compressor::image_compressor, video_compressor::video_compressor};
+use self::image_compressor::image_compressor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
+use crate::VIDEO_QUEUE_SENDER;
 use crate::{
     executor::prepare_progress_bar,
     public::{
@@ -9,8 +10,9 @@ use crate::{
     },
 };
 use rayon::prelude::*;
+use std::panic::Location;
+use std::sync::atomic::Ordering;
 use std::sync::{atomic::AtomicUsize, Arc};
-use std::{panic::Location, sync::atomic::Ordering};
 pub mod image_compressor;
 pub mod image_decoder;
 mod image_thumbhash;
@@ -27,24 +29,39 @@ where
 
     let collect: Vec<DataBase> = databases
         .filter_map(|mut database| {
-            let compress_result = if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-                image_compressor
+            if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
+                match image_compressor(&mut database) {
+                    Ok(_) => {
+                        processed_count.fetch_add(1, Ordering::SeqCst);
+                        Some(database)
+                    }
+                    Err(error) => {
+                        handle_error(ErrorData::new(
+                            error.to_string(),
+                            format!("An error occurred while processing file",),
+                            Some(database.hash),
+                            Some(database.imported_path()),
+                            Location::caller(),
+                        ));
+                        processed_count.fetch_add(1, Ordering::SeqCst);
+                        None
+                    }
+                }
             } else {
-                video_compressor
-            }(&mut database);
-            processed_count.fetch_add(1, Ordering::SeqCst);
-            progress_bar.inc(1);
-            if let Err(error) = compress_result {
-                handle_error(ErrorData::new(
-                    error.to_string(),
-                    format!("An error occurred while processing file",),
-                    Some(database.hash),
-                    Some(database.imported_path()),
-                    Location::caller(),
-                ));
+                database.pending = true;
+                let write_txn = TREE.in_disk.begin_write().unwrap();
+                {
+                    let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
+                    write_table.insert(&*database.hash, &database).unwrap();
+                }
+                write_txn.commit().unwrap();
+                VIDEO_QUEUE_SENDER
+                    .get()
+                    .unwrap()
+                    .send(database.hash)
+                    .unwrap();
+                processed_count.fetch_add(1, Ordering::SeqCst);
                 None
-            } else {
-                Some(database)
             }
         })
         .collect();
