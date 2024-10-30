@@ -15,8 +15,8 @@ impl DataBase {
         Self {
             hash,
             size,
-            width: 400,
-            height: 300,
+            width: 0,
+            height: 0,
             thumbhash: Vec::<u8>::new(),
             phash: Vec::<u8>::new(),
             ext_type: Self::determine_type(&ext),
