@@ -15,7 +15,7 @@ pub mod image_compressor;
 pub mod image_decoder;
 mod image_thumbhash;
 mod utils;
-mod video_compressor;
+pub mod video_compressor;
 mod video_ffprobe;
 mod video_preview;
 pub fn compressor<T>(databases: T)

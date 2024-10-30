@@ -16,10 +16,6 @@ use std::{
 
 use super::{video_ffprobe::video_duration, video_preview::generate_preview};
 
-pub fn video_compressor_in_worker_thread(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
-    todo!()
-}
-
 pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
 
