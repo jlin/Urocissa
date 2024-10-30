@@ -51,19 +51,19 @@ async fn rocket() -> _ {
     let turn_sync_on = Arc::new(AtomicBool::new(true));
     let turn_sync_on_clone_for_stop = Arc::clone(&turn_sync_on);
     let _import_path: Arc<Mutex<Option<PathBuf>>> = Arc::new(Mutex::new(None));
-    let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<Vec<PathBuf>>();
+    let (events_sender, events_receiver) = tokio::sync::mpsc::unbounded_channel::<Vec<PathBuf>>();
     let turn_sync_on_clone = Arc::clone(&turn_sync_on_clone_for_stop);
 
     std::fs::create_dir_all(PathBuf::from("./object/imported")).unwrap();
     std::fs::create_dir_all(PathBuf::from("./object/compressed")).unwrap();
     std::fs::create_dir_all(PathBuf::from("upload")).unwrap();
 
-    let tx_clone = tx.clone();
+    let tx_clone = events_sender.clone();
     tokio::spawn(async move {
         start_watcher(tx_clone).await;
     });
     tokio::spawn(async move {
-        synchronizer::start_sync(rx, turn_sync_on_clone.clone())
+        synchronizer::start_sync(events_receiver, turn_sync_on_clone.clone())
             .await
             .expect("start_sync error");
     });
@@ -71,7 +71,7 @@ async fn rocket() -> _ {
         .attach(cache_control_fairing())
         .attach(auth_request_fairing())
         .manage(turn_sync_on_clone_for_stop)
-        .manage(tx)
+        .manage(events_sender)
         .mount("/object/imported", FileServer::from("./object/imported"))
         .mount(
             "/assets",
@@ -114,7 +114,7 @@ async fn rocket() -> _ {
         )
 }
 
-async fn start_watcher(tx: UnboundedSender<Vec<PathBuf>>) {
+async fn start_watcher(events_sender: UnboundedSender<Vec<PathBuf>>) {
     let sync_path_list: &Vec<PathBuf> = &PRIVATE_CONFIG.sync_path;
     let mut watcher: RecommendedWatcher =
         notify::recommended_watcher(move |watcher_result: notify::Result<Event>| {
@@ -123,7 +123,9 @@ async fn start_watcher(tx: UnboundedSender<Vec<PathBuf>>) {
                     match wacher_events.kind {
                         EventKind::Create(_) => {
                             if !wacher_events.paths.is_empty() {
-                                if let Err(send_error) = tx.send(wacher_events.paths.clone()) {
+                                if let Err(send_error) =
+                                    events_sender.send(wacher_events.paths.clone())
+                                {
                                     let error_data = ErrorData::new(
                                         format!("Failed to send paths: {}", send_error),
                                         format!(
@@ -147,7 +149,9 @@ async fn start_watcher(tx: UnboundedSender<Vec<PathBuf>>) {
                                 .collect();
 
                             if !filtered_paths.is_empty() {
-                                tx.send(filtered_paths).expect("tx send error");
+                                events_sender
+                                    .send(filtered_paths)
+                                    .expect("events_sender send error");
                             }
                         }
                         _ => (),

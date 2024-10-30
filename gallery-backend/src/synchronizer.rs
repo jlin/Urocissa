@@ -9,14 +9,14 @@ use tokio;
 use tokio::sync::mpsc::UnboundedReceiver;
 
 pub async fn start_sync(
-    mut rx: UnboundedReceiver<Vec<PathBuf>>,
+    mut events_receiver: UnboundedReceiver<Vec<PathBuf>>,
     turn_sync_on: Arc<AtomicBool>,
 ) -> anyhow::Result<()> {
     let events_repository: Arc<Mutex<Vec<PathBuf>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store events
     let events_repository_clone: Arc<Mutex<Vec<PathBuf>>> = Arc::clone(&events_repository);
     // Create a new thread to receive and process events
     tokio::task::spawn(async move {
-        while let Some(event_paths) = rx.recv().await {
+        while let Some(event_paths) = events_receiver.recv().await {
             events_repository_clone
                 .lock()
                 .expect("events_repository_arc_clone lock error")
