@@ -4,6 +4,7 @@ use env_logger::Builder;
 use log::kv::Key;
 use log::LevelFilter;
 use std::io::Write;
+use std::path::PathBuf;
 
 pub fn initialize_logger() {
     Builder::new()
@@ -60,4 +61,11 @@ pub fn initialize_logger() {
         .filter(None, LevelFilter::Info) // Set minimum Level to Warn for all modules
         .filter(Some("rocket"), LevelFilter::Warn)
         .init();
+}
+
+pub fn initialize_folder() {
+    std::fs::create_dir_all(PathBuf::from("./db")).unwrap();
+    std::fs::create_dir_all(PathBuf::from("./object/imported")).unwrap();
+    std::fs::create_dir_all(PathBuf::from("./object/compressed")).unwrap();
+    std::fs::create_dir_all(PathBuf::from("upload")).unwrap();
 }

@@ -2,8 +2,7 @@ static BATCH_SIZE: usize = 100;
 #[macro_use]
 extern crate rocket;
 use crate::public::error_data::{handle_error, ErrorData};
-use arrayvec::ArrayString;
-use logger::initialize_logger;
+use initialization::{initialize_folder, initialize_logger};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use public::config::PRIVATE_CONFIG;
 use public::redb::DATA_TABLE;
@@ -27,26 +26,21 @@ use router::{
     },
 };
 use std::sync::atomic::Ordering;
-use std::sync::OnceLock;
 use std::time::Instant;
-use std::{
-    panic::Location,
-    path::PathBuf,
-    sync::{atomic::AtomicBool, Arc, Mutex},
-};
-use tokio::{sync::mpsc::UnboundedSender, time::Duration};
+use std::{panic::Location, path::PathBuf};
+use synchronizer::EVENTS_SENDER;
+use tokio::time::Duration;
 mod executor;
-mod logger;
+mod initialization;
 mod public;
 mod router;
 mod synchronizer;
-static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
-static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 
 #[launch]
 async fn rocket() -> _ {
     initialize_logger();
-    std::fs::create_dir_all(PathBuf::from("./db")).unwrap();
+    initialize_folder();
+
     let start_time = Instant::now();
     let txn = TREE.in_disk.begin_write().unwrap();
     {
@@ -54,39 +48,18 @@ async fn rocket() -> _ {
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", table.len().unwrap());
     }
     txn.commit().unwrap();
+
     SHOULD_RESET.store(true, Ordering::SeqCst);
-    let turn_sync_on = Arc::new(AtomicBool::new(true));
-    let turn_sync_on_clone_for_stop = Arc::clone(&turn_sync_on);
-    let _import_path: Arc<Mutex<Option<PathBuf>>> = Arc::new(Mutex::new(None));
-    let (events_sender, events_receiver) = tokio::sync::mpsc::unbounded_channel::<Vec<PathBuf>>();
-    EVENTS_SENDER.set(events_sender).unwrap();
-
-    let (video_queue_sender, video_queue_receiver) =
-        tokio::sync::mpsc::unbounded_channel::<Vec<ArrayString<64>>>();
-    VIDEO_QUEUE_SENDER.set(video_queue_sender).unwrap();
-
-    let turn_sync_on_clone = Arc::clone(&turn_sync_on_clone_for_stop);
-
-    std::fs::create_dir_all(PathBuf::from("./object/imported")).unwrap();
-    std::fs::create_dir_all(PathBuf::from("./object/compressed")).unwrap();
-    std::fs::create_dir_all(PathBuf::from("upload")).unwrap();
 
     tokio::spawn(async move {
         start_watcher().await;
     });
     tokio::spawn(async move {
-        synchronizer::start_sync(
-            events_receiver,
-            video_queue_receiver,
-            turn_sync_on_clone.clone(),
-        )
-        .await
-        .expect("start_sync error");
+        synchronizer::start_sync().await.expect("start_sync error");
     });
     rocket::build()
         .attach(cache_control_fairing())
         .attach(auth_request_fairing())
-        .manage(turn_sync_on_clone_for_stop)
         .mount("/object/imported", FileServer::from("./object/imported"))
         .mount(
             "/assets",

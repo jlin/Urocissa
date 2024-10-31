@@ -2,7 +2,7 @@ use self::image_compressor::image_compressor;
 use self::video_compressor::video_compressor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
-use crate::VIDEO_QUEUE_SENDER;
+use crate::synchronizer::VIDEO_QUEUE_SENDER;
 use crate::{
     executor::prepare_progress_bar,
     public::{
