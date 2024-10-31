@@ -16,7 +16,6 @@ pub struct ReturnMessage {
 
 #[post("/upload", data = "<data>")]
 pub async fn upload(data: Form<Vec<TempFile<'_>>>) -> Json<ReturnMessage> {
-    println!("{:?}", data);
     for mut file in data.into_inner() {
         let filename = match file.name() {
             Some(name) => name,
@@ -45,9 +44,7 @@ pub async fn upload(data: Form<Vec<TempFile<'_>>>) -> Json<ReturnMessage> {
             let unique_id = Uuid::new_v4();
             let path = format!("./upload/{}-{}.{}", filename, unique_id, extension);
             match file.move_copy_to(path).await {
-                Ok(_) => {
-                    println!("saved");
-                }
+                Ok(_) => {}
                 Err(err) => {
                     return Json(ReturnMessage {
                         status: "error".to_string(),

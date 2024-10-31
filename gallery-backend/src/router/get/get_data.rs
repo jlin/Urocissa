@@ -130,7 +130,7 @@ pub async fn get_data(
                     )
                 })
                 .collect();
-            warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data {} - {}", start, end);
+            warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data: {} ~ {}", start, end);
             Ok(Json(data_vec))
         } else {
             // index out of range
@@ -173,17 +173,12 @@ pub async fn get_tags() -> Json<Vec<TagInfo>> {
     .await
     .unwrap()
 }
-
 #[get("/get/get-rows?<index>&<timestamp>")]
 pub async fn get_rows(index: usize, timestamp: String) -> Result<Json<Row>, Status> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;
-        let duration = start_time.elapsed();
-        println!(
-            "Time taken to read rows and create RowWithWidth: {:?}",
-            duration
-        );
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read rows: index = {}", index);
         return Ok(Json(filtered_rows));
     })
     .await

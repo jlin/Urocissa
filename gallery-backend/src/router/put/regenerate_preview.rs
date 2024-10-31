@@ -32,7 +32,7 @@ pub async fn regenerate_preview(json_data: Json<RegenerateData>) -> () {
         let total_batches = (hash_vec.len() + 99) / 100;
 
         for (i, batch) in hash_vec.chunks(100).enumerate() {
-            println!("Processing batch {}/{}", i + 1, total_batches);
+            info!("Processing batch {}/{}", i + 1, total_batches);
 
             let iterator = batch.into_par_iter().map(|string| {
                 let database = table.get(&**string).unwrap().unwrap().value();

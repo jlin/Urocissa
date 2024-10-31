@@ -16,7 +16,6 @@ pub fn redirect_to_photo() -> content::RawHtml<String> {
 
 #[get("/share/<_path..>")]
 pub fn redirect_to_photo_2(_path: PathBuf) -> content::RawHtml<String> {
-    println!("RETURNING");
     content::RawHtml(INDEX_HTML.to_string())
 }
 

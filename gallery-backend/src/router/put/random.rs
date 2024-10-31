@@ -13,5 +13,5 @@ pub async fn generate_random_data(number: usize) {
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
     SHOULD_RESET.store(true, Ordering::SeqCst);
-    println!("insert random data complete")
+    info!("Insert random data complete")
 }
