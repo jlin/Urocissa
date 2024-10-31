@@ -1,7 +1,6 @@
 use super::Tree;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::redb::DATA_TABLE;
-use log::warn;
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
 use std::sync::atomic::AtomicBool;
