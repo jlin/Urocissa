@@ -27,18 +27,19 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Features
 
-- **Blazing Fast Performance**: Indexing photos with a pure Rust crate. Instantly serve, search, and filter one million photos in under a second using an in-memory cached database.
+- **Blazing Fast Performance**: Index photos with a pure Rust crate. Instantly serve, search, and filter one million photos in under a second using an in-memory cached database.
 
-- **Memory Efficient**: Even with the entire database cached in memory, both the standard demo and the one-million-photo demo can still run seamlessly on a single server with just 4 GB of RAM.
+- **Memory Efficient**: Even with the entire database cached in memory, both the standard demo and the one-million-photo demo can run seamlessly on a single server with just 4 GB of RAM.
 
-- **Infinite Photo Stream**: Endless scrolling without pagination. No lazy loading is needed. Urocissa uses advanced virtual scrolling to serve one million photos, overcoming the DOM height limit of 33,554,400px (see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616)).
+- **Infinite Photo Stream**: Experience endless scrolling without pagination. No lazy loading needed. Urocissa uses advanced virtual scrolling to serve one million photos, overcoming the DOM height limit of 33,554,400px (see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616)).
 
 - **Instant Select All**: Select all photos instantly without loading the entire database.
 
-- **Responsive Layout**: Adaptive design that allows browsing on mobile devices.
+- **Responsive Layout**: Enjoy an adaptive design that ensures a smooth browsing experience on mobile devices.
 
-- **Instant Data Search**: Search data using boolean operators such as 'and', 'or', or 'not'. You can find examples of search queries [here](https://github.com/hsa00000/Urocissa/blob/main/SEARCH.md).
+- **Instant Data Search**: Use boolean operators such as 'and', 'or', or 'not' to search your data instantly. Find examples of search queries [here](https://github.com/hsa00000/Urocissa/blob/main/SEARCH.md).
 
+- **Automatic Backup**: Urocissa monitors folder changes, automatically backs up new photos, and indexes them while preserving the original files.
 
 ## Limitations
 
