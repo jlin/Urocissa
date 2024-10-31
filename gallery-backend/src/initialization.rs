@@ -17,7 +17,11 @@ pub fn initialize_logger() {
                     // If custom_value contains both numbers and units, add a space between them
                     let value_str = format!("{}", v);
                     if let Some(index) = value_str.find(|c: char| c.is_alphabetic()) {
-                        format!("{} {}", &value_str[..index], &value_str[index..])
+                        if let Ok(value) = value_str[..index].parse::<f32>() {
+                            format!("{:.2} {}", value, &value_str[index..])
+                        } else {
+                            value_str
+                        }
                     } else {
                         value_str
                     }
