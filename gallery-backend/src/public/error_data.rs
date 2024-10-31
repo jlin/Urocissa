@@ -52,7 +52,7 @@ impl<'a> ErrorData<'a> {
 }
 
 pub fn handle_error(error_data: ErrorData) -> () {
-    println!("{:?}", error_data);
+    error!("{:?}", error_data);
     if let Some(url) = &PRIVATE_CONFIG.discord_hook_url {
         send_discord_webhook(url, error_data);
     }
@@ -63,6 +63,6 @@ fn send_discord_webhook(webhook_url: &str, error_data: ErrorData) -> () {
     let params = json!({ "content": debug_string });
     let result = client.post(webhook_url).json(&params).send();
     if let Err(e) = result {
-        println!("Error sending webhook: {:?}", e);
+        error!("Error sending webhook: {:?}", e);
     }
 }

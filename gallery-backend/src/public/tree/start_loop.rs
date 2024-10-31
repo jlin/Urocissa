@@ -32,7 +32,7 @@ impl Tree {
                     .collect();
                 data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
                 *self.in_memory.write().unwrap() = data_vec;
-                warn!("In-memory cache updated.");
+                info!("In-memory cache updated.");
             }
             sleep(Duration::from_millis(500))
         });

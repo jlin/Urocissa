@@ -13,7 +13,7 @@ impl TreeSnapshot {
         let chunk_count = (data_length + BATCH_NUMBER - 1) / BATCH_NUMBER; // Calculate total chunks
 
         if row_index > chunk_count {
-            println!("read_rows out of bound");
+            error!("read_rows out of bound");
             return Err(Status::NotFound);
         }
 

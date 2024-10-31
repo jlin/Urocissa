@@ -12,7 +12,7 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
     let all_paths = merge_file_paths(list_of_sync_files);
     let total_batches = (all_paths.len() + BATCH_SIZE - 1) / BATCH_SIZE; // Calculate total number of batches
     for (current_batch, batch) in all_paths.chunks(BATCH_SIZE).enumerate() {
-        println!("Processing batch {}/{}", current_batch + 1, total_batches); // Show the current batch being processed
+        info!("Processing batch {}/{}", current_batch + 1, total_batches); // Show the current batch being processed
         let batch: Vec<PathBuf> = batch.to_vec();
         processor(batch);
         SHOULD_RESET.store(true, Ordering::SeqCst);

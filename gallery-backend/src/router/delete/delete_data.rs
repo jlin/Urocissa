@@ -13,8 +13,6 @@ pub struct DeleteList {
 }
 #[delete("/delete/delete-data", format = "json", data = "<json_data>")]
 pub async fn delete_data(json_data: Json<DeleteList>) {
-    println!("get data {:?}", json_data);
-
     tokio::task::spawn_blocking(move || {
         let timestamp = &json_data.timestamp;
 
@@ -34,11 +32,11 @@ pub async fn delete_data(json_data: Json<DeleteList>) {
                 let imported_path = data.imported_path();
 
                 std::fs::remove_file(&compressed_path).unwrap_or_else(|err| {
-                    eprintln!("Failed to delete file at {:?}: {:?}", compressed_path, err);
+                    error!("Failed to delete file at {:?}: {:?}", compressed_path, err);
                 });
 
                 std::fs::remove_file(&imported_path).unwrap_or_else(|err| {
-                    eprintln!("Failed to delete file at {:?}: {:?}", imported_path, err);
+                    error!("Failed to delete file at {:?}: {:?}", imported_path, err);
                 });
 
                 table.remove(hash.as_str()).unwrap();

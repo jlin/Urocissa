@@ -9,20 +9,21 @@ edition = "2021"
 lto = true
 
 [dependencies]
+anstyle = "1.0.9"
 anyhow = "1.0.89"
 arrayvec = { version = "0.7.6", features = ["serde"] }
 bitcode = { version = "0.6.3", features = ["arrayvec"] }
 blake3 = "1.5.4"
 chrono = "0.4.38"
 dashmap = { version = "6.1.0", features = ["rayon"] }
-env_logger = "0.11.5"
+env_logger = { version = "0.11.5", features = ["humantime", "color"] }
 futures = "0.3.31"
 image = "0.25.4"
 image_hasher = "2.0.0"
 indicatif = "0.17.8"
 jsonwebtoken = "9.3.0"
 kamadak-exif = "0.5.5"
-log = "0.4.22"
+log = { version = "0.4.22", features = ["kv"] }
 notify = "6.1.1"
 path-clean = "1.0.1"
 rand = "0.8.5"

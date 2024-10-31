@@ -54,8 +54,7 @@ impl TreeSnapshot {
                     });
             }
         }
-
-        println!("scrollbar elapsed time: {:.2?}", start_time.elapsed()); // or log this information
+        warn!(duration = &*format!("{:?}", start_time.elapsed()); "Generate scrollbar"); // or log this information
         scroll_bar_data_vec
     }
 }

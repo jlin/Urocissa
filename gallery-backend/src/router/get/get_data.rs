@@ -24,14 +24,12 @@ pub async fn get_data_length(
         let start_time = Instant::now();
 
         // Step 1: Generate filter from expression
-        let elapsed = start_time.elapsed().as_millis();
-        println!("Step 1 (Generate filter): {} ms", elapsed);
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Generate filter");
 
         // Step 2: Filter items
         let filter_items_start_time = Instant::now();
         let ref_data = TREE.in_memory.read().unwrap();
-        let filter_items_elapsed = filter_items_start_time.elapsed().as_millis();
-        println!("Step 2 (Filter items): {} ms", filter_items_elapsed);
+        info!(duration = &*format!("{:?}", filter_items_start_time.elapsed()); "Filter items");
 
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
@@ -62,8 +60,7 @@ pub async fn get_data_length(
         };
 
         let data_length = reduced_data.len();
-        let layout_elapsed = layout_start_time.elapsed().as_millis();
-        println!("Step 3 (Compute layout): {} ms", layout_elapsed);
+        info!(duration = &*format!("{:?}", layout_start_time.elapsed()); "Compute layout");
 
         // Step 4: Locate hash
         let locate_start_time = Instant::now();
@@ -74,8 +71,7 @@ pub async fn get_data_length(
         } else {
             None
         };
-        let locate_elapsed = locate_start_time.elapsed().as_millis();
-        println!("Step 4 (Locate hash): {} ms", locate_elapsed);
+        info!(duration = &*format!("{:?}", locate_start_time.elapsed()); "Locate data");
 
         // Step 5: Insert data into TREE_SNAPSHOT
         let db_start_time = Instant::now();
@@ -87,8 +83,8 @@ pub async fn get_data_length(
         TREE_SNAPSHOT
             .in_memory
             .insert(timestamp.clone(), reduced_data);
-        let db_elapsed = db_start_time.elapsed().as_millis();
-        println!("Step 5 (Insert data into TREE_SNAPSHOT): {} ms", db_elapsed);
+
+        info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
@@ -97,16 +93,10 @@ pub async fn get_data_length(
             locate_to,
             data_length,
         )));
-        let json_elapsed = json_start_time.elapsed().as_millis();
-        println!(
-            "Step 6 (Create and return JSON response): {} ms",
-            json_elapsed
-        );
+        info!(duration = &*format!("{:?}", json_start_time.elapsed()); "Create JSON response");
 
         // Total elapsed time
-        let total_elapsed = start_time.elapsed().as_millis();
-        println!("Total elapsed time: {} ms", total_elapsed);
-
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "get_data_length complete");
         json
     })
     .await
@@ -140,8 +130,7 @@ pub async fn get_data(
                     )
                 })
                 .collect();
-            let read_time = start_time.elapsed();
-            println!("get_data: {:?}", read_time);
+            warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data {} - {}", start, end);
             Ok(Json(data_vec))
         } else {
             // index out of range

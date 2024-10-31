@@ -68,7 +68,7 @@ pub async fn start_sync(
             }
 
             if !turn_sync_on.load(Ordering::SeqCst) {
-                println!("Stop Sync");
+                warn!("Stop watch folders");
                 break;
             }
         }

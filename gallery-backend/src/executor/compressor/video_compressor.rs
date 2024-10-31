@@ -49,8 +49,8 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
     let duration = match duration_result {
         Ok(d) if (d * 1000.0) as u32 == 100 => {
             // If duration is 0.1 seconds (0.1 seconds * 1000 microseconds/second = 100 microseconds)
-            println!(
-                "This gif is a static picture, try with image_compressor: {:?}",
+            info!(
+                "This gif is a static picture, try with image_compressor - {:?}",
                 database.imported_path_string()
             );
             database.ext_type = "image".to_string();
@@ -61,7 +61,7 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
             if e.to_string().contains("fail to parse to f32")
                 && database.ext.to_lowercase() == String::from("gif")
             {
-                println!("This may not be a gif");
+                info!("This may not be a gif");
                 database.ext_type = "image".to_string();
                 return image_compressor(database);
             } else {
@@ -110,16 +110,16 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
                     Ok(processed_time_f64) => {
                         // Microseconds
                         let x = ((processed_time_f64 / 1000000.0) / duration) * 100.0;
-                        println!(
+                        info!(
                             "Percentage: {:.2}% for {}",
                             x,
                             &database.compressed_path_string()
                         );
                     }
-                    Err(e) => eprintln!("Failed to parse processed_time: {}", e),
+                    Err(e) => error!("Failed to parse processed_time: {}", e),
                 }
             } else {
-                eprintln!("No digits captured for line: {}", line);
+                error!("No digits captured for line: {}", line);
             }
         }
     }

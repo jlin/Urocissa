@@ -2,8 +2,12 @@ static BATCH_SIZE: usize = 100;
 #[macro_use]
 extern crate rocket;
 use crate::public::error_data::{handle_error, ErrorData};
+use anstyle::Color;
 use arrayvec::ArrayString;
-use log::warn;
+use env_logger::fmt::style::Style;
+use env_logger::Builder;
+use log::kv::Key;
+use log::{warn, LevelFilter};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use public::config::PRIVATE_CONFIG;
 use public::redb::DATA_TABLE;
@@ -26,8 +30,10 @@ use router::{
         edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview,
     },
 };
+use std::io::Write;
 use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
+use std::time::Instant;
 use std::{
     panic::Location,
     path::PathBuf,
@@ -44,12 +50,58 @@ static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = Onc
 
 #[launch]
 async fn rocket() -> _ {
-    env_logger::init();
+    Builder::new()
+        .format(|buf, record| {
+            let custom_value = record
+                .key_values()
+                .get(Key::from("duration"))
+                .map(|v| format!("{}", v))
+                .unwrap_or_default(); // 如果沒有找到 "duration" 則返回空字串
+
+            // 設置樣式：粗體藍色的 custom_value
+            let custom_value_style = Style::new()
+                .bold() // 設置粗體
+                .fg_color(Some(Color::Ansi(anstyle::AnsiColor::Blue))); // 設置藍色前景
+
+            // 設置樣式：灰色的 timestamp 和 target
+            let grey_style =
+                Style::new().fg_color(Some(Color::Ansi(anstyle::AnsiColor::BrightBlack))); // 設置灰色前景
+
+            // 開始寫入 buffer，將所有內容合併成一次 write!
+            writeln!(
+                buf,
+                "{}{}{}{} {}{}{} {}{}{}\n{:>10}{} {}",
+                // 使用灰色樣式渲染 timestamp
+                grey_style.render(),
+                buf.timestamp(),           // 直接使用 timestamp 方法
+                grey_style.render_reset(), // 重置灰色樣式
+                // 渲染 level 的顏色
+                buf.default_level_style(record.level()).render(), // 開始渲染 Level 樣式
+                record.level(),                                   // 真正的 Level 內容
+                buf.default_level_style(record.level()).render_reset(), // 渲染 Level 樣式結束
+                // 使用灰色樣式渲染 target
+                grey_style.render(),
+                record.target(),           // Target 顯示在 Level 之後
+                grey_style.render_reset(), // 重置灰色樣式
+                // 使用藍色粗體樣式渲染 custom_value
+                custom_value_style.render(),
+                custom_value,                      // 寫入 custom_value
+                custom_value_style.render_reset(), // 重置 custom_value 樣式
+                // 寫入 Log 訊息
+                record.args()
+            )?;
+
+            Ok(())
+        })
+        .filter(None, LevelFilter::Info) // 設置所有模組的最低 Level 為 Warn
+        .filter(Some("rocket"), LevelFilter::Warn)
+        .init();
     std::fs::create_dir_all(PathBuf::from("./db")).unwrap();
+    let start_time = Instant::now();
     let txn = TREE.in_disk.begin_write().unwrap();
     {
         let table = txn.open_table(DATA_TABLE).unwrap();
-        warn!("Read {} data from database.", table.len().unwrap());
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", table.len().unwrap());
     }
     txn.commit().unwrap();
     SHOULD_RESET.store(true, Ordering::SeqCst);
@@ -174,7 +226,7 @@ async fn start_watcher() {
                         _ => (),
                     }
                 }
-                Err(e) => println!("watch error: {:?}", e),
+                Err(e) => error!("watch error: {:?}", e),
             }
         })
         .unwrap();

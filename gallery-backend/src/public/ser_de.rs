@@ -40,7 +40,7 @@ impl Value for ReducedData {
     {
         bitcode::decode::<ReducedData>(data)
             .map_err(|e| {
-                eprintln!("Failed to deserialize ReducedData: {:?}", e);
+                error!("Failed to deserialize ReducedData: {:?}", e);
                 e
             })
             .unwrap()

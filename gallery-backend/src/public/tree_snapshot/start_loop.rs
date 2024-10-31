@@ -37,15 +37,17 @@ impl TreeSnapshot {
                             })
                         }
                         txn.commit().unwrap();
-                        println!(
-                            "Step: Inserting into TREE_SNAPSHOT_IN_DISK {:?}",
-                            timer_start.elapsed()
+                        info!(duration = &*format!("{:?}", timer_start.elapsed());
+                            "Write in-memory cache into disk"
                         );
                     }
                 }
                 {
                     self.in_memory.remove(&timestamp);
-                    println!("TREE_SNAPSHOT_IN_MEMORY has len {}", self.in_memory.len());
+                    info!(
+                        "{} items remaining in in-memory cache",
+                        self.in_memory.len()
+                    );
                 }
             }
             sleep(Duration::from_millis(500));
@@ -61,10 +63,10 @@ impl TreeSnapshot {
                     let write_txn = self.in_disk.begin_write().unwrap();
 
                     match write_txn.delete_table(table_handle) {
-                        Ok(true) => println!("Deleted table: {:?}", timestamp),
-                        Ok(false) => println!("Failed to delete table: {:?}", timestamp),
+                        Ok(true) => info!("Delete table: {:?}", timestamp),
+                        Ok(false) => error!("Failed to delete table: {:?}", timestamp),
                         Err(e) => {
-                            eprintln!("Error deleting table: {:?}, error: {:?}", timestamp, e)
+                            error!("Failed to delete table: {:?}, error: {:?}", timestamp, e)
                         }
                     }
                     write_txn.commit().unwrap();

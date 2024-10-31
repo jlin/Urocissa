@@ -13,14 +13,14 @@ impl TreeSnapshot {
         }
 
         let read_txn = self.in_disk.begin_read().map_err(|err| {
-            println!("{:?}", err);
+            error!("{:?}", err);
             Status::InternalServerError
         })?;
 
         let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&timestamp);
 
         let table = read_txn.open_table(table_definition).map_err(|err| {
-            println!("{:?}", err);
+            error!("{:?}", err);
             Status::InternalServerError
         })?;
 

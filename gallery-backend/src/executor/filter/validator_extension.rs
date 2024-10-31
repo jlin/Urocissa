@@ -15,7 +15,7 @@ pub fn validator(all_paths: Vec<PathBuf>) -> impl ParallelIterator<Item = PathBu
                 {
                     Some(file_path)
                 } else {
-                    println!("{} is not a valid extension", &lowercased_ext);
+                    error!("{} is not a valid extension", &lowercased_ext);
                     None
                 }
             }

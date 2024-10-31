@@ -65,7 +65,7 @@ pub fn auth_request_fairing() -> AdHoc {
                     ) {
                         Ok(_) => true,
                         Err(_) => {
-                            println!("JWT validation failed.");
+                            warn!("JWT validation failed.");
                             false
                         }
                     }
@@ -79,13 +79,13 @@ pub fn auth_request_fairing() -> AdHoc {
             if !auth_pass {
                 if is_browser_request {
                     // Redirect to login for browser requests
-                    println!("Unauthorized access attempt via browser, redirecting to login.");
+                    warn!("Unauthorized access attempt via browser, redirecting to login.");
                     let redirect_uri = Origin::parse("/redirect-to-login").unwrap();
                     req.set_method(Method::Get);
                     req.set_uri(redirect_uri);
                 } else {
                     // Unauthorized response for Axios/fetch requests
-                    println!("Unauthorized access attempt via fetch.");
+                    warn!("Unauthorized access attempt via fetch.");
                     let unauthorized_uri = Origin::parse("/unauthorized").unwrap();
                     req.set_method(Method::Get);
                     req.set_uri(unauthorized_uri);

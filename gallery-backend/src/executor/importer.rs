@@ -16,13 +16,13 @@ pub fn import(
         let source_path = &hash_alias_size.hash_alias.source_path();
         let dest_path = &hash_alias_size.hash_alias.imported_path();
         if let Err(err) = fs::create_dir_all(dest_path.parent().unwrap()) {
-            println!("Failed to create directory: {:?}", err);
+            error!("Failed to create directory: {:?}", err);
             return Err(Box::new(err));
         }
         if let Err(err) = fs::copy(&source_path, &dest_path) {
-            println!("Failed to copy file: {:?}", err);
+            error!("Failed to copy file: {:?}", err);
 
-            println!("{:?}", source_path);
+            error!("{:?}", source_path);
             return Err(Box::new(err));
         }
         progress_bar.inc(1);
