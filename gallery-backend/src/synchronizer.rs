@@ -17,7 +17,7 @@ use tokio::sync::mpsc::UnboundedReceiver;
 
 pub async fn start_sync(
     mut events_receiver: UnboundedReceiver<Vec<PathBuf>>,
-    mut video_queue_receiver: UnboundedReceiver<ArrayString<64>>,
+    mut video_queue_receiver: UnboundedReceiver<Vec<ArrayString<64>>>,
     turn_sync_on: Arc<AtomicBool>,
 ) -> anyhow::Result<()> {
     let events_repository: Arc<Mutex<Vec<PathBuf>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store events
@@ -42,7 +42,7 @@ pub async fn start_sync(
             video_queue_repository_repository_clone
                 .lock()
                 .expect("events_repository_arc_clone lock error")
-                .push(video_hash);
+                .extend(video_hash);
         }
     });
 

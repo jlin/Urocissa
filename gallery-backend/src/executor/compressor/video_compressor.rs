@@ -3,8 +3,6 @@ use crate::{
     public::{
         constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION,
         database_struct::database::definition::DataBase,
-        redb::DATA_TABLE,
-        tree::{start_loop::SHOULD_RESET, TREE},
     },
 };
 use anyhow::{Context, Result};
@@ -14,7 +12,6 @@ use std::{
     error::Error,
     io::{BufRead, BufReader},
     process::{Command, Stdio},
-    sync::atomic::Ordering,
 };
 
 use super::{video_ffprobe::video_duration, video_preview::generate_preview};
@@ -41,14 +38,7 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
         )
     })?;
     generate_preview(database)?; // Get preview image
-    database.pending = true;
-    let write_txn = TREE.in_disk.begin_write().unwrap();
-    {
-        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-        write_table.insert(&*database.hash, &*database).unwrap();
-    }
-    write_txn.commit().unwrap();
-    SHOULD_RESET.store(true, Ordering::SeqCst);
+    database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
 
     Ok(())
 }

@@ -40,7 +40,7 @@ mod router;
 mod synchronizer;
 
 static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
-static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<ArrayString<64>>> = OnceLock::new();
+static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 
 #[launch]
 async fn rocket() -> _ {
@@ -60,7 +60,7 @@ async fn rocket() -> _ {
     EVENTS_SENDER.set(events_sender).unwrap();
 
     let (video_queue_sender, video_queue_receiver) =
-        tokio::sync::mpsc::unbounded_channel::<ArrayString<64>>();
+        tokio::sync::mpsc::unbounded_channel::<Vec<ArrayString<64>>>();
     VIDEO_QUEUE_SENDER.set(video_queue_sender).unwrap();
 
     let turn_sync_on_clone = Arc::clone(&turn_sync_on_clone_for_stop);

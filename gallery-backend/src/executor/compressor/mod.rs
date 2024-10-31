@@ -10,6 +10,7 @@ use crate::{
         redb::DATA_TABLE,
     },
 };
+use dashmap::DashSet;
 use rayon::prelude::*;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
@@ -27,52 +28,28 @@ where
 {
     let processed_count = Arc::new(AtomicUsize::new(0));
     let progress_bar = prepare_progress_bar(0); // Initialize the progress bar with an unknown length
-
+    let video_hash_dashset = DashSet::new();
     let collect: Vec<DataBase> = databases
         .filter_map(|mut database| {
-            if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-                match image_compressor(&mut database) {
-                    Ok(_) => {
-                        processed_count.fetch_add(1, Ordering::SeqCst);
-                        Some(database)
-                    }
-                    Err(error) => {
-                        processed_count.fetch_add(1, Ordering::SeqCst);
-                        handle_error(ErrorData::new(
-                            error.to_string(),
-                            format!("An error occurred while processing file",),
-                            Some(database.hash),
-                            Some(database.imported_path()),
-                            Location::caller(),
-                        ));
-
-                        None
-                    }
-                }
+            let compress_result = if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
+                image_compressor
             } else {
-                match video_compressor(&mut database) {
-                    Ok(_) => {
-                        processed_count.fetch_add(1, Ordering::SeqCst);
-                        VIDEO_QUEUE_SENDER
-                            .get()
-                            .unwrap()
-                            .send(database.hash)
-                            .unwrap();
-
-                        None
-                    }
-                    Err(error) => {
-                        processed_count.fetch_add(1, Ordering::SeqCst);
-                        handle_error(ErrorData::new(
-                            error.to_string(),
-                            format!("An error occurred while processing file",),
-                            Some(database.hash),
-                            Some(database.imported_path()),
-                            Location::caller(),
-                        ));
-                        None
-                    }
-                }
+                video_hash_dashset.insert(database.hash);
+                video_compressor
+            }(&mut database);
+            processed_count.fetch_add(1, Ordering::SeqCst);
+            progress_bar.inc(1);
+            if let Err(error) = compress_result {
+                handle_error(ErrorData::new(
+                    error.to_string(),
+                    format!("An error occurred while processing file",),
+                    Some(database.hash),
+                    Some(database.imported_path()),
+                    Location::caller(),
+                ));
+                None
+            } else {
+                Some(database)
             }
         })
         .collect();
@@ -84,5 +61,13 @@ where
         });
     }
     write_txn.commit().unwrap();
+
+    // Send video hashes to worker thread
+    VIDEO_QUEUE_SENDER
+        .get()
+        .unwrap()
+        .send(video_hash_dashset.into_iter().collect())
+        .unwrap();
+
     progress_bar.finish();
 }
