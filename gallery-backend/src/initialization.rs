@@ -3,10 +3,11 @@ use env_logger::fmt::style::Style;
 use env_logger::Builder;
 use log::kv::Key;
 use log::LevelFilter;
+use std::env;
 use std::io::Write;
 use std::path::PathBuf;
-
 pub fn initialize_logger() {
+    env::set_var("RUST_LOG", "INFO");
     Builder::new()
         .format(|buf, record| {
             let custom_value = record
