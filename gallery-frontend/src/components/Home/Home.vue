@@ -20,7 +20,7 @@
     <Buffer
       :bufferHeight="bufferHeight"
       :style="{
-        userSelect: scrollbarStore.isDragging ? 'none' : 'auto'
+        userSelect: scrollbarStore.isDragging ? 'none' : 'auto' // Prevent accidental selection while scrolling.
       }"
     />
   </div>
