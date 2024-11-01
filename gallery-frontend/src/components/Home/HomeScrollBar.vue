@@ -17,8 +17,6 @@
       @click="handleClick"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
-      @mousemove="handleMove"
-      @mouseleave="handleMouseLeave"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
       @touchmove="handleMove"
@@ -220,14 +218,12 @@ const handleClick = () => {
  * Handle movement over the scrollbar.
  */
 const handleMove = () => {
-  if (scrollTop !== undefined) {
-    const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
-    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
+  const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
-    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (isDragging.value) handleClick()
-      hoverLabelRowIndex.value = targetRowIndex
-    }
+  if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
+    if (isDragging.value) handleClick()
+    hoverLabelRowIndex.value = targetRowIndex
   }
 }
 
@@ -236,14 +232,16 @@ const handleMouseDown = () => {
   isDragging.value = true
 }
 
-const handleMouseLeave = () => {
-  if (reachBottom.value) {
-    hoverLabelRowIndex.value = rowLength.value - 1
-  } else {
-    hoverLabelRowIndex.value = currentBatchIndex.value
-  }
+window.addEventListener('mouseup', () => {
+  console.log('Mouse up detected!', event)
   isDragging.value = false
-}
+})
+
+window.addEventListener('mousemove', () => {
+  if (isDragging.value) {
+    handleMove()
+  }
+})
 
 const handleMouseUp = () => {
   isDragging.value = false
