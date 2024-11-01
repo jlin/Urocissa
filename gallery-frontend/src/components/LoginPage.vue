@@ -23,11 +23,9 @@ import { ref } from 'vue'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
-import { useConfigStore } from '@/store/configStore'
 const password = ref('')
 const token = ref<string>('') // To store the JWT token
 const router = useRouter()
-const configStore = useConfigStore()
 const handleLogin = async () => {
   try {
     const response = await axios.post('/post/authenticate', password.value, {
@@ -44,15 +42,7 @@ const handleLogin = async () => {
       sameSite: 'Strict', // Prevent CSRF attacks
       expires: 1 // Optional: Expires in 1 day
     })
-    // Perform initialization:
-    try {
-      const response = await axios.get('/get/get-config.json')
 
-      configStore.disableImg = response.data.disableImg
-    } catch (error) {
-      console.error('Error fetching config:', error)
-      throw error
-    }
     await router.push('/')
   } catch (error) {
     console.error(error)

@@ -13,6 +13,8 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchScrollbarInWorker } from '@/script/inWorker/fetchScrollbarInWorker'
 import { useModalStore } from '@/store/modalStore'
 import router from '@/script/routes'
+import axios from 'axios'
+import { useConfigStore } from '@/store/configStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker) {
@@ -26,6 +28,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
   const rowStore = useRowStore()
   const locationStore = useLocationStore()
   const modalStore = useModalStore()
+  const configStore = useConfigStore()
   const handler = createHandler<typeof fromDataWorker>({
     returnData: (payload) => {
       const slicedDataArray: SlicedDataItem[] = payload.slicedDataArray
@@ -72,7 +75,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
     prefetchReturn: async (payload) => {
       const result: Prefetch = payload.result
       if (result.dataLength === 0) {
-        messageStore.message = "Wow, so empty! Try adding some photos here!"
+        messageStore.message = 'Wow, so empty! Try adding some photos here!'
         messageStore.warn = false
         messageStore.showMessage = true
       }
@@ -82,10 +85,20 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       dataLengthStore.locateTo = result.locateTo
       initializedStore.initialized = true
 
+      // Perform initialization:
       if (!tagStore.fetched) {
         await tagStore.fetchTags()
       }
       fetchScrollbarInWorker()
+
+      try {
+        const response = await axios.get('/get/get-config.json')
+
+        configStore.disableImg = response.data.disableImg
+      } catch (error) {
+        console.error('Error fetching config:', error)
+        throw error
+      }
 
       dataLengthStore.updateFetchRowTrigger = !dataLengthStore.updateFetchRowTrigger
     },
