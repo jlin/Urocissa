@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject, Ref, computed, watch, watchEffect } from 'vue'
+import { ref, inject, Ref, computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { clamp, debounce } from 'lodash'
 import { useElementSize, useMouseInElement } from '@vueuse/core'
 import { useDataLengthStore } from '@/store/dataLengthStore'
@@ -100,7 +100,6 @@ import {
   scrollBarWidth
 } from '@/script/common/commonType'
 
-const isDragging = ref(false)
 const isScrolling = ref(false)
 const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)
@@ -218,43 +217,33 @@ const handleClick = () => {
  * Handle movement over the scrollbar.
  */
 const handleMove = () => {
-  const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
-  const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
+  if (scrollbarStore.isDragging) {
+    const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
-  if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-    if (isDragging.value) handleClick()
-    hoverLabelRowIndex.value = targetRowIndex
+    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
+      if (scrollbarStore.isDragging) handleClick()
+      hoverLabelRowIndex.value = targetRowIndex
+    }
   }
 }
 
 const handleMouseDown = () => {
   isScrolling.value = true
-  isDragging.value = true
+  scrollbarStore.isDragging = true
 }
-
-window.addEventListener('mouseup', () => {
-  console.log('Mouse up detected!', event)
-  isDragging.value = false
-})
-
-window.addEventListener('mousemove', () => {
-  if (isDragging.value) {
-    handleMove()
-  }
-})
 
 const handleMouseUp = () => {
-  isDragging.value = false
+  scrollbarStore.isDragging = false
 }
-
 const handleTouchStart = () => {
   isScrolling.value = true
-  isDragging.value = true
+  scrollbarStore.isDragging = true
   handleClick()
 }
 
 const handleTouchEnd = () => {
-  isDragging.value = false
+  scrollbarStore.isDragging = false
 }
 
 /**
@@ -291,5 +280,15 @@ watch([() => locationStore.locationIndex, reachBottom], () => {
     hoverLabelRowIndex.value = currentBatchIndex.value
     currentDateChipIndex.value = currentBatchIndex.value
   }
+})
+
+onMounted(() => {
+  window.addEventListener('mouseup', handleMouseUp)
+  window.addEventListener('mousemove', handleMove)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('mouseup', handleMouseUp)
+  window.removeEventListener('mousemove', handleMove)
 })
 </script>

@@ -6,10 +6,12 @@ export const useScrollbarStore = defineStore({
     scrollbarDataArray: ScrollbarData[]
     scrollbarDataArrayYear: ScrollbarData[]
     initialized: boolean
+    isDragging: boolean
   } => ({
     scrollbarDataArray: [],
     scrollbarDataArrayYear: [],
-    initialized: false
+    initialized: false,
+    isDragging: false
   }),
   actions: {
     initialize(scrollbarDataArray: ScrollbarData[]) {

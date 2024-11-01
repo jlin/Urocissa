@@ -17,7 +17,12 @@
         : () => {}
     "
   >
-    <Buffer :bufferHeight="bufferHeight" />
+    <Buffer
+      :bufferHeight="bufferHeight"
+      :style="{
+        userSelect: scrollbarStore.isDragging ? 'none' : 'auto'
+      }"
+    />
   </div>
 </template>
 
@@ -57,6 +62,8 @@ import { useRowStore } from '@/store/rowStore'
 import { debounce } from 'lodash'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import { useScrollbarStore } from '@/store/scrollbarStore'
+const scrollbarStore = useScrollbarStore()
 const offsetStore = useOffsetStore()
 const rowStore = useRowStore()
 const dataStore = useDataStore()
