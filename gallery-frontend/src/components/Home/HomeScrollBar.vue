@@ -2,7 +2,7 @@
   <v-sheet class="position-fixed w-100 h-100" :style="{ backgroundColor: `#424242` }">
     <v-sheet
       v-if="imageContainerRef"
-      ref="scrollBarRef"
+      ref="scrollbarRef"
       class="position-fixed"
       id="scroll-bar"
       :style="{
@@ -55,7 +55,7 @@
         </v-chip>
         <!-- This sheet's height is adjusted to visually indicate the size of the current row block. -->
         <v-sheet
-          v-if="scrollBarRef"
+          v-if="scrollbarRef"
           id="block-chip"
           class="w-100 position-absolute bg-grey-darken-2"
           :style="{
@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import { ref, inject, Ref, computed, watch, watchEffect } from 'vue'
 import { clamp, debounce } from 'lodash'
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useMouseInElement } from '@vueuse/core'
 import { useDataLengthStore } from '@/store/dataLengthStore'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import { useRowStore } from '@/store/rowStore'
@@ -126,10 +126,11 @@ const reachBottom = computed(() => {
 const windowHeight = inject<Ref<number>>('windowHeight')!
 const scrollTop = inject<Ref<number>>('scrollTop')
 const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
-const scrollBarRef = ref<HTMLElement | null>(null)
+const scrollbarRef = ref<HTMLElement | null>(null)
 
 const rowLength = computed(() => dataLengthStore.rowLength)
-const { height: scrollbarHeight } = useElementSize(imageContainerRef)
+const { height: scrollbarHeight } = useElementSize(scrollbarRef)
+const scrollbarMouse = useMouseInElement(scrollbarRef)
 
 /**
  * Calculate the height of a single row chip.
@@ -195,14 +196,10 @@ const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index), 1
 /**
  * Handle a click event on the scrollbar.
  */
-const handleClick = (event: MouseEvent | TouchEvent) => {
-  const scrollbarElement = event.currentTarget
-  const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
-
-  if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
-    const scrollbar = scrollbarElement.getBoundingClientRect()
-    const clickPositionRelative = clientY - scrollbar.top // Relative to the top of the scrollbar
-    const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbar.height)
+const handleClick = () => {
+  if (scrollTop !== undefined) {
+    const clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+    const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
 
     if (targetRowIndex === currentDateChipIndex.value) {
       return
@@ -222,17 +219,13 @@ const handleClick = (event: MouseEvent | TouchEvent) => {
 /**
  * Handle movement over the scrollbar.
  */
-const handleMove = (event: MouseEvent | TouchEvent) => {
-  const scrollbarElement = event.currentTarget
-  const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY
-
-  if (scrollbarElement instanceof HTMLElement && scrollTop !== undefined) {
-    const scrollbar = scrollbarElement.getBoundingClientRect()
-    const hoverPositionRelative = clientY - scrollbar.top // Relative to the top of the scrollbar
-    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbar.height)
+const handleMove = () => {
+  if (scrollTop !== undefined) {
+    const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (isDragging.value) handleClick(event)
+      if (isDragging.value) handleClick()
       hoverLabelRowIndex.value = targetRowIndex
     }
   }
@@ -256,10 +249,10 @@ const handleMouseUp = () => {
   isDragging.value = false
 }
 
-const handleTouchStart = (event: TouchEvent) => {
+const handleTouchStart = () => {
   isScrolling.value = true
   isDragging.value = true
-  handleClick(event)
+  handleClick()
 }
 
 const handleTouchEnd = () => {
