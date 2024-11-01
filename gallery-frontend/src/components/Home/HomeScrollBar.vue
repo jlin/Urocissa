@@ -17,6 +17,8 @@
       @click="handleClick"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
+      @mousemove="handleHover"
+      @mouseleave="handleMouseLeave"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
       @touchmove="handleMove"
@@ -228,6 +230,15 @@ const handleMove = () => {
   }
 }
 
+const handleHover = () => {
+  const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
+
+  if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
+    hoverLabelRowIndex.value = targetRowIndex
+  }
+}
+
 const handleMouseDown = () => {
   isScrolling.value = true
   scrollbarStore.isDragging = true
@@ -236,6 +247,15 @@ const handleMouseDown = () => {
 const handleMouseUp = () => {
   scrollbarStore.isDragging = false
 }
+
+const handleMouseLeave = () => {
+  if (reachBottom.value) {
+    hoverLabelRowIndex.value = rowLength.value - 1
+  } else {
+    hoverLabelRowIndex.value = currentBatchIndex.value
+  }
+}
+
 const handleTouchStart = () => {
   isScrolling.value = true
   scrollbarStore.isDragging = true
