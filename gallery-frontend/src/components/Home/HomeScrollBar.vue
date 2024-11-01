@@ -17,6 +17,7 @@
       @click="handleClick"
       @mousedown="handleMouseDown"
       @mouseup="handleMouseUp"
+      @mousemove="handleMove"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
       @touchmove="handleMove"
@@ -217,14 +218,13 @@ const handleClick = () => {
  * Handle movement over the scrollbar.
  */
 const handleMove = () => {
-  if (scrollbarStore.isDragging) {
-    const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
-    const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
+  const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
-    if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (scrollbarStore.isDragging) handleClick()
-      hoverLabelRowIndex.value = targetRowIndex
-    }
+  if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
+    if (scrollbarStore.isDragging) handleClick()
+
+    hoverLabelRowIndex.value = targetRowIndex
   }
 }
 
