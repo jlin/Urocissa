@@ -82,6 +82,7 @@ function triggerFileInput(): void {
 }
 
 async function handleFileUpload(event: Event): Promise<void> {
+  const messageStore = useMessageStore()
   const target = event.target as HTMLInputElement
   const files = target.files
   if (!files || files.length === 0) return
@@ -105,7 +106,7 @@ async function handleFileUpload(event: Event): Promise<void> {
     uploadStore.startTime = startTime
     uploadStore.uploading = true
 
-    const response = await axios.post('/upload', formData, {
+    await axios.post('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
@@ -123,17 +124,9 @@ async function handleFileUpload(event: Event): Promise<void> {
       }
     })
 
-    const result = response.data
-    if (result.status === 'ok') {
-      console.log('Upload complete')
-      uploadStore.uploading = false
-      messageStor.message = 'Files uploaded successfully!'
-      messageStor.showMessage = true
-    } else if (result.status === 'error') {
-      messageStor.message = result.message
-      messageStor.warn = true
-      messageStor.showMessage = true
-    }
+    messageStore.message = 'Files uploaded successfully!'
+    messageStore.warn = false
+    messageStore.showMessage = true
   } catch (error) {
     console.error('There was an error uploading the files: ', error)
     messageStor.message = `There was an error uploading the files: ${error}`
