@@ -1,8 +1,7 @@
 <template>
   <v-card
     class="mx-auto position-fixed"
-    max-width="300"
-    max-height="200"
+    width="300"
     variant="elevated"
     id="upload-vcard"
     retain-focus
@@ -12,36 +11,38 @@
       zIndex: 5
     }"
   >
-    <v-card-text class="text-medium-emphasis pa-6">
-      <div class="text-h6 mb-6" v-if="uploadStore.total">Uploading</div>
-
-      <div class="text-h4 font-weight-black mb-4">{{ uploadStore.percentComplete() }}%</div>
-
-      <v-progress-linear
-        bg-color="surface-variant"
-        class="mb-6"
-        color="primary"
-        height="10"
-        :model-value="uploadStore.percentComplete()"
-        rounded="pill"
-      ></v-progress-linear>
-
-      <div v-if="uploadStore.loaded">
-        {{ filesize(uploadStore.loaded) }} uploaded, remaining time:{{
-          uploadStore.remainingTime()
-        }}
-        s
-      </div>
-    </v-card-text>
+    <v-progress-linear
+      bg-color="surface-variant"
+      color="primary"
+      height="10"
+      :model-value="uploadStore.percentComplete()"
+      rounded="pill"
+    ></v-progress-linear>
+    <v-card-item>
+      <v-row no-gutters justify="space-between">
+        <v-card-title class="font-weight-black">Uploading</v-card-title>
+        <v-col cols="12">
+          <v-card-title
+            >Remaining time:
+            {{
+              humanizeDuration(uploadStore.remainingTime() * 1000, {
+                units: ['h', 'm', 's'],
+                largest: 1,
+                round: true
+              })
+            }}</v-card-title
+          >
+        </v-col>
+      </v-row>
+    </v-card-item>
   </v-card>
 </template>
-
 <script setup lang="ts">
 /**
  * This modal is used for displaying upload information.
  */
 import { useUploadStore } from '@/store/uploadStore'
-import { filesize } from 'filesize'
+import humanizeDuration from 'humanize-duration'
 const uploadStore = useUploadStore()
 </script>
 
