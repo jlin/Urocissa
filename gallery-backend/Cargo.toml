@@ -17,6 +17,7 @@ blake3 = "1.5.4"
 chrono = "0.4.38"
 dashmap = { version = "6.1.0", features = ["rayon"] }
 env_logger = { version = "0.11.5", features = ["humantime", "color"] }
+filetime = "0.2.25"
 futures = "0.3.31"
 image = "0.25.4"
 image_hasher = "2.0.0"
