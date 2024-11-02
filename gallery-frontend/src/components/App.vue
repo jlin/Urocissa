@@ -15,14 +15,15 @@
 </template>
 
 <script setup lang="ts">
-import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, defineAsyncComponent, onMounted } from 'vue'
 import Cookies from 'js-cookie'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 
-const scrollbarStore = useScrollbarStore()
+const NotificationWarn = defineAsyncComponent(() => import('@/components/NotificationWarn.vue'))
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
+
+const scrollbarStore = useScrollbarStore()
 
 // Function to check if cookie has no password field
 async function checkCookieAndRedirect() {
