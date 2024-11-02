@@ -125,6 +125,7 @@ async fn start_watcher() {
                                         None,
                                         None,
                                         Location::caller(),
+                                        None,
                                     );
                                     handle_error(error_data);
                                 }

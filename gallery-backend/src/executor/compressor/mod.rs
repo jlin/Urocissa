@@ -46,6 +46,7 @@ where
                     Some(database.hash),
                     Some(database.imported_path()),
                     Location::caller(),
+                    Some(database),
                 ));
                 None
             } else {

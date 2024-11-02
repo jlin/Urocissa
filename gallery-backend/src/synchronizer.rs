@@ -124,6 +124,7 @@ pub async fn start_sync() -> anyhow::Result<()> {
                         Some(database.hash),
                         Some(database.imported_path()),
                         Location::caller(),
+                        Some(database),
                     ));
                 }
             })

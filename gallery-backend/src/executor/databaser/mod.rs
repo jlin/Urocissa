@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::panic::Location;
 
 use self::processor_image::process_image_info;
@@ -26,6 +27,13 @@ pub fn databaser(vec_of_hash_alias: Vec<HashAliasSize>) -> impl ParallelIterator
                             Some(hash_alias_size.hash_alias.hash),
                             Some(hash_alias_size.hash_alias.imported_path()),
                             Location::caller(),
+                            Some(DataBase::new(
+                                hash_alias_size.hash_alias.hash,
+                                hash_alias_size.size,
+                                hash_alias_size.hash_alias.ext(),
+                                BTreeMap::new(),
+                                hash_alias_size.hash_alias.alias.alias,
+                            )),
                         ));
                         None
                     }

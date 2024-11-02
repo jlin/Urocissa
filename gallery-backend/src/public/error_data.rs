@@ -1,4 +1,4 @@
-use std::{panic::Location, path::PathBuf};
+use std::{fs, panic::Location, path::PathBuf};
 
 use arrayvec::ArrayString;
 use chrono::Utc;
@@ -7,9 +7,11 @@ use serde_json::json;
 
 use crate::public::config::PRIVATE_CONFIG;
 
+use super::database_struct::database::definition::DataBase;
+
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub struct JsonData(pub &'static str, pub &'static std::path::Path);
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ErrorData<'a> {
     pub error: String,
     pub description: String,
@@ -17,6 +19,7 @@ pub struct ErrorData<'a> {
     pub file: Option<PathBuf>,
     pub time: u128,
     pub location: &'a Location<'a>,
+    pub remove_file: Option<DataBase>,
 }
 
 impl<'a> ErrorData<'a> {
@@ -26,6 +29,7 @@ impl<'a> ErrorData<'a> {
         hash: Option<ArrayString<64>>,
         file: Option<PathBuf>,
         location: &'a Location,
+        remove_file: Option<DataBase>,
     ) -> Self {
         ErrorData {
             error,
@@ -34,6 +38,7 @@ impl<'a> ErrorData<'a> {
             location,
             hash,
             file,
+            remove_file,
         }
     }
     pub fn to_formatted_string(&self) -> String {
@@ -52,7 +57,28 @@ impl<'a> ErrorData<'a> {
 }
 
 pub fn handle_error(error_data: ErrorData) -> () {
-    error!("{:?}", error_data);
+    error!("{:#?}", error_data);
+    if let Some(database) = &error_data.remove_file {
+        let remove_file_list = vec![
+            database.imported_path(),
+            database.compressed_path(),
+            database.preview_path().into(),
+        ];
+        for file_path in remove_file_list {
+            if file_path.exists() {
+                match fs::remove_file(&file_path) {
+                    Ok(_) => {
+                        info!("Successfully removed file {}", file_path.display());
+                    }
+                    Err(e) => {
+                        error!("Failed to remove file {}: {}", file_path.display(), e);
+                    }
+                }
+            } else {
+                info!("File {} does not exist. Skip delete", file_path.display());
+            }
+        }
+    }
     if let Some(url) = &PRIVATE_CONFIG.discord_hook_url {
         send_discord_webhook(url, error_data);
     }

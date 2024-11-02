@@ -26,6 +26,7 @@ pub fn validator(all_paths: Vec<PathBuf>) -> impl ParallelIterator<Item = PathBu
                     None,
                     Some(file_path),
                     Location::caller(),
+                    None,
                 ));
                 None
             }

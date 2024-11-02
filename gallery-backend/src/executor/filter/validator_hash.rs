@@ -44,7 +44,7 @@ pub fn validator(
                                 duplicated_alias.alias.alias.push(file_modify);
                                 duplicated_files_number.fetch_add(1, Ordering::SeqCst);
                             } else {
-                                // If this is indeed a new file 
+                                // If this is indeed a new file
                                 dashmap_of_hash_alias.insert(
                                     hash,
                                     AliasSize::new(
@@ -74,6 +74,7 @@ fn blake3_hasher(file_path: &Path) -> Result<ArrayString<64>, ErrorData> {
                 None,
                 Some(file_path.to_path_buf()),
                 Location::caller(),
+                None,
             ));
         }
     };
@@ -94,6 +95,7 @@ fn blake3_hasher(file_path: &Path) -> Result<ArrayString<64>, ErrorData> {
                     None,
                     Some(file_path.to_path_buf()),
                     Location::caller(),
+                    None,
                 ));
             }
         }
