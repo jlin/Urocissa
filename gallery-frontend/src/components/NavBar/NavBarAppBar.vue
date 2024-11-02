@@ -90,6 +90,7 @@ async function handleFileUpload(event: Event): Promise<void> {
   let totalSize = 0
 
   for (let i = 0; i < files.length; i++) {
+    formData.append('lastModifiede' + i, files[i].lastModified.toString())
     formData.append('file' + i, files[i])
     totalSize += files[i].size
   }
