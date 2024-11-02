@@ -1,5 +1,9 @@
 <template>
-  <v-app>
+  <v-app
+    :style="{
+      userSelect: scrollbarStore.isDragging ? 'none' : 'auto' // Prevent accidental selection while scrolling.
+    }"
+  >
     <component :is="NavBar" v-if="route.name !== 'LoginPage'" />
     <v-main class="h-screen">
       <router-view v-slot="{ Component }" :key="routeKey">
@@ -15,7 +19,9 @@ import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, defineAsyncComponent, onMounted } from 'vue'
 import Cookies from 'js-cookie'
+import { useScrollbarStore } from '@/store/scrollbarStore'
 
+const scrollbarStore = useScrollbarStore()
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
 
 // Function to check if cookie has no password field
