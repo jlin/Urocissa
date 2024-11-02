@@ -24,7 +24,7 @@ pub fn databaser(vec_of_hash_alias: Vec<HashAliasSize>) -> impl ParallelIterator
                             e.to_string(),
                             format!("An error occurred while processing file",),
                             Some(hash_alias_size.hash_alias.hash),
-                            Some(hash_alias_size.hash_alias.source_path().clone()),
+                            Some(hash_alias_size.hash_alias.imported_path()),
                             Location::caller(),
                         ));
                         None
