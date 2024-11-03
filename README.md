@@ -1,7 +1,17 @@
 ![螢幕擷取畫面 2024-10-17 213036](https://github.com/user-attachments/assets/b8de7937-1916-4b73-9c31-667c7eb1a23d)
+
 # Urocissa
 
 Urocissa is a self-hosted gallery designed to serve massive collections, capable of handling millions of images and videos. It is built using Rust and Vue.
+
+## Table of Contents
+- [Motivation](#motivation)
+- [Demo](#demo)
+- [Advantages](#advantages)
+- [Limitations](#limitations)
+- [Steps to Set Up and Use the App](#steps-to-set-up-and-use-the-app)
+- [Update](#update)
+
 
 ## Motivation
 
@@ -25,7 +35,7 @@ This demo demonstrates Urocissa's ability to manage 1,000,000 photos, showcasing
 
 Both demos are currently in read-only mode, and uploading files or editing tags is not permitted at this time.
 
-## Features
+## Advantages
 
 - **Blazing Fast Performance**: Index photos with a pure Rust crate. Instantly serve, search, and filter one million photos in under a second using an in-memory cached database.
 
