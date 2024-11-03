@@ -23,7 +23,7 @@ impl DataBase {
             ext,
             exif_vec,
             tag: HashSet::<String>::new(),
-            album: ArrayString::<64>::new(),
+            album: HashSet::<String>::new(),
             alias,
             pending: false,
         }
