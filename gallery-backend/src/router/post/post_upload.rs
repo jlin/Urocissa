@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
@@ -61,12 +63,14 @@ pub async fn upload(data: Form<Vec<FileUpload<'_>>>) -> Result<(), Status> {
                 last_modified_time = last_modified_time_received;
             }
             FileUpload::File(mut file) => {
+                let start_time = Instant::now();
                 let filename = get_filename(&file);
                 let extension = match get_extension(&file) {
                     Ok(ext) => ext,
                     Err(err) => return Err(err),
                 };
 
+                warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get filename and extension");
                 if VALID_IMAGE_EXTENSIONS.contains(&extension.as_str())
                     || VALID_VIDEO_EXTENSIONS.contains(&extension.as_str())
                 {
