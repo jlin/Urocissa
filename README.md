@@ -43,21 +43,34 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 - **Infinite Photo Stream**: Experience endless scrolling without pagination. No lazy loading needed. Urocissa uses advanced virtual scrolling to serve one million photos, overcoming the DOM height limit of 33,554,400px (see [TanStack/virtual#616](https://github.com/TanStack/virtual/issues/616)).
 
-- **Instant Select All**: Select all photos instantly without loading the entire database.
-
-- **Responsive Layout**: Enjoy an adaptive design that ensures a smooth browsing experience on mobile devices.
-
 - **Instant Data Search**: Use boolean operators such as 'and', 'or', or 'not' to search your data instantly. Find examples of search queries [here](https://github.com/hsa00000/Urocissa/blob/main/SEARCH.md).
-
-- **Automatic Backup**: Urocissa monitors folder changes, automatically backs up new photos, and indexes them while preserving the original files.
 
 ## Limitations
 
-1. **Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome and Firefox on Windows and Android, but it may encounter issues for browsers on iOS or Linux.
+**Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome and Firefox on Windows and Android, but it may encounter issues for browsers on iOS or Linux. The detailed features can be seen in this table:
 
-2. **No AI Face Recognition**: The app currently does not support AI-based face recognition.
 
-3. **Single User Only**: Only supports personal use and cannot create multiple user accounts.
+| Feature                                | Status     |
+|----------------------------------------|------------|
+| Upload Videos and Photos               | ✅          |
+| Auto Backup Folders                    | ✅          |
+| Download Photos and Videos             | ✅          |
+| EXIF Data                              | ✅          |
+| User-Defined Tags                      | ✅          |
+| Duplicate Handling                     | ✅          |
+| Instant Select All                     | ✅          |
+| Find in Timeline                       | ✅          |
+| Responsive Layout                      | ✅          |
+| Shareable Albums                       | 🛠️          |
+| Basic Editing                          | ⏳          |
+| Multi-User Support                     | ⏳          |
+| Docker Installation                    | ⏳          |
+| Discovery                              | ⏳          |
+| Object/Face Recognition                | ❌          |
+| Geolocation/Map                        | ❌          |
+| Android App                            | ❌          |
+| External Libraries                     | ❌          |
+| Existing Folders                       | ❌          |
 
 ## Steps to Set Up and Use the App
 
