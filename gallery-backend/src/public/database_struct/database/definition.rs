@@ -16,7 +16,7 @@ pub struct DataBase {
     pub ext: String,
     pub exif_vec: BTreeMap<String, String>,
     pub tag: HashSet<String>,
-    pub album: HashSet<String>,
+    pub album: HashSet<ArrayString<64>>,
     pub alias: Vec<FileModify>,
     pub ext_type: String,
     pub pending: bool,

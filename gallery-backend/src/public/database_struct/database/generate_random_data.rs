@@ -32,7 +32,7 @@ impl DataBase {
             ext: "jpg".to_string(),
             exif_vec: BTreeMap::<String, String>::new(),
             tag: HashSet::<String>::new(),
-            album: HashSet::<String>::new(),
+            album: HashSet::new(),
             alias: vec![FileModify {
                 file: String::from("/"),
                 modified: 0,
