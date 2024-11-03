@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use jsonwebtoken::{encode, EncodingKey, Header};
 use rand::{rngs::OsRng, RngCore};
 use rocket::post;
@@ -52,4 +53,33 @@ pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'stat
     }
 
     Err("Invalid password")
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ShareClaims {
+    url: ArrayString<64>,
+    exp: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ShareAuthentication {
+    url: ArrayString<64>,
+    password: Option<String>,
+}
+
+#[post("/post/authenticate-share", data = "<album_authentication>")]
+pub async fn authenticate_share(
+    album_authentication: Json<ShareAuthentication>,
+) -> Result<Json<String>, &'static str> {
+    let expiration = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        + 3600;
+
+    let claims = ShareClaims {
+        url: album_authentication.url,
+        exp: expiration as usize,
+    };
+    todo!()
 }

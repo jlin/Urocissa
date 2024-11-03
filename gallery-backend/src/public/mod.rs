@@ -1,3 +1,4 @@
+pub mod album;
 pub mod config;
 pub mod constant;
 pub mod database_struct;
