@@ -2,6 +2,7 @@ use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
 use rocket::{form::Form, fs::TempFile};
+use tokio::task::spawn_blocking;
 use uuid::Uuid;
 
 pub enum FileUpload<'r> {
@@ -28,40 +29,6 @@ impl<'r> FromFormField<'r> for FileUpload<'r> {
     }
 }
 
-#[post("/upload", data = "<data>")]
-pub async fn upload(data: Form<Vec<FileUpload<'_>>>) -> Result<(), Status> {
-    let mut last_modified_time = 0;
-
-    for file_data in data.into_inner() {
-        match file_data {
-            FileUpload::LastModified(last_modified_time_received) => {
-                last_modified_time = last_modified_time_received;
-            }
-            FileUpload::File(mut file) => {
-                let filename = get_filename(&file);
-                let extension = match get_extension(&file) {
-                    Ok(ext) => ext,
-                    Err(err) => return Err(err),
-                };
-
-                if VALID_IMAGE_EXTENSIONS.contains(&extension.as_str())
-                    || VALID_VIDEO_EXTENSIONS.contains(&extension.as_str())
-                {
-                    if let Err(err) =
-                        save_file(&mut file, &filename, &extension, last_modified_time).await
-                    {
-                        return Err(err);
-                    }
-                } else {
-                    error!("Invalid file type");
-                    return Err(Status::InternalServerError);
-                }
-            }
-        }
-    }
-    Ok(())
-}
-
 fn get_filename(file: &TempFile<'_>) -> String {
     file.name()
         .map(|name| name.to_string())
@@ -84,17 +51,51 @@ fn get_extension(file: &TempFile<'_>) -> Result<String, Status> {
     }
 }
 
+#[post("/upload", data = "<data>")]
+pub async fn upload(data: Form<Vec<FileUpload<'_>>>) -> Result<(), Status> {
+    let mut last_modified_time = 0;
+
+    for file_data in data.into_inner() {
+        match file_data {
+            FileUpload::LastModified(last_modified_time_received) => {
+                last_modified_time = last_modified_time_received;
+            }
+            FileUpload::File(mut file) => {
+                let filename = get_filename(&file);
+                let extension = match get_extension(&file) {
+                    Ok(ext) => ext,
+                    Err(err) => return Err(err),
+                };
+
+                if VALID_IMAGE_EXTENSIONS.contains(&extension.as_str())
+                    || VALID_VIDEO_EXTENSIONS.contains(&extension.as_str())
+                {
+                    if let Err(err) =
+                        save_file(&mut file, filename, extension, last_modified_time).await
+                    {
+                        return Err(err);
+                    }
+                } else {
+                    error!("Invalid file type");
+                    return Err(Status::InternalServerError);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 async fn save_file(
     file: &mut TempFile<'_>,
-    filename: &str,
-    extension: &str,
+    filename: String,
+    extension: String,
     last_modified_time: u64,
 ) -> Result<(), Status> {
     let unique_id = Uuid::new_v4();
     let path_tmp = format!("./upload/{}-{}.tmp", filename, unique_id);
 
     match file.move_copy_to(&path_tmp).await {
-        Ok(_) => {
+        Ok(_) => spawn_blocking(move || {
             set_last_modified_time(&path_tmp, last_modified_time)?;
             let path_final = format!("./upload/{}-{}.{}", filename, unique_id, extension);
             match std::fs::rename(&path_tmp, &path_final) {
@@ -104,7 +105,9 @@ async fn save_file(
                     Err(Status::InternalServerError)
                 }
             }
-        }
+        })
+        .await
+        .unwrap(),
         Err(err) => {
             error!("Failed to save file: {}", err);
             Err(Status::InternalServerError)
