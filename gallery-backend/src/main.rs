@@ -20,7 +20,10 @@ use router::{
         favorite_view, login, redirect_to_login, redirect_to_photo, redirect_to_photo_2, setting,
         tags, trashed, trashed_view, unauthorized,
     },
-    post::{authenticate::authenticate, post_upload::upload},
+    post::{
+        authenticate::authenticate, authenticate::authenticate_share, create_album::create_album,
+        post_upload::upload,
+    },
     put::{
         edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview,
     },
@@ -97,7 +100,9 @@ async fn rocket() -> _ {
                 get_scroll_bar,
                 regenerate_preview,
                 authenticate,
-                redirect_to_login
+                redirect_to_login,
+                create_album,
+                authenticate_share
             ],
         )
 }

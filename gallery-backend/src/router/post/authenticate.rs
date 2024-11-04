@@ -77,7 +77,7 @@ pub async fn authenticate_share(
         .as_secs()
         + 3600;
 
-    let claims = ShareClaims {
+    let _claims = ShareClaims {
         url: album_authentication.url,
         exp: expiration as usize,
     };
