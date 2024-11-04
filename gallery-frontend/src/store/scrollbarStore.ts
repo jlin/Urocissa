@@ -16,6 +16,7 @@ export const useScrollbarStore = defineStore({
   actions: {
     initialize(scrollbarDataArray: ScrollbarData[]) {
       this.scrollbarDataArray = scrollbarDataArray
+      this.scrollbarDataArrayYear = []
       let year: number | null = null
       this.scrollbarDataArray.forEach((scrollbarData) => {
         if (year !== scrollbarData.year) {
