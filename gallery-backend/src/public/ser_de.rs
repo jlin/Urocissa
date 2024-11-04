@@ -1,5 +1,5 @@
 use super::{
-    database_struct::database::definition::DataBase, row::Row,
+    album::Album, database_struct::database::definition::DataBase, row::Row,
     tree_snap_shot_in_memory::ReducedData,
 };
 use redb::{TypeName, Value};
@@ -66,7 +66,7 @@ impl Value for Row {
     where
         Self: 'a,
     {
-        bitcode::decode::<Self>(data).expect("Failed to deserialize ReducedData")
+        bitcode::decode::<Self>(data).expect("Failed to deserialize Row")
     }
 
     fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a> {
@@ -74,6 +74,29 @@ impl Value for Row {
     }
 
     fn type_name() -> TypeName {
-        TypeName::new("ReducedData")
+        TypeName::new("Row")
+    }
+}
+
+impl Value for Album {
+    type SelfType<'a> = Self where Self: 'a;
+    type AsBytes<'a> = Vec<u8> where Self: 'a;
+
+    fn fixed_width() -> Option<usize> {
+        None
+    }
+    fn from_bytes<'a>(data: &'a [u8]) -> Self::SelfType<'a>
+    where
+        Self: 'a,
+    {
+        bitcode::decode::<Self>(data).expect("Failed to deserialize Album")
+    }
+
+    fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a> {
+        bitcode::encode(value)
+    }
+
+    fn type_name() -> TypeName {
+        TypeName::new("Album")
     }
 }
