@@ -1,6 +1,6 @@
 import {
+  AbstractData,
   DataBase,
-  DataBaseParse,
   DisplayElement,
   Prefetch,
   Row,
@@ -178,7 +178,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
   const response = await axios.get<DataBase[]>(fetchUrl)
   const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
-  const data: Map<number, DataBase> = new Map()
+  const data: Map<number, AbstractData> = new Map()
 
   for (let index = 0; index < databaseTimestampArray.length; index++) {
     if (!shouldProcessBatch.includes(batchIndex)) {
@@ -186,10 +186,12 @@ async function fetchData(batchIndex: number, timestamp: string) {
     }
     const item = databaseTimestampArray[index]
 
-    if ("DataBase" in item.abstractData) {
+    if ('DataBase' in item.abstractData) {
       const dataBaseInstance = new DataBase(item.abstractData.DataBase, item.timestamp)
+      const abstractData = new AbstractData(dataBaseInstance)
+
       const key = batchIndex * batchNumber + index
-      data.set(key, dataBaseInstance)
+      data.set(key, abstractData)
     }
 
     if (index % 100 === 0) {

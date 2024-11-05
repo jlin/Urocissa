@@ -1,9 +1,9 @@
-import type { DataBase } from '@/script/common/commonType'
+import type { AbstractData, DataBase } from '@/script/common/commonType'
 import { defineStore } from 'pinia'
 
 export const useDataStore = defineStore('DataStore', {
   state: (): {
-    data: Map<number, DataBase> // dataIndex -> data
+    data: Map<number, AbstractData> // dataIndex -> data
     hashMapData: Map<string, number> // hash -> dataIndex
     batchFetched: Map<number, boolean> // Tracks the batches of image metadata that have been fetched
   } => ({

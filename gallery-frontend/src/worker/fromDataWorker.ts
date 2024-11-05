@@ -34,7 +34,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       const slicedDataArray: SlicedDataItem[] = payload.slicedDataArray
       slicedDataArray.forEach(({ index, data }) => {
         dataStore.data.set(index, data)
-        dataStore.hashMapData.set(data.hash, index)
+        dataStore.hashMapData.set(data.hash(), index)
       })
 
       dataStore.batchFetched.set(payload.batch, true)

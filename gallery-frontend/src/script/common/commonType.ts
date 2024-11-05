@@ -106,16 +106,18 @@ export class SubRow {
  * Represents album data with relevant attributes.
  */
 export class Album {
-  album_id: string
-  album_name: string
-  active: boolean
-  password: string
+  id: string
+  name: string
+  width: number
+  height: number
+  cover: string
 
-  constructor(album_id: string, album_name: string, active: boolean, password: string) {
-    this.album_id = album_id
-    this.album_name = album_name
-    this.active = active
-    this.password = password
+  constructor(id: string, name: string, width: number, height: number, cover: string) {
+    this.id = id
+    this.name = name
+    this.width = width
+    this.height = height
+    this.cover = cover
   }
 }
 
@@ -133,7 +135,7 @@ export type Sorting = 'ascending' | 'descending' | 'random' | 'similar'
  */
 export interface SlicedDataItem {
   index: number
-  data: DataBase
+  data: AbstractData
 }
 
 /**
@@ -141,7 +143,7 @@ export interface SlicedDataItem {
  */
 export interface SlicedData {
   index: number
-  data: DataBase
+  data: AbstractData
 }
 
 /**
@@ -302,16 +304,36 @@ const AlbumSchema = z.object({
   height: z.number().int().nonnegative()
 })
 
-const AbstractDataSchema = z.union([
+const AbstractDataSchemaParse = z.union([
   z.object({ DataBase: DataBaseParse }),
   z.object({ Album: AlbumSchema })
 ])
+
+export class AbstractData {
+  database?: DataBase
+  album?: Album
+  constructor(data: DataBase | Album) {
+    if (data instanceof DataBase) {
+      this.database = data
+    } else if (data instanceof Album) {
+      this.album = data
+    }
+  }
+
+  hash() {
+    if (this.database !== undefined) {
+      return this.database.hash
+    } else {
+      return this.album!.id
+    }
+  }
+}
 
 /**
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({
-  abstractData: AbstractDataSchema,
+  abstractData: AbstractDataSchemaParse,
   timestamp: z.number()
 })
 
