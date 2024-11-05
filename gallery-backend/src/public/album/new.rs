@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -20,6 +20,9 @@ impl Album {
             cover: None,
             user_defined_metadata: HashMap::new(),
             share_list: vec![],
+            tag: HashSet::new(),
+            width: 300,
+            height: 300,
         }
     }
 }

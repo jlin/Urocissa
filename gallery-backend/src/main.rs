@@ -5,7 +5,7 @@ use crate::public::error_data::{handle_error, ErrorData};
 use initialization::{initialize_folder, initialize_logger};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use public::config::PRIVATE_CONFIG;
-use public::redb::DATA_TABLE;
+use public::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::tree::start_loop::SHOULD_RESET;
 use public::tree::TREE;
 use redb::ReadableTableMetadata;
@@ -51,7 +51,10 @@ async fn rocket() -> _ {
     {
         let table = txn.open_table(DATA_TABLE).unwrap();
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", table.len().unwrap());
+        let album_table = txn.open_table(ALBUM_TABLE).unwrap();
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", album_table.len().unwrap());
     }
+
     txn.commit().unwrap();
 
     SHOULD_RESET.store(true, Ordering::SeqCst);

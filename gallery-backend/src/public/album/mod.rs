@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use arrayvec::ArrayString;
 use bitcode::{Decode, Encode};
@@ -25,4 +25,7 @@ pub struct Album {
     pub cover: Option<ArrayString<64>>,
     pub user_defined_metadata: HashMap<String, Vec<String>>,
     pub share_list: Vec<Share>,
+    pub tag: HashSet<String>,
+    pub width: u32,
+    pub height: u32,
 }

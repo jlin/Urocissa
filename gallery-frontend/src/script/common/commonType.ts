@@ -107,7 +107,7 @@ export class SubRow {
 /**
  * Represents album data with relevant attributes.
  */
-export class AlbumData {
+export class Album {
   album_id: string
   album_name: string
   active: boolean
@@ -265,16 +265,45 @@ export const DataBaseTimestampForConstructorSchema = z.object({
   timestamp: z.number()
 })
 
+const ShareSchema = z.object({
+  url: z.string().max(64),
+  description: z.string(),
+  password: z.string().optional(),
+  show_metadata: z.boolean(),
+  show_download: z.boolean(),
+  show_upload: z.boolean(),
+  exp: z.number().int().nonnegative()
+})
+
+const AlbumSchema = z.object({
+  id: z.string().max(64),
+  title: z.string().optional(),
+  created_time: z.bigint(),
+  cover: z.string().max(64).optional(),
+  user_defined_metadata: z.record(z.array(z.string())),
+  share_list: z.array(ShareSchema),
+  tag: z.array(z.string()),
+  width: z.number().int().nonnegative(),
+  height: z.number().int().nonnegative()
+})
+
+
+
 /**
  * Schema to validate instances of DataBase.
  */
 export const databaseSchema = z.instanceof(DataBase)
 
+const AbstractDataSchema = z.union([
+  z.object({ DataBase: databaseSchema }),
+  z.object({ Album: AlbumSchema })
+])
+
 /**
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({
-  database: z.instanceof(DataBase),
+  database: AbstractDataSchema,
   timestamp: z.number()
 })
 

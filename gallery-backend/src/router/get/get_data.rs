@@ -1,12 +1,13 @@
+use crate::public::abstract_data::AbstractData;
 use crate::public::album::Album;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
-use crate::public::redb::DATA_TABLE;
+use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::public::reduced_data::ReducedData;
 use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::TREE;
-use crate::public::reduced_data::ReducedData;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
@@ -61,9 +62,9 @@ pub async fn prefetch(
                     .par_iter()
                     .filter(move |database| filter(&database.database))
                     .map(|item| ReducedData {
-                        hash: item.database.hash,
-                        width: item.database.width,
-                        height: item.database.height,
+                        hash: item.database.hash(),
+                        width: item.database.width(),
+                        height: item.database.height(),
                         date: item.timestamp,
                     })
                     .collect()
@@ -71,9 +72,9 @@ pub async fn prefetch(
             None => ref_data
                 .par_iter()
                 .map(|item| ReducedData {
-                    hash: item.database.hash,
-                    width: item.database.width,
-                    height: item.database.height,
+                    hash: item.database.hash(),
+                    width: item.database.width(),
+                    height: item.database.height(),
                     date: item.timestamp,
                 })
                 .collect(),
@@ -134,33 +135,45 @@ pub async fn get_data(
         let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(&timestamp).unwrap();
         let read_txn = TREE.in_disk.begin_read().unwrap();
         let table = read_txn.open_table(DATA_TABLE).unwrap();
+        let album_table = read_txn.open_table(ALBUM_TABLE).unwrap();
         let end = end.min(tree_snapshot.len());
+
         if start < end {
-            let data_vec: Vec<DataBaseTimestamp> = (start..end)
+            // Change the type of data_vec to Result<Vec<DataBaseTimestamp>, Status>
+            let data_vec: Result<Vec<DataBaseTimestamp>, Status> = (start..end)
                 .into_par_iter()
-                .map(|index| {
-                    let database = table
-                        .get(&*tree_snapshot.get_hash(index))
-                        .unwrap()
-                        .unwrap()
-                        .value();
-                    DataBaseTimestamp::new(
-                        database,
-                        &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
-                    )
-                })
+                .map(
+                    |index| match table.get(&*tree_snapshot.get_hash(index)).unwrap() {
+                        Some(database) => Ok(DataBaseTimestamp::new(
+                            AbstractData::DataBase(database.value()),
+                            &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
+                        )),
+                        None => match album_table.get(&*tree_snapshot.get_hash(index)).unwrap() {
+                            Some(album) => Ok(DataBaseTimestamp::new(
+                                AbstractData::Album(album.value()),
+                                &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
+                            )),
+                            None => Err(Status::InternalServerError),
+                        },
+                    },
+                )
                 .collect();
-            warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data: {} ~ {}", start, end);
-            Ok(Json(data_vec))
+
+            match data_vec {
+                Ok(vec) => {
+                    warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data: {} ~ {}", start, end);
+                    Ok(Json(vec))
+                }
+                Err(e) => Err(e),
+            }
         } else {
-            // index out of range
+            // Index out of range
             Ok(Json(vec![]))
         }
     })
     .await
     .unwrap()
 }
-
 #[get("/get/get-config.json")]
 pub async fn get_config() -> Json<&'static PublicConfig> {
     Json(&*PUBLIC_CONFIG)

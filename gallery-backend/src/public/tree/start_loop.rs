@@ -1,6 +1,7 @@
 use super::Tree;
+use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
-use crate::public::redb::DATA_TABLE;
+use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
 use std::sync::atomic::AtomicBool;
@@ -26,9 +27,27 @@ impl Tree {
                     .map(|guard| {
                         let (_key, value) = guard.unwrap();
                         let database = value.value();
-                        DataBaseTimestamp::new(database, &priority_list)
+                        DataBaseTimestamp::new(AbstractData::DataBase(database), &priority_list)
                     })
                     .collect();
+                let album_table = self
+                    .in_disk
+                    .begin_read()
+                    .unwrap()
+                    .open_table(ALBUM_TABLE)
+                    .unwrap();
+
+                let album_vec: Vec<DataBaseTimestamp> = album_table
+                    .iter()
+                    .unwrap()
+                    .map(|guard| {
+                        let (_key, value) = guard.unwrap();
+                        let album = value.value();
+                        DataBaseTimestamp::new(AbstractData::Album(album), &priority_list)
+                    })
+                    .collect();
+                data_vec.extend(album_vec);
+
                 data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
                 *self.in_memory.write().unwrap() = data_vec;
                 info!("In-memory cache updated.");

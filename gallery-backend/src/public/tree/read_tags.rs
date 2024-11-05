@@ -25,7 +25,7 @@ impl Tree {
             .iter()
             .par_bridge()
             .for_each(|database| {
-                for tag in &database.database.tag {
+                for tag in database.database.tag() {
                     let counter = tag_counts
                         .entry(tag.clone())
                         .or_insert_with(|| AtomicUsize::new(0));
