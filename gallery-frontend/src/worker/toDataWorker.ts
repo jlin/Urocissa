@@ -1,6 +1,6 @@
 import {
   DataBase,
-  DataBaseTimestampForConstructorSchema,
+  DataBaseParse,
   DisplayElement,
   Prefetch,
   Row,
@@ -10,6 +10,7 @@ import {
   SubRow,
   TagInfo,
   batchNumber,
+  databaseTimestampSchema,
   fixedBigRowHeight,
   prefetchSchema,
   rowSchema,
@@ -175,7 +176,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
   }`
 
   const response = await axios.get<DataBase[]>(fetchUrl)
-  const databaseTimestampArray = z.array(DataBaseTimestampForConstructorSchema).parse(response.data)
+  const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
   const data: Map<number, DataBase> = new Map()
 
@@ -184,9 +185,14 @@ async function fetchData(batchIndex: number, timestamp: string) {
       break // Stop processing further if the batch should no longer be processed
     }
     const item = databaseTimestampArray[index]
-    const dataBaseInstance = new DataBase(item)
-    const key = batchIndex * batchNumber + index
-    data.set(key, dataBaseInstance)
+    const isDataBase = z.object({ DataBase: DataBaseParse }).safeParse(item.database)
+    if (isDataBase.success) {
+      const parsedData = isDataBase.data
+      const dataBaseInstance = new DataBase(parsedData.DataBase, item.timestamp)
+      const key = batchIndex * batchNumber + index
+      data.set(key, dataBaseInstance)
+    }
+
     if (index % 100 === 0) {
       // Yield after every 100 items
       await new Promise((resolve) => setTimeout(resolve, 0))

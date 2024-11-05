@@ -39,13 +39,12 @@ export class DataBase {
   ext_type: string
   pending: boolean
 
-  constructor(dataWithTimestamp: z.infer<typeof DataBaseTimestampForConstructorSchema>) {
-    const data = dataWithTimestamp.database
+  constructor(data: z.infer<typeof DataBaseParse>, timestamp: number) {
     this.hash = data.hash
     this.size = data.size
     this.width = data.width
     this.height = data.height
-    this.timestamp = dataWithTimestamp.timestamp
+    this.timestamp = timestamp
     this.thumbhashUrl = thumbHashToDataURL(data.thumbhash)
     this.phash = data.phash
     this.hammingDistance = 0
@@ -66,7 +65,7 @@ export class DataBase {
    */
   static createDefault(): DataBase | undefined {
     const defaultData = {
-      database: {
+      DataBase: {
         album: [],
         alias: [{ file: '' }],
         exif_vec: {},
@@ -80,12 +79,11 @@ export class DataBase {
         tag: [],
         thumbhash: [],
         width: 300
-      },
-      timestamp: Date.now()
+      }
     }
 
     try {
-      return new DataBase(DataBaseTimestampForConstructorSchema.parse(defaultData))
+      return new DataBase(DataBaseParse.parse(defaultData), Date.now())
     } catch (error) {
       console.error('Failed to create default DataBase:', error)
       return undefined
@@ -243,24 +241,41 @@ export const prefetchSchema = z.object({
   locateTo: z.number().nullable()
 })
 
+export const DataBaseParse = z.object({
+  album: z.array(z.string()),
+  alias: z.array(AliasSchema),
+  exif_vec: z.record(z.string(), z.string()),
+  ext: z.string(),
+  ext_type: z.string(),
+  hash: z.string(),
+  height: z.number(),
+  pending: z.boolean(),
+  phash: z.array(z.number()),
+  size: z.number(),
+  tag: z.array(z.string()),
+  thumbhash: z.array(z.number()),
+  width: z.number()
+})
 /**
  * Schema for DataBase constructor.
  */
-export const DataBaseTimestampForConstructorSchema = z.object({
+export const DataBaseTimestamp = z.object({
   database: z.object({
-    album: z.array(z.string()),
-    alias: z.array(AliasSchema),
-    exif_vec: z.record(z.string(), z.string()),
-    ext: z.string(),
-    ext_type: z.string(),
-    hash: z.string(),
-    height: z.number(),
-    pending: z.boolean(),
-    phash: z.array(z.number()),
-    size: z.number(),
-    tag: z.array(z.string()),
-    thumbhash: z.array(z.number()),
-    width: z.number()
+    DataBase: z.object({
+      album: z.array(z.string()),
+      alias: z.array(AliasSchema),
+      exif_vec: z.record(z.string(), z.string()),
+      ext: z.string(),
+      ext_type: z.string(),
+      hash: z.string(),
+      height: z.number(),
+      pending: z.boolean(),
+      phash: z.array(z.number()),
+      size: z.number(),
+      tag: z.array(z.string()),
+      thumbhash: z.array(z.number()),
+      width: z.number()
+    })
   }),
   timestamp: z.number()
 })
@@ -287,15 +302,8 @@ const AlbumSchema = z.object({
   height: z.number().int().nonnegative()
 })
 
-
-
-/**
- * Schema to validate instances of DataBase.
- */
-export const databaseSchema = z.instanceof(DataBase)
-
 const AbstractDataSchema = z.union([
-  z.object({ DataBase: databaseSchema }),
+  z.object({ DataBase: DataBaseParse }),
   z.object({ Album: AlbumSchema })
 ])
 
