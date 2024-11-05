@@ -6,7 +6,7 @@ use crate::public::redb::DATA_TABLE;
 use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::TREE;
-use crate::public::tree_snap_shot_in_memory::ReducedData;
+use crate::public::reduced_data::ReducedData;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 

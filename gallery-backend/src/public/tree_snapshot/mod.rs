@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 
 use dashmap::DashMap;
 
-use crate::public::tree_snap_shot_in_memory::ReducedData;
+use crate::public::reduced_data::ReducedData;
 
 #[derive(Debug)]
 pub struct TreeSnapshot {

@@ -1,5 +1,5 @@
 use super::TreeSnapshot;
-use crate::public::tree_snap_shot_in_memory::ReducedData;
+use crate::public::reduced_data::ReducedData;
 use arrayvec::ArrayString;
 use dashmap::mapref::one::Ref;
 

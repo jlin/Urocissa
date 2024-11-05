@@ -1,6 +1,6 @@
 use super::{
     album::Album, database_struct::database::definition::DataBase, row::Row,
-    tree_snap_shot_in_memory::ReducedData,
+    reduced_data::ReducedData,
 };
 use redb::{TypeName, Value};
 
