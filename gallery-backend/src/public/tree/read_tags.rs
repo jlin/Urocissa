@@ -2,7 +2,10 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use dashmap::DashMap;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
+use redb::ReadableTable;
 use serde::{Deserialize, Serialize};
+
+use crate::public::{album::Album, redb::ALBUM_TABLE};
 
 use super::Tree;
 
@@ -38,5 +41,20 @@ impl Tree {
             })
             .collect();
         tag_infos
+    }
+    pub fn read_albums(&'static self) -> Vec<Album> {
+        let txn = self.in_disk.begin_read().unwrap();
+
+        let album_table = txn.open_table(ALBUM_TABLE).unwrap();
+
+        album_table
+            .iter()
+            .unwrap()
+            .map(|result| {
+                let (_, access_guard) = result.unwrap();
+                let album = access_guard.value();
+                album
+            })
+            .collect()
     }
 }

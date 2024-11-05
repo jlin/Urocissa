@@ -1,3 +1,4 @@
+use crate::public::album::Album;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
@@ -174,6 +175,17 @@ pub async fn get_tags() -> Json<Vec<TagInfo>> {
     .await
     .unwrap()
 }
+
+#[get("/get/get-albums")]
+pub async fn get_albums() -> Json<Vec<Album>> {
+    tokio::task::spawn_blocking(move || {
+        let album_list = TREE.read_albums();
+        Json(album_list)
+    })
+    .await
+    .unwrap()
+}
+
 #[get("/get/get-rows?<index>&<timestamp>")]
 pub async fn get_rows(index: usize, timestamp: String) -> Result<Json<Row>, Status> {
     tokio::task::spawn_blocking(move || {

@@ -13,7 +13,9 @@ use rocket::fs::FileServer;
 use router::fairing::{auth_request_fairing, cache_control_fairing};
 use router::{
     delete::delete_data::delete_data,
-    get::get_data::{get_config, get_data, get_rows, get_scroll_bar, get_tags, prefetch},
+    get::get_data::{
+        get_albums, get_config, get_data, get_rows, get_scroll_bar, get_tags, prefetch,
+    },
     get::get_img::compressed_file,
     get::get_page::{
         all, all_view, archived, archived_view, catch_view_routes, favicon, favorite,
@@ -102,7 +104,8 @@ async fn rocket() -> _ {
                 authenticate,
                 redirect_to_login,
                 create_album,
-                authenticate_share
+                authenticate_share,
+                get_albums
             ],
         )
 }
