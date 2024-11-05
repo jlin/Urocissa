@@ -311,7 +311,7 @@ const AbstractDataSchema = z.union([
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({
-  database: AbstractDataSchema,
+  abstractData: AbstractDataSchema,
   timestamp: z.number()
 })
 

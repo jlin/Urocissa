@@ -185,10 +185,9 @@ async function fetchData(batchIndex: number, timestamp: string) {
       break // Stop processing further if the batch should no longer be processed
     }
     const item = databaseTimestampArray[index]
-    const isDataBase = z.object({ DataBase: DataBaseParse }).safeParse(item.database)
-    if (isDataBase.success) {
-      const parsedData = isDataBase.data
-      const dataBaseInstance = new DataBase(parsedData.DataBase, item.timestamp)
+
+    if ("DataBase" in item.abstractData) {
+      const dataBaseInstance = new DataBase(item.abstractData.DataBase, item.timestamp)
       const key = batchIndex * batchNumber + index
       data.set(key, dataBaseInstance)
     }
