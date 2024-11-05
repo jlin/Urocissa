@@ -1,6 +1,6 @@
 import { paddingPixel, Row } from '@/script/common/commonType'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useRowStore } from '@/store/rowStore'
 import { Ref, ref, toRaw, watch } from 'vue'
@@ -216,16 +216,16 @@ function updateLastRowBottom(
   lastRowBottom: Ref<number>,
   endHeight: number
 ) {
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   if (visibleRows.value.length > 0) {
     const lastRow = visibleRows.value[visibleRows.value.length - 1]
     const lastRowBottomComputed = lastRow.topPixelAccumulated! + lastRow.offset + lastRow.rowHeight
     lastRowBottom.value = lastRowBottomComputed
-    if (lastRowBottomComputed <= endHeight && lastRow.end < dataLengthStore.dataLength) {
+    if (lastRowBottomComputed <= endHeight && lastRow.end < prefetchStore.dataLength) {
       const lastRowIndex = lastRow.rowIndex
       fetchRowInWorker(lastRowIndex + 1)
       setTimeout(() => {
-        dataLengthStore.updateVisibleRowTrigger = !dataLengthStore.updateVisibleRowTrigger
+        prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
       }, 500)
     }
   }
@@ -252,7 +252,7 @@ export function useUpdateVisibleRows(
   windowHeight: Ref<number>
 ) {
   const visibleRows: Ref<Row[]> = ref<Row[]>([])
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   const rowStore = useRowStore()
 
   const updateVisibleRows = () => {
@@ -272,7 +272,7 @@ export function useUpdateVisibleRows(
         scrollTopOffsetFix(
           visibleRows,
           scrollTop,
-          dataLengthStore.totalHeight - windowHeight.value - paddingPixel
+          prefetchStore.totalHeight - windowHeight.value - paddingPixel
         )
       }
       updateLastVisibleRow(visibleRows)
@@ -286,7 +286,7 @@ export function useUpdateVisibleRows(
     [
       imageContainerRef,
       scrollTop,
-      () => dataLengthStore.updateVisibleRowTrigger,
+      () => prefetchStore.updateVisibleRowTrigger,
       () => document.visibilityState
     ],
     updateVisibleRows,

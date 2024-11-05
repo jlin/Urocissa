@@ -1,8 +1,8 @@
 import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/commonType'
 import { defineStore } from 'pinia'
 
-export const useDataLengthStore = defineStore({
-  id: 'dataLengthStore',
+export const usePrefetchStore = defineStore({
+  id: 'prefetchStore',
   state: (): {
     windowWidth: number
     timestamp: string | null

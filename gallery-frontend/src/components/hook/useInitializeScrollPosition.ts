@@ -1,6 +1,6 @@
 import { watch, type Ref, type ComputedRef } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/commonType'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 
@@ -23,7 +23,7 @@ export function useInitializeScrollPosition(
   windowWidth: Ref<number>
 ): void {
   const initializedStore = useInitializedStore()
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
 
   watch(
     // Here windowWidth is watched for the case that when resizing,
@@ -39,12 +39,12 @@ export function useInitializeScrollPosition(
 
         clientHeight.value = imageContainer.clientHeight
 
-        const jumpTo = dataLengthStore.locateTo
+        const jumpTo = prefetchStore.locateTo
         if (jumpTo !== null) {
           const targetRowIndex = Math.floor(jumpTo / layoutBatchNumber)
           scrollTop.value = targetRowIndex * fixedBigRowHeight
           fetchRowInWorker(targetRowIndex)
-          dataLengthStore.locateTo = null
+          prefetchStore.locateTo = null
         }
       }
     },

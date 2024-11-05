@@ -1,4 +1,4 @@
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
@@ -12,15 +12,15 @@ import { bindActionDispatch } from 'typesafe-agent-events'
  * @param {number} index - The index of the row to fetch.
  */
 export function fetchRowInWorker(index: number) {
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   const locationStore = useLocationStore()
   const queueStore = useQueueStore()
 
-  if (dataLengthStore.rowLength === 0) {
+  if (prefetchStore.rowLength === 0) {
     return // No data to fetch
   }
 
-  index = clamp(index, 0, dataLengthStore.rowLength - 1)
+  index = clamp(index, 0, prefetchStore.rowLength - 1)
 
   if (queueStore.row.has(index)) {
     return // Already fetched
@@ -38,15 +38,15 @@ export function fetchRowInWorker(index: number) {
   const dataWorker = workerStore.worker!
 
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
-  const timestamp = dataLengthStore.timestamp
+  const timestamp = prefetchStore.timestamp
 
   if (timestamp !== null) {
     queueStore.row.add(index)
     postToWorker.fetchRow({
       index: index,
       timestamp: timestamp,
-      windowWidth: dataLengthStore.windowWidth,
-      isLastRow: index === dataLengthStore.rowLength - 1
+      windowWidth: prefetchStore.windowWidth,
+      isLastRow: index === prefetchStore.rowLength - 1
     })
   }
 }

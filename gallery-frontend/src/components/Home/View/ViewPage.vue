@@ -283,7 +283,7 @@ import { useQueueStore } from '@/store/queueStore'
 import { batchNumber } from '@/script/common/commonType'
 import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { getSrc } from '@/../config.ts'
 
 interface ExifData {
@@ -292,7 +292,7 @@ interface ExifData {
   FocalLength: string // Focal length as a string, e.g., "35 mm"
   PhotographicSensitivity: string
 }
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 const workerStore = useWorkerStore()
 const queueStore = useQueueStore()
 const imgStore = useImgStore()
@@ -473,7 +473,7 @@ function prefetchMedia(index: number) {
 
       if (nextMeta !== undefined && nextMeta.ext_type === 'image') {
         checkAndFetch(nextIndex)
-      } else if (nextMeta === undefined && nextIndex <= dataLengthStore.dataLength - 1) {
+      } else if (nextMeta === undefined && nextIndex <= prefetchStore.dataLength - 1) {
         fetchDataInWorker(Math.floor(nextIndex / batchNumber))
       }
 

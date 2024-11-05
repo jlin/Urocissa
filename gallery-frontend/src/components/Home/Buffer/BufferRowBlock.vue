@@ -2,7 +2,7 @@
   <div class="w-100 d-flex flex-wrap row-flex-container no-select">
     <div
       v-for="(data, subIndex) in row.displayElements"
-      :key="`${row.start}-${subIndex}-${dataLengthStore.timestamp}`"
+      :key="`${row.start}-${subIndex}-${prefetchStore.timestamp}`"
       :style="{
         width: `${data.displayWidth}px`,
         height: `${data.displayHeight}px`
@@ -151,7 +151,7 @@
 <script setup lang="ts">
 import { layoutBatchNumber, Row } from '@/script/common/commonType'
 import { useCollectionStore } from '@/store/collectionStore'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
 import { useImgStore } from '@/store/imgStore'
 import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
@@ -169,7 +169,7 @@ const props = defineProps<{
 const router = useRouter()
 const route = useRoute()
 const mobile = inject<string | null>('mobile')!
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 const collectionStore = useCollectionStore()
 const dataStore = useDataStore()
 const imgStore = useImgStore()

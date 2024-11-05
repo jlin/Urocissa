@@ -1,4 +1,4 @@
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useTagStore } from '@/store/tagStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
@@ -10,7 +10,7 @@ export function editTagsInWorker(
   removeTagsArray: string[]
 ) {
   const workerStore = useWorkerStore()
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   const tagStore = useTagStore()
 
   tagStore.fetched = false
@@ -21,7 +21,7 @@ export function editTagsInWorker(
 
   const dataWorker = workerStore.worker!
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
-  const timestamp = dataLengthStore.timestamp
+  const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {
       indexArray: [...indexArray],

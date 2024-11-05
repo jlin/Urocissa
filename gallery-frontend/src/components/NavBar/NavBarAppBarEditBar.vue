@@ -9,7 +9,7 @@
     </v-card>
     <v-spacer></v-spacer>
     <v-btn
-      v-if="dataLengthStore.dataLength !== collectionStore.editModeCollection.size"
+      v-if="prefetchStore.dataLength !== collectionStore.editModeCollection.size"
       icon="mdi-select-all"
       @click="selectAll()"
     ></v-btn>
@@ -79,7 +79,7 @@ import { getSrc } from '@/../config'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useCollectionStore } from '@/store/collectionStore'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
 import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
@@ -89,7 +89,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const modalStore = useModalStore()
 const collectionStore = useCollectionStore()
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 const dataStore = useDataStore()
 const leaveEdit = () => {
   collectionStore.editModeCollection.clear()
@@ -97,7 +97,7 @@ const leaveEdit = () => {
 }
 
 const selectAll = () => {
-  for (let i = 0; i < dataLengthStore.dataLength; i++) {
+  for (let i = 0; i < prefetchStore.dataLength; i++) {
     collectionStore.editModeCollection.add(i)
   }
 }
@@ -107,7 +107,7 @@ const selectRemove = () => {
 }
 
 const selectInverse = () => {
-  for (let i = 0; i < dataLengthStore.dataLength; i++) {
+  for (let i = 0; i < prefetchStore.dataLength; i++) {
     if (collectionStore.editModeCollection.has(i)) {
       collectionStore.editModeCollection.delete(i)
     } else {
@@ -135,7 +135,7 @@ const regeneratePreview = async () => {
   const indexArray = Array.from(collectionStore.editModeCollection)
   const regenerateData = {
     indexArray: indexArray,
-    timestamp: dataLengthStore.timestamp
+    timestamp: prefetchStore.timestamp
   }
   try {
     const response = await axios.post('/put/regenerate-preview', regenerateData, {

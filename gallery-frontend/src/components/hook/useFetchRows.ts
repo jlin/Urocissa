@@ -3,7 +3,7 @@ import { Ref, watch } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import debounce from 'lodash/debounce'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
 
@@ -50,7 +50,7 @@ export function useFetchRows(
   maxWait = 100
 ) {
   const initializedStore = useInitializedStore()
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
 
   const debouncedFetch = debounce(
     () => {
@@ -80,7 +80,7 @@ export function useFetchRows(
   )
 
   watch(
-    [() => initializedStore.initialized, scrollTop, () => dataLengthStore.updateFetchRowTrigger],
+    [() => initializedStore.initialized, scrollTop, () => prefetchStore.updateFetchRowTrigger],
     debouncedFetch,
     { immediate: true }
   )

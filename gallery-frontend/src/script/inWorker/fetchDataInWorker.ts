@@ -1,5 +1,5 @@
 import { useWorkerStore } from '@/store/workerStore'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { toDataWorker } from '@/worker/workerApi'
 
@@ -10,11 +10,11 @@ export function fetchDataInWorker(batch: number) {
     workerStore.initializeWorker()
   }
 
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   const dataWorker = workerStore.worker!
 
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
-  const timestamp = dataLengthStore.timestamp
+  const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     // Photo data is fetched batch by batch
     postToWorker.fetchData({

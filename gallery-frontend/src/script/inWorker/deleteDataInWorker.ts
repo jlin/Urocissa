@@ -1,11 +1,11 @@
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
 export function deleteDataInWorker(indexArray: number[]) {
   const workerStore = useWorkerStore()
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
 
   if (workerStore.worker === null) {
     workerStore.initializeWorker()
@@ -13,7 +13,7 @@ export function deleteDataInWorker(indexArray: number[]) {
   const dataWorker = workerStore.worker!
 
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
-  const timestamp = dataLengthStore.timestamp
+  const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     postToWorker.deleteData({
       indexArray: indexArray,

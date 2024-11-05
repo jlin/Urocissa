@@ -2,12 +2,12 @@
   <div
     class="buffer position-relative w-100 overflow-y-hidden"
     :style="{
-      height: `${Math.max(bufferHeight, dataLengthStore.totalHeight)}px`
+      height: `${Math.max(bufferHeight, prefetchStore.totalHeight)}px`
     }"
   >
     <BufferPlaceholder
       id="placeholderTop"
-      v-if="visibleRows.length > 0 && !(dataLengthStore.totalHeight <= windowHeight)"
+      v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
       :topPixel="visibleRows[0].topPixelAccumulated! -
         scrollTop +
         bufferHeight / 3 +
@@ -16,7 +16,7 @@
     />
     <div
       v-for="row in visibleRows"
-      :key="`${row.start}-${dataLengthStore.timestamp}`"
+      :key="`${row.start}-${prefetchStore.timestamp}`"
       class="positioned-element position-absolute w-100 row-div"
       :style="{
         position: 'absolute',
@@ -29,7 +29,7 @@
     </div>
     <BufferPlaceholder
       id="placeholderBottom"
-      v-if="visibleRows.length > 0 && !(dataLengthStore.totalHeight <= windowHeight)"
+      v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
       :topPixel="visibleRows[visibleRows.length - 1].topPixelAccumulated! -
         scrollTop +
         bufferHeight / 3 +
@@ -68,7 +68,7 @@
  * `bufferHeight / 3` is used to position the RowBlock at a sufficient distance from the top of the component so that the parent Homepage can scroll up without reaching the top prematurely.
  */
 import { ComponentPublicInstance, Ref, computed, inject, ref, watch } from 'vue'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useFetchImgs } from '../../hook/useFetchImgs'
 import { useUpdateVisibleRows } from '../../hook/useUpdateVisibleRows'
 import { useFetchRows } from '../../hook/useFetchRows'
@@ -76,7 +76,7 @@ import { batchNumber, paddingPixel } from '@/script/common/commonType'
 import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 
 const windowWidth = inject<Ref<number>>('windowWidth')!
 const windowHeight = inject<Ref<number>>('windowHeight')!

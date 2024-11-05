@@ -1,6 +1,6 @@
 import { useDataStore } from '@/store/dataStore'
 import { Prefetch, SlicedDataItem } from '@/script/common/commonType'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useTagStore } from '@/store/tagStore'
@@ -20,7 +20,7 @@ const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 export function handleDataWorkerReturn(dataWorker: Worker) {
   const dataStore = useDataStore()
   const messageStore = useMessageStore()
-  const dataLengthStore = useDataLengthStore()
+  const prefetchStore = usePrefetchStore()
   const tagStore = useTagStore()
   const initializedStore = useInitializedStore()
   const scrollbarStore = useScrollbarStore()
@@ -43,7 +43,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       const timestamp = payload.timestamp
       const rowWithOffset = payload.rowWithOffset
       const windowWidth = rowWithOffset.windowWidth
-      if (windowWidth !== dataLengthStore.windowWidth) {
+      if (windowWidth !== prefetchStore.windowWidth) {
         return
       }
 
@@ -54,7 +54,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
         return
       }
       const index = row.rowIndex
-      if (timestamp === dataLengthStore.timestamp && !offsetStore.offset.has(index)) {
+      if (timestamp === prefetchStore.timestamp && !offsetStore.offset.has(index)) {
         offsetStore.offset.set(index, offset)
         row.offset = offsetStore.accumulatedOffset(row.rowIndex)
         rowStore.rowData.forEach((row) => {
@@ -65,12 +65,12 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
 
         rowStore.rowData.set(row.rowIndex, row)
 
-        dataLengthStore.totalHeight = dataLengthStore.totalHeight + offset
+        prefetchStore.totalHeight = prefetchStore.totalHeight + offset
         offsetStore.accumulatedAll = offsetStore.accumulatedAll + offset
       }
 
-      dataLengthStore.updateFetchRowTrigger = !dataLengthStore.updateFetchRowTrigger
-      dataLengthStore.updateVisibleRowTrigger = !dataLengthStore.updateVisibleRowTrigger
+      prefetchStore.updateFetchRowTrigger = !prefetchStore.updateFetchRowTrigger
+      prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
     },
     prefetchReturn: async (payload) => {
       const result: Prefetch = payload.result
@@ -79,10 +79,10 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
         messageStore.warn = false
         messageStore.showMessage = true
       }
-      dataLengthStore.timestamp = result.timestamp
-      dataLengthStore.updateVisibleRowTrigger = !dataLengthStore.updateVisibleRowTrigger
-      dataLengthStore.calculateLength(result.dataLength)
-      dataLengthStore.locateTo = result.locateTo
+      prefetchStore.timestamp = result.timestamp
+      prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
+      prefetchStore.calculateLength(result.dataLength)
+      prefetchStore.locateTo = result.locateTo
       initializedStore.initialized = true
 
       // Perform initialization:
@@ -100,7 +100,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
         throw error
       }
 
-      dataLengthStore.updateFetchRowTrigger = !dataLengthStore.updateFetchRowTrigger
+      prefetchStore.updateFetchRowTrigger = !prefetchStore.updateFetchRowTrigger
     },
     editTagsReturn: (payload) => {
       if (payload.returnedTagsArray !== undefined) {

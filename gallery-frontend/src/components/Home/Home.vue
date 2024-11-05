@@ -11,8 +11,8 @@
     }"
     :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
     @scroll="
-      // If dataLengthStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
-      dataLengthStore.totalHeight - windowHeight > 0 && dataLengthStore.locateTo === null
+      // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
+      prefetchStore.totalHeight - windowHeight > 0 && prefetchStore.locateTo === null
         ? throttledHandleScroll()
         : () => {}
     "
@@ -35,7 +35,7 @@
  */
 import { ref, onMounted, computed, provide, onBeforeUnmount, watch } from 'vue'
 import { useDataStore } from '@/store/dataStore'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useFilterStore } from '@/store/filterStore'
 import { useInitializedStore } from '@/store/initializedStore'
@@ -62,7 +62,7 @@ const rowStore = useRowStore()
 const dataStore = useDataStore()
 const filterStore = useFilterStore()
 const collectionStore = useCollectionStore()
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 const workerStore = useWorkerStore()
 const initializedStore = useInitializedStore()
 const queueStore = useQueueStore()
@@ -99,8 +99,8 @@ const throttledHandleScroll = handleScroll(
 watch(windowWidth, () => {
   // Handles browser resizing.
   locationStore.triggerForResize()
-  dataLengthStore.windowWidth = Math.round(windowWidth.value)
-  dataLengthStore.clearForResize()
+  prefetchStore.windowWidth = Math.round(windowWidth.value)
+  prefetchStore.clearForResize()
   rowStore.clearForResize()
   offsetStore.clearAll()
   queueStore.clearAll()
@@ -115,7 +115,7 @@ const resizeDebounce = debounce(() => {
 }, 100)
 
 const bufferHeight = computed(() => {
-  if (dataLengthStore.totalHeight <= windowHeight.value) {
+  if (prefetchStore.totalHeight <= windowHeight.value) {
     return 0
   } else {
     return 600000
@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
   workerStore.terminateWorker()
   initializedStore.initialized = false
   dataStore.clearAll()
-  dataLengthStore.clearAll()
+  prefetchStore.clearAll()
   queueStore.clearAll()
   filterStore.basicString = null
   filterStore.filterString = null

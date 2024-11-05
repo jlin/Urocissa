@@ -143,7 +143,7 @@ async function prefetch(
 ) {
   void priorityId
   void reverse
-  const fetchUrl = `/get/get-db-length?${locate ? `locate=${locate}` : ''}`
+  const fetchUrl = `/get/prefetch?${locate ? `locate=${locate}` : ''}`
 
   const axiosResponse = await axios.post<Prefetch>(fetchUrl, filterJsonString, {
     headers: {

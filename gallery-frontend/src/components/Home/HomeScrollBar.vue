@@ -87,7 +87,7 @@
 import { ref, inject, Ref, computed, watch, watchEffect, onMounted, onBeforeUnmount } from 'vue'
 import { clamp, debounce } from 'lodash'
 import { useElementSize, useMouseInElement } from '@vueuse/core'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
@@ -108,7 +108,7 @@ const currentDateChipIndex = ref(0)
 const chipSize = 25
 
 const locationStore = useLocationStore()
-const dataLengthStore = useDataLengthStore()
+const prefetchStore = usePrefetchStore()
 const scrollbarStore = useScrollbarStore()
 const rowStore = useRowStore()
 const offsetStore = useOffsetStore()
@@ -118,7 +118,7 @@ const reachBottom = computed(() => {
   return (
     scrollTop !== undefined &&
     windowHeight !== undefined &&
-    scrollTop!.value === dataLengthStore.totalHeight - windowHeight.value - paddingPixel
+    scrollTop!.value === prefetchStore.totalHeight - windowHeight.value - paddingPixel
   )
 })
 
@@ -127,7 +127,7 @@ const scrollTop = inject<Ref<number>>('scrollTop')
 const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
 const scrollbarRef = ref<HTMLElement | null>(null)
 
-const rowLength = computed(() => dataLengthStore.rowLength)
+const rowLength = computed(() => prefetchStore.rowLength)
 const { height: scrollbarHeight } = useElementSize(scrollbarRef)
 const scrollbarMouse = useMouseInElement(scrollbarRef)
 
@@ -208,7 +208,7 @@ const handleClick = () => {
     locationStore.anchor = targetRowIndex
     offsetStore.clearAll()
     queueStore.clearAll()
-    dataLengthStore.clearForResize()
+    prefetchStore.clearForResize()
     rowStore.clearForResize()
     scrollTop.value = targetRowIndex * fixedBigRowHeight
     debouncedFetchRow(targetRowIndex)

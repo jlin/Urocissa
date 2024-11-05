@@ -14,8 +14,27 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::UNIX_EPOCH;
 use std::time::{Instant, SystemTime};
-#[post("/get/get-db-length?<locate>", format = "json", data = "<query_data>")]
-pub async fn get_data_length(
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Prefetch {
+    pub timestamp: String,
+    pub locate_to: Option<usize>,
+    pub data_length: usize,
+}
+
+impl Prefetch {
+    fn new(timestamp: String, locate_to: Option<usize>, data_length: usize) -> Self {
+        Self {
+            timestamp,
+            locate_to,
+            data_length,
+        }
+    }
+}
+
+#[post("/get/prefetch?<locate>", format = "json", data = "<query_data>")]
+pub async fn prefetch(
     query_data: Option<Json<Expression>>,
     locate: Option<String>,
 ) -> Json<Option<Prefetch>> {
@@ -144,24 +163,6 @@ pub async fn get_data(
 #[get("/get/get-config.json")]
 pub async fn get_config() -> Json<&'static PublicConfig> {
     Json(&*PUBLIC_CONFIG)
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Prefetch {
-    pub timestamp: String,
-    pub locate_to: Option<usize>,
-    pub data_length: usize,
-}
-
-impl Prefetch {
-    fn new(timestamp: String, locate_to: Option<usize>, data_length: usize) -> Self {
-        Self {
-            timestamp,
-            locate_to,
-            data_length,
-        }
-    }
 }
 
 #[get("/get/get-tags")]

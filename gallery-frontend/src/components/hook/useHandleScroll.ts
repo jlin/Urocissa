@@ -1,5 +1,5 @@
 import { paddingPixel } from '@/script/common/commonType'
-import { useDataLengthStore } from '@/store/dataLengthStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 import { throttle } from 'lodash'
 import { Ref } from 'vue'
 
@@ -28,7 +28,7 @@ export function handleScroll(
   const throttledHandleScroll = throttle(
     () => {
       if (imageContainerRef.value !== null) {
-        const dataLengthStore = useDataLengthStore()
+        const prefetchStore = usePrefetchStore()
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
         const result = scrollTop.value + difference
 
@@ -43,16 +43,16 @@ export function handleScroll(
           } else {
             scrollTop.value = 0
           }
-        } else if (result >= dataLengthStore.totalHeight - windowHeight.value - paddingPixel) {
+        } else if (result >= prefetchStore.totalHeight - windowHeight.value - paddingPixel) {
           // If scrolling exceeds the upper bound, reset the scroll position to the maximum allowed value.
           if (mobile) {
             stopScroll.value = true
-            scrollTop.value = dataLengthStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTop.value = prefetchStore.totalHeight - windowHeight.value - paddingPixel
             setTimeout(() => {
               stopScroll.value = false
             }, 100)
           } else {
-            scrollTop.value = dataLengthStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTop.value = prefetchStore.totalHeight - windowHeight.value - paddingPixel
           }
         } else {
           // Adjust the scroll position normally within the allowed range.
