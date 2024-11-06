@@ -310,11 +310,23 @@ const metadata = computed(() => {
   return dataStore.data.get(index.value)?.database!
 })
 const nextHash = computed(() => {
-  return dataStore.data.get(index.value + 1)?.get_hash()
+  const nextData = dataStore.data.get(index.value + 1)
+  if (nextData !== undefined && nextData.database) {
+    return nextData.database.hash
+  } else {
+    return undefined
+  }
 })
+
 const previousHash = computed(() => {
-  return dataStore.data.get(index.value - 1)?.get_hash()
+  const previousData = dataStore.data.get(index.value - 1)
+  if (previousData !== undefined && previousData.database) {
+    return previousData.database.hash
+  } else {
+    return undefined
+  }
 })
+
 const errorMessage = ref<string | null>(null)
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const filePathComplete = computed(() => {

@@ -18,77 +18,58 @@ export const layoutBatchNumber = 20
 // ===========================
 
 /**
- * Represents a database entry with various attributes.
+ * Schema for alias objects.
  */
-export class DataBase {
-  hash: string
-  size: number
-  width: number
-  height: number
+const AliasSchema = z.object({
+  file: z.string(),
+  modified: z.number(),
+  scan_time: z.number()
+})
+
+export const DataBaseSchema = z.object({
+  album: z.array(z.string()),
+  alias: z.array(AliasSchema),
+  exif_vec: z.record(z.string(), z.string()),
+  ext: z.string(),
+  ext_type: z.string(),
+  hash: z.string(),
+  height: z.number(),
+  pending: z.boolean(),
+  phash: z.array(z.number()),
+  size: z.number(),
+  tag: z.array(z.string()),
+  thumbhash: z.array(z.number()),
+  width: z.number(),
+  timestamp: z.number(),
+  thumbhashUrl: z.string(), // need initialize
+  filename: z.string() // need initialize
+})
+
+export type DataBase = z.infer<typeof DataBaseSchema>
+
+export function createDataBase(
+  databaseParse: z.infer<typeof DataBaseParse>,
   timestamp: number
-  thumbhashUrl: string
-  phash: number[]
-  hammingDistance: number
-  randomIndex: number
-  ext: string
-  exif_vec: { [key: string]: string }
-  tag: string[]
-  album: string[]
-  alias: Alias[]
-  filename: string
-  ext_type: string
-  pending: boolean
-
-  constructor(data: z.infer<typeof DataBaseParse>, timestamp: number) {
-    this.hash = data.hash
-    this.size = data.size
-    this.width = data.width
-    this.height = data.height
-    this.timestamp = timestamp
-    this.thumbhashUrl = thumbHashToDataURL(data.thumbhash)
-    this.phash = data.phash
-    this.hammingDistance = 0
-    this.randomIndex = 0
-    this.ext = data.ext
-    this.exif_vec = data.exif_vec
-    this.tag = data.tag
-    this.album = data.album
-    this.alias = data.alias
-    this.filename = this.alias[0]?.file.split('/').pop() || ''
-    this.ext_type = data.ext_type
-    this.pending = data.pending
+): DataBase {
+  const database: DataBase = {
+    album: databaseParse.album,
+    alias: databaseParse.alias,
+    exif_vec: databaseParse.exif_vec,
+    ext: databaseParse.ext,
+    ext_type: databaseParse.ext_type,
+    hash: databaseParse.hash,
+    height: databaseParse.height,
+    pending: databaseParse.pending,
+    phash: databaseParse.phash,
+    size: databaseParse.size,
+    tag: databaseParse.tag,
+    thumbhash: databaseParse.thumbhash,
+    width: databaseParse.width,
+    timestamp: timestamp,
+    thumbhashUrl: thumbHashToDataURL(databaseParse.thumbhash),
+    filename: databaseParse.alias[0]?.file.split('/').pop() || ''
   }
-
-  /**
-   * Creates a default instance of DataBase.
-   * @returns {DataBase | undefined} A new DataBase instance or undefined if parsing fails.
-   */
-  static createDefault(): DataBase | undefined {
-    const defaultData = {
-      DataBase: {
-        album: [],
-        alias: [{ file: '' }],
-        exif_vec: {},
-        ext: '',
-        ext_type: '',
-        hash: '',
-        height: 200,
-        pending: false,
-        phash: [],
-        size: 0,
-        tag: [],
-        thumbhash: [],
-        width: 300
-      }
-    }
-
-    try {
-      return new DataBase(DataBaseParse.parse(defaultData), Date.now())
-    } catch (error) {
-      console.error('Failed to create default DataBase:', error)
-      return undefined
-    }
-  }
+  return database
 }
 
 /**
@@ -174,20 +155,11 @@ export type Prefetch = z.infer<typeof prefetchSchema>
 /**
  * Represents Album.
  */
-export type Album = z.infer<typeof albumSchema>
+export type Album = z.infer<typeof AlbumSchema>
 
 // ===========================
 // Zod Schemas
 // ===========================
-
-/**
- * Schema for alias objects.
- */
-const AliasSchema = z.object({
-  file: z.string(),
-  modified: z.number(),
-  scan_time: z.number()
-})
 
 /**
  * Schema for display elements.
@@ -278,7 +250,7 @@ const ShareSchema = z.object({
   exp: z.number().int().nonnegative()
 })
 
-const albumSchema = z.object({
+const AlbumSchema = z.object({
   id: z.string().max(64),
   title: z.string().optional(),
   created_time: z.bigint(),
@@ -290,49 +262,29 @@ const albumSchema = z.object({
   height: z.number().int().nonnegative()
 })
 
-const AbstractDataSchemaParse = z.union([
+const AbstractDataParseSchema = z.union([
   z.object({ DataBase: DataBaseParse }),
-  z.object({ Album: albumSchema })
+  z.object({ Album: AlbumSchema })
 ])
 
-export class AbstractData {
-  database?: DataBase
-  album?: Album
-  constructor(data: DataBase | Album, data_type: 'DataBase' | 'Album') {
-    switch (data_type) {
-      case 'DataBase':
-        this.database = data as DataBase
-        break
-      case 'Album':
-        this.album = data as Album
-        break
-      default:
-        throw new Error('Invalid data type: Expected "DataBase" or "Album".')
-    }
-  }
+const AbstractDataSchema = z.object({
+  database: DataBaseSchema.optional(),
+  album: AlbumSchema.optional()
+})
 
-  static parse_from_worker(abstractData: AbstractData) {
-    if (abstractData.database !== undefined) {
-      return new AbstractData(abstractData.database, 'DataBase')
-    } else {
-      return new AbstractData(abstractData.album!, 'Album')
-    }
-  }
+export type AbstractData = z.infer<typeof AbstractDataSchema>
 
-  get_tag() {
-    if (this.database !== undefined) {
-      return this.database.tag
-    } else {
-      return this.album!.tag
+export function createAbstractData(data: DataBase | Album): AbstractData {
+  if ('hash' in data) {
+    const abstractData: AbstractData = {
+      database: data
     }
-  }
-
-  get_hash() {
-    if (this.database !== undefined) {
-      return this.database.hash
-    } else {
-      return this.album!.id
+    return abstractData
+  } else {
+    const abstractData: AbstractData = {
+      album: data
     }
+    return abstractData
   }
 }
 
@@ -340,7 +292,7 @@ export class AbstractData {
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({
-  abstractData: AbstractDataSchemaParse,
+  abstractData: AbstractDataParseSchema,
   timestamp: z.number()
 })
 

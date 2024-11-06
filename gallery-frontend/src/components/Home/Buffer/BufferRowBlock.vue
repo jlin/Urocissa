@@ -239,14 +239,17 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
     const workerIndex = index % workerStore.concurrencyNumber
 
     if (workerStore.postToWorkerList !== undefined) {
-      workerStore.postToWorkerList[workerIndex].processSmallImage({
-        index: index,
-        hash: dataStore.data.get(index)!.get_hash(),
-        width: displayWidth,
-        height: displayHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        jwt: Cookies.get('jwt')!
-      })
+      const data = dataStore.data.get(index)!
+      if (data.database) {
+        workerStore.postToWorkerList[workerIndex].processSmallImage({
+          index: index,
+          hash: data.database.hash,
+          width: displayWidth,
+          height: displayHeight,
+          devicePixelRatio: window.devicePixelRatio,
+          jwt: Cookies.get('jwt')!
+        })
+      }
     } else {
       console.error('workerStore.postToWorkerList is undefined')
     }

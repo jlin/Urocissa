@@ -10,6 +10,8 @@ import {
   SubRow,
   TagInfo,
   batchNumber,
+  createAbstractData,
+  createDataBase,
   databaseTimestampSchema,
   fixedBigRowHeight,
   prefetchSchema,
@@ -187,8 +189,8 @@ async function fetchData(batchIndex: number, timestamp: string) {
     const item = databaseTimestampArray[index]
 
     if ('DataBase' in item.abstractData) {
-      const dataBaseInstance = new DataBase(item.abstractData.DataBase, item.timestamp)
-      const abstractData = new AbstractData(dataBaseInstance, 'DataBase')
+      const dataBaseInstance = createDataBase(item.abstractData.DataBase, item.timestamp)
+      const abstractData = createAbstractData(dataBaseInstance)
       const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
     }

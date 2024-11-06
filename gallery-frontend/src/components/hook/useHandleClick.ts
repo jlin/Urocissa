@@ -40,7 +40,7 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
     } else {
       // collectionStore.editModeOn === false
       const dataStore = useDataStore()
-      const hash = dataStore.data.get(currentIndex)!.get_hash()
+      const hash = dataStore.data.get(currentIndex)!.database!.hash
 
       if (route.path.startsWith('/favorite')) {
         router.push({ path: '/favorite/view/' + hash, query: { ...route.query } })
