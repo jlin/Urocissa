@@ -1,4 +1,12 @@
 import {
+  prefetchSchema,
+  rowSchema,
+  rowWithOffsetSchema,
+  scrollbarDataSchema,
+  tagInfoSchema,
+  databaseTimestampSchema
+} from '@/script/common/schemas'
+import {
   AbstractData,
   DataBase,
   DisplayElement,
@@ -7,19 +15,12 @@ import {
   RowWithOffset,
   ScrollbarData,
   SlicedData,
-  SubRow,
-  TagInfo,
-  batchNumber,
-  createAbstractData,
-  createDataBase,
-  databaseTimestampSchema,
-  fixedBigRowHeight,
-  prefetchSchema,
-  rowSchema,
-  rowWithOffsetSchema,
-  scrollbarDataSchema,
-  tagInfoSchema
-} from '@/script/common/commonType'
+  TagInfo
+} from '@/script/common/types'
+import { SubRow } from '@/script/common/classes'
+import { batchNumber, fixedBigRowHeight } from '@/script/common/constants'
+import { createAbstractData, createDataBase } from '@/script/common/functions'
+
 import axios from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
 import { fromDataWorker, toDataWorker } from './workerApi'

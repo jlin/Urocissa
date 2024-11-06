@@ -1,4 +1,4 @@
-import { ScrollbarData } from '@/script/common/commonType'
+import { ScrollbarData } from '@/script/common/types'
 import { defineStore } from 'pinia'
 export const useScrollbarStore = defineStore({
   id: 'scrollbarStore',

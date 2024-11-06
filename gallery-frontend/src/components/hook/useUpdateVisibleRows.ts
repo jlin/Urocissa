@@ -1,4 +1,5 @@
-import { paddingPixel, Row } from '@/script/common/commonType'
+import { Row } from '@/script/common/types'
+import { paddingPixel } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'

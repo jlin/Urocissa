@@ -5,7 +5,7 @@ import {
   ScrollbarData,
   SlicedData,
   TagInfo
-} from '@/script/common/commonType'
+} from '@/script/common/types'
 
 // Import createActionCreators from typesafe-agent-events for defining strongly-typed actions
 import { createActionCreators } from 'typesafe-agent-events'

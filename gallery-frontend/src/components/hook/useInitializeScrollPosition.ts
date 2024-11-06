@@ -1,7 +1,7 @@
 import { watch, type Ref, type ComputedRef } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/commonType'
+import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 
 /**

@@ -153,7 +153,8 @@
 </template>
 
 <script setup lang="ts">
-import { layoutBatchNumber, Row } from '@/script/common/commonType'
+import { layoutBatchNumber } from '@/script/common/constants'
+import { Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'

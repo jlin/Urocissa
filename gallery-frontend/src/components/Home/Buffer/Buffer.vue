@@ -72,7 +72,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useFetchImgs } from '../../hook/useFetchImgs'
 import { useUpdateVisibleRows } from '../../hook/useUpdateVisibleRows'
 import { useFetchRows } from '../../hook/useFetchRows'
-import { batchNumber, paddingPixel } from '@/script/common/commonType'
+import { batchNumber, paddingPixel } from '@/script/common/constants'
 import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 

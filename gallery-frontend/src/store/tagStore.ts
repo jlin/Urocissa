@@ -1,4 +1,5 @@
-import { TagInfo, tagInfoSchema } from '@/script/common/commonType'
+import { TagInfo } from '@/script/common/types'
+import { tagInfoSchema } from '@/script/common/schemas'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'

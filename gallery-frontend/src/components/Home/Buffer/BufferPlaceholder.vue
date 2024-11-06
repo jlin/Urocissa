@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { paddingPixel } from '@/script/common/commonType'
+import { paddingPixel } from '@/script/common/constants'
 import { computed, inject, onMounted, Ref, ref, watchEffect } from 'vue'
 const placeholderRef = ref<HTMLElement>()
 const windowWidth = inject<Ref<number>>('windowWidth')!

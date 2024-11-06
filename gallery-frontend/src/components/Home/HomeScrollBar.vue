@@ -94,14 +94,13 @@ import { useOffsetStore } from '@/store/offsetStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import { ScrollbarData } from '@/script/common/types'
 import {
   fixedBigRowHeight,
   layoutBatchNumber,
   paddingPixel,
-  ScrollbarData,
   scrollBarWidth
-} from '@/script/common/commonType'
-
+} from '@/script/common/constants'
 const isScrolling = ref(false)
 const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)

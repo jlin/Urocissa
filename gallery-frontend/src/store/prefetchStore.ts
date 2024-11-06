@@ -1,4 +1,4 @@
-import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/commonType'
+import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
 import { defineStore } from 'pinia'
 
 export const usePrefetchStore = defineStore({

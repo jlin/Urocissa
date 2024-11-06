@@ -1,4 +1,4 @@
-import { paddingPixel } from '@/script/common/commonType'
+import { paddingPixel } from '@/script/common/constants'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { throttle } from 'lodash'
 import { Ref } from 'vue'

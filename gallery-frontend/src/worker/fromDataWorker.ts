@@ -1,5 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import { Prefetch, SlicedDataItem } from '@/script/common/commonType'
+import { Prefetch, SlicedDataItem } from '@/script/common/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useInitializedStore } from '@/store/initializedStore'

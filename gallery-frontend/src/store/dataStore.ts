@@ -1,4 +1,4 @@
-import type { AbstractData } from '@/script/common/commonType'
+import type { AbstractData } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
 export const useDataStore = defineStore('DataStore', {
