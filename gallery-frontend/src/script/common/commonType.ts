@@ -327,7 +327,7 @@ export class AbstractData {
     }
   }
 
-  hash() {
+  get_hash() {
     if (this.database !== undefined) {
       return this.database.hash
     } else {

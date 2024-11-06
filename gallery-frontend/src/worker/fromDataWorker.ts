@@ -35,7 +35,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       slicedDataArray.forEach(({ index, data }) => {
         let parsed_data = AbstractData.parse_from_worker(data)
         dataStore.data.set(index, parsed_data)
-        dataStore.hashMapData.set(parsed_data.hash(), index)
+        dataStore.hashMapData.set(parsed_data.get_hash(), index)
       })
 
       dataStore.batchFetched.set(payload.batch, true)

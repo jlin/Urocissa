@@ -310,10 +310,10 @@ const metadata = computed(() => {
   return dataStore.data.get(index.value)?.database!
 })
 const nextHash = computed(() => {
-  return dataStore.data.get(index.value + 1)?.hash
+  return dataStore.data.get(index.value + 1)?.get_hash()
 })
 const previousHash = computed(() => {
-  return dataStore.data.get(index.value - 1)?.hash
+  return dataStore.data.get(index.value - 1)?.get_hash()
 })
 const errorMessage = ref<string | null>(null)
 const colRef = ref<InstanceType<typeof VCol> | null>(null)

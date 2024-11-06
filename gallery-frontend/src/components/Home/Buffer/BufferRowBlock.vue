@@ -237,10 +237,11 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
   } else if (!queueStore.img.has(index)) {
     queueStore.img.add(index)
     const workerIndex = index % workerStore.concurrencyNumber
+
     if (workerStore.postToWorkerList !== undefined) {
       workerStore.postToWorkerList[workerIndex].processSmallImage({
         index: index,
-        hash: dataStore.data.get(index)!.hash(),
+        hash: dataStore.data.get(index)!.get_hash(),
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
