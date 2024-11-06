@@ -165,10 +165,18 @@ const downloadAllFiles = async () => {
       const batchIndex = indexArray.slice(i, i + concurrencyLimit)
       const downloadPromises = batchIndex.map(async (index) => {
         const metadata = dataStore.data.get(index)!
-        const url = getSrc(metadata.hash, true, metadata.ext, Cookies.get('jwt')!, undefined)
-        const response = await axios.get(url, { responseType: 'blob' })
-        const fileName = `${metadata.hash}.${metadata.ext}`
-        saveAs(response.data, fileName)
+        if (metadata.database) {
+          const url = getSrc(
+            metadata.database.hash,
+            true,
+            metadata.database.ext,
+            Cookies.get('jwt')!,
+            undefined
+          )
+          const response = await axios.get(url, { responseType: 'blob' })
+          const fileName = `${metadata.database.hash}.${metadata.database.ext}`
+          saveAs(response.data, fileName)
+        }
       })
 
       await Promise.all(downloadPromises)

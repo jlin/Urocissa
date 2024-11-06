@@ -42,7 +42,7 @@
                 prepend-icon="mdi-alert-circle-outline"
                 density="comfortable"
                 size="small"
-                v-if="dataStore.data.get(row.start + subIndex)?.pending"
+                v-if="dataStore.data.get(row.start + subIndex)?.database?.pending"
                 color="grey"
                 variant="flat"
                 class="position-absolute ma-2"
@@ -59,7 +59,7 @@
                 size="small"
                 v-if="
                   dataStore.data.has(row.start + subIndex) &&
-                  dataStore.data.get(row.start + subIndex)?.ext_type === 'video'
+                  dataStore.data.get(row.start + subIndex)?.database?.ext_type === 'video'
                 "
                 color="grey"
                 variant="flat"
@@ -70,7 +70,7 @@
                   zIndex: 4
                 }"
               >
-                {{ formatDuration(dataStore.data.get(row.start + subIndex)?.exif_vec.duration!) }}
+                {{ formatDuration(dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!) }}
               </v-chip>
               <div
                 v-if="!mobile"
@@ -130,7 +130,7 @@
                     zIndex: 1
                   }"
                   class="w-100 h-100 bg-grey-darken-2"
-                  :src="dataStore.data.get(row.start + subIndex)!.thumbhashUrl"
+                  :src="dataStore.data.get(row.start + subIndex)!.database?.thumbhashUrl"
                 />
               </transition>
             </div>
@@ -236,7 +236,7 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
     if (workerStore.postToWorkerList !== undefined) {
       workerStore.postToWorkerList[workerIndex].processSmallImage({
         index: index,
-        hash: dataStore.data.get(index)!.hash,
+        hash: dataStore.data.get(index)!.hash(),
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,

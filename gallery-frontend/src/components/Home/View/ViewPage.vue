@@ -307,7 +307,7 @@ const hash = computed(() => {
 })
 const hashPattern = /^[a-fA-F0-9]{64}$/
 const metadata = computed(() => {
-  return dataStore.data.get(index.value)
+  return dataStore.data.get(index.value)?.database!
 })
 const nextHash = computed(() => {
   return dataStore.data.get(index.value + 1)?.hash
@@ -371,7 +371,7 @@ const checkAndFetch = (index: number): boolean => {
     queueStore.original.add(index)
     postToWorker.processImage({
       index: index,
-      hash: dataStore.data.get(index)!.hash,
+      hash: dataStore.data.get(index)!.database!.hash,
       devicePixelRatio: window.devicePixelRatio,
       jwt: Cookies.get('jwt')!
     })
@@ -468,8 +468,8 @@ function prefetchMedia(index: number) {
       const nextIndex = index + i
       const prevIndex = index - i
 
-      const nextMeta = dataStore.data.get(nextIndex)
-      const prevMeta = dataStore.data.get(prevIndex)
+      const nextMeta = dataStore.data.get(nextIndex)?.database!
+      const prevMeta = dataStore.data.get(prevIndex)?.database!
 
       if (nextMeta !== undefined && nextMeta.ext_type === 'image') {
         checkAndFetch(nextIndex)

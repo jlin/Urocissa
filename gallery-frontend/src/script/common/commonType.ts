@@ -102,25 +102,6 @@ export class SubRow {
   }
 }
 
-/**
- * Represents album data with relevant attributes.
- */
-export class Album {
-  id: string
-  name: string
-  width: number
-  height: number
-  cover: string
-
-  constructor(id: string, name: string, width: number, height: number, cover: string) {
-    this.id = id
-    this.name = name
-    this.width = width
-    this.height = height
-    this.cover = cover
-  }
-}
-
 // ===========================
 // Types and Interfaces
 // ===========================
@@ -189,6 +170,11 @@ export type RowWithOffset = z.infer<typeof rowWithOffsetSchema>
  * Represents prefetch information.
  */
 export type Prefetch = z.infer<typeof prefetchSchema>
+
+/**
+ * Represents Album.
+ */
+export type Album = z.infer<typeof albumSchema>
 
 // ===========================
 // Zod Schemas
@@ -292,7 +278,7 @@ const ShareSchema = z.object({
   exp: z.number().int().nonnegative()
 })
 
-const AlbumSchema = z.object({
+const albumSchema = z.object({
   id: z.string().max(64),
   title: z.string().optional(),
   created_time: z.bigint(),
@@ -306,7 +292,7 @@ const AlbumSchema = z.object({
 
 const AbstractDataSchemaParse = z.union([
   z.object({ DataBase: DataBaseParse }),
-  z.object({ Album: AlbumSchema })
+  z.object({ Album: albumSchema })
 ])
 
 export class AbstractData {
@@ -315,8 +301,16 @@ export class AbstractData {
   constructor(data: DataBase | Album) {
     if (data instanceof DataBase) {
       this.database = data
-    } else if (data instanceof Album) {
+    } else {
       this.album = data
+    }
+  }
+
+  get_tag() {
+   if (this.database !== undefined) {
+      return this.database.tag
+    } else {
+      return this.album!.tag
     }
   }
 

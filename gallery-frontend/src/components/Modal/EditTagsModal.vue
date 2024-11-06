@@ -45,11 +45,11 @@ const specialTag = (tag: string): boolean => {
 }
 
 onMounted(() => {
-    changedTagsArray.value = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!.tag.filter(tag => !specialTag(tag))
+    changedTagsArray.value = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!.get_tag().filter(tag => !specialTag(tag))
 })
 
 const defaultTags = computed(() => {
-    return storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!.tag
+    return storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!.get_tag()
 })
 
 const change = () => {
