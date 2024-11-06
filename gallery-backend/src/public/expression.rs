@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{abstract_data::AbstractData, database_struct::database::definition::DataBase};
+use super::abstract_data::AbstractData;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub enum Expression {

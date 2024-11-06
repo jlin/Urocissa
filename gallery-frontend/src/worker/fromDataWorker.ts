@@ -1,5 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import { Prefetch, SlicedDataItem } from '@/script/common/commonType'
+import { AbstractData, Prefetch, SlicedDataItem } from '@/script/common/commonType'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useInitializedStore } from '@/store/initializedStore'
@@ -33,8 +33,9 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
     returnData: (payload) => {
       const slicedDataArray: SlicedDataItem[] = payload.slicedDataArray
       slicedDataArray.forEach(({ index, data }) => {
-        dataStore.data.set(index, data)
-        dataStore.hashMapData.set(data.hash(), index)
+        let parsed_data = AbstractData.parse_from_worker(data)
+        dataStore.data.set(index, parsed_data)
+        dataStore.hashMapData.set(parsed_data.hash(), index)
       })
 
       dataStore.batchFetched.set(payload.batch, true)

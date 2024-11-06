@@ -298,16 +298,29 @@ const AbstractDataSchemaParse = z.union([
 export class AbstractData {
   database?: DataBase
   album?: Album
-  constructor(data: DataBase | Album) {
-    if (data instanceof DataBase) {
-      this.database = data
+  constructor(data: DataBase | Album, data_type: 'DataBase' | 'Album') {
+    switch (data_type) {
+      case 'DataBase':
+        this.database = data as DataBase
+        break
+      case 'Album':
+        this.album = data as Album
+        break
+      default:
+        throw new Error('Invalid data type: Expected "DataBase" or "Album".')
+    }
+  }
+
+  static parse_from_worker(abstractData: AbstractData) {
+    if (abstractData.database !== undefined) {
+      return new AbstractData(abstractData.database, 'DataBase')
     } else {
-      this.album = data
+      return new AbstractData(abstractData.album!, 'Album')
     }
   }
 
   get_tag() {
-   if (this.database !== undefined) {
+    if (this.database !== undefined) {
       return this.database.tag
     } else {
       return this.album!.tag

@@ -70,7 +70,11 @@
                   zIndex: 4
                 }"
               >
-                {{ formatDuration(dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!) }}
+                {{
+                  formatDuration(
+                    dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!
+                  )
+                }}
               </v-chip>
               <div
                 v-if="!mobile"

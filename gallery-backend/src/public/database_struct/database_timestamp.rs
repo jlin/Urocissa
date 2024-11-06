@@ -2,19 +2,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::public::abstract_data::AbstractData;
 
-use super::database::definition::DataBase;
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DataBaseTimestamp {
-    pub database: AbstractData,
+    pub abstract_data: AbstractData,
     pub timestamp: u128,
 }
 
 impl DataBaseTimestamp {
-    pub fn new(database: AbstractData, priority_list: &Vec<&str>) -> Self {
-        let timestamp = database.compute_timestamp(priority_list);
+    pub fn new(abstract_data: AbstractData, priority_list: &Vec<&str>) -> Self {
+        let timestamp = abstract_data.compute_timestamp(priority_list);
         Self {
-            database,
+            abstract_data,
             timestamp,
         }
     }

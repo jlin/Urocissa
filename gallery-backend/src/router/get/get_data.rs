@@ -60,22 +60,22 @@ pub async fn prefetch(
                 let filter = expression.generate_filter();
                 ref_data
                     .par_iter()
-                    .filter(move |database| filter(&database.database))
-                    .map(|item| ReducedData {
-                        hash: item.database.hash(),
-                        width: item.database.width(),
-                        height: item.database.height(),
-                        date: item.timestamp,
+                    .filter(move |database_timestamp| filter(&database_timestamp.abstract_data))
+                    .map(|database_timestamp| ReducedData {
+                        hash: database_timestamp.abstract_data.hash(),
+                        width: database_timestamp.abstract_data.width(),
+                        height: database_timestamp.abstract_data.height(),
+                        date: database_timestamp.timestamp,
                     })
                     .collect()
             }
             None => ref_data
                 .par_iter()
-                .map(|item| ReducedData {
-                    hash: item.database.hash(),
-                    width: item.database.width(),
-                    height: item.database.height(),
-                    date: item.timestamp,
+                .map(|database_timestamp| ReducedData {
+                    hash: database_timestamp.abstract_data.hash(),
+                    width: database_timestamp.abstract_data.width(),
+                    height: database_timestamp.abstract_data.height(),
+                    date: database_timestamp.timestamp,
                 })
                 .collect(),
         };

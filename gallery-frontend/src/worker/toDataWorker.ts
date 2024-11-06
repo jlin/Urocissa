@@ -188,8 +188,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
 
     if ('DataBase' in item.abstractData) {
       const dataBaseInstance = new DataBase(item.abstractData.DataBase, item.timestamp)
-      const abstractData = new AbstractData(dataBaseInstance)
-
+      const abstractData = new AbstractData(dataBaseInstance, 'DataBase')
       const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
     }
