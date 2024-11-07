@@ -27,8 +27,16 @@
         </v-text-field>
       </v-card-text>
     </v-card>
-    <v-btn v-if="!route.fullPath.includes('share')" @click="triggerFileInput" icon="mdi-upload">
-    </v-btn>
+    <v-menu>
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" icon="mdi-plus"></v-btn>
+      </template>
+      <v-list>
+        <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
+          <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
   </v-app-bar>
   <!-- If collectionStore.editModeOn === true then show the Editbar -->
   <EditBar v-else />
