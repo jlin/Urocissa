@@ -40,6 +40,8 @@ export const useFilterStore = defineStore({
           return 'archived'
         } else if (route.path.startsWith('/trashed')) {
           return 'trashed'
+        } else if (route.path.startsWith('/album')) {
+          return 'album'
         } else if (route.path.startsWith('/all')) {
           return 'all'
         } else {
@@ -49,23 +51,27 @@ export const useFilterStore = defineStore({
 
       switch (currentPage.value) {
         case 'default': {
-          this.basicString = 'and(not(tag: _archived), not(tag:_trashed))'
+          this.basicString = 'and(not(tag: _archived), not(tag:_trashed), not(type:album))'
           break
         }
         case 'favorite': {
-          this.basicString = 'and(tag:_favorite, not(tag:_trashed))'
+          this.basicString = 'and(tag:_favorite, not(tag:_trashed), not(type:album))'
           break
         }
         case 'archived': {
-          this.basicString = 'and(tag:_archived, not(tag:_trashed))'
+          this.basicString = 'and(tag:_archived, not(tag:_trashed), not(type:album))'
+          break
+        }
+        case 'album': {
+          this.basicString = 'type:album'
           break
         }
         case 'trashed': {
-          this.basicString = 'tag:_trashed'
+          this.basicString = 'and(tag:_trashed, not(type:album))'
           break
         }
         case 'all': {
-          this.basicString = null
+          this.basicString = `not(type:album)`
           break
         }
         default: {

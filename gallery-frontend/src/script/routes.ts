@@ -65,18 +65,44 @@ function createRouteWithAlias(path: string, component: () => Promise<any>, name:
 }
 
 // Use dynamic imports for all routes
-const homePageRoutes = createRouteWithAlias('', () => import('@/components/Home/Home.vue'), 'HomePage')
-const allPageRoutes = createRouteWithAlias('all', () => import('@/components/Page/AllPage.vue'), 'AllPage')
-const favoritePageRoutes = createRouteWithAlias('favorite', () => import('@/components/Page/FavoritePage.vue'), 'FavoritePage')
-const archivedPageRoutes = createRouteWithAlias('archived', () => import('@/components/Page/ArchivedPage.vue'), 'ArchivedPage')
-const trashedPageRoutes = createRouteWithAlias('trashed', () => import('@/components/Page/ArchivedPage.vue'), 'TrashedPage')
+const homePageRoutes = createRouteWithAlias(
+  '',
+  () => import('@/components/Home/Home.vue'),
+  'HomePage'
+)
+const allPageRoutes = createRouteWithAlias(
+  'all',
+  () => import('@/components/Page/AllPage.vue'),
+  'AllPage'
+)
+const favoritePageRoutes = createRouteWithAlias(
+  'favorite',
+  () => import('@/components/Page/FavoritePage.vue'),
+  'FavoritePage'
+)
+const archivedPageRoutes = createRouteWithAlias(
+  'archived',
+  () => import('@/components/Page/ArchivedPage.vue'),
+  'ArchivedPage'
+)
+const trashedPageRoutes = createRouteWithAlias(
+  'trashed',
+  () => import('@/components/Page/ArchivedPage.vue'),
+  'TrashedPage'
+)
+const albumPageRoutes = createRouteWithAlias(
+  'album',
+  () => import('@/components/Page/AlbumPage.vue'),
+  'AlbumPage'
+)
 
 const routes = simpleRoutes.concat(
   homePageRoutes,
   allPageRoutes,
   favoritePageRoutes,
   archivedPageRoutes,
-  trashedPageRoutes
+  trashedPageRoutes,
+  albumPageRoutes
 )
 
 const router = createRouter({

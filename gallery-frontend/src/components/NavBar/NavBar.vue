@@ -16,6 +16,7 @@
     <v-list nav :key="route.fullPath">
       <v-list-item slim to="/" prepend-icon="mdi-home" title="Home"></v-list-item>
       <v-list-item slim to="/tags" prepend-icon="mdi-tag-multiple" title="Tags"></v-list-item>
+      <v-list-item slim to="/album" prepend-icon="mdi-image-album" title="Album"></v-list-item>
       <v-list-item slim to="/favorite" prepend-icon="mdi-star" title="Favorite"></v-list-item>
       <v-list-item
         slim
