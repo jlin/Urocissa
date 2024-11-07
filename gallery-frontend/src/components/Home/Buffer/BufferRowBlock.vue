@@ -39,6 +39,7 @@
                 </template>
               </v-hover>
               <v-chip
+                id="processing-chip"
                 prepend-icon="mdi-alert-circle-outline"
                 density="comfortable"
                 size="small"
@@ -55,6 +56,7 @@
                 {{ 'Processing' }}
               </v-chip>
               <v-chip
+                id="duration-chip"
                 density="comfortable"
                 size="small"
                 v-if="
@@ -77,6 +79,7 @@
                 }}
               </v-chip>
               <div
+                id="hover-gradient-div"
                 v-if="!mobile"
                 v-show="imgIsHovering"
                 class="position-absolute w-100"
@@ -88,6 +91,7 @@
                 }"
               ></div>
               <img
+                id="mobile-small-image"
                 @contextmenu.prevent
                 @pointerdown="($event) => handlePointerdown($event, row.start + subIndex)"
                 @pointerup="($event) => handlePointerUp($event, row.start + subIndex)"
@@ -107,6 +111,7 @@
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
               <img
+                id="desktop-small-image"
                 draggable="false"
                 @click="($event) => handleClick($event, row.start + subIndex)"
                 v-if="
@@ -126,6 +131,7 @@
 
               <transition name="slide-fade" appear>
                 <img
+                  id="thumbhash-image"
                   draggable="false"
                   v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg"
                   :key="row.start + subIndex"
@@ -139,6 +145,7 @@
               </transition>
             </div>
             <div
+              id="grey-background-placeholder"
               :style="{
                 position: 'absolute',
                 zIndex: 0
