@@ -22,7 +22,7 @@ export const useWorkerStore = defineStore({
     imgWorker: Worker[]
     postToWorkerList: postToWorkerType[] | undefined
   } => ({
-    concurrencyNumber: navigator.hardwareConcurrency - 1,
+    concurrencyNumber: Math.max(0, Math.floor(navigator.hardwareConcurrency / 2)),
     worker: null,
     imgWorker: [],
     postToWorkerList: undefined
