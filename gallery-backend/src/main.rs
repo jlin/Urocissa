@@ -50,9 +50,9 @@ async fn rocket() -> _ {
     let txn = TREE.in_disk.begin_write().unwrap();
     {
         let table = txn.open_table(DATA_TABLE).unwrap();
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", table.len().unwrap());
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} photos/vidoes from database.", table.len().unwrap());
         let album_table = txn.open_table(ALBUM_TABLE).unwrap();
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} data from database.", album_table.len().unwrap());
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} albums from database.", album_table.len().unwrap());
     }
 
     txn.commit().unwrap();
