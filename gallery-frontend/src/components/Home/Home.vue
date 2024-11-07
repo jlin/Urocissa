@@ -17,8 +17,14 @@
         : () => {}
     "
   >
-    <Buffer v-if="prefetchStore.dataLength > 0" :bufferHeight="bufferHeight" />
-    <v-container v-else class="d-flex align-center justify-center">
+    <Buffer
+      v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
+      :bufferHeight="bufferHeight"
+    />
+    <v-container
+      v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
+      class="d-flex align-center justify-center"
+    >
       <v-card
         class="pa-4 text-center mx-auto"
         elevation="12"
