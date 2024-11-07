@@ -149,3 +149,10 @@ export const databaseTimestampSchema = z.object({
   abstractData: AbstractDataParseSchema,
   timestamp: z.number()
 })
+
+/**
+ * Represents a sub-row containing display elements.
+ */
+export const SubRowSchema = z.object({
+  displayElements: z.array(displayElementSchema)
+})

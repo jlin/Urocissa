@@ -17,7 +17,7 @@ import {
   SlicedData,
   TagInfo
 } from '@/script/common/types'
-import { SubRow } from '@/script/common/classes'
+import { SubRow } from '@/script/common/types'
 import { batchNumber, fixedBigRowHeight } from '@/script/common/constants'
 import { createAbstractData, createDataBase } from '@/script/common/functions'
 
@@ -335,7 +335,10 @@ function KnuthPlassLayout(row: Row, windowWidth: number): SubRow[] {
   // Split allDisplayElement into subrows based on lineWrapBatchResult
   for (const count of lineWrapBatchResult) {
     const subArray = allDisplayElement.slice(startIndex, startIndex + count)
-    result.push(new SubRow(subArray))
+    const subrow: SubRow = {
+      displayElements: subArray
+    }
+    result.push(subrow)
     startIndex += count
   }
 
