@@ -1,7 +1,7 @@
 // schemas.ts
 
-import { z } from 'zod';
-import { fixedBigRowHeight } from './constants';
+import { z } from 'zod'
+import { fixedBigRowHeight } from './constants'
 
 /**
  * Schema for alias objects.
@@ -9,8 +9,8 @@ import { fixedBigRowHeight } from './constants';
 export const AliasSchema = z.object({
   file: z.string(),
   modified: z.number(),
-  scan_time: z.number(),
-});
+  scan_time: z.number()
+})
 
 /**
  * Schema for display elements.
@@ -18,8 +18,8 @@ export const AliasSchema = z.object({
 export const displayElementSchema = z.object({
   displayWidth: z.number(),
   displayHeight: z.number(),
-  displayTopPixelAccumulated: z.number().optional(),
-});
+  displayTopPixelAccumulated: z.number().optional()
+})
 
 /**
  * Schema for rows.
@@ -31,8 +31,8 @@ export const rowSchema = z.object({
   displayElements: z.array(displayElementSchema),
   topPixelAccumulated: z.number().optional(),
   rowIndex: z.number(),
-  offset: z.number().optional().default(0),
-});
+  offset: z.number().optional().default(0)
+})
 
 /**
  * Schema for rows with offset.
@@ -40,8 +40,8 @@ export const rowSchema = z.object({
 export const rowWithOffsetSchema = z.object({
   row: rowSchema,
   offset: z.number(),
-  windowWidth: z.number(),
-});
+  windowWidth: z.number()
+})
 
 /**
  * Schema for prefetching data.
@@ -49,8 +49,8 @@ export const rowWithOffsetSchema = z.object({
 export const prefetchSchema = z.object({
   timestamp: z.string(),
   dataLength: z.number(),
-  locateTo: z.number().nullable(),
-});
+  locateTo: z.number().nullable()
+})
 
 export const DataBaseParse = z.object({
   album: z.array(z.string()),
@@ -65,8 +65,8 @@ export const DataBaseParse = z.object({
   size: z.number(),
   tag: z.array(z.string()),
   thumbhash: z.array(z.number()),
-  width: z.number(),
-});
+  width: z.number()
+})
 
 /**
  * Schema for DataBase with additional fields.
@@ -74,18 +74,18 @@ export const DataBaseParse = z.object({
 export const DataBaseSchema = DataBaseParse.extend({
   timestamp: z.number(),
   thumbhashUrl: z.string(), // need initialize
-  filename: z.string(),     // need initialize
-});
+  filename: z.string() // need initialize
+})
 
 /**
  * Schema for database timestamp.
  */
 export const DataBaseTimestamp = z.object({
   database: z.object({
-    DataBase: DataBaseParse,
+    DataBase: DataBaseParse
   }),
-  timestamp: z.number(),
-});
+  timestamp: z.number()
+})
 
 /**
  * Schema for share information.
@@ -94,36 +94,36 @@ export const ShareSchema = z.object({
   url: z.string().max(64),
   description: z.string(),
   password: z.string().optional(),
-  show_metadata: z.boolean(),
-  show_download: z.boolean(),
-  show_upload: z.boolean(),
-  exp: z.number().int().nonnegative(),
-});
+  showMetadata: z.boolean(),
+  showDownload: z.boolean(),
+  showUpload: z.boolean(),
+  exp: z.number()
+})
 
 /**
  * Schema for album.
  */
 export const AlbumSchema = z.object({
-  id: z.string().max(64),
-  title: z.string().optional(),
-  created_time: z.bigint(),
-  cover: z.string().max(64).optional(),
-  user_defined_metadata: z.record(z.array(z.string())),
-  share_list: z.array(ShareSchema),
+  id: z.string(),
+  title: z.string().nullable(),
+  createdTime: z.number(),
+  cover: z.string().nullable(),
+  userDefinedMetadata: z.record(z.array(z.string())),
+  shareList: z.array(ShareSchema),
   tag: z.array(z.string()),
-  width: z.number().int().nonnegative(),
-  height: z.number().int().nonnegative(),
-});
+  width: z.number(),
+  height: z.number()
+})
 
 export const AbstractDataParseSchema = z.union([
   z.object({ DataBase: DataBaseParse }),
-  z.object({ Album: AlbumSchema }),
-]);
+  z.object({ Album: AlbumSchema })
+])
 
 export const AbstractDataSchema = z.object({
   database: DataBaseSchema.optional(),
-  album: AlbumSchema.optional(),
-});
+  album: AlbumSchema.optional()
+})
 
 /**
  * Schema for scrollbar data.
@@ -131,21 +131,21 @@ export const AbstractDataSchema = z.object({
 export const scrollbarDataSchema = z.object({
   index: z.number(),
   year: z.number(),
-  month: z.number(),
-});
+  month: z.number()
+})
 
 /**
  * Schema for tag information.
  */
 export const tagInfoSchema = z.object({
   tag: z.string(),
-  number: z.number(),
-});
+  number: z.number()
+})
 
 /**
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({
   abstractData: AbstractDataParseSchema,
-  timestamp: z.number(),
-});
+  timestamp: z.number()
+})
