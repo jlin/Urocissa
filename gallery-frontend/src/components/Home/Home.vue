@@ -17,7 +17,7 @@
         : () => {}
     "
   >
-    <Buffer :bufferHeight="bufferHeight" />
+    <Buffer v-if="prefetchStore.dataLength > 0" :bufferHeight="bufferHeight" />
   </div>
 </template>
 
