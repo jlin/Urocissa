@@ -35,6 +35,9 @@
         <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
           <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
         </v-list-item>
+        <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
+          <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
+        </v-list-item>
       </v-list>
     </v-menu>
   </v-app-bar>
@@ -60,7 +63,9 @@ import { useCollectionStore } from '@/store/collectionStore'
 import EditBar from '@/components//NavBar/NavBarAppBarEditBar.vue'
 import axios from 'axios'
 import { useUploadStore } from '@/store/uploadStore'
+import { useModalStore } from '@/store/modalStore'
 
+const modalStore = useModalStore()
 const showDrawer = inject('showDrawer') as Ref<boolean>
 const uploadStore = useUploadStore()
 const collectionStore = useCollectionStore()
@@ -70,6 +75,15 @@ const searchQuery = ref('')
 const messageStor = useMessageStore()
 const fileInput: Ref<HTMLInputElement | null> = ref(null)
 const filterStore = useFilterStore()
+
+const triggerModal = () => {
+  modalStore.showCreateAlbumsModal = true
+  console.log('modalStore.showCreateAlbumsModal is', modalStore.showCreateAlbumsModal)
+}
+
+watchEffect(() => {
+  console.log('modalStore.showCreateAlbumsModal is', modalStore.showCreateAlbumsModal)
+})
 
 const handleSearch = async () => {
   filterStore.filterString = searchQuery.value

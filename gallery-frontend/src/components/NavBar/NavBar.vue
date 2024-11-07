@@ -31,6 +31,7 @@
   <EditTagsModal v-if="modalStore.showEditTagsModal" />
   <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
   <UploadModal v-if="modalStore.showUploadModal && uploadStore.uploading" />
+  <CreateAlbumsModal v-if="modalStore.showCreateAlbumsModal" />
 </template>
 
 <script setup lang="ts">
@@ -38,6 +39,7 @@ import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
 import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
 import AppBar from '@/components//NavBar/NavBarAppBar.vue'
 import UploadModal from '@/components/Modal/uploadModal.vue'
+import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
