@@ -2,7 +2,7 @@
   <v-app-bar v-if="!collectionStore.editModeOn">
     <v-btn @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
     <v-card class="w-100">
-      <v-card-text>
+      <v-card-text class="pa-0">
         <v-text-field
           id="nav-search-input"
           rounded
