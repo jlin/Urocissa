@@ -128,12 +128,11 @@
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
-
               <transition name="slide-fade" appear>
                 <img
                   id="thumbhash-image"
                   draggable="false"
-                  v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg"
+                  v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg && dataStore.data.get(row.start + subIndex)!.database"
                   :key="row.start + subIndex"
                   :style="{
                     position: 'absolute',
@@ -150,6 +149,7 @@
                 position: 'absolute',
                 zIndex: 0
               }"
+              @click="($event) => handleClick($event, row.start + subIndex)"
               class="w-100 h-100 bg-grey-darken-2"
             ></div>
           </div>

@@ -49,6 +49,7 @@ export type AtomicExpressionCstChildren = {
   extExpression?: ExtExpressionCstNode[];
   makeExpression?: MakeExpressionCstNode[];
   modelExpression?: ModelExpressionCstNode[];
+  albumExpression?: AlbumExpressionCstNode[];
   pathExpression?: PathExpressionCstNode[];
   anyExpression?: AnyExpressionCstNode[];
 };
@@ -115,6 +116,16 @@ export type ModelExpressionCstChildren = {
   Identifier: IToken[];
 };
 
+export interface AlbumExpressionCstNode extends CstNode {
+  name: "albumExpression";
+  children: AlbumExpressionCstChildren;
+}
+
+export type AlbumExpressionCstChildren = {
+  Album: IToken[];
+  Identifier: IToken[];
+};
+
 export interface PathExpressionCstNode extends CstNode {
   name: "pathExpression";
   children: PathExpressionCstChildren;
@@ -146,6 +157,7 @@ export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   extExpression(children: ExtExpressionCstChildren, param?: IN): OUT;
   makeExpression(children: MakeExpressionCstChildren, param?: IN): OUT;
   modelExpression(children: ModelExpressionCstChildren, param?: IN): OUT;
+  albumExpression(children: AlbumExpressionCstChildren, param?: IN): OUT;
   pathExpression(children: PathExpressionCstChildren, param?: IN): OUT;
   anyExpression(children: AnyExpressionCstChildren, param?: IN): OUT;
 }

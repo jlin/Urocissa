@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use serde::{Deserialize, Serialize};
 
 use super::abstract_data::AbstractData;
@@ -13,6 +14,7 @@ pub enum Expression {
     Model(String),
     Make(String),
     Path(String),
+    Album(ArrayString<64>),
     Any(String),
 }
 
@@ -88,6 +90,12 @@ impl Expression {
                     AbstractData::DataBase(db) => db.alias.iter().any(|file_modify| {
                         file_modify.file.to_ascii_lowercase().contains(&path_lower)
                     }),
+                    AbstractData::Album(_) => false,
+                })
+            }
+            Expression::Album(album_id) => {
+                Box::new(move |abstract_data: &AbstractData| match abstract_data {
+                    AbstractData::DataBase(db) => db.album.contains(&album_id),
                     AbstractData::Album(_) => false,
                 })
             }

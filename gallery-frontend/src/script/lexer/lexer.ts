@@ -1,5 +1,6 @@
 import { CstParser, Lexer, createToken, type TokenType } from 'chevrotain'
 import {
+  AlbumExpressionCstChildren,
   AndExpressionCstChildren,
   AnyExpressionCstChildren,
   AtomicExpressionCstChildren,
@@ -29,6 +30,7 @@ const Type: TokenType = createToken({ name: 'Type', pattern: /type:/ })
 const Ext: TokenType = createToken({ name: 'Ext', pattern: /ext:/ })
 const Model: TokenType = createToken({ name: 'Model', pattern: /model:/ })
 const Make: TokenType = createToken({ name: 'Makel', pattern: /make:/ })
+const Album: TokenType = createToken({ name: 'Album', pattern: /album:/ })
 const Path: TokenType = createToken({ name: 'Path', pattern: /path:/ })
 const Any: TokenType = createToken({ name: 'Any', pattern: /any:/ })
 const Comma: TokenType = createToken({ name: 'Comma', pattern: /,/ })
@@ -56,6 +58,7 @@ const allTokens: TokenType[] = [
   Type,
   Ext,
   Make,
+  Album,
   Model,
   Path,
   Any,
@@ -109,6 +112,7 @@ export class MyParser extends CstParser {
       { ALT: () => this.SUBRULE(this.extExpression) },
       { ALT: () => this.SUBRULE(this.makeExpression) },
       { ALT: () => this.SUBRULE(this.modelExpression) },
+      { ALT: () => this.SUBRULE(this.albumExpression) },
       { ALT: () => this.SUBRULE(this.pathExpression) },
       { ALT: () => this.SUBRULE(this.anyExpression) }
     ])
@@ -140,6 +144,10 @@ export class MyParser extends CstParser {
   })
   public modelExpression = this.RULE('modelExpression', () => {
     this.CONSUME1(Model)
+    this.CONSUME2(Identifier)
+  })
+  public albumExpression = this.RULE('albumExpression', () => {
+    this.CONSUME1(Album)
     this.CONSUME2(Identifier)
   })
   public pathExpression = this.RULE('pathExpression', () => {
@@ -210,6 +218,9 @@ export class MyVisitor extends BaseVisitor {
     if (children.modelExpression) {
       return this.visit(children.modelExpression)
     }
+    if (children.albumExpression) {
+      return this.visit(children.albumExpression)
+    }
     if (children.pathExpression) {
       return this.visit(children.pathExpression)
     }
@@ -235,6 +246,9 @@ export class MyVisitor extends BaseVisitor {
   }
   modelExpression(children: ModelExpressionCstChildren) {
     return { Model: children.Identifier[0].image }
+  }
+  albumExpression(children: AlbumExpressionCstChildren) {
+    return { Album: children.Identifier[0].image }
   }
   pathExpression(children: PathExpressionCstChildren) {
     return { Path: children.Identifier[0].image }

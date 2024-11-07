@@ -1,9 +1,9 @@
 // functions.ts
 
-import { thumbHashToDataURL } from 'thumbhash';
-import { z } from 'zod';
-import { DataBaseParse } from './schemas';
-import { DataBase, AbstractData, Album } from './types';
+import { thumbHashToDataURL } from 'thumbhash'
+import { z } from 'zod'
+import { DataBaseParse } from './schemas'
+import { DataBase, AbstractData, Album } from './types'
 
 /**
  * Creates a DataBase instance from parsed data and timestamp.
@@ -16,9 +16,9 @@ export function createDataBase(
     ...databaseParse,
     timestamp: timestamp,
     thumbhashUrl: thumbHashToDataURL(databaseParse.thumbhash),
-    filename: databaseParse.alias[0]?.file.split('/').pop() || '',
-  };
-  return database;
+    filename: databaseParse.alias[0]?.file.split('/').pop() || ''
+  }
+  return database
 }
 
 /**
@@ -26,8 +26,8 @@ export function createDataBase(
  */
 export function createAbstractData(data: DataBase | Album): AbstractData {
   if ('hash' in data) {
-    return { database: data };
+    return { database: data }
   } else {
-    return { album: data };
+    return { album: data }
   }
 }

@@ -3,7 +3,7 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
 
 export function useHandleClick(router: Router, route: RouteLocationNormalizedLoaded) {
-  const handleClick = (event: MouseEvent, currentIndex: number) => {
+  const handleClick = async (event: MouseEvent, currentIndex: number) => {
     const collectionStore = useCollectionStore()
     if (collectionStore.editModeOn) {
       if (event.shiftKey && collectionStore.lastClick !== null) {
@@ -40,18 +40,30 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
     } else {
       // collectionStore.editModeOn === false
       const dataStore = useDataStore()
-      const hash = dataStore.data.get(currentIndex)!.database!.hash
+      const abstractData = dataStore.data.get(currentIndex)!
+      console.log(' abstractData is', abstractData)
 
-      if (route.path.startsWith('/favorite')) {
-        router.push({ path: '/favorite/view/' + hash, query: { ...route.query } })
-      } else if (route.path.startsWith('/archived')) {
-        router.push({ path: '/archived/view/' + hash, query: { ...route.query } })
-      } else if (route.path.startsWith('/all')) {
-        router.push({ path: '/all/view/' + hash, query: { ...route.query } })
-      } else if (route.path.startsWith('/trashed')) {
-        router.push({ path: '/trashed/view/' + hash, query: { ...route.query } })
+      if (abstractData.database !== undefined) {
+        const hash = dataStore.data.get(currentIndex)!.database!.hash
+        if (route.path.startsWith('/favorite')) {
+          router.push({ path: '/favorite/view/' + hash, query: { ...route.query } })
+        } else if (route.path.startsWith('/archived')) {
+          router.push({ path: '/archived/view/' + hash, query: { ...route.query } })
+        } else if (route.path.startsWith('/all')) {
+          router.push({ path: '/all/view/' + hash, query: { ...route.query } })
+        } else if (route.path.startsWith('/trashed')) {
+          router.push({ path: '/trashed/view/' + hash, query: { ...route.query } })
+        } else {
+          router.push({ path: '/view/' + hash, query: { ...route.query } })
+        }
       } else {
-        router.push({ path: '/view/' + hash, query: { ...route.query } })
+        // is album
+        const id = abstractData.album!.id
+        const query = `album: ${id}`
+        await router.replace({
+          path: `/all`,
+          query: { search: query }
+        })
       }
     }
     if (collectionStore.editModeCollection.size === 0) {

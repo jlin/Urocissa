@@ -4,7 +4,8 @@ import {
   rowWithOffsetSchema,
   scrollbarDataSchema,
   tagInfoSchema,
-  databaseTimestampSchema
+  databaseTimestampSchema,
+  AlbumSchema
 } from '@/script/common/schemas'
 import {
   AbstractData,
@@ -192,6 +193,10 @@ async function fetchData(batchIndex: number, timestamp: string) {
     if ('DataBase' in item.abstractData) {
       const dataBaseInstance = createDataBase(item.abstractData.DataBase, item.timestamp)
       const abstractData = createAbstractData(dataBaseInstance)
+      const key = batchIndex * batchNumber + index
+      data.set(key, abstractData)
+    } else if ('Album' in item.abstractData) {
+      const abstractData = createAbstractData(item.abstractData.Album)
       const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
     }
