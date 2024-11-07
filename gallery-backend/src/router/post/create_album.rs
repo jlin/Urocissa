@@ -12,6 +12,7 @@ use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct CreateAlbum {
     pub title: Option<String>,
     pub elements: Vec<ArrayString<64>>,

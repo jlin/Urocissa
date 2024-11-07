@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub mod new;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct Share {
     pub url: ArrayString<64>,
     pub description: String,
@@ -18,6 +19,7 @@ pub struct Share {
 }
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
 pub struct Album {
     pub id: ArrayString<64>,
     pub title: Option<String>,
