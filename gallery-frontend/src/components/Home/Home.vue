@@ -18,6 +18,20 @@
     "
   >
     <Buffer v-if="prefetchStore.dataLength > 0" :bufferHeight="bufferHeight" />
+    <v-container v-else class="d-flex align-center justify-center">
+      <v-card
+        class="pa-4 text-center mx-auto"
+        elevation="12"
+        max-width="600"
+        rounded="lg"
+        width="100%"
+      >
+        <v-icon class="mb-5" color="grey" icon="mdi-image-plus" size="100"></v-icon>
+        <v-card-item>
+          <v-card-title>Wow, so empty!<br />Try adding some photos here!</v-card-title>
+        </v-card-item>
+      </v-card>
+    </v-container>
   </div>
 </template>
 

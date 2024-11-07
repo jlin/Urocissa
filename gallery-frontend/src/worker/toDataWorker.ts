@@ -4,8 +4,7 @@ import {
   rowWithOffsetSchema,
   scrollbarDataSchema,
   tagInfoSchema,
-  databaseTimestampSchema,
-  AlbumSchema
+  databaseTimestampSchema
 } from '@/script/common/schemas'
 import {
   AbstractData,
