@@ -29,6 +29,7 @@
     </v-list>
   </v-navigation-drawer>
   <EditTagsModal v-if="modalStore.showEditTagsModal" />
+  <EditAlbumsModal v-if="modalStore.showEditAlbumsModal" />
   <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
   <UploadModal v-if="modalStore.showUploadModal && uploadStore.uploading" />
   <CreateAlbumsModal v-if="modalStore.showCreateAlbumsModal" />
@@ -40,6 +41,8 @@ import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
 import AppBar from '@/components//NavBar/NavBarAppBar.vue'
 import UploadModal from '@/components/Modal/uploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
+import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
+
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'

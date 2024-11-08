@@ -255,6 +255,40 @@
                     >
                   </v-list-item-subtitle>
                 </v-list-item>
+                <v-list-item>
+                  <template v-slot:prepend>
+                    <v-avatar>
+                      <v-icon color="black">mdi-image-album</v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-list-item-subtitle class="text-wrap">
+                    <v-chip
+                      variant="flat"
+                      color="black"
+                      v-for="albumId in metadata.album"
+                      :key="albumId"
+                      link
+                      class="ma-1"
+                      @click="
+                        {
+                        }
+                      "
+                    >
+                      {{ albumId }}</v-chip
+                    >
+                  </v-list-item-subtitle>
+                  <v-list-item-subtitle>
+                    <v-chip
+                      prepend-icon="mdi-pencil"
+                      color="black"
+                      variant="outlined"
+                      class="ma-1"
+                      link
+                      @click="modalStore.showEditAlbumsModal = true"
+                      >edit</v-chip
+                    >
+                  </v-list-item-subtitle>
+                </v-list-item>
               </v-list>
             </v-col>
           </v-row>
