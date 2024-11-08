@@ -107,6 +107,7 @@ const change = () => {
     addAlbumsArrayComputed.map((album) => album.albumId),
     removeAlbumsArrayComputed.map((album) => album.albumId)
   )
+  modalStore.showEditAlbumsModal = false
 }
 </script>
 
