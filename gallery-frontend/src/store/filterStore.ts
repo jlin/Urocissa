@@ -54,8 +54,9 @@ export const useFilterStore = defineStore({
           break
         }
         case 'album': {
-          console.error('error')
-
+          // Access the 'id' parameter from the route
+          const id = route.params.id
+          this.basicString = `album:${id}`
           break
         }
         case 'trashed': {

@@ -59,10 +59,8 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
       } else {
         // is album
         const id = abstractData.album!.id
-        const query = `album: ${id}`
-        await router.replace({
-          path: `/all`,
-          query: { search: query }
+        await router.push({
+          path: `/album-${id}`
         })
       }
     }
