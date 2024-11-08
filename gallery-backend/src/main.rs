@@ -27,7 +27,8 @@ use router::{
         post_upload::upload,
     },
     put::{
-        edit_tag::edit_tag, random::generate_random_data, regenerate_preview::regenerate_preview,
+        edit_album::edit_album, edit_tag::edit_tag, random::generate_random_data,
+        regenerate_preview::regenerate_preview,
     },
 };
 use std::sync::atomic::Ordering;
@@ -108,7 +109,8 @@ async fn rocket() -> _ {
                 redirect_to_login,
                 create_album,
                 authenticate_share,
-                get_albums
+                get_albums,
+                edit_album
             ],
         )
 }

@@ -84,6 +84,12 @@ type EditTagsParams = {
   removeTagsArray: string[]
   timestamp: string
 }
+type EditAlbumsParams = {
+  idArray: number[]
+  addAlbumsArray: string[]
+  removeAlbumsArray: string[]
+  timestamp: string
+}
 type DeleteDataParams = { indexArray: number[]; timestamp: string }
 type FetchScrollBarParams = { timestamp: string }
 
@@ -93,6 +99,7 @@ export const toDataWorker = createActionCreators({
   fetchRow: (payload: FetchRowParams) => payload,
   prefetch: (payload: PrefetchParams) => payload,
   editTags: (payload: EditTagsParams) => payload,
+  editAlbums: (payload: EditAlbumsParams) => payload,
   deleteData: (payload: DeleteDataParams) => payload,
   fetchScrollbar: (payload: FetchScrollBarParams) => payload
 })

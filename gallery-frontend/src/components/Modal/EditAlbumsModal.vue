@@ -12,10 +12,10 @@
           v-model="changedAlbumsArray"
           chips
           multiple
-          item-title="label"
-          item-value="value"
+          item-title="albumName"
+          item-value="albumId"
           :items="albumList!"
-          label="Tags"
+          label="Albums"
           closable-chips
         ></v-combobox>
       </v-container>
@@ -34,7 +34,7 @@
           variant="outlined"
           class="ma-2 button button-submit"
           @click="change()"
-          :loading="!tagStore.fetched"
+          :loading="!albumStore.fetched"
         >
           Submit
         </v-btn>
@@ -51,21 +51,27 @@ import { useModalStore } from '@/store/modalStore'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
-import { useTagStore } from '@/store/tagStore'
+import { useAlbumStore } from '@/store/albumStore'
+import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
+import { AlbumInfo } from '@/script/common/types'
+
 const modalStore = useModalStore()
 const storeData = useDataStore()
 const route = useRoute()
-const changedAlbumsArray = ref<string[]>([])
-const tagStore = useTagStore()
+const changedAlbumsArray = ref<AlbumInfo[]>([])
+const albumStore = useAlbumStore()
 const albumList = computed(() => {
-  // todo!
+  return albumStore.albums
 })
 
 onMounted(() => {
   const data = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!
   if (data.database) {
-    changedAlbumsArray.value = data.database.album
+    changedAlbumsArray.value = data.database.album.map((albumId) => ({
+      albumId,
+      albumName:
+        albumStore.albums.find((album) => album.albumId === albumId)?.albumName ?? 'Unknown Album'
+    }))
   } else if (data.album) {
     console.error('This should not happen')
   }
@@ -74,7 +80,12 @@ onMounted(() => {
 const defaultAlbums = computed(() => {
   const data = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!
   if (data.database) {
-    return data.database.album
+    const result = data.database.album.map((albumId) => ({
+      albumId,
+      albumName:
+        albumStore.albums.find((album) => album.albumId === albumId)?.albumName ?? 'Unknown Album'
+    }))
+    return result
   } else {
     console.error('This should not happen')
   }
@@ -83,12 +94,20 @@ const defaultAlbums = computed(() => {
 const change = () => {
   const hashArray: number[] = [storeData.hashMapData.get(route.params.hash as string)!]
   const addAlbumsArrayComputed = changedAlbumsArray.value.filter(
-    (album) => !defaultAlbums.value!.includes(album)
+    (album) => !defaultAlbums.value?.map((album) => album.albumId)!.includes(album.albumId)
   )
   const removeAlbumsArrayComputed = defaultAlbums.value!.filter(
-    (album) => !changedAlbumsArray.value.includes(album)
+    (album) => !changedAlbumsArray.value?.map((album) => album.albumId).includes(album.albumId)
   )
-  editTagsInWorker(hashArray, addAlbumsArrayComputed, removeAlbumsArrayComputed)
+  console.log(' hashArray is', hashArray)
+  console.log('addAlbumsArrayComputed is', addAlbumsArrayComputed)
+  console.log(' removeAlbumsArrayComputed) is', removeAlbumsArrayComputed)
+
+  editAlbumsInWorker(
+    hashArray,
+    addAlbumsArrayComputed.map((album) => album.albumId),
+    removeAlbumsArrayComputed.map((album) => album.albumId)
+  )
 }
 </script>
 
