@@ -7,9 +7,9 @@
           v-model="changedTagsArray"
           chips
           multiple
-          item-title="label"
-          item-value="value"
-          :items="tagList.filter((tag) => !specialTag(tag))"
+          item-title="tag"
+          item-value="tag"
+          :items="tagList.filter((tag) => !specialTag(tag.tag))"
           label="Tags"
           closable-chips
         ></v-combobox>
@@ -54,7 +54,7 @@ const route = useRoute()
 const changedTagsArray = ref<string[]>([])
 const tagStore = useTagStore()
 const tagList = computed(() => {
-  return tagStore.tags.map((tag) => tag.tag)
+  return tagStore.tags
 })
 
 const specialTag = (tag: string): boolean => {
