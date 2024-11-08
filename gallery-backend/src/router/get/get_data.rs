@@ -189,11 +189,25 @@ pub async fn get_tags() -> Json<Vec<TagInfo>> {
     .unwrap()
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct AlbumInfo {
+    pub album_id: String,
+    pub album_name: String,
+}
+
 #[get("/get/get-albums")]
-pub async fn get_albums() -> Json<Vec<Album>> {
+pub async fn get_albums() -> Json<Vec<AlbumInfo>> {
     tokio::task::spawn_blocking(move || {
         let album_list = TREE.read_albums();
-        Json(album_list)
+        let album_info_list = album_list
+            .into_iter()
+            .map(|album| AlbumInfo {
+                album_id: album.id.to_string(),
+                album_name: album.title.unwrap_or("".to_string()),
+            })
+            .collect();
+        Json(album_info_list)
     })
     .await
     .unwrap()
