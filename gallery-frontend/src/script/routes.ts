@@ -90,10 +90,10 @@ const trashedPageRoutes = createRouteWithAlias(
   () => import('@/components/Page/ArchivedPage.vue'),
   'TrashedPage'
 )
-const albumPageRoutes = createRouteWithAlias(
-  'album',
-  () => import('@/components/Page/AlbumPage.vue'),
-  'AlbumPage'
+const albumsPageRoutes = createRouteWithAlias(
+  'albums',
+  () => import('@/components/Page/AlbumsPage.vue'),
+  'AlbumsPage'
 )
 
 const routes = simpleRoutes.concat(
@@ -102,7 +102,7 @@ const routes = simpleRoutes.concat(
   favoritePageRoutes,
   archivedPageRoutes,
   trashedPageRoutes,
-  albumPageRoutes
+  albumsPageRoutes
 )
 
 const router = createRouter({

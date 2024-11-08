@@ -10,7 +10,7 @@ export const useFilterStore = defineStore({
     basicString: string | null
     // Records the gallery search filter
     filterString: string | null
-    currentPage: 'default' | 'all' | 'favorite' | 'archived' | 'trashed' | 'album'
+    currentPage: 'default' | 'all' | 'favorite' | 'archived' | 'trashed' | 'albums' | 'album'
   } => ({
     basicString: null,
     filterString: null,
@@ -49,8 +49,13 @@ export const useFilterStore = defineStore({
           this.basicString = 'and(tag:_archived, not(tag:_trashed), not(type:album))'
           break
         }
-        case 'album': {
+        case 'albums': {
           this.basicString = 'type:album'
+          break
+        }
+        case 'album': {
+          console.error('error')
+
           break
         }
         case 'trashed': {
