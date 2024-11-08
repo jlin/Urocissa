@@ -12,7 +12,8 @@ import {
   AlbumSchema,
   DataBaseSchema,
   AbstractDataSchema,
-  SubRowSchema
+  SubRowSchema,
+  albumInfoSchema
 } from './schemas'
 
 /**
@@ -54,6 +55,8 @@ export type Alias = z.infer<typeof AliasSchema>
  * Represents tag information.
  */
 export type TagInfo = z.infer<typeof tagInfoSchema>
+
+export type AlbumInfo = z.infer<typeof albumInfoSchema>
 
 /**
  * Represents scrollbar data.

@@ -143,6 +143,14 @@ export const tagInfoSchema = z.object({
 })
 
 /**
+ * Schema for album information.
+ */
+export const albumInfoSchema = z.object({
+  albumId: z.string(),
+  albumName: z.string()
+})
+
+/**
  * Schema for database timestamp.
  */
 export const databaseTimestampSchema = z.object({

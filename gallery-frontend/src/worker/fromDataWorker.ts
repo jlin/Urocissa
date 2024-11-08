@@ -15,6 +15,7 @@ import { useModalStore } from '@/store/modalStore'
 import router from '@/script/routes'
 import axios from 'axios'
 import { useConfigStore } from '@/store/configStore'
+import { useAlbumStore } from '@/store/albumStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker) {
@@ -29,6 +30,8 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
   const locationStore = useLocationStore()
   const modalStore = useModalStore()
   const configStore = useConfigStore()
+  const albumStore = useAlbumStore()
+
   const handler = createHandler<typeof fromDataWorker>({
     returnData: (payload) => {
       const slicedDataArray: SlicedDataItem[] = payload.slicedDataArray
@@ -93,6 +96,10 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
       if (!tagStore.fetched) {
         await tagStore.fetchTags()
       }
+      if (!albumStore.fetched) {
+        await albumStore.fetchAlbums()
+      }
+
       fetchScrollbarInWorker()
 
       try {
