@@ -8,9 +8,11 @@ export const useAlbumStore = defineStore({
   id: 'albumStore',
   state: (): {
     albums: AlbumInfo[]
+    albumMap: Map<string, string>
     fetched: boolean
   } => ({
     albums: [],
+    albumMap: new Map(),
     fetched: false
   }),
   actions: {
@@ -27,6 +29,10 @@ export const useAlbumStore = defineStore({
 
         this.albums = albums
         this.albums.sort((a, b) => a.albumName.localeCompare(b.albumName))
+
+        this.albums.forEach((album) => {
+          this.albumMap.set(album.albumId, album.albumName)
+        })
 
         this.fetched = true
       } catch (error) {

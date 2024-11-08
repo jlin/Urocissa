@@ -34,7 +34,6 @@
           variant="outlined"
           class="ma-2 button button-submit"
           @click="change()"
-          :loading="!albumStore.fetched"
         >
           Submit
         </v-btn>

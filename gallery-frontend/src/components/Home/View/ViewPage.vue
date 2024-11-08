@@ -274,7 +274,7 @@
                         }
                       "
                     >
-                      {{ albumId }}</v-chip
+                      {{ albumStore.albumMap.get(albumId)! }}</v-chip
                     >
                   </v-list-item-subtitle>
                   <v-list-item-subtitle>
@@ -319,6 +319,7 @@ import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { getSrc } from '@/../config.ts'
+import { useAlbumStore } from '@/store/albumStore'
 
 interface ExifData {
   FNumber: string // Aperture value as a string, e.g., "f/2.8"
@@ -334,6 +335,7 @@ const initializedStore = useInitializedStore()
 const modalStore = useModalStore()
 const infoStore = useInfoStore()
 const dataStore = useDataStore()
+const albumStore = useAlbumStore()
 const route = useRoute()
 const router = useRouter()
 const hash = computed(() => {
