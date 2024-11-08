@@ -257,6 +257,15 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
           devicePixelRatio: window.devicePixelRatio,
           jwt: Cookies.get('jwt')!
         })
+      } else if (data.album?.cover) {
+        workerStore.postToWorkerList[workerIndex].processSmallImage({
+          index: index,
+          hash: data.album?.cover,
+          width: displayWidth,
+          height: displayHeight,
+          devicePixelRatio: window.devicePixelRatio,
+          jwt: Cookies.get('jwt')!
+        })
       }
     } else {
       console.error('workerStore.postToWorkerList is undefined')

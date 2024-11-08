@@ -1,5 +1,4 @@
 use crate::public::abstract_data::AbstractData;
-use crate::public::album::Album;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;

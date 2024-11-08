@@ -1,10 +1,9 @@
 use std::sync::atomic::Ordering;
 
+use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::DATA_TABLE;
-use crate::public::tree::read_tags::TagInfo;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use arrayvec::ArrayString;
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
@@ -24,6 +23,7 @@ pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
             let mut write_table = txn.open_table(DATA_TABLE).unwrap();
+
             let timestamp = &json_data.timestamp;
             let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
@@ -33,11 +33,12 @@ pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {
                 .for_each(|index| {
                     let hash = tree_snapshot.get_hash(*index);
                     let mut data = write_table.get(hash.as_str()).unwrap().unwrap().value();
-                    json_data.add_albums_content.iter().for_each(|album| {
-                        data.album.insert(album.clone());
+                    json_data.add_albums_content.iter().for_each(|album_id| {
+                        data.album.insert(album_id.clone());
                     });
-                    json_data.remove_albums_content.iter().for_each(|album| {
-                        data.album.remove(album);
+
+                    json_data.remove_albums_content.iter().for_each(|album_id| {
+                        data.album.remove(album_id);
                     });
 
                     write_table.insert(&*data.hash, &data).unwrap();
