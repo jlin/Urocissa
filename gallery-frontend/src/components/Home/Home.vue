@@ -21,23 +21,7 @@
       v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
       :bufferHeight="bufferHeight"
     />
-    <v-container
-      v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-      class="d-flex align-center justify-center"
-    >
-      <v-card
-        class="pa-4 text-center mx-auto"
-        elevation="12"
-        max-width="600"
-        rounded="lg"
-        width="100%"
-      >
-        <v-icon class="mb-5" color="grey" icon="mdi-image-plus" size="100"></v-icon>
-        <v-card-item>
-          <v-card-title>Wow, so empty!<br />Try adding some photos here!</v-card-title>
-        </v-card-item>
-      </v-card>
-    </v-container>
+    <HomeEmptyCard v-if="initializedStore.initialized && prefetchStore.dataLength === 0" />
   </div>
 </template>
 
@@ -77,6 +61,7 @@ import { useRowStore } from '@/store/rowStore'
 import { debounce } from 'lodash'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import HomeEmptyCard from './HomeEmptyCard.vue'
 const offsetStore = useOffsetStore()
 const rowStore = useRowStore()
 const dataStore = useDataStore()
