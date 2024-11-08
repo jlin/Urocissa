@@ -1,6 +1,6 @@
+import { useCurrentPage } from '@/script/common/functions'
 import { generateJsonString } from '@/script/lexer/generateJson'
 import { defineStore } from 'pinia'
-import { computed } from 'vue'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 
 export const useFilterStore = defineStore({
@@ -10,9 +10,11 @@ export const useFilterStore = defineStore({
     basicString: string | null
     // Records the gallery search filter
     filterString: string | null
+    currentPage: 'default' | 'all' | 'favorite' | 'archived' | 'trashed' | 'album'
   } => ({
     basicString: null,
-    filterString: null
+    filterString: null,
+    currentPage: 'default'
   }),
   actions: {
     // Generates the filter JSON string using basicString and filterString
@@ -33,23 +35,8 @@ export const useFilterStore = defineStore({
       this.filterString = searchString ? searchString : null
     },
     handleBasicString(route: RouteLocationNormalizedLoaded) {
-      const currentPage = computed(() => {
-        if (route.path.startsWith('/favorite')) {
-          return 'favorite'
-        } else if (route.path.startsWith('/archived')) {
-          return 'archived'
-        } else if (route.path.startsWith('/trashed')) {
-          return 'trashed'
-        } else if (route.path.startsWith('/album')) {
-          return 'album'
-        } else if (route.path.startsWith('/all')) {
-          return 'all'
-        } else {
-          return 'default'
-        }
-      })
-
-      switch (currentPage.value) {
+      const currentPage = useCurrentPage(route).value
+      switch (currentPage) {
         case 'default': {
           this.basicString = 'and(not(tag: _archived), not(tag:_trashed), not(type:album))'
           break
