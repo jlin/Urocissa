@@ -1,8 +1,4 @@
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-
-use crate::public::{
-    abstract_data::AbstractData, database_struct::database::definition::DataBase, tree::TREE,
-};
+use crate::public::database_struct::database::definition::DataBase;
 
 use super::Album;
 
