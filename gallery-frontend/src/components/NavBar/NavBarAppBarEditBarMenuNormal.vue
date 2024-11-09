@@ -26,7 +26,7 @@
       <v-divider></v-divider>
 
       <v-list-item
-        v-if="!isTrashedRoute"
+        v-if="!route.path.startsWith('/trashed')"
         prepend-icon="mdi-trash-can-outline"
         @click="handleQuickEdit('trashed')"
       >
@@ -47,7 +47,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
@@ -65,8 +64,6 @@ const collectionStore = useCollectionStore()
 const prefetchStore = usePrefetchStore()
 const dataStore = useDataStore()
 const modalStore = useModalStore()
-
-const isTrashedRoute = computed(() => route.path.startsWith('/trashed'))
 
 // Methods
 const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {
