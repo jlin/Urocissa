@@ -17,7 +17,7 @@
     <v-btn v-else icon="mdi-select-remove" @click="selectRemove"></v-btn>
     <v-btn icon="mdi-select-inverse" @click="selectInverse"></v-btn>
     <!-- Use the new Menu Component -->
-    <NavBarAppBarEditBarMenuNormal />
+    <NavBarAppBarEditBarMenuNormal v-if="!route.meta.isInsideAlbum" />
   </v-app-bar>
 </template>
 
@@ -26,7 +26,8 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 
 import NavBarAppBarEditBarMenuNormal from '@/components/NavBar/NavBarAppBarEditBarMenuNormal.vue'
-
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const collectionStore = useCollectionStore()
 const prefetchStore = usePrefetchStore()
 

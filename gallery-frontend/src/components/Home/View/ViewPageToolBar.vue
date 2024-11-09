@@ -105,6 +105,7 @@ const collectionStore = useCollectionStore()
 const route = useRoute()
 const computedPath = computed(() => {
   const path = route.path
+
   if (path.startsWith('/view')) {
     return '/'
   } else if (path.startsWith('/favorite/view')) {
@@ -115,6 +116,11 @@ const computedPath = computed(() => {
     return '/trashed'
   } else if (path.startsWith('/all/view')) {
     return '/all'
+  } else if (path.startsWith('/album-') && path.includes('/view/')) {
+    // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
+    const segments = path.split('/')
+    const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
+    return `/${albumIdentifier}`
   } else {
     return '/'
   }

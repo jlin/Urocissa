@@ -108,7 +108,8 @@ function createRouteForInsideAlbum(): RouteRecordRaw[] {
     name: 'InsideAlbumPage',
     meta: {
       navigation: true,
-      sortable: true
+      sortable: true,
+      isInsideAlbum: true
     },
     children: [
       {

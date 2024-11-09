@@ -45,16 +45,27 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
 
       if (abstractData.database !== undefined) {
         const hash = dataStore.data.get(currentIndex)!.database!.hash
+
         if (route.path.startsWith('/favorite')) {
-          router.push({ path: '/favorite/view/' + hash, query: { ...route.query } })
+          router.push({ path: `/favorite/view/${hash}`, query: { ...route.query } })
         } else if (route.path.startsWith('/archived')) {
-          router.push({ path: '/archived/view/' + hash, query: { ...route.query } })
+          router.push({ path: `/archived/view/${hash}`, query: { ...route.query } })
         } else if (route.path.startsWith('/all')) {
-          router.push({ path: '/all/view/' + hash, query: { ...route.query } })
+          router.push({ path: `/all/view/${hash}`, query: { ...route.query } })
         } else if (route.path.startsWith('/trashed')) {
-          router.push({ path: '/trashed/view/' + hash, query: { ...route.query } })
+          router.push({ path: `/trashed/view/${hash}`, query: { ...route.query } })
+        } else if (route.path.startsWith('/album-')) {
+          // Extract the album identifier from the path
+          const segments = route.path.split('/')
+          const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
+          if (albumIdentifier) {
+            router.push({ path: `/${albumIdentifier}/view/${hash}`, query: { ...route.query } })
+          } else {
+            // Fallback if album identifier is not found
+            router.push({ path: `/view/${hash}`, query: { ...route.query } })
+          }
         } else {
-          router.push({ path: '/view/' + hash, query: { ...route.query } })
+          router.push({ path: `/view/${hash}`, query: { ...route.query } })
         }
       } else {
         // is album

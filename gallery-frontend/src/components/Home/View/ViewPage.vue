@@ -386,10 +386,15 @@ const previousPage = computed(() => {
     return `/all/view/${previousHash.value}`
   } else if (route.path.startsWith('/trashed')) {
     return `/trashed/view/${previousHash.value}`
+  } else if (route.path.startsWith('/album-')) {
+    // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
+    const albumIdentifier = route.path.split('/')[1]
+    return `/${albumIdentifier}/view/${previousHash.value}`
   } else {
     return `/view/${previousHash.value}`
   }
 })
+
 const nextPage = computed(() => {
   if (route.path.startsWith('/favorite')) {
     return `/favorite/view/${nextHash.value}`
@@ -399,6 +404,10 @@ const nextPage = computed(() => {
     return `/all/view/${nextHash.value}`
   } else if (route.path.startsWith('/trashed')) {
     return `/trashed/view/${nextHash.value}`
+  } else if (route.path.startsWith('/album-')) {
+    // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
+    const albumIdentifier = route.path.split('/')[1]
+    return `/${albumIdentifier}/view/${nextHash.value}`
   } else {
     return `/view/${nextHash.value}`
   }
@@ -596,6 +605,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 const computedPath = computed(() => {
   const path = route.path
+
   if (path.startsWith('/view')) {
     return '/'
   } else if (path.startsWith('/favorite/view')) {
@@ -606,9 +616,18 @@ const computedPath = computed(() => {
     return '/trashed'
   } else if (path.startsWith('/all/view')) {
     return '/all'
+  } else if (path.startsWith('/album-') && path.includes('/view/')) {
+    // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
+    const segments = path.split('/')
+    const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
+    return `/${albumIdentifier}`
   } else {
     return '/'
   }
+})
+
+watchEffect(() => {
+  console.log('computedPath is', computedPath.value)
 })
 
 const handlePopState = () => {
