@@ -3,6 +3,7 @@ import { useInitializedStore } from '@/store/initializedStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 
 /**
  * Initializes scroll position and client height for the image container.
@@ -16,7 +17,6 @@ import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
  */
 export function useInitializeScrollPosition(
   imageContainerRef: Ref<HTMLElement | null>,
-  scrollTop: Ref<number>,
   bufferHeight: ComputedRef<number>,
   lastScrollTop: Ref<number>,
   clientHeight: Ref<number>,
@@ -31,6 +31,7 @@ export function useInitializeScrollPosition(
     [() => initializedStore.initialized, windowWidth],
 
     async () => {
+      const scrollTopStore = useScrollTopStore()
       const imageContainer = imageContainerRef.value
       if (imageContainer !== null && initializedStore.initialized) {
         imageContainer.scrollTop = bufferHeight.value / 3
@@ -42,7 +43,7 @@ export function useInitializeScrollPosition(
         const jumpTo = prefetchStore.locateTo
         if (jumpTo !== null) {
           const targetRowIndex = Math.floor(jumpTo / layoutBatchNumber)
-          scrollTop.value = targetRowIndex * fixedBigRowHeight
+          scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
           fetchRowInWorker(targetRowIndex)
           prefetchStore.locateTo = null
         }

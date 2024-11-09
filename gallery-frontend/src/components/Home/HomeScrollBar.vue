@@ -101,11 +101,13 @@ import {
   paddingPixel,
   scrollBarWidth
 } from '@/script/common/constants'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 const isScrolling = ref(false)
 const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)
 const chipSize = 25
 
+const scrollTopStore = useScrollTopStore()
 const locationStore = useLocationStore()
 const prefetchStore = usePrefetchStore()
 const scrollbarStore = useScrollbarStore()
@@ -115,14 +117,12 @@ const queueStore = useQueueStore()
 
 const reachBottom = computed(() => {
   return (
-    scrollTop !== undefined &&
     windowHeight !== undefined &&
-    scrollTop!.value === prefetchStore.totalHeight - windowHeight.value - paddingPixel
+    scrollTopStore.scrollTop === prefetchStore.totalHeight - windowHeight.value - paddingPixel
   )
 })
 
 const windowHeight = inject<Ref<number>>('windowHeight')!
-const scrollTop = inject<Ref<number>>('scrollTop')
 const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
 const scrollbarRef = ref<HTMLElement | null>(null)
 
@@ -195,7 +195,7 @@ const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index), 1
  * Handle a click event on the scrollbar.
  */
 const handleClick = () => {
-  if (scrollTop !== undefined) {
+  if (scrollTopStore.scrollTop !== undefined) {
     const clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
     const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
 
@@ -209,7 +209,7 @@ const handleClick = () => {
     queueStore.clearAll()
     prefetchStore.clearForResize()
     rowStore.clearForResize()
-    scrollTop.value = targetRowIndex * fixedBigRowHeight
+    scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
     debouncedFetchRow(targetRowIndex)
   }
 }

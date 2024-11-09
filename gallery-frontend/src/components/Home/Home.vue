@@ -62,6 +62,8 @@ import { debounce } from 'lodash'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
+import { useScrollTopStore } from '@/store/scrollTopStore'
+const scrollTopStore = useScrollTopStore()
 const offsetStore = useOffsetStore()
 const rowStore = useRowStore()
 const dataStore = useDataStore()
@@ -81,13 +83,12 @@ const clientHeight = ref<number>(0)
 
 const lastScrollTop = ref(0)
 const stopScroll = ref(false)
-const scrollTop = ref<number>(0)
 
 const md = new MobileDetect(window.navigator.userAgent)
 const mobile = md.mobile()
 
 provide('imageContainerRef', imageContainerRef)
-provide('scrollTop', scrollTop)
+
 provide('windowWidth', windowWidth)
 provide('windowHeight', windowHeight)
 provide('mobile', mobile)
@@ -95,7 +96,6 @@ provide('mobile', mobile)
 const throttledHandleScroll = handleScroll(
   imageContainerRef,
   lastScrollTop,
-  scrollTop,
   mobile,
   stopScroll,
   windowHeight
@@ -115,7 +115,7 @@ watch(windowWidth, () => {
 
 const resizeDebounce = debounce(() => {
   const locationRowIndex = Math.floor(locationStore.locationIndex! / layoutBatchNumber)
-  scrollTop.value = locationRowIndex * 2400
+  scrollTopStore.scrollTop = locationRowIndex * 2400
   fetchRowInWorker(locationRowIndex)
 }, 100)
 
@@ -135,7 +135,6 @@ onMounted(async () => {
   prefetch(filterStore.generateFilterJsonString(), windowWidth, route)
   useInitializeScrollPosition(
     imageContainerRef,
-    scrollTop,
     bufferHeight,
     lastScrollTop,
     clientHeight,

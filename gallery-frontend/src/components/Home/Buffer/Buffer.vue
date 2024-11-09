@@ -9,7 +9,7 @@
       id="placeholderTop"
       v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
       :topPixel="visibleRows[0].topPixelAccumulated! -
-        scrollTop +
+        scrollTopStore.scrollTop +
         bufferHeight / 3 +
         visibleRows[0].offset"
       :modifyTopPixel="true"
@@ -20,7 +20,7 @@
       class="positioned-element position-absolute w-100 row-div"
       :style="{
         position: 'absolute',
-        top: `${row.topPixelAccumulated! - scrollTop + bufferHeight / 3 + row.offset}px`,
+        top: `${row.topPixelAccumulated! - scrollTopStore.scrollTop + bufferHeight / 3 + row.offset}px`,
         height: `${row.rowHeight}px`
       }"
       :start="`${row.start}`"
@@ -31,7 +31,7 @@
       id="placeholderBottom"
       v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
       :topPixel="visibleRows[visibleRows.length - 1].topPixelAccumulated! -
-        scrollTop +
+        scrollTopStore.scrollTop +
         bufferHeight / 3 +
         visibleRows[visibleRows.length - 1].offset +
         visibleRows[visibleRows.length - 1].rowHeight"
@@ -42,7 +42,7 @@
       ref="placeholderNoneRef"
       v-if="visibleRows.length === 0 && windowWidth > 0"
       :topPixel="
-        ((lastRowBottom - scrollTop + windowHeight) %
+        ((lastRowBottom - scrollTopStore.scrollTop + windowHeight) %
           (placeholderNoneRowRefHeight + 2 * paddingPixel)) +
         bufferHeight / 3 -
         windowHeight
@@ -75,12 +75,14 @@ import { useFetchRows } from '../../hook/useFetchRows'
 import { batchNumber, paddingPixel } from '@/script/common/constants'
 import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 
 const prefetchStore = usePrefetchStore()
+const scrollTopStore = useScrollTopStore()
+
 const windowWidth = inject<Ref<number>>('windowWidth')!
 const windowHeight = inject<Ref<number>>('windowHeight')!
 const imageContainerRef = inject<Ref<HTMLElement>>('imageContainerRef')!
-const scrollTop = inject<Ref<number>>('scrollTop')!
 
 type BufferPlaceholderInstance = ComponentPublicInstance<{
   placeholderRowRefHeight: number
@@ -92,19 +94,19 @@ const placeholderNoneRowRefHeight = computed(() =>
   placeholderNoneRef.value ? placeholderNoneRef.value.placeholderRowRefHeight : 0
 )
 const visibleRowsLength = computed(() => visibleRows.value.length)
-const startHeight = computed(() => scrollTop.value)
-const endHeight = computed(() => scrollTop.value + windowHeight.value)
+const startHeight = computed(() => scrollTopStore.scrollTop)
+const endHeight = computed(() => scrollTopStore.scrollTop + windowHeight.value)
 
 const { visibleRows } = useUpdateVisibleRows(
   imageContainerRef,
-  scrollTop,
+
   startHeight,
   endHeight,
   lastRowBottom,
   windowHeight
 )
 useFetchImgs(visibleRows, visibleRowsLength, batchNumber)
-useFetchRows(scrollTop, startHeight, endHeight)
+useFetchRows(startHeight, endHeight)
 
 watch(windowWidth, () => {
   visibleRows.value = []

@@ -5,6 +5,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useRowStore } from '@/store/rowStore'
 import { Ref, ref, toRaw, watch } from 'vue'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 
 /**
  * Finds and returns rows that overlap within the given range.
@@ -142,12 +143,10 @@ function filterRowForLocation(visibleRows: Ref<Row[]>) {
  * @param scrollTop - Current scroll position.
  * @param scrollingBound - Maximum allowed scroll position.
  */
-function scrollTopOffsetFix(
-  visibleRows: Ref<Row[]>,
-  scrollTop: Ref<number>,
-  scrollingBound: number
-) {
+function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number) {
   const rowStore = useRowStore()
+  const scrollTopStore = useScrollTopStore()
+
   const lastCurrentRowThatInLastVisibleRow = visibleRows.value.findLast((row) => {
     return rowStore.lastVisibleRow.has(row.rowIndex)
   })
@@ -160,7 +159,7 @@ function scrollTopOffsetFix(
 
     // Adjust scrollTop while ensuring it does not exceed the scrollingBound
 
-    scrollTop.value = Math.min(scrollTop.value + shift, scrollingBound)
+    scrollTopStore.scrollTop = Math.min(scrollTopStore.scrollTop + shift, scrollingBound)
   }
 }
 
@@ -246,7 +245,6 @@ function updateLastRowBottom(
  */
 export function useUpdateVisibleRows(
   imageContainerRef: Ref<HTMLElement | null>,
-  scrollTop: Ref<number>,
   startHeight: Ref<number>,
   endHeight: Ref<number>,
   lastRowBottom: Ref<number>,
@@ -255,6 +253,7 @@ export function useUpdateVisibleRows(
   const visibleRows: Ref<Row[]> = ref<Row[]>([])
   const prefetchStore = usePrefetchStore()
   const rowStore = useRowStore()
+  const scrollTopStore = useScrollTopStore()
 
   const updateVisibleRows = () => {
     if (imageContainerRef.value) {
@@ -272,12 +271,11 @@ export function useUpdateVisibleRows(
 
         scrollTopOffsetFix(
           visibleRows,
-          scrollTop,
           prefetchStore.totalHeight - windowHeight.value - paddingPixel
         )
       }
       updateLastVisibleRow(visibleRows)
-      updateLocationIndex(visibleRows, scrollTop.value)
+      updateLocationIndex(visibleRows, scrollTopStore.scrollTop)
       updateLastRowBottom(visibleRows, lastRowBottom, endHeight.value)
     }
   }
@@ -286,7 +284,7 @@ export function useUpdateVisibleRows(
   watch(
     [
       imageContainerRef,
-      scrollTop,
+      () => scrollTopStore.scrollTop,
       () => prefetchStore.updateVisibleRowTrigger,
       () => document.visibilityState
     ],

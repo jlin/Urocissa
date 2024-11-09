@@ -1,5 +1,6 @@
 import { paddingPixel } from '@/script/common/constants'
 import { usePrefetchStore } from '@/store/prefetchStore'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 import { throttle } from 'lodash'
 import { Ref } from 'vue'
 
@@ -20,7 +21,6 @@ import { Ref } from 'vue'
 export function handleScroll(
   imageContainerRef: Ref<HTMLElement | null>,
   lastScrollTop: Ref<number>,
-  scrollTop: Ref<number>,
   mobile: string | null,
   stopScroll: Ref<boolean>,
   windowHeight: Ref<number>
@@ -28,35 +28,36 @@ export function handleScroll(
   const throttledHandleScroll = throttle(
     () => {
       if (imageContainerRef.value !== null) {
+        const scrollTopStore = useScrollTopStore()
         const prefetchStore = usePrefetchStore()
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
-        const result = scrollTop.value + difference
+        const result = scrollTopStore.scrollTop + difference
 
         if (result < 0) {
           // If scrolling exceeds the lower bound, reset the scroll position to 0.
           if (mobile) {
             stopScroll.value = true
-            scrollTop.value = 0
+            scrollTopStore.scrollTop = 0
             setTimeout(() => {
               stopScroll.value = false
             }, 100)
           } else {
-            scrollTop.value = 0
+            scrollTopStore.scrollTop = 0
           }
         } else if (result >= prefetchStore.totalHeight - windowHeight.value - paddingPixel) {
           // If scrolling exceeds the upper bound, reset the scroll position to the maximum allowed value.
           if (mobile) {
             stopScroll.value = true
-            scrollTop.value = prefetchStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTopStore.scrollTop = prefetchStore.totalHeight - windowHeight.value - paddingPixel
             setTimeout(() => {
               stopScroll.value = false
             }, 100)
           } else {
-            scrollTop.value = prefetchStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTopStore.scrollTop = prefetchStore.totalHeight - windowHeight.value - paddingPixel
           }
         } else {
           // Adjust the scroll position normally within the allowed range.
-          scrollTop.value += difference
+          scrollTopStore.scrollTop += difference
         }
 
         // Compensate for the change in scrollTop caused by the user's scroll action.

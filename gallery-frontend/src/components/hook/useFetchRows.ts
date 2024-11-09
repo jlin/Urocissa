@@ -6,6 +6,7 @@ import debounce from 'lodash/debounce'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
+import { useScrollTopStore } from '@/store/scrollTopStore'
 
 /**
  * Computes the sum of offsets for rows above the given scroll position.
@@ -43,7 +44,6 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number) {
  * @param maxWait - Maximum wait time in milliseconds for debounced requests (default: 100ms).
  */
 export function useFetchRows(
-  scrollTop: Ref<number>,
   startHeight: Ref<number>,
   endHeight: Ref<number>,
   debounceTime = 50,
@@ -51,11 +51,12 @@ export function useFetchRows(
 ) {
   const initializedStore = useInitializedStore()
   const prefetchStore = usePrefetchStore()
+  const scrollTopStore = useScrollTopStore()
 
   const debouncedFetch = debounce(
     () => {
       if (initializedStore.initialized) {
-        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(scrollTop.value)
+        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(scrollTopStore.scrollTop)
         const fixedHeight = 2400
         const startHeightOffseted = startHeight.value - offSetSumOfAboveRowsIndex - fixedHeight
         const endHeightOffseted = endHeight.value - offSetSumOfAboveRowsIndex + fixedHeight
@@ -80,7 +81,11 @@ export function useFetchRows(
   )
 
   watch(
-    [() => initializedStore.initialized, scrollTop, () => prefetchStore.updateFetchRowTrigger],
+    [
+      () => initializedStore.initialized,
+      () => scrollTopStore.scrollTop,
+      () => prefetchStore.updateFetchRowTrigger
+    ],
     debouncedFetch,
     { immediate: true }
   )
