@@ -24,10 +24,12 @@ use router::{
     },
     post::{
         authenticate::authenticate, authenticate::authenticate_share, create_album::create_album,
-        edit_album::set_album_cover, post_upload::upload,
+        post_upload::upload,
     },
     put::{
-        edit_album::edit_album, edit_tag::edit_tag, random::generate_random_data,
+        edit_album::{edit_album, set_album_cover},
+        edit_tag::edit_tag,
+        random::generate_random_data,
         regenerate_preview::regenerate_preview,
     },
 };
