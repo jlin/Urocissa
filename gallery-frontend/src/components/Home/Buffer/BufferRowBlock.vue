@@ -78,6 +78,30 @@
                   )
                 }}
               </v-chip>
+              <v-chip
+                id="album-chip"
+                density="comfortable"
+                size="small"
+                prepend-icon="mdi-image-album"
+                v-if="
+                  dataStore.data.has(row.start + subIndex) &&
+                  dataStore.data.get(row.start + subIndex)?.album
+                "
+                color="black"
+                variant="flat"
+                class="position-absolute ma-2"
+                :style="{
+                  bottom: '0px',
+                  right: '0px',
+                  zIndex: 4
+                }"
+              >
+                <span class="text-truncate" :style="{
+                  maxWidth: `${data.displayWidth * 0.8}px`
+                }">
+                  {{ dataStore.data.get(row.start + subIndex)?.album?.title }}
+                </span>
+              </v-chip>
               <div
                 id="hover-gradient-div"
                 v-if="!mobile"

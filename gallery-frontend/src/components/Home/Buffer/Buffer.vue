@@ -77,7 +77,6 @@ import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 
 const prefetchStore = usePrefetchStore()
-
 const windowWidth = inject<Ref<number>>('windowWidth')!
 const windowHeight = inject<Ref<number>>('windowHeight')!
 const imageContainerRef = inject<Ref<HTMLElement>>('imageContainerRef')!
