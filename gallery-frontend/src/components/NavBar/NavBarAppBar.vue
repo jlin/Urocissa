@@ -1,19 +1,19 @@
 <template>
   <v-app-bar v-if="!collectionStore.editModeOn" scroll-off-screen>
-    <v-row justify="center" align="center" class="w-100 h-100" no-gutters>
-      <v-col justify="center" align="center" cols="1">
+    <v-row class="w-100 h-100 d-flex align-center justify-center" no-gutters>
+      <v-col class="d-flex align-center justify-center" cols="1">
         <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
         </v-btn>
         <v-btn v-else icon="mdi mdi-arrow-left" to="/albums"></v-btn>
       </v-col>
-      <v-col v-if="route.meta.isInsideAlbum" cols="5">
+      <v-col v-if="route.meta.isInsideAlbum" cols="5" class="d-flex align-center justify-center">
         <v-card elevation="0">
           <v-card-title class="text-truncate">
             {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
           </v-card-title>
         </v-card>
       </v-col>
-      <v-col :cols="route.meta.isInsideAlbum ? 5 : 10" justify="center" align="center">
+      <v-col :cols="route.meta.isInsideAlbum ? 5 : 10" class="d-flex align-center justify-center">
         <v-card class="w-100">
           <v-card-text class="pa-0">
             <v-text-field
@@ -41,7 +41,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="1" justify="center" align="center">
+      <v-col cols="1" class="d-flex align-center justify-center">
         <v-menu>
           <template v-slot:activator="{ props }">
             <v-btn v-bind="props" icon="mdi-plus"></v-btn>
