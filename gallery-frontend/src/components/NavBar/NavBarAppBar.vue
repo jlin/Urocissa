@@ -1,62 +1,57 @@
 <template>
   <v-app-bar v-if="!collectionStore.editModeOn" scroll-off-screen>
-    <v-row class="w-100 h-100 d-flex align-center justify-center" no-gutters>
-      <v-col class="d-flex align-center justify-center" cols="1">
-        <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
-        </v-btn>
-        <v-btn v-else icon="mdi mdi-arrow-left" to="/albums"></v-btn>
-      </v-col>
-      <v-col v-if="route.meta.isInsideAlbum" cols="5" class="d-flex align-center justify-center">
-        <v-card elevation="0">
-          <v-card-title class="text-truncate">
-            {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
-          </v-card-title>
-        </v-card>
-      </v-col>
-      <v-col :cols="route.meta.isInsideAlbum ? 5 : 10" class="d-flex align-center justify-center">
-        <v-card class="w-100">
-          <v-card-text class="pa-0">
-            <v-text-field
-              id="nav-search-input"
-              rounded
-              class="ma-0"
-              v-model="searchQuery"
-              bg-color="grey-darken-2"
-              @click:prependInner="handleSearch"
-              @click:clear="handleSearch"
-              @keyup.enter="handleSearch"
-              clearable
-              persistent-clear
-              variant="solo"
-              flat
-              prepend-inner-icon="mdi-magnify"
-              single-line
-              hide-details
-              style="margin-right: 10px"
-            >
-              <template v-slot:label>
-                <span class="text-caption">Search</span>
-              </template>
-            </v-text-field>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col cols="1" class="d-flex align-center justify-center">
-        <v-menu>
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-plus"></v-btn>
+    <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
+    </v-btn>
+    <v-btn v-else icon="mdi mdi-arrow-left" to="/albums"></v-btn>
+    <v-card v-if="route.meta.isInsideAlbum" elevation="0" class="w-50">
+      <v-card-title class="text-truncate">
+        {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
+      </v-card-title>
+    </v-card>
+    <v-card
+      :style="{
+        width: `${route.meta.isInsideAlbum ? '50%' : '100%'}`
+      }"
+    >
+      <v-card-text class="pa-0">
+        <v-text-field
+          id="nav-search-input"
+          rounded
+          class="ma-0"
+          v-model="searchQuery"
+          bg-color="grey-darken-2"
+          @click:prependInner="handleSearch"
+          @click:clear="handleSearch"
+          @keyup.enter="handleSearch"
+          clearable
+          persistent-clear
+          variant="solo"
+          flat
+          prepend-inner-icon="mdi-magnify"
+          single-line
+          hide-details
+          style="margin-right: 10px"
+        >
+          <template v-slot:label>
+            <span class="text-caption">Search</span>
           </template>
-          <v-list>
-            <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
-              <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
-            </v-list-item>
-            <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
-              <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </v-col>
-    </v-row>
+        </v-text-field>
+      </v-card-text>
+    </v-card>
+
+    <v-menu>
+      <template v-slot:activator="{ props }">
+        <v-btn v-bind="props" icon="mdi-plus"></v-btn>
+      </template>
+      <v-list>
+        <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
+          <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
+          <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
   </v-app-bar>
   <!-- If collectionStore.editModeOn === true then show the Editbar -->
   <EditBar v-else />
