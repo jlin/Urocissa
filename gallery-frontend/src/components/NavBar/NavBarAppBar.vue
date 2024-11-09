@@ -1,45 +1,60 @@
 <template>
-  <v-app-bar v-if="!collectionStore.editModeOn">
-    <v-btn @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
-    <v-card class="w-100">
-      <v-card-text class="pa-0">
-        <v-text-field
-          id="nav-search-input"
-          rounded
-          class="ma-2"
-          v-model="searchQuery"
-          bg-color="grey-darken-2"
-          @click:prependInner="handleSearch"
-          @click:clear="handleSearch"
-          @keyup.enter="handleSearch"
-          clearable
-          persistent-clear
-          variant="solo"
-          flat
-          prepend-inner-icon="mdi-magnify"
-          single-line
-          hide-details
-          style="margin-right: 10px"
-        >
-          <template v-slot:label>
-            <span class="text-caption">Search</span>
+  <v-app-bar v-if="!collectionStore.editModeOn" scroll-off-screen>
+    <v-row justify="center" align="center" class="w-100 h-100" no-gutters>
+      <v-col justify="center" align="center" cols="1">
+        <v-btn @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
+      </v-col>
+      <v-col v-if="route.meta.isInsideAlbum" cols="5">
+        <v-card elevation="0">
+          <v-card-title class="text-truncate">
+            {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
+          </v-card-title>
+        </v-card>
+      </v-col>
+      <v-col :cols="route.meta.isInsideAlbum ? 5 : 10" justify="center" align="center">
+        <v-card class="w-100">
+          <v-card-text class="pa-0">
+            <v-text-field
+              id="nav-search-input"
+              rounded
+              class="ma-0"
+              v-model="searchQuery"
+              bg-color="grey-darken-2"
+              @click:prependInner="handleSearch"
+              @click:clear="handleSearch"
+              @keyup.enter="handleSearch"
+              clearable
+              persistent-clear
+              variant="solo"
+              flat
+              prepend-inner-icon="mdi-magnify"
+              single-line
+              hide-details
+              style="margin-right: 10px"
+            >
+              <template v-slot:label>
+                <span class="text-caption">Search</span>
+              </template>
+            </v-text-field>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="1" justify="center" align="center">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-plus"></v-btn>
           </template>
-        </v-text-field>
-      </v-card-text>
-    </v-card>
-    <v-menu>
-      <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" icon="mdi-plus"></v-btn>
-      </template>
-      <v-list>
-        <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
-          <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
-        </v-list-item>
-        <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
-          <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+          <v-list>
+            <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
+              <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
+              <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+    </v-row>
   </v-app-bar>
   <!-- If collectionStore.editModeOn === true then show the Editbar -->
   <EditBar v-else />
@@ -64,7 +79,9 @@ import EditBar from '@/components//NavBar/NavBarAppBarEditBar.vue'
 import axios from 'axios'
 import { useUploadStore } from '@/store/uploadStore'
 import { useModalStore } from '@/store/modalStore'
+import { useAlbumStore } from '@/store/albumStore'
 
+const albumStore = useAlbumStore()
 const modalStore = useModalStore()
 const showDrawer = inject('showDrawer') as Ref<boolean>
 const uploadStore = useUploadStore()

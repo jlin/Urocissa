@@ -388,8 +388,8 @@ const previousPage = computed(() => {
     return `/trashed/view/${previousHash.value}`
   } else if (route.path.startsWith('/album-')) {
     // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
-    const albumIdentifier = route.path.split('/')[1]
-    return `/${albumIdentifier}/view/${previousHash.value}`
+    const albumId = route.path.split('/')[1]
+    return `/${albumId}/view/${previousHash.value}`
   } else {
     return `/view/${previousHash.value}`
   }
@@ -406,8 +406,8 @@ const nextPage = computed(() => {
     return `/trashed/view/${nextHash.value}`
   } else if (route.path.startsWith('/album-')) {
     // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
-    const albumIdentifier = route.path.split('/')[1]
-    return `/${albumIdentifier}/view/${nextHash.value}`
+    const albumId = route.path.split('/')[1]
+    return `/${albumId}/view/${nextHash.value}`
   } else {
     return `/view/${nextHash.value}`
   }
@@ -619,8 +619,8 @@ const computedPath = computed(() => {
   } else if (path.startsWith('/album-') && path.includes('/view/')) {
     // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
     const segments = path.split('/')
-    const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
-    return `/${albumIdentifier}`
+    const albumId = segments.find((segment) => segment.startsWith('album-'))
+    return `/${albumId}`
   } else {
     return '/'
   }
