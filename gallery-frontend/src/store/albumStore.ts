@@ -8,7 +8,7 @@ export const useAlbumStore = defineStore({
   id: 'albumStore',
   state: (): {
     albums: AlbumInfo[]
-    albumMap: Map<string, string>
+    albumMap: Map<string, string> // id -> name
     fetched: boolean
   } => ({
     albums: [],
