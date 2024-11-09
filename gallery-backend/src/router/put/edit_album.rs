@@ -80,6 +80,7 @@ pub async fn set_album_cover(set_album_cover: Json<SetAlbumCover>) -> Result<(),
         }
         txn.commit().unwrap();
         SHOULD_RESET.swap(true, Ordering::SeqCst);
+
         Ok(())
     })
     .await
