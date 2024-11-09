@@ -2,7 +2,9 @@
   <v-app-bar v-if="!collectionStore.editModeOn" scroll-off-screen>
     <v-row justify="center" align="center" class="w-100 h-100" no-gutters>
       <v-col justify="center" align="center" cols="1">
-        <v-btn @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
+        <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
+        </v-btn>
+        <v-btn v-else icon="mdi mdi-arrow-left" to="/albums"></v-btn>
       </v-col>
       <v-col v-if="route.meta.isInsideAlbum" cols="5">
         <v-card elevation="0">
