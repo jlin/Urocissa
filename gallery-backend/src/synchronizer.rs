@@ -1,11 +1,13 @@
 use crate::executor::compressor::video_compressor::generate_compressed;
 use crate::executor::executor;
 use crate::public::error_data::{handle_error, ErrorData};
-use crate::public::redb::DATA_TABLE;
+use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
+use log::info;
+use redb::ReadableTable;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
@@ -19,6 +21,7 @@ use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 pub static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
 pub static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
+pub static ALBUM_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 
 pub async fn start_sync() -> anyhow::Result<()> {
     let (events_sender, mut events_receiver) = unbounded_channel::<Vec<PathBuf>>();
@@ -28,12 +31,20 @@ pub async fn start_sync() -> anyhow::Result<()> {
         unbounded_channel::<Vec<ArrayString<64>>>();
     VIDEO_QUEUE_SENDER.set(video_queue_sender).unwrap();
 
+    let (album_queue_sender, mut album_queue_receiver) =
+        unbounded_channel::<Vec<ArrayString<64>>>();
+    ALBUM_QUEUE_SENDER.set(album_queue_sender).unwrap();
+
     let events_repository: Arc<Mutex<Vec<PathBuf>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store events
     let events_repository_clone: Arc<Mutex<Vec<PathBuf>>> = Arc::clone(&events_repository);
 
     let video_queue_repository: Arc<Mutex<Vec<ArrayString<64>>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store video hash
     let video_queue_repository_repository_clone: Arc<Mutex<Vec<ArrayString<64>>>> =
         Arc::clone(&video_queue_repository);
+
+    let album_queue_repository: Arc<Mutex<Vec<ArrayString<64>>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store video hash
+    let album_queue_repository_repository_clone: Arc<Mutex<Vec<ArrayString<64>>>> =
+        Arc::clone(&album_queue_repository);
 
     // Create a new thread to receive and process events
     tokio::task::spawn(async move {
@@ -51,6 +62,15 @@ pub async fn start_sync() -> anyhow::Result<()> {
                 .lock()
                 .expect("events_repository_arc_clone lock error")
                 .extend(video_hash);
+        }
+    });
+
+    tokio::task::spawn(async move {
+        while let Some(album_id) = album_queue_receiver.recv().await {
+            album_queue_repository_repository_clone
+                .lock()
+                .expect("events_repository_arc_clone lock error")
+                .extend(album_id);
         }
     });
 
@@ -128,6 +148,40 @@ pub async fn start_sync() -> anyhow::Result<()> {
                     ));
                 }
             })
+        }
+    });
+
+    tokio::task::spawn_blocking(move || loop {
+        std::thread::sleep(std::time::Duration::from_secs(3));
+        let list_of_album_id = {
+            let mut album_queue_repository_repository_lock = album_queue_repository
+                .lock()
+                .expect("events_repository lock error");
+            std::mem::take(&mut *album_queue_repository_repository_lock)
+        };
+
+        // Deduplication operation
+        let id_vec = list_of_album_id
+            .into_iter()
+            .collect::<HashSet<ArrayString<64>>>()
+            .into_iter()
+            .collect::<Vec<ArrayString<64>>>();
+
+        if !id_vec.is_empty() {
+            let txn = TREE.in_disk.begin_write().unwrap();
+            {
+                let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
+                id_vec.into_iter().for_each(|album_id| {
+                    let mut album = album_table.get(&*album_id).unwrap().unwrap().value();
+                    if album.cover.is_none() {
+                        album.auto_set_cover();
+                    }
+                    album_table.insert(&*album_id, album).unwrap();
+                });
+            }
+            txn.commit().unwrap();
+            SHOULD_RESET.store(true, Ordering::SeqCst);
+            info!("Update album cover successfully")
         }
     });
 

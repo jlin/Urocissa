@@ -1,10 +1,12 @@
+use std::collections::HashSet;
 use std::sync::atomic::Ordering;
 
-use crate::public::tree::start_loop::SHOULD_RESET;
+use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
+use log::info;
 use redb::ReadableTable;
 use rocket::http::Status;
 use rocket::serde::{json::Json, Deserialize};
@@ -48,6 +50,22 @@ pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {
         }
         txn.commit().unwrap();
         SHOULD_RESET.store(true, Ordering::SeqCst);
+
+        let concact_result: Vec<ArrayString<64>> = json_data
+            .add_albums_content
+            .iter()
+            .chain(json_data.remove_albums_content.iter())
+            .cloned()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+        ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
+            .get()
+            .unwrap()
+            .send(concact_result)
+            .unwrap();
+        info!("Send concact_result")
     })
     .await
     .unwrap()
