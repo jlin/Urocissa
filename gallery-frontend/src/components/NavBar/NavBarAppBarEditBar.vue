@@ -18,15 +18,17 @@
     <v-btn icon="mdi-select-inverse" @click="selectInverse"></v-btn>
     <!-- Use the new Menu Component -->
     <NavBarAppBarEditBarMenuNormal v-if="!route.meta.isInsideAlbum" />
+    <NavBarAppBarEditBarMenuAlbum v-else />
   </v-app-bar>
 </template>
 
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-
-import NavBarAppBarEditBarMenuNormal from '@/components/NavBar/NavBarAppBarEditBarMenuNormal.vue'
 import { useRoute } from 'vue-router'
+import NavBarAppBarEditBarMenuNormal from '@/components/NavBar/NavBarAppBarEditBarMenuNormal.vue'
+import NavBarAppBarEditBarMenuAlbum from './NavBarAppBarEditBarMenuAlbum.vue'
+
 const route = useRoute()
 const collectionStore = useCollectionStore()
 const prefetchStore = usePrefetchStore()

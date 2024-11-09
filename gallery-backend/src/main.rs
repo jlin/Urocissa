@@ -24,7 +24,7 @@ use router::{
     },
     post::{
         authenticate::authenticate, authenticate::authenticate_share, create_album::create_album,
-        post_upload::upload,
+        edit_album::set_album_cover, post_upload::upload,
     },
     put::{
         edit_album::edit_album, edit_tag::edit_tag, random::generate_random_data,
@@ -110,7 +110,8 @@ async fn rocket() -> _ {
                 create_album,
                 authenticate_share,
                 get_albums,
-                edit_album
+                edit_album,
+                set_album_cover
             ],
         )
 }
