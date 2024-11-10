@@ -6,7 +6,7 @@
     cols="auto"
     :style="{ backgroundColor: 'white' }"
   >
-    <v-row no-gutters class="position-relative">
+    <v-row v-if="metadata.database" no-gutters class="position-relative">
       <v-toolbar color="white">
         <!-- Icon button with increased size -->
         <v-btn icon @click="toggleInfo">
@@ -25,10 +25,10 @@
               </v-avatar>
             </template>
             <v-list-item-title class="text-wrap">{{
-              `${metadata.width} \u00D7 ${metadata.height}`
+              `${metadata.database.width} \u00D7 ${metadata.database.height}`
             }}</v-list-item-title>
             <v-list-item-subtitle class="text-wrap">{{
-              filesize(metadata.size)
+              filesize(metadata.database.size)
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
@@ -50,13 +50,18 @@
                 <v-icon color="black">mdi-calendar</v-icon>
               </v-avatar>
             </template>
-            <v-list-item-title class="text-wrap">{{ dater(metadata.timestamp) }}</v-list-item-title>
+            <v-list-item-title class="text-wrap">{{
+              dater(metadata.database.timestamp)
+            }}</v-list-item-title>
             <v-list-item-subtitle class="text-wrap">{{
-              timer(metadata.timestamp)
+              timer(metadata.database.timestamp)
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item
-            v-if="metadata.exif_vec.Make !== undefined || metadata.exif_vec.Model !== undefined"
+            v-if="
+              metadata.database.exif_vec.Make !== undefined ||
+              metadata.database.exif_vec.Model !== undefined
+            "
           >
             <template v-slot:prepend>
               <v-avatar>
@@ -64,15 +69,19 @@
               </v-avatar>
             </template>
             <v-list-item-title class="text-wrap">{{
-              generateExifMake(metadata.exif_vec)
+              generateExifMake(metadata.database.exif_vec)
             }}</v-list-item-title>
             <v-list-item-subtitle class="text-wrap">
               <v-row>
-                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).FNumber }}</v-col>
-                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).ExposureTime }}</v-col>
-                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).FocalLength }}</v-col>
+                <v-col cols="auto">{{ formatExifData(metadata.database.exif_vec).FNumber }}</v-col>
                 <v-col cols="auto">{{
-                  formatExifData(metadata.exif_vec).PhotographicSensitivity
+                  formatExifData(metadata.database.exif_vec).ExposureTime
+                }}</v-col>
+                <v-col cols="auto">{{
+                  formatExifData(metadata.database.exif_vec).FocalLength
+                }}</v-col>
+                <v-col cols="auto">{{
+                  formatExifData(metadata.database.exif_vec).PhotographicSensitivity
                 }}</v-col>
               </v-row>
             </v-list-item-subtitle>
@@ -88,7 +97,7 @@
             </template>
             <v-list-item-title>
               <v-chip
-                v-if="metadata.tag.includes('_favorite')"
+                v-if="metadata.database.tag.includes('_favorite')"
                 prepend-icon="mdi-star"
                 color="black"
                 variant="tonal"
@@ -108,7 +117,7 @@
                 >favorite</v-chip
               >
               <v-chip
-                v-if="metadata.tag.includes('_archived')"
+                v-if="metadata.database.tag.includes('_archived')"
                 prepend-icon="mdi-archive-arrow-down"
                 color="black"
                 variant="tonal"
@@ -165,7 +174,7 @@
               <v-chip
                 variant="flat"
                 color="black"
-                v-for="albumId in metadata.album"
+                v-for="albumId in metadata.database.album"
                 :key="albumId"
                 link
                 class="ma-1"
@@ -189,6 +198,7 @@
         </v-list>
       </v-col>
     </v-row>
+    <v-row v-else> </v-row>
   </v-col>
 </template>
 
@@ -201,10 +211,10 @@ import { useAlbumStore } from '@/store/albumStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { filesize } from 'filesize'
 import { useDataStore } from '@/store/dataStore'
-import { DataBase } from '@/script/common/types'
+import { AbstractData } from '@/script/common/types'
 
 const props = defineProps<{
-  metadata: DataBase
+  metadata: AbstractData
 }>()
 
 // Stores
@@ -215,7 +225,7 @@ const dataStore = useDataStore() // Import dataStore
 const router = useRouter()
 
 const filePathComplete = computed(() => {
-  return `${props.metadata?.alias[0].file}`
+  return `${props.metadata?.database!.alias[0].file}`
 })
 const filePath = computed(() => {
   return `${filePathComplete.value.split('/').pop()}`
@@ -225,15 +235,25 @@ const separator = computed(() => {
 })
 
 // Computed Properties
-const filteredTags = computed(() =>
-  props.metadata.tag.filter(
-    (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
-  )
-)
+const filteredTags = computed(() => {
+  if (props.metadata.database) {
+    return props.metadata.database.tag.filter(
+      (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
+    )
+  } else {
+    return props.metadata.album!.tag.filter(
+      (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
+    )
+  }
+})
 
 // Retrieve index based on metadata hash
 const index = computed(() => {
-  return dataStore.hashMapData.get(props.metadata.hash)!
+  if (props.metadata.database) {
+    return dataStore.hashMapData.get(props.metadata.database.hash)!
+  } else {
+    return dataStore.hashMapData.get(props.metadata.album!.cover!)!
+  }
 })
 
 // Methods

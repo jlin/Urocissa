@@ -4,20 +4,20 @@
     <v-spacer></v-spacer>
     <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
     <v-btn
-      v-if="metadata"
-      :icon="metadata.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
+      v-if="metadata && metadata.database"
+      :icon="metadata.database.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
       @click="quickEditTags('favorite')"
     ></v-btn>
     <v-btn
-      v-if="metadata"
+      v-if="metadata && metadata.database"
       :icon="
-        metadata.tag.includes('_archived')
+        metadata.database.tag.includes('_archived')
           ? 'mdi-archive-arrow-up-outline'
           : 'mdi-archive-arrow-down-outline'
       "
       @click="quickEditTags('archived')"
     ></v-btn>
-    <v-menu v-if="metadata">
+    <v-menu v-if="metadata && metadata.database">
       <template v-slot:activator="{ props }">
         <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
       </template>
@@ -25,7 +25,7 @@
         <v-list-item
           prepend-icon="mdi-open-in-new"
           value="view-original-file"
-          :href="getSrc(props.metadata!.hash, true, props.metadata!.ext, Cookies.get('jwt')!, undefined )"
+          :href="getSrc(metadata.database.hash, true, metadata.database.ext, Cookies.get('jwt')!, undefined )"
           target="_blank"
         >
           <v-list-item-title class="wrap">{{ 'View Original File' }}</v-list-item-title>
@@ -33,8 +33,8 @@
         <v-list-item
           prepend-icon="mdi-download"
           value="download-original-file"
-          :href="getSrc(props.metadata!.hash,  true, props.metadata!.ext, Cookies.get('jwt')!, undefined)"
-          :download="`${props.metadata!.hash}.${props.metadata!.ext}`"
+          :href="getSrc(metadata.database.hash,  true, metadata.database.ext, Cookies.get('jwt')!, undefined)"
+          :download="`${metadata.database.hash}.${metadata.database.ext}`"
         >
           <v-list-item-title class="wrap">{{ 'Download Original File' }}</v-list-item-title>
         </v-list-item>
@@ -50,7 +50,7 @@
           <v-list-item-title class="wrap">{{ 'Edit Tags' }}</v-list-item-title>
         </v-list-item>
         <v-list-item
-          v-if="!metadata.tag.includes('_trashed')"
+          v-if="!metadata.database.tag.includes('_trashed')"
           prepend-icon="mdi-trash-can-outline"
           value="delete-file"
           @click="quickEditTags('trashed')"
@@ -83,7 +83,7 @@ import { computed } from 'vue'
 import { useDataStore } from '@/store/dataStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
-import { type DataBase } from '@/script/common/types'
+import { AbstractData } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
@@ -95,7 +95,7 @@ const infoStore = useInfoStore()
 
 const props = defineProps<Props>()
 interface Props {
-  metadata: DataBase | undefined
+  metadata: AbstractData
 }
 const hash = computed(() => {
   return route.params.hash as string
@@ -146,19 +146,19 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
   let removeTagsArray: string[] = []
   let addTagsArray: string[] = []
   if (category === 'favorite') {
-    if (!props.metadata?.tag.includes('_favorite')) {
+    if (!props.metadata?.database!.tag.includes('_favorite')) {
       addTagsArray = ['_favorite']
     } else {
       removeTagsArray = ['_favorite']
     }
   } else if (category === 'archived') {
-    if (!props.metadata?.tag.includes('_archived')) {
+    if (!props.metadata?.database!.tag.includes('_archived')) {
       addTagsArray = ['_archived']
     } else {
       removeTagsArray = ['_archived']
     }
   } else if (category === 'trashed') {
-    if (!props.metadata?.tag.includes('_trashed')) {
+    if (!props.metadata?.database!.tag.includes('_trashed')) {
       addTagsArray = ['_trashed']
     } else {
       removeTagsArray = ['_trashed']
@@ -169,7 +169,7 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
 
 const deleteData = () => {
   if (props.metadata) {
-    const index = dataStore.hashMapData.get(props.metadata.hash)
+    const index = dataStore.hashMapData.get(props.metadata.database!.hash)
     if (index !== undefined) {
       deleteDataInWorker([index])
     }
@@ -178,7 +178,7 @@ const deleteData = () => {
 
 const regeneratePreview = async () => {
   if (props.metadata) {
-    const hash = props.metadata.hash
+    const hash = props.metadata.database!.hash
     const data = [hash] // Replace with your actual data
 
     try {

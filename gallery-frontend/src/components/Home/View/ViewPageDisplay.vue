@@ -11,12 +11,12 @@
       <ViewPageToolBar :metadata="metadata" />
       <v-col v-if="metadata" id="col-ref" class="h-100 d-flex align-center justify-center">
         <v-img
-          v-if="metadata?.ext_type === 'image'"
+          v-if="metadata && metadata.database && metadata.database.ext_type === 'image'"
           :src="imgStore.imgOriginal.get(index)!"
           :lazy-src="imgStore.imgUrl.get(index)!"
           :style="{
-            width: `${metadata.width}px`,
-            height: `${metadata.height}px`,
+            width: `${metadata.database.width}px`,
+            height: `${metadata.database.height}px`,
             maxWidth: '100%',
             maxHeight: '100%'
           }"
@@ -25,18 +25,36 @@
         <video
           controls
           autoplay
-          v-if="metadata?.ext_type === 'video' && !metadata?.pending"
+          v-if="
+            metadata &&
+            metadata.database &&
+            metadata.database.ext_type === 'video' &&
+            !metadata.database.pending
+          "
           :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
           :style="{
-            width: `${metadata.width}px`,
-            height: `${metadata.height}px`,
+            width: `${metadata.database.width}px`,
+            height: `${metadata.database.height}px`,
             maxWidth: '100%',
             maxHeight: '100%'
           }"
           inline
         ></video>
+        <v-img
+          v-if="metadata && metadata.album"
+          :src="imgStore.imgOriginal.get(index)!"
+          :lazy-src="imgStore.imgUrl.get(index)!"
+          :style="{
+            width: `${metadata.album.width}px`,
+            height: `${metadata.album.height}px`,
+            maxWidth: '100%',
+            maxHeight: '100%'
+          }"
+          inline
+        ></v-img>
+
         <v-card
-          v-if="metadata?.pending"
+          v-if="metadata?.database?.pending"
           class="d-flex align-center justify-start"
           outlined
           style="padding: 16px"
@@ -99,10 +117,10 @@ import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { getSrc } from '@/../config.ts'
-import { DataBase } from '@/script/common/types'
+import { AbstractData } from '@/script/common/types'
 
 const props = defineProps<{
-  metadata: DataBase
+  metadata: AbstractData
 }>()
 
 const prefetchStore = usePrefetchStore()
@@ -124,6 +142,8 @@ const nextHash = computed(() => {
   const nextData = dataStore.data.get(index.value + 1)
   if (nextData !== undefined && nextData.database) {
     return nextData.database.hash
+  } else if (nextData !== undefined && nextData.album) {
+    return nextData.album.id
   } else {
     return undefined
   }
@@ -133,6 +153,8 @@ const previousHash = computed(() => {
   const previousData = dataStore.data.get(index.value - 1)
   if (previousData !== undefined && previousData.database) {
     return previousData.database.hash
+  } else if (previousData !== undefined && previousData.album) {
+    return previousData.album.id
   } else {
     return undefined
   }
@@ -193,9 +215,12 @@ const checkAndFetch = (index: number): boolean => {
     return true
   } else if (!queueStore.original.has(index)) {
     queueStore.original.add(index)
+    const hash = dataStore.data.get(index)!.database
+      ? dataStore.data.get(index)!.database!.hash
+      : dataStore.data.get(index)!.album!.cover!
     postToWorker.processImage({
       index: index,
-      hash: dataStore.data.get(index)!.database!.hash,
+      hash: hash,
       devicePixelRatio: window.devicePixelRatio,
       jwt: Cookies.get('jwt')!
     })

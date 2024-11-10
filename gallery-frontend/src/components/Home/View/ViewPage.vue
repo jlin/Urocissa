@@ -13,8 +13,8 @@
       :style="{ backgroundColor: 'black' }"
     >
       <v-row no-gutters class="w-100 h-100 flex-nowrap">
-        <ViewPageDisplay v-if="metadata" :metadata="metadata" />
-        <MetadataCol v-if="metadata" :metadata="metadata" />
+        <ViewPageDisplay v-if="abstractData" :metadata="abstractData" />
+        <MetadataCol v-if="abstractData" :metadata="abstractData" />
       </v-row>
     </v-container>
   </v-overlay>
@@ -33,8 +33,8 @@ const index = computed(() => {
 
 const dataStore = useDataStore()
 const route = useRoute()
-const metadata = computed(() => {
-  return dataStore.data.get(index.value)?.database!
+const abstractData = computed(() => {
+  return dataStore.data.get(index.value)!
 })
 </script>
 <style scoped>
