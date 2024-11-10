@@ -137,8 +137,7 @@
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
-              <v-img
-                cover
+              <img
                 id="desktop-small-image"
                 draggable="false"
                 @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
@@ -151,12 +150,12 @@
                 "
                 :style="{
                   zIndex: 2,
-                  position: 'absolute'
+                  position: 'absolute',
+                  objectFit: 'cover'
                 }"
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
-              >
-              </v-img>
+              />
               <transition name="slide-fade" appear>
                 <img
                   id="thumbhash-image"

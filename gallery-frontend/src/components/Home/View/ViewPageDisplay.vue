@@ -10,18 +10,23 @@
     <v-row no-gutters class="h-100 position-relative">
       <ViewPageToolBar :metadata="metadata" />
       <v-col v-if="metadata" id="col-ref" class="h-100 d-flex align-center justify-center">
-        <v-img
-          v-if="metadata && metadata.database && metadata.database.ext_type === 'image'"
+        <img
+          :key="index"
+          v-if="
+            imgStore.imgOriginal.get(index) &&
+            metadata &&
+            metadata.database &&
+            metadata.database.ext_type === 'image'
+          "
           :src="imgStore.imgOriginal.get(index)!"
-          :lazy-src="imgStore.imgUrl.get(index)!"
           :style="{
             width: `${metadata.database.width}px`,
             height: `${metadata.database.height}px`,
             maxWidth: '100%',
-            maxHeight: '100%'
+            maxHeight: '100%',
+            objectFit: 'scale-down'
           }"
-          inline
-        ></v-img>
+        />
         <video
           controls
           autoplay
@@ -40,11 +45,31 @@
           }"
           inline
         ></video>
-        <v-img
+        <v-chip
+          v-if="metadata && metadata.album"
+          id="album-label-chip"
+          density="default"
+          size="x-large"
+          prepend-icon="mdi-image-album"
+          color="black"
+          variant="flat"
+          class="position-absolute ma-2"
+          :style="{
+            bottom: '10px',
+            right: '10px',
+            zIndex: 4
+          }"
+        >
+          <span class="text-truncate">
+            {{ metadata.album.title }}
+          </span>
+        </v-chip>
+        <img
+          v-if="metadata && metadata.album"
+          :key="index"
           rounded="xl"
           aspect-ratio="1"
           cover
-          v-if="metadata && metadata.album"
           :src="imgStore.imgOriginal.get(index)!"
           :lazy-src="imgStore.imgUrl.get(index)!"
           :style="{
@@ -60,28 +85,7 @@
             )}px`,
             border: '8px solid white'
           }"
-          inline
-        >
-          <v-chip
-            id="album-label-chip"
-            density="default"
-            size="x-large"
-            prepend-icon="mdi-image-album"
-            color="black"
-            variant="flat"
-            class="position-absolute ma-2"
-            :style="{
-              bottom: '10px',
-              right: '10px',
-              zIndex: 4
-            }"
-          >
-            <span class="text-truncate">
-              {{ metadata.album.title }}
-            </span>
-          </v-chip>
-        </v-img>
-
+        />
         <v-card
           v-if="metadata?.database?.pending"
           class="d-flex align-center justify-start"
