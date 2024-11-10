@@ -37,3 +37,9 @@ const metadata = computed(() => {
   return dataStore.data.get(index.value)?.database!
 })
 </script>
+<style scoped>
+.v-container::-webkit-scrollbar {
+  display: none;
+  /* Hide scrollbar */
+}
+</style>

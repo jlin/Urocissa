@@ -25,14 +25,58 @@
               </v-avatar>
             </template>
             <v-list-item-title class="text-wrap">{{
-              `${metadata.width} × ${metadata.height}`
+              `${metadata.width} \u00D7 ${metadata.height}`
             }}</v-list-item-title>
             <v-list-item-subtitle class="text-wrap">{{
               filesize(metadata.size)
             }}</v-list-item-subtitle>
           </v-list-item>
-
-          <!-- Additional Metadata Items... (Repeat similar structure) -->
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-folder</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="text-wrap">{{
+              `${filePath.split(separator).pop() || ''}`
+            }}</v-list-item-title>
+            <v-list-item-subtitle class="text-wrap">{{
+              `${filePathComplete}`
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item>
+            <template v-slot:prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-calendar</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="text-wrap">{{ dater(metadata.timestamp) }}</v-list-item-title>
+            <v-list-item-subtitle class="text-wrap">{{
+              timer(metadata.timestamp)
+            }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-list-item
+            v-if="metadata.exif_vec.Make !== undefined || metadata.exif_vec.Model !== undefined"
+          >
+            <template v-slot:prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-camera-iris</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="text-wrap">{{
+              generateExifMake(metadata.exif_vec)
+            }}</v-list-item-title>
+            <v-list-item-subtitle class="text-wrap">
+              <v-row>
+                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).FNumber }}</v-col>
+                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).ExposureTime }}</v-col>
+                <v-col cols="auto">{{ formatExifData(metadata.exif_vec).FocalLength }}</v-col>
+                <v-col cols="auto">{{
+                  formatExifData(metadata.exif_vec).PhotographicSensitivity
+                }}</v-col>
+              </v-row>
+            </v-list-item-subtitle>
+          </v-list-item>
 
           <!-- Tags Section -->
           <v-divider></v-divider>
@@ -170,6 +214,16 @@ const albumStore = useAlbumStore()
 const dataStore = useDataStore() // Import dataStore
 const router = useRouter()
 
+const filePathComplete = computed(() => {
+  return `${props.metadata?.alias[0].file}`
+})
+const filePath = computed(() => {
+  return `${filePathComplete.value.split('/').pop()}`
+})
+const separator = computed(() => {
+  return filePath.value.includes('\\') ? '\\' : '/'
+})
+
 // Computed Properties
 const filteredTags = computed(() =>
   props.metadata.tag.filter(
@@ -217,4 +271,77 @@ function navigateToAlbum(albumId: string) {
 function openEditAlbumsModal() {
   modalStore.showEditAlbumsModal = true
 }
+
+function generateExifMake(exifData: any): string {
+  let make_formated: string = ''
+  let model_formated: string = ''
+  if (exifData.Make !== undefined) {
+    const make: string = exifData.Make.replace(/"/g, '')
+    make_formated = make
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part !== '')
+      .join(', ')
+  }
+  if (exifData.Model !== undefined) {
+    const model: string = exifData.Model.replace(/"/g, '')
+    model_formated = model
+      .split(',')
+      .map((part) => part.trim())
+      .filter((part) => part !== '')
+      .join(', ')
+  }
+  return make_formated + ' ' + model_formated
+}
+
+interface ExifData {
+  FNumber: string // Aperture value as a string, e.g., "f/2.8"
+  ExposureTime: string // Exposure time as a string, e.g., "1/60 s"
+  FocalLength: string // Focal length as a string, e.g., "35 mm"
+  PhotographicSensitivity: string
+}
+
+function formatExifData(exifData: any): ExifData {
+  const formattedExifData: ExifData = {
+    FNumber: exifData.FNumber.replace('f/', 'ƒ/'),
+    ExposureTime: `1/${exifData.ExposureTime.replace(' s', '').replace('1/', '')}`,
+    FocalLength: `${exifData.FocalLength.replace(' mm', '')} mm`,
+    PhotographicSensitivity: `ISO ${exifData.PhotographicSensitivity}`
+  }
+
+  return formattedExifData
+}
+
+function dater(timestamp: number): string {
+  const locale = navigator.language
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(timestamp)
+}
+
+function timer(timestamp: number): string {
+  const locale = navigator.language
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    hour12: true,
+    dayPeriod: 'narrow',
+    timeZoneName: 'short'
+  }).format(timestamp)
+}
 </script>
+<style scoped>
+.metadata-css {
+  width: 360px;
+}
+
+@media (max-width: 720px) {
+  .metadata-css {
+    width: 100%;
+  }
+}
+</style>

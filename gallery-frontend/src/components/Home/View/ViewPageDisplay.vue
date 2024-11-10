@@ -313,11 +313,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.v-container::-webkit-scrollbar {
-  display: none;
-  /* Hide scrollbar */
-}
-
 .my-toolbar {
   z-index: 1;
   background: linear-gradient(
@@ -326,10 +321,6 @@ onBeforeUnmount(() => {
     rgba(0, 0, 0, 0.25) 50%,
     rgba(0, 0, 0, 0) 100%
   );
-}
-
-.wrap {
-  white-space: normal;
 }
 
 .show-info {
@@ -344,15 +335,5 @@ onBeforeUnmount(() => {
 
 .not-show-info {
   width: 100%;
-}
-
-.metadata-css {
-  width: 360px;
-}
-
-@media (max-width: 720px) {
-  .metadata-css {
-    width: 100%;
-  }
 }
 </style>
