@@ -41,17 +41,46 @@
           inline
         ></video>
         <v-img
+          rounded="xl"
+          aspect-ratio="1"
+          cover
           v-if="metadata && metadata.album"
           :src="imgStore.imgOriginal.get(index)!"
           :lazy-src="imgStore.imgUrl.get(index)!"
           :style="{
-            width: `${metadata.album.width}px`,
-            height: `${metadata.album.height}px`,
-            maxWidth: '100%',
-            maxHeight: '100%'
+            width: `${Math.round(
+              metadata.album.width *
+                Math.min(colWidth / metadata.album.width, colHeight / metadata.album.height) *
+                0.85
+            )}px`,
+            height: `${Math.round(
+              metadata.album.height *
+                Math.min(colWidth / metadata.album.width, colHeight / metadata.album.height) *
+                0.85
+            )}px`,
+            border: '8px solid white'
           }"
           inline
-        ></v-img>
+        >
+          <v-chip
+            id="album-label-chip"
+            density="default"
+            size="x-large"
+            prepend-icon="mdi-image-album"
+            color="black"
+            variant="flat"
+            class="position-absolute ma-2"
+            :style="{
+              bottom: '10px',
+              right: '10px',
+              zIndex: 4
+            }"
+          >
+            <span class="text-truncate">
+              {{ metadata.album.title }}
+            </span>
+          </v-chip>
+        </v-img>
 
         <v-card
           v-if="metadata?.database?.pending"
@@ -118,6 +147,10 @@ import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
+import { useElementSize } from '@vueuse/core'
+
+const colRef = ref<InstanceType<typeof VCol> | null>(null)
+const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
   metadata: AbstractData
@@ -159,8 +192,6 @@ const previousHash = computed(() => {
     return undefined
   }
 })
-
-const colRef = ref<InstanceType<typeof VCol> | null>(null)
 
 const index = computed(() => {
   return dataStore.hashMapData.get(route.params.hash as string)!
