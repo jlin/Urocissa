@@ -38,15 +38,15 @@ export const useFilterStore = defineStore({
       const currentPage = useCurrentPage(route).value
       switch (currentPage) {
         case 'default': {
-          this.basicString = 'and(not(tag: _archived), not(tag:_trashed), not(type:album))'
+          this.basicString = 'and(not(tag: _archived), not(tag:_trashed))'
           break
         }
         case 'favorite': {
-          this.basicString = 'and(tag:_favorite, not(tag:_trashed), not(type:album))'
+          this.basicString = 'and(tag:_favorite, not(tag:_trashed))'
           break
         }
         case 'archived': {
-          this.basicString = 'and(tag:_archived, not(tag:_trashed), not(type:album))'
+          this.basicString = 'and(tag:_archived, not(tag:_trashed))'
           break
         }
         case 'albums': {
@@ -60,11 +60,11 @@ export const useFilterStore = defineStore({
           break
         }
         case 'trashed': {
-          this.basicString = 'and(tag:_trashed, not(type:album))'
+          this.basicString = 'and(tag:_trashed)'
           break
         }
         case 'all': {
-          this.basicString = `not(type:album)`
+          this.basicString = null
           break
         }
         default: {
