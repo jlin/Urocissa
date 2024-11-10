@@ -96,9 +96,12 @@
                   zIndex: 4
                 }"
               >
-                <span class="text-truncate" :style="{
-                  maxWidth: `${data.displayWidth * 0.8}px`
-                }">
+                <span
+                  class="text-truncate"
+                  :style="{
+                    maxWidth: `${data.displayWidth * 0.8}px`
+                  }"
+                >
                   {{ dataStore.data.get(row.start + subIndex)?.album?.title }}
                 </span>
               </v-chip>
@@ -134,10 +137,11 @@
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
-              <img
+              <v-img
+                cover
                 id="desktop-small-image"
                 draggable="false"
-                @click="($event) => handleClick($event, row.start + subIndex)"
+                @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
                 v-if="
                   !mobile &&
                   !configStore.disableImg &&
@@ -151,7 +155,8 @@
                 }"
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
-              />
+              >
+              </v-img>
               <transition name="slide-fade" appear>
                 <img
                   id="thumbhash-image"
@@ -288,7 +293,8 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
           width: displayWidth,
           height: displayHeight,
           devicePixelRatio: window.devicePixelRatio,
-          jwt: Cookies.get('jwt')!
+          jwt: Cookies.get('jwt')!,
+          albumMode: true
         })
       }
     } else {

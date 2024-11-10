@@ -1,11 +1,5 @@
 // Import necessary types from the commonType module
-import {
-  Prefetch,
-  RowWithOffset,
-  ScrollbarData,
-  SlicedData,
-  TagInfo
-} from '@/script/common/types'
+import { Prefetch, RowWithOffset, ScrollbarData, SlicedData, TagInfo } from '@/script/common/types'
 
 // Import createActionCreators from typesafe-agent-events for defining strongly-typed actions
 import { createActionCreators } from 'typesafe-agent-events'
@@ -30,6 +24,7 @@ export type processSmallImagePayload = {
   height: number
   devicePixelRatio: number
   jwt: string
+  albumMode?: boolean
 }
 
 export type processImagePayload = {

@@ -50,8 +50,16 @@ const handler = createHandler<typeof toImgWorker>({
       const converted: Blob = await readAndCompressImage(img, {
         argorithm: 'bilinear',
         quality: 1,
-        maxWidth: event.width * event.devicePixelRatio,
-        maxHeight: event.height * event.devicePixelRatio
+        maxWidth: event.albumMode
+          ? img.width *
+            Math.max(event.width / img.width, event.height / img.height) *
+            event.devicePixelRatio
+          : event.width * event.devicePixelRatio,
+        maxHeight: event.albumMode
+          ? img.height *
+            Math.max(event.width / img.width, event.height / img.height) *
+            event.devicePixelRatio
+          : event.height * event.devicePixelRatio
       })
 
       const objectUrl = URL.createObjectURL(converted)
