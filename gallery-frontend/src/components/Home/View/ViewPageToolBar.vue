@@ -17,6 +17,15 @@
       "
       @click="quickEditTags('archived')"
     ></v-btn>
+    <v-btn
+      v-if="metadata && metadata.album"
+      color="teal-accent-4"
+      variant="flat"
+      class="ma-2 button button-submit"
+      :to="`/album-${metadata.album.id}`"
+    >
+      Enter
+    </v-btn>
     <v-menu v-if="metadata && metadata.database">
       <template v-slot:activator="{ props }">
         <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>

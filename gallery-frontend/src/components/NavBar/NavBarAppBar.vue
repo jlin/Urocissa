@@ -1,8 +1,8 @@
 <template>
-  <v-app-bar v-if="!collectionStore.editModeOn" scroll-off-screen>
+  <v-app-bar v-if="!collectionStore.editModeOn">
     <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
     </v-btn>
-    <v-btn v-else icon="mdi mdi-arrow-left" to="/albums"></v-btn>
+    <v-btn v-else icon="mdi mdi-arrow-left" @click="router.back()"></v-btn>
     <v-card v-if="route.meta.isInsideAlbum" elevation="0" class="w-50">
       <v-card-title class="text-truncate">
         {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
