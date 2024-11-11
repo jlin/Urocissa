@@ -24,7 +24,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-import ViewPageDisplay from './ViewPageDisplay.vue'
+import ViewPageDisplay from '@/components/Home/View/ViewPageDisplay/ViewPageDisplay.vue'
 import MetadataCol from '@/components/Home/View/ViewPageMetadata.vue'
 
 const index = computed(() => {

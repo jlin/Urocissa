@@ -68,8 +68,8 @@ import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { AbstractData } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
-import ViewPageDisplayDatabase from './ViewPageDisplayDatabase.vue'
-import ViewPageDisplayAlbum from './ViewPageDisplayAlbum.vue'
+import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayDatabase.vue'
+import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
