@@ -45,10 +45,17 @@
           }"
           inline
         ></video>
-        <v-row>
-          <v-col class="d-flex align-center justify-center flex-column flex-md-row">
+        <v-row v-if="metadata && metadata.album">
+          <v-col
+            :class="[
+              'd-flex',
+              'align-center',
+              'justify-center',
+              colWidth < colHeight ? 'flex-column' : 'flex-row'
+            ]"
+          >
             <img
-              v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
+              v-if="imgStore.imgOriginal.get(index)"
               id="album-img"
               :key="index"
               rounded="xl"
@@ -56,8 +63,14 @@
               cover
               :src="imgStore.imgOriginal.get(index)"
               :style="{
-                width: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
-                height: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
+                width: `${Math.round(
+                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+                )}px`,
+                height: `${Math.round(
+                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+                )}px`,
+                maxWidth: '500px',
+                maxHeight: '500px',
                 objectFit: 'cover',
                 border: '8px solid white'
               }"
@@ -65,8 +78,14 @@
             <v-card
               v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
               :style="{
-                width: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
-                height: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`
+                width: `${Math.round(
+                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+                )}px`,
+                height: `${Math.round(
+                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+                )}px`,
+                maxWidth: '500px',
+                maxHeight: '500px'
               }"
               outlined
               style="padding: 16px"
