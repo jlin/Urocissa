@@ -36,16 +36,23 @@ pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {
                 .iter()
                 .for_each(|index| {
                     let hash = tree_snapshot.get_hash(*index);
-                    let mut data = write_table.get(hash.as_str()).unwrap().unwrap().value();
-                    json_data.add_albums_content.iter().for_each(|album_id| {
-                        data.album.insert(album_id.clone());
-                    });
+                    let data_opt = match write_table.get(hash.as_str()).unwrap() {
+                        Some(guard) => {
+                            let mut data = guard.value();
+                            json_data.add_albums_content.iter().for_each(|album_id| {
+                                data.album.insert(album_id.clone());
+                            });
 
-                    json_data.remove_albums_content.iter().for_each(|album_id| {
-                        data.album.remove(album_id);
-                    });
-
-                    write_table.insert(&*data.hash, &data).unwrap();
+                            json_data.remove_albums_content.iter().for_each(|album_id| {
+                                data.album.remove(album_id);
+                            });
+                            Some(data)
+                        }
+                        None => None,
+                    };
+                    if let Some(data) = data_opt {
+                        write_table.insert(&*data.hash, &data).unwrap();
+                    };
                 });
         }
         txn.commit().unwrap();

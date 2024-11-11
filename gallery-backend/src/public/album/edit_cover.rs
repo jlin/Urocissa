@@ -66,13 +66,15 @@ impl Album {
             .as_millis();
 
         // Set the cover using the first (earliest) database entry
-        if let Some((first_database, first_timestamp)) = data_in_album.first() {
-            self.set_cover(first_database);
+        if let Some((_, first_timestamp)) = data_in_album.first() {
             self.start_time = Some(*first_timestamp);
         }
 
         // Set the end_time using the last (latest) timestamp
-        if let Some((_, last_timestamp)) = data_in_album.last() {
+        if let Some((last_database, last_timestamp)) = data_in_album.last() {
+            if self.cover.is_none() {
+                self.set_cover(last_database);
+            }
             self.end_time = Some(*last_timestamp);
         }
     }
