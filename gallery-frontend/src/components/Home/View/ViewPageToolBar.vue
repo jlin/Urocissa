@@ -50,6 +50,13 @@
           <v-list-item-title class="wrap">{{ 'Edit Tags' }}</v-list-item-title>
         </v-list-item>
         <v-list-item
+          prepend-icon="mdi-image-album"
+          value="edit-albums"
+          @click="modalStore.showEditAlbumsModal = true"
+        >
+          <v-list-item-title class="wrap">{{ 'Edit Albums' }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item
           v-if="!metadata.database.tag.includes('_trashed')"
           prepend-icon="mdi-trash-can-outline"
           value="delete-file"
