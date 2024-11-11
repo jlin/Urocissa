@@ -6,12 +6,14 @@ export const useModalStore = defineStore({
     showEditTagsModal: boolean
     showBatchEditTagsModal: boolean
     showEditAlbumsModal: boolean
+    showBatchEditAlbumsModal: boolean
     showCreateAlbumsModal: boolean
     showUploadModal: boolean
   } => ({
     showEditTagsModal: false,
     showBatchEditTagsModal: false,
     showEditAlbumsModal: false,
+    showBatchEditAlbumsModal: false,
     showCreateAlbumsModal: false,
     showUploadModal: true
   }),

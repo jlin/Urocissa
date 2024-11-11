@@ -13,8 +13,12 @@
         <v-list-item-title class="wrap">Favorite</v-list-item-title>
       </v-list-item>
 
-      <v-list-item prepend-icon="mdi-pencil" @click="showBatchEditTagsModal">
-        <v-list-item-title class="wrap">Edit</v-list-item-title>
+      <v-list-item prepend-icon="mdi-tag" @click="showBatchEditTagsModal">
+        <v-list-item-title class="wrap">Batch Edit Tags</v-list-item-title>
+      </v-list-item>
+
+      <v-list-item prepend-icon="mdi-image-album" @click="showBatchEditAlbumsModal">
+        <v-list-item-title class="wrap">Batch Edit Albums</v-list-item-title>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -85,6 +89,10 @@ const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {
 
 const showBatchEditTagsModal = () => {
   modalStore.showBatchEditTagsModal = true
+}
+
+const showBatchEditAlbumsModal = () => {
+  modalStore.showBatchEditAlbumsModal = true
 }
 
 const regeneratePreview = async () => {
