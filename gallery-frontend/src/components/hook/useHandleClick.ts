@@ -52,6 +52,8 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
         router.push({ path: `/all/view/${hashOrId}`, query: { ...route.query } })
       } else if (route.path.startsWith('/trashed')) {
         router.push({ path: `/trashed/view/${hashOrId}`, query: { ...route.query } })
+      } else if (route.path.startsWith('/albums')) {
+        router.push({ path: `/albums/view/${hashOrId}`, query: { ...route.query } })
       } else if (route.path.startsWith('/album-')) {
         // Extract the album identifier from the path
         const segments = route.path.split('/')

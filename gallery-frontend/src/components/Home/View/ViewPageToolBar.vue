@@ -121,6 +121,8 @@ const computedPath = computed(() => {
     return '/archived'
   } else if (path.startsWith('/trashed/view')) {
     return '/trashed'
+  } else if (path.startsWith('/albums/view')) {
+    return '/albums'
   } else if (path.startsWith('/all/view')) {
     return '/all'
   } else if (path.startsWith('/album-') && path.includes('/view/')) {

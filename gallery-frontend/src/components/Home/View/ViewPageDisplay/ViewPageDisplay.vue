@@ -125,6 +125,8 @@ const previousPage = computed(() => {
     return `/all/view/${previousHash.value}`
   } else if (route.path.startsWith('/trashed')) {
     return `/trashed/view/${previousHash.value}`
+  } else if (route.path.startsWith('/albums')) {
+    return `/albums/view/${previousHash.value}`
   } else if (route.path.startsWith('/album-')) {
     // Extract the album identifier
     const albumId = route.path.split('/')[1]
@@ -143,6 +145,8 @@ const nextPage = computed(() => {
     return `/all/view/${nextHash.value}`
   } else if (route.path.startsWith('/trashed')) {
     return `/trashed/view/${nextHash.value}`
+  } else if (route.path.startsWith('/albums')) {
+    return `/albums/view/${nextHash.value}`
   } else if (route.path.startsWith('/album-')) {
     // Extract the album identifier
     const albumId = route.path.split('/')[1]
@@ -262,6 +266,8 @@ const computedPath = computed(() => {
     return '/archived'
   } else if (path.startsWith('/trashed/view')) {
     return '/trashed'
+  } else if (path.startsWith('/albums/view')) {
+    return '/albums'
   } else if (path.startsWith('/all/view')) {
     return '/all'
   } else if (path.startsWith('/album-') && path.includes('/view/')) {
