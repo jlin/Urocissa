@@ -181,7 +181,7 @@ pub async fn start_sync() -> anyhow::Result<()> {
             }
             txn.commit().unwrap();
             SHOULD_RESET.store(true, Ordering::SeqCst);
-            info!("Update album cover successfully")
+            info!("Album self-updated")
         }
     });
 

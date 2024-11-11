@@ -33,7 +33,7 @@ impl Tree {
             > = Arc::clone(&album_waiting_for_update_repository);
 
             tokio::task::spawn(async move {
-                info!("Spawn in spawn_blocking successfully");
+                info!("Album thread spawned");
                 while let Some(album_id) = album_waiting_for_update_receiver.recv().await {
                     album_waiting_for_update_repository_repository_clone
                         .lock()
@@ -95,12 +95,13 @@ impl Tree {
                     *self.in_memory.write().unwrap() = data_vec;
                     info!("In-memory cache updated.");
 
-                    ALBUM_QUEUE_SENDER
-                        .get()
-                        .unwrap()
-                        .send(list_of_waiting_for_update_album_id)
-                        .unwrap();
-                    info!("Send to ALBUM_QUEUE_SENDER");
+                    if !list_of_waiting_for_update_album_id.is_empty() {
+                        ALBUM_QUEUE_SENDER
+                            .get()
+                            .unwrap()
+                            .send(list_of_waiting_for_update_album_id)
+                            .unwrap();
+                    }
                 }
                 sleep(Duration::from_millis(500))
             }

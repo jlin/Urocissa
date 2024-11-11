@@ -53,9 +53,9 @@ async fn rocket() -> _ {
     let txn = TREE.in_disk.begin_write().unwrap();
     {
         let table = txn.open_table(DATA_TABLE).unwrap();
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} photos/vidoes from database.", table.len().unwrap());
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} photos/vidoes from database", table.len().unwrap());
         let album_table = txn.open_table(ALBUM_TABLE).unwrap();
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} albums from database.", album_table.len().unwrap());
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} albums from database", album_table.len().unwrap());
     }
 
     txn.commit().unwrap();
@@ -66,7 +66,14 @@ async fn rocket() -> _ {
         start_watcher().await;
     });
     tokio::spawn(async move {
-        synchronizer::start_sync().await.expect("start_sync error");
+        match synchronizer::start_sync().await {
+            Ok(_) => {
+                info!("Synchronizer start");
+            }
+            Err(_) => {
+                error!("Synchronizer failed to start")
+            }
+        }
     });
     rocket::build()
         .attach(cache_control_fairing())
