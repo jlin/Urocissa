@@ -9,15 +9,14 @@
   >
     <v-row no-gutters class="h-100 position-relative">
       <ViewPageToolBar :metadata="metadata" />
-      <v-col v-if="metadata" id="col-ref" class="h-100 d-flex align-center justify-center">
+      <v-col
+        v-if="metadata && metadata.database"
+        id="col-ref"
+        class="h-100 d-flex align-center justify-center"
+      >
         <img
           :key="index"
-          v-if="
-            metadata &&
-            metadata.database &&
-            metadata.database.ext_type === 'image' &&
-            imgStore.imgOriginal.get(index)
-          "
+          v-if="metadata.database.ext_type === 'image' && imgStore.imgOriginal.get(index)"
           :src="imgStore.imgOriginal.get(index)"
           :style="{
             width: `${metadata.database.width}px`,
@@ -30,12 +29,7 @@
         <video
           controls
           autoplay
-          v-if="
-            metadata &&
-            metadata.database &&
-            metadata.database.ext_type === 'video' &&
-            !metadata.database.pending
-          "
+          v-if="metadata.database.ext_type === 'video' && !metadata.database.pending"
           :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
           :style="{
             width: `${metadata.database.width}px`,
@@ -44,8 +38,9 @@
             maxHeight: '100%'
           }"
           inline
-        ></video>
-        <v-row v-if="metadata && metadata.album">
+        ></video> </v-col
+      ><v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
+        <v-row>
           <v-col
             :class="[
               'd-flex',
@@ -99,20 +94,16 @@
               <v-divider></v-divider>
               <v-list>
                 <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title v-if="metadata.album.startTime">
-                      {{ `${dater(metadata.album.startTime)} ~ ${dater(metadata.album.endTime!)}` }}
-                    </v-list-item-title>
-                    <v-list-item-subtitle>
-                      {{
-                        `${metadata.album.itemCount} item${
-                          metadata.album.itemCount === 1 ? '' : 's'
-                        }`
-                      }}
-                      •
-                      {{ filesize(metadata.album.itemSize) }}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
+                  <v-list-item-title v-if="metadata.album.startTime">
+                    {{ `${dater(metadata.album.startTime)} ~ ${dater(metadata.album.endTime!)}` }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle>
+                    {{
+                      `${metadata.album.itemCount} item${metadata.album.itemCount === 1 ? '' : 's'}`
+                    }}
+                    •
+                    {{ filesize(metadata.album.itemSize) }}
+                  </v-list-item-subtitle>
                 </v-list-item>
               </v-list>
 
@@ -148,29 +139,28 @@
             </v-col>
           </v-row>
         </v-card>
-
-        <v-card
-          id="previous-page-anchor"
-          v-if="previousHash !== undefined"
-          color="transparent"
-          class="navigate-left h-100 d-flex align-center justify-center"
-          style="position: absolute; left: 0"
-          :to="{ path: previousPage, query: $route.query }"
-        >
-          <v-icon>mdi-arrow-left</v-icon>
-        </v-card>
-        <v-card
-          id="next-page-anchor"
-          v-if="nextHash !== undefined"
-          color="transparent"
-          class="navigate-right h-100 d-flex align-center justify-center"
-          style="position: absolute; right: 0"
-          :to="{ path: nextPage, query: $route.query }"
-        >
-          <v-icon>mdi-arrow-right</v-icon>
-        </v-card>
       </v-col>
-      <v-col v-else class="h-100 d-flex align-center justify-center">
+      <v-card
+        id="previous-page-anchor"
+        v-if="previousHash !== undefined"
+        color="transparent"
+        class="navigate-left h-100 d-flex align-center justify-center"
+        style="position: absolute; left: 0"
+        :to="{ path: previousPage, query: $route.query }"
+      >
+        <v-icon>mdi-arrow-left</v-icon>
+      </v-card>
+      <v-card
+        id="next-page-anchor"
+        v-if="nextHash !== undefined"
+        color="transparent"
+        class="navigate-right h-100 d-flex align-center justify-center"
+        style="position: absolute; right: 0"
+        :to="{ path: nextPage, query: $route.query }"
+      >
+        <v-icon>mdi-arrow-right</v-icon>
+      </v-card>
+      <v-col v-if="!metadata" class="h-100 d-flex align-center justify-center">
         <v-progress-circular color="primary" indeterminate></v-progress-circular>
       </v-col>
     </v-row>
