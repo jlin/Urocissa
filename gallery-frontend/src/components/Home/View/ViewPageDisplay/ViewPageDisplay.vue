@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect, onMounted, onUnmounted, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { VCol } from 'vuetify/components'
@@ -76,6 +76,7 @@ const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
   metadata: AbstractData
+  index: number
 }>()
 
 const prefetchStore = usePrefetchStore()
@@ -90,7 +91,7 @@ const route = useRoute()
 const router = useRouter()
 
 const nextHash = computed(() => {
-  const nextData = dataStore.data.get(index.value + 1)
+  const nextData = dataStore.data.get(props.index + 1)
   if (nextData !== undefined && nextData.database) {
     return nextData.database.hash
   } else if (nextData !== undefined && nextData.album) {
@@ -101,7 +102,7 @@ const nextHash = computed(() => {
 })
 
 const previousHash = computed(() => {
-  const previousData = dataStore.data.get(index.value - 1)
+  const previousData = dataStore.data.get(props.index - 1)
   if (previousData !== undefined && previousData.database) {
     return previousData.database.hash
   } else if (previousData !== undefined && previousData.album) {
@@ -152,12 +153,12 @@ const nextPage = computed(() => {
 })
 
 const workerIndex = computed(() => {
-  return index.value % workerStore.concurrencyNumber
+  return props.index % workerStore.concurrencyNumber
 })
 
-const postToWorker = bindActionDispatch(toImgWorker, (action) =>
+const postToWorker = bindActionDispatch(toImgWorker, (action) => {
   workerStore.imgWorker[workerIndex.value]!.postMessage(action)
-)
+})
 
 const checkAndFetch = (index: number): boolean => {
   if (imgStore.imgOriginal.has(index)) {
@@ -213,12 +214,12 @@ watch(
   [index, () => initializedStore.initialized],
   () => {
     if (initializedStore.initialized) {
-      if (index.value !== undefined) {
-        checkAndFetch(index.value)
+      if (props.index !== undefined) {
+        checkAndFetch(props.index)
 
         // Prefetch next and previous 10 hashes if they exist
-        prefetchMedia(index.value)
-        console.log(props.metadata)
+        prefetchMedia(props.index)
+        // console.log(props.metadata) // debug usage
       }
     }
   },
@@ -269,10 +270,6 @@ const computedPath = computed(() => {
   } else {
     return '/'
   }
-})
-
-watchEffect(() => {
-  console.log('computedPath is', computedPath.value)
 })
 
 const handlePopState = () => {
