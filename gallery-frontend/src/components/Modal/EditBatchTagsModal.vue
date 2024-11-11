@@ -3,7 +3,7 @@
     v-model="modalStore.showBatchEditTagsModal"
     variant="flat"
     persistent
-    id="edit-tag-overlay"
+    id="batch-edit-tag-overlay"
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated">
       <v-card-title class="text-h5"> Edit Tags </v-card-title>
@@ -13,8 +13,6 @@
             v-model="addTagsArray"
             chips
             multiple
-            item-title="label"
-            item-value="value"
             label="Add Tags"
             :rules="[addTagsRule]"
             :items="tagList.filter((tag) => !specialTag(tag))"
@@ -25,8 +23,6 @@
             v-model="removeTagsArray"
             chips
             multiple
-            item-title="label"
-            item-value="value"
             label="Remove Tags"
             :rules="[removeTagsRule]"
             :items="tagList.filter((tag) => !specialTag(tag))"
