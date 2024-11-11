@@ -64,6 +64,16 @@ pub async fn favorite_view(_hash: String) -> Option<NamedFile> {
         .ok()
 }
 
+#[get("/<dynamic_album_id>")]
+pub async fn album_page(dynamic_album_id: String) -> Option<NamedFile> {
+    if dynamic_album_id.starts_with("album-") {
+        NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
+            .await
+            .ok()
+    } else {
+        None
+    }
+}
 #[get("/archived")]
 pub async fn archived() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
