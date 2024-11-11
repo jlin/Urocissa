@@ -73,7 +73,14 @@
               color="teal-accent-4"
               variant="flat"
               class="ma-2 button button-submit"
-              :to="`/album-${metadata.album.id}`"
+              @click="
+                () => {
+                  // Record the current URL for leaveAlbumPath
+                  albumStore.leaveAlbumPath = route.fullPath
+                  // Navigate to the specific album page
+                  router.push(`/album-${metadata.album!.id}`)
+                }
+              "
             >
               Enter Album
             </v-btn>
@@ -101,13 +108,15 @@
 </template>
 
 <script setup lang="ts">
-import { watchEffect, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 
 import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
+import { useAlbumStore } from '@/store/albumStore'
+
+const albumStore = useAlbumStore()
 
 function dater(timestamp: number): string {
   const locale = navigator.language
@@ -127,31 +136,5 @@ defineProps<{
 
 const imgStore = useImgStore()
 const route = useRoute()
-
-const computedPath = computed(() => {
-  const path = route.path
-
-  if (path.startsWith('/view')) {
-    return '/'
-  } else if (path.startsWith('/favorite/view')) {
-    return '/favorite'
-  } else if (path.startsWith('/archived/view')) {
-    return '/archived'
-  } else if (path.startsWith('/trashed/view')) {
-    return '/trashed'
-  } else if (path.startsWith('/all/view')) {
-    return '/all'
-  } else if (path.startsWith('/album-') && path.includes('/view/')) {
-    // Extract the album identifier
-    const segments = path.split('/')
-    const albumId = segments.find((segment) => segment.startsWith('album-'))
-    return `/${albumId}`
-  } else {
-    return '/'
-  }
-})
-
-watchEffect(() => {
-  console.log('computedPath is', computedPath.value)
-})
+const router = useRouter()
 </script>

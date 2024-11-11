@@ -10,10 +10,12 @@ export const useAlbumStore = defineStore({
     albums: AlbumInfo[]
     albumMap: Map<string, string> // id -> name
     fetched: boolean
+    leaveAlbumPath: string | undefined
   } => ({
     albums: [],
     albumMap: new Map(),
-    fetched: false
+    fetched: false,
+    leaveAlbumPath: undefined
   }),
   actions: {
     async fetchAlbums() {
