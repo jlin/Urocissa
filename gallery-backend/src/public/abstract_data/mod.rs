@@ -27,13 +27,13 @@ impl AbstractData {
     pub fn width(self: &Self) -> u32 {
         match self {
             AbstractData::DataBase(database) => database.width,
-            AbstractData::Album(album) => 300,
+            AbstractData::Album(_) => 300,
         }
     }
     pub fn height(self: &Self) -> u32 {
         match self {
             AbstractData::DataBase(database) => database.height,
-            AbstractData::Album(album) => 300,
+            AbstractData::Album(_) => 300,
         }
     }
     pub fn tag(self: &Self) -> &HashSet<String> {

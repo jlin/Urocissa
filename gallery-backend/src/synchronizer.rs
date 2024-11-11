@@ -173,9 +173,9 @@ pub async fn start_sync() -> anyhow::Result<()> {
                 let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
                 id_vec.into_iter().for_each(|album_id| {
                     let mut album = album_table.get(&*album_id).unwrap().unwrap().value();
-                    if album.cover.is_none() {
-                        album.auto_set_cover();
-                    }
+                    album.pending = true;
+                    album.self_update();
+                    album.pending = false;
                     album_table.insert(&*album_id, album).unwrap();
                 });
             }

@@ -23,6 +23,12 @@ impl Album {
             tag: HashSet::new(),
             width: 300,
             height: 300,
+            start_time: None,
+            end_time: None,
+            last_modified_time: timestamp,
+            item_count: 0,
+            item_size: 0,
+            pending: false,
         }
     }
 }
