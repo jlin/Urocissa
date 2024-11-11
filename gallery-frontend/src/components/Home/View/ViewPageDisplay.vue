@@ -13,12 +13,12 @@
         <img
           :key="index"
           v-if="
-            imgStore.imgOriginal.get(index) &&
             metadata &&
             metadata.database &&
-            metadata.database.ext_type === 'image'
+            metadata.database.ext_type === 'image' &&
+            imgStore.imgOriginal.get(index)
           "
-          :src="imgStore.imgOriginal.get(index)!"
+          :src="imgStore.imgOriginal.get(index)"
           :style="{
             width: `${metadata.database.width}px`,
             height: `${metadata.database.height}px`,
@@ -45,47 +45,74 @@
           }"
           inline
         ></video>
-        <v-chip
-          v-if="metadata && metadata.album"
-          id="album-label-chip"
-          density="default"
-          size="x-large"
-          prepend-icon="mdi-image-album"
-          color="black"
-          variant="flat"
-          class="position-absolute ma-2"
-          :style="{
-            bottom: '10px',
-            right: '10px',
-            zIndex: 4
-          }"
-        >
-          <span class="text-truncate">
-            {{ metadata.album.title }}
-          </span>
-        </v-chip>
-        <img
-          v-if="metadata && metadata.album"
-          :key="index"
-          rounded="xl"
-          aspect-ratio="1"
-          cover
-          :src="imgStore.imgOriginal.get(index)!"
-          :lazy-src="imgStore.imgUrl.get(index)!"
-          :style="{
-            width: `${Math.round(
-              metadata.album.width *
-                Math.min(colWidth / metadata.album.width, colHeight / metadata.album.height) *
-                0.85
-            )}px`,
-            height: `${Math.round(
-              metadata.album.height *
-                Math.min(colWidth / metadata.album.width, colHeight / metadata.album.height) *
-                0.85
-            )}px`,
-            border: '8px solid white'
-          }"
-        />
+        <v-row>
+          <v-col class="d-flex align-center justify-center flex-column flex-md-row">
+            <img
+              v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
+              id="album-img"
+              :key="index"
+              rounded="xl"
+              aspect-ratio="1"
+              cover
+              :src="imgStore.imgOriginal.get(index)"
+              :style="{
+                width: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
+                height: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
+                objectFit: 'cover',
+                border: '8px solid white'
+              }"
+            />
+            <v-card
+              v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
+              :style="{
+                width: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`,
+                height: `${Math.round(Math.min(colWidth, colHeight) * 0.5)}px`
+              }"
+              outlined
+              style="padding: 16px"
+              class="d-flex flex-column"
+            >
+              <v-card-item>
+                <v-card-title class="text-h4">
+                  {{ metadata.album.title }}
+                </v-card-title>
+              </v-card-item>
+              <v-divider></v-divider>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-content>
+                    <v-list-item-title v-if="metadata.album.startTime">
+                      {{ `${dater(metadata.album.startTime)} ~ ${dater(metadata.album.endTime!)}` }}
+                    </v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{
+                        `${metadata.album.itemCount} item${
+                          metadata.album.itemCount === 1 ? '' : 's'
+                        }`
+                      }}
+                      •
+                      {{ filesize(metadata.album.itemSize) }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+
+              <!-- Use this div to take up remaining space -->
+              <div class="flex-grow-1"></div>
+
+              <v-card-actions class="justify-end">
+                <v-btn
+                  color="teal-accent-4"
+                  variant="flat"
+                  class="ma-2 button button-submit"
+                  :to="`/album-${metadata.album.id}`"
+                >
+                  Enter Album
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+        </v-row>
         <v-card
           v-if="metadata?.database?.pending"
           class="d-flex align-center justify-start"
@@ -152,6 +179,16 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
+import { filesize } from 'filesize'
+
+function dater(timestamp: number): string {
+  const locale = navigator.language
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(timestamp)
+}
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)

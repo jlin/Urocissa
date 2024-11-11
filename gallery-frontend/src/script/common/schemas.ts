@@ -107,12 +107,18 @@ export const AlbumSchema = z.object({
   id: z.string(),
   title: z.string().nullable(),
   createdTime: z.number(),
+  startTime: z.number().nullable(),
+  endTime: z.number().nullable(),
+  lastModifiedTime: z.number(),
   cover: z.string().nullable(),
   userDefinedMetadata: z.record(z.array(z.string())),
   shareList: z.array(ShareSchema),
   tag: z.array(z.string()),
   width: z.number(),
-  height: z.number()
+  height: z.number(),
+  itemCount: z.number(),
+  itemSize: z.number(),
+  pending: z.boolean()
 })
 
 export const AbstractDataParseSchema = z.union([
