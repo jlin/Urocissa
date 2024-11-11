@@ -151,7 +151,10 @@
                 :style="{
                   zIndex: 2,
                   position: 'absolute',
-                  objectFit: 'cover'
+                  objectFit: 'cover',
+                  border: dataStore.data.get(row.start + subIndex)?.album
+                    ? '8px solid white'
+                    : undefined
                 }"
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"

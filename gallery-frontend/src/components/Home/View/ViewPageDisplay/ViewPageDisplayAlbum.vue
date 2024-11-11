@@ -31,7 +31,7 @@
           }"
         />
         <v-card
-          v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
+          v-if="metadata && metadata.album"
           :style="{
             width: `${Math.round(
               Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
@@ -73,16 +73,10 @@
               color="teal-accent-4"
               variant="flat"
               class="ma-2 button button-submit"
-              @click="
-                () => {
-                  // Record the current URL for leaveAlbumPath
-                  albumStore.leaveAlbumPath = route.fullPath
-                  // Navigate to the specific album page
-                  router.push(`/album-${metadata.album!.id}`)
-                }
-              "
+              target="_blank"
+              :href="`/album-${metadata.album!.id}`"
             >
-              Enter Album
+              Open Album
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -108,15 +102,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 
 import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
-import { useAlbumStore } from '@/store/albumStore'
-
-const albumStore = useAlbumStore()
 
 function dater(timestamp: number): string {
   const locale = navigator.language
@@ -135,6 +125,4 @@ defineProps<{
 }>()
 
 const imgStore = useImgStore()
-const route = useRoute()
-const router = useRouter()
 </script>

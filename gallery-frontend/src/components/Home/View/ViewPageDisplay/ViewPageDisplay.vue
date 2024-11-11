@@ -167,13 +167,15 @@ const checkAndFetch = (index: number): boolean => {
     queueStore.original.add(index)
     const hash = dataStore.data.get(index)!.database
       ? dataStore.data.get(index)!.database!.hash
-      : dataStore.data.get(index)!.album!.cover!
-    postToWorker.processImage({
-      index: index,
-      hash: hash,
-      devicePixelRatio: window.devicePixelRatio,
-      jwt: Cookies.get('jwt')!
-    })
+      : dataStore.data.get(index)!.album!.cover
+    if (hash !== null) {
+      postToWorker.processImage({
+        index: index,
+        hash: hash,
+        devicePixelRatio: window.devicePixelRatio,
+        jwt: Cookies.get('jwt')!
+      })
+    }
     return false
   } else {
     return false
