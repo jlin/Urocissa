@@ -9,137 +9,18 @@
   >
     <v-row no-gutters class="h-100 position-relative">
       <ViewPageToolBar :metadata="metadata" />
-      <v-col
-        v-if="metadata && metadata.database"
-        id="col-ref"
-        class="h-100 d-flex align-center justify-center"
-      >
-        <img
-          :key="index"
-          v-if="metadata.database.ext_type === 'image' && imgStore.imgOriginal.get(index)"
-          :src="imgStore.imgOriginal.get(index)"
-          :style="{
-            width: `${metadata.database.width}px`,
-            height: `${metadata.database.height}px`,
-            maxWidth: '100%',
-            maxHeight: '100%',
-            objectFit: 'scale-down'
-          }"
-        />
-        <video
-          controls
-          autoplay
-          v-if="metadata.database.ext_type === 'video' && !metadata.database.pending"
-          :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
-          :style="{
-            width: `${metadata.database.width}px`,
-            height: `${metadata.database.height}px`,
-            maxWidth: '100%',
-            maxHeight: '100%'
-          }"
-          inline
-        ></video> </v-col
-      ><v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
-        <v-row>
-          <v-col
-            :class="[
-              'd-flex',
-              'align-center',
-              'justify-center',
-              colWidth < colHeight ? 'flex-column' : 'flex-row'
-            ]"
-          >
-            <img
-              v-if="imgStore.imgOriginal.get(index)"
-              id="album-img"
-              :key="index"
-              rounded="xl"
-              aspect-ratio="1"
-              cover
-              :src="imgStore.imgOriginal.get(index)"
-              :style="{
-                width: `${Math.round(
-                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-                )}px`,
-                height: `${Math.round(
-                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-                )}px`,
-                maxWidth: '500px',
-                maxHeight: '500px',
-                objectFit: 'cover',
-                border: '8px solid white'
-              }"
-            />
-            <v-card
-              v-if="metadata && metadata.album && imgStore.imgOriginal.get(index)"
-              :style="{
-                width: `${Math.round(
-                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-                )}px`,
-                height: `${Math.round(
-                  Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-                )}px`,
-                maxWidth: '500px',
-                maxHeight: '500px'
-              }"
-              outlined
-              style="padding: 16px"
-              class="d-flex flex-column"
-            >
-              <v-card-item>
-                <v-card-title class="text-h4">
-                  {{ metadata.album.title }}
-                </v-card-title>
-              </v-card-item>
-              <v-divider></v-divider>
-              <v-list>
-                <v-list-item>
-                  <v-list-item-title v-if="metadata.album.startTime">
-                    {{ `${dater(metadata.album.startTime)} ~ ${dater(metadata.album.endTime!)}` }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle>
-                    {{
-                      `${metadata.album.itemCount} item${metadata.album.itemCount === 1 ? '' : 's'}`
-                    }}
-                    •
-                    {{ filesize(metadata.album.itemSize) }}
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
-
-              <!-- Use this div to take up remaining space -->
-              <div class="flex-grow-1"></div>
-
-              <v-card-actions class="justify-end">
-                <v-btn
-                  color="teal-accent-4"
-                  variant="flat"
-                  class="ma-2 button button-submit"
-                  :to="`/album-${metadata.album.id}`"
-                >
-                  Enter Album
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-card
-          v-if="metadata?.database?.pending"
-          class="d-flex align-center justify-start"
-          outlined
-          style="padding: 16px"
-        >
-          <v-row align="center" no-gutters>
-            <v-col cols="auto" class="d-flex align-center">
-              <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
-            </v-col>
-            <v-col class="text-left pl-4">
-              <div>This video is currently being processed.</div>
-              <div>Please check back later.</div>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-col>
+      <ViewPageDisplayDatabase
+        :index="index"
+        :metadata="metadata"
+        :colWidth="colWidth"
+        :colHeight="colHeight"
+      />
+      <ViewPageDisplayAlbum
+        :index="index"
+        :metadata="metadata"
+        :colWidth="colWidth"
+        :colHeight="colHeight"
+      />
       <v-card
         id="previous-page-anchor"
         v-if="previousHash !== undefined"
@@ -185,19 +66,10 @@ import { batchNumber } from '@/script/common/constants'
 import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
-import { filesize } from 'filesize'
-
-function dater(timestamp: number): string {
-  const locale = navigator.language
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(timestamp)
-}
+import ViewPageDisplayDatabase from './ViewPageDisplayDatabase.vue'
+import ViewPageDisplayAlbum from './ViewPageDisplayAlbum.vue'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -216,10 +88,6 @@ const infoStore = useInfoStore()
 const dataStore = useDataStore()
 const route = useRoute()
 const router = useRouter()
-
-const hash = computed(() => {
-  return route.params.hash as string
-})
 
 const nextHash = computed(() => {
   const nextData = dataStore.data.get(index.value + 1)
