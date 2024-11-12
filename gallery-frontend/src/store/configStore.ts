@@ -5,11 +5,12 @@
 
 import { defineStore } from 'pinia'
 
-export const useConfigStore = defineStore('configStore', {
-  state: (): {
-    disableImg: boolean
-  } => ({
-    disableImg: false
-  }),
-  actions: {}
-})
+export const useConfigStore = (isolationId: string = '') =>
+  defineStore('configStore' + isolationId, {
+    state: (): {
+      disableImg: boolean
+    } => ({
+      disableImg: false
+    }),
+    actions: {}
+  })()

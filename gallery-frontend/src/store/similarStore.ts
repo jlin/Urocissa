@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-export const useSimilarStore = defineStore({
-  id: 'similarStore',
-  state: (): {
-    usingSimilarMode: boolean
-  } => ({
-    usingSimilarMode: false
-  }),
-  actions: {}
-})
+export const useSimilarStore = (isolationId: string = '') =>
+  defineStore({
+    id: 'similarStore' + isolationId,
+    state: (): {
+      usingSimilarMode: boolean
+    } => ({
+      usingSimilarMode: false
+    }),
+    actions: {}
+  })()
