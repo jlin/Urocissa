@@ -13,7 +13,7 @@
       :style="{ backgroundColor: 'black' }"
     >
       <v-row no-gutters class="w-100 h-100 flex-nowrap">
-        <ViewPageDisplay v-if="abstractData" :metadata="abstractData" :index="index" />
+        <ViewPageDisplay :metadata="abstractData" :index="index" />
         <MetadataCol v-if="abstractData" :metadata="abstractData" />
       </v-row>
     </v-container>

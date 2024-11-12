@@ -10,12 +10,14 @@
     <v-row no-gutters class="h-100 position-relative">
       <ViewPageToolBar :metadata="metadata" />
       <ViewPageDisplayDatabase
+        v-if="metadata"
         :index="index"
         :metadata="metadata"
         :colWidth="colWidth"
         :colHeight="colHeight"
       />
       <ViewPageDisplayAlbum
+        v-if="metadata"
         :index="index"
         :metadata="metadata"
         :colWidth="colWidth"
@@ -75,7 +77,7 @@ const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
-  metadata: AbstractData
+  metadata: AbstractData | undefined
   index: number
 }>()
 

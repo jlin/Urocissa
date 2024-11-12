@@ -102,7 +102,7 @@ const infoStore = useInfoStore()
 
 const props = defineProps<Props>()
 interface Props {
-  metadata: AbstractData
+  metadata: AbstractData | undefined
 }
 const hash = computed(() => {
   return route.params.hash as string

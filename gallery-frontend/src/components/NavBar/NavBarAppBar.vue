@@ -2,6 +2,11 @@
   <v-app-bar v-if="!collectionStore.editModeOn">
     <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
     </v-btn>
+    <v-btn
+      v-else
+      icon="mdi mdi-arrow-left"
+      :to="albumStore.leaveAlbumPath ? albumStore.leaveAlbumPath : '/'"
+    ></v-btn>
     <v-card v-if="route.meta.isInsideAlbum" elevation="0" class="w-50">
       <v-card-title class="text-truncate">
         {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}

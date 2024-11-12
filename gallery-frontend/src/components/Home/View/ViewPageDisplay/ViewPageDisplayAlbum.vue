@@ -73,10 +73,14 @@
               color="teal-accent-4"
               variant="flat"
               class="ma-2 button button-submit"
-              target="_blank"
-              :href="`/album-${metadata.album!.id}`"
+              :to="`/album-${metadata.album!.id}`"
+              @click="
+                () => {
+                  albumStore.leaveAlbumPath = route.fullPath
+                }
+              "
             >
-              Open Album
+              Enter Album
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -107,6 +111,10 @@ import { useImgStore } from '@/store/imgStore'
 
 import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
+import { useAlbumStore } from '@/store/albumStore'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const albumStore = useAlbumStore()
 
 function dater(timestamp: number): string {
   const locale = navigator.language
