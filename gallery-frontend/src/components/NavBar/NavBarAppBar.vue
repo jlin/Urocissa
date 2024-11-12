@@ -38,7 +38,7 @@
       </v-card-text>
     </v-card>
 
-    <v-menu>
+    <v-menu v-if="!route.meta.isInsideAlbum">
       <template v-slot:activator="{ props }">
         <v-btn v-bind="props" icon="mdi-plus"></v-btn>
       </template>
