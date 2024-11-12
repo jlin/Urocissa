@@ -15,7 +15,7 @@ export const useModalStore = defineStore({
     showEditAlbumsModal: false,
     showBatchEditAlbumsModal: false,
     showCreateAlbumsModal: false,
-    showUploadModal: true
+    showUploadModal: false
   }),
   actions: {}
 })
