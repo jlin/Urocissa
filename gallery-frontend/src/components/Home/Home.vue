@@ -188,6 +188,18 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+#image-container {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+#image-container::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, and Opera */
+}
+
 img {
   transition: border 0.1s linear;
 }

@@ -127,11 +127,9 @@ import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
 import { useAlbumStore } from '@/store/albumStore'
 import { useRoute } from 'vue-router'
-import { useModalStore } from '@/store/modalStore'
 
 const route = useRoute()
 const albumStore = useAlbumStore('')
-const modalStore = useModalStore('')
 
 function dater(timestamp: number): string {
   const locale = navigator.language

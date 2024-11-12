@@ -44,41 +44,46 @@ export const useFilterStore = (isolationId: string) =>
         this.filterString = searchString ? searchString : null
       },
       handleBasicString(route: RouteLocationNormalizedLoaded) {
-        const currentPage = useCurrentPage(route).value
-        switch (currentPage) {
-          case 'default': {
-            this.basicString = 'and(not(tag: _archived), not(tag:_trashed))'
-            break
-          }
-          case 'favorite': {
-            this.basicString = 'and(tag:_favorite, not(tag:_trashed))'
-            break
-          }
-          case 'archived': {
-            this.basicString = 'and(tag:_archived, not(tag:_trashed))'
-            break
-          }
-          case 'albums': {
-            this.basicString = 'type:album'
-            break
-          }
-          case 'album': {
-            // Access the 'id' parameter from the route
-            const id = route.params.id
-            this.basicString = `album:${id}`
-            break
-          }
-          case 'trashed': {
-            this.basicString = 'and(tag:_trashed)'
-            break
-          }
-          case 'all': {
-            this.basicString = null
-            break
-          }
-          default: {
-            this.basicString = null
-            break
+        if (route.meta.isReadPage) {
+          const album_id = route.params.hash
+          this.basicString = `album:${album_id}`
+        } else {
+          const currentPage = useCurrentPage(route).value
+          switch (currentPage) {
+            case 'default': {
+              this.basicString = 'and(not(tag: _archived), not(tag:_trashed))'
+              break
+            }
+            case 'favorite': {
+              this.basicString = 'and(tag:_favorite, not(tag:_trashed))'
+              break
+            }
+            case 'archived': {
+              this.basicString = 'and(tag:_archived, not(tag:_trashed))'
+              break
+            }
+            case 'albums': {
+              this.basicString = 'type:album'
+              break
+            }
+            case 'album': {
+              // Access the 'id' parameter from the route
+              const id = route.params.id
+              this.basicString = `album:${id}`
+              break
+            }
+            case 'trashed': {
+              this.basicString = 'and(tag:_trashed)'
+              break
+            }
+            case 'all': {
+              this.basicString = null
+              break
+            }
+            default: {
+              this.basicString = null
+              break
+            }
           }
         }
       }
