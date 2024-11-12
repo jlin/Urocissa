@@ -1,4 +1,5 @@
 <template>
+  <router-view></router-view>
   <v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
     <v-row>
       <v-col
@@ -69,6 +70,14 @@
           <div class="flex-grow-1"></div>
 
           <v-card-actions class="justify-end">
+            <v-btn
+              color="teal-accent-4"
+              variant="flat"
+              class="ma-2 button button-submit"
+              :to="`${route.fullPath}/isolated`"
+            >
+              test enter
+            </v-btn>
             <v-btn
               color="teal-accent-4"
               variant="flat"
