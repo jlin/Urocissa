@@ -33,6 +33,7 @@ use router::{
         regenerate_preview::regenerate_preview,
     },
 };
+use std::fs;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 use std::{panic::Location, path::PathBuf};
@@ -51,6 +52,19 @@ async fn rocket() -> _ {
 
     let start_time = Instant::now();
     let txn = TREE.in_disk.begin_write().unwrap();
+    {
+        let db_path = "./db/temp_db.redb";
+        if fs::metadata(db_path).is_ok() {
+            match fs::remove_file(db_path) {
+                Ok(_) => {
+                    info!("Clear cache");
+                }
+                Err(_) => {
+                    error!("Fail to delete cache data ./db/temp_db.redb")
+                }
+            }
+        }
+    }
     {
         let table = txn.open_table(DATA_TABLE).unwrap();
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} photos/vidoes from database", table.len().unwrap());
