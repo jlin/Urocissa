@@ -107,13 +107,17 @@ const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)
 const chipSize = 25
 
-const scrollTopStore = useScrollTopStore()
-const locationStore = useLocationStore()
-const prefetchStore = usePrefetchStore()
-const scrollbarStore = useScrollbarStore()
-const rowStore = useRowStore()
-const offsetStore = useOffsetStore()
-const queueStore = useQueueStore()
+const props = defineProps<{
+  isolationId: string
+}>()
+
+const scrollTopStore = useScrollTopStore(props.isolationId)
+const locationStore = useLocationStore(props.isolationId)
+const prefetchStore = usePrefetchStore(props.isolationId)
+const scrollbarStore = useScrollbarStore(props.isolationId)
+const rowStore = useRowStore(props.isolationId)
+const offsetStore = useOffsetStore(props.isolationId)
+const queueStore = useQueueStore(props.isolationId)
 
 const reachBottom = computed(() => {
   return (
@@ -189,7 +193,7 @@ const getTargetRowIndex = (percentage: number) => {
   return clamp(targetRowIndex, 0, rowLength.value - 1)
 }
 
-const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index), 100)
+const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index, props.isolationId), 100)
 
 /**
  * Handle a click event on the scrollbar.

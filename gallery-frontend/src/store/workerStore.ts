@@ -14,7 +14,7 @@ type postToWorkerType = {
   processImage: (payload: processImagePayload) => void
   processAbort: (payload: processAbortPayload) => void
 }
-export const useWorkerStore = (isolationId: string = '') =>
+export const useWorkerStore = (isolationId: string ) =>
   defineStore({
     id: 'workerStore' + isolationId,
     state: (): {
@@ -29,12 +29,14 @@ export const useWorkerStore = (isolationId: string = '') =>
       postToWorkerList: undefined
     }),
     actions: {
-      initializeWorker() {
+      initializeWorker(isolationId: string ) {
+        console.log('intiailzie worker isolationId is', isolationId)
+
         if (this.worker === null) {
           this.worker = new Worker(new URL('../worker/toDataWorker.ts', import.meta.url), {
             type: 'module'
           })
-          handleDataWorkerReturn(this.worker)
+          handleDataWorkerReturn(this.worker, isolationId)
         } else {
           console.error('There is already a worker')
         }
@@ -52,7 +54,7 @@ export const useWorkerStore = (isolationId: string = '') =>
             this.postToWorkerList.push(postToWorker)
           }
           this.imgWorker.forEach((worker) => {
-            handleImgWorker(worker)
+            handleImgWorker(worker, isolationId)
           })
         } else {
           console.error('There is already an imgWorker')

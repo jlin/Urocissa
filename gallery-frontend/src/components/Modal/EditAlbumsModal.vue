@@ -71,11 +71,11 @@ import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { AlbumInfo } from '@/script/common/types'
 
-const modalStore = useModalStore()
-const storeData = useDataStore()
+const modalStore = useModalStore('')
+const storeData = useDataStore('')
 const route = useRoute()
 const vModelAlbumsArray = ref<AlbumInfo[]>([])
-const albumStore = useAlbumStore()
+const albumStore = useAlbumStore('')
 
 const defaultAlbums = computed(() => {
   // defaultAlbums should be the list of albums in data.database.album

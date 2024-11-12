@@ -1,7 +1,7 @@
 import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
 import { defineStore } from 'pinia'
 
-export const usePrefetchStore = (isolationId: string = '') =>
+export const usePrefetchStore = (isolationId: string ) =>
   defineStore({
     id: 'prefetchStore' + isolationId,
     state: (): {

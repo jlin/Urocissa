@@ -23,13 +23,14 @@ export function handleScroll(
   lastScrollTop: Ref<number>,
   mobile: string | null,
   stopScroll: Ref<boolean>,
-  windowHeight: Ref<number>
+  windowHeight: Ref<number>,
+  isolationId: string
 ) {
   const throttledHandleScroll = throttle(
     () => {
       if (imageContainerRef.value !== null) {
-        const scrollTopStore = useScrollTopStore()
-        const prefetchStore = usePrefetchStore()
+        const scrollTopStore = useScrollTopStore(isolationId)
+        const prefetchStore = usePrefetchStore(isolationId)
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
         const result = scrollTopStore.scrollTop + difference
 

@@ -32,7 +32,7 @@ const index = computed(() => {
   return dataStore.hashMapData.get(route.params.hash as string)!
 })
 
-const dataStore = useDataStore()
+const dataStore = useDataStore('')
 const route = useRoute()
 const abstractData = computed(() => {
   return dataStore.data.get(index.value)!

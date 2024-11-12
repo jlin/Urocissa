@@ -15,12 +15,13 @@ export function useFetchImgs(
   visibleRows: Ref<Array<{ start: number; end: number }>>,
   visibleRowsLength: Ref<number>,
   batchNumber: number,
+  isolationId: string,
   debounceTime = 75,
   maxWait = 1000
 ) {
   const debouncedFetch = debounce(
     async () => {
-      const dataStore = useDataStore()
+      const dataStore = useDataStore(isolationId)
       const length = visibleRowsLength.value
       if (length > 0) {
         const startBatchIndex = Math.max(
@@ -31,7 +32,7 @@ export function useFetchImgs(
 
         for (let batchIndex = startBatchIndex; batchIndex <= endBatchIndex; batchIndex++) {
           if (!dataStore.batchFetched.get(batchIndex)) {
-            fetchDataInWorker(batchIndex)
+            fetchDataInWorker(batchIndex, isolationId)
           }
         }
       }

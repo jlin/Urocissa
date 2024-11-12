@@ -80,14 +80,14 @@ const props = defineProps<{
   index: number
 }>()
 
-const prefetchStore = usePrefetchStore()
-const workerStore = useWorkerStore()
-const queueStore = useQueueStore()
-const imgStore = useImgStore()
-const initializedStore = useInitializedStore()
-const modalStore = useModalStore()
-const infoStore = useInfoStore()
-const dataStore = useDataStore()
+const prefetchStore = usePrefetchStore('')
+const workerStore = useWorkerStore('')
+const queueStore = useQueueStore('')
+const imgStore = useImgStore('')
+const initializedStore = useInitializedStore('')
+const modalStore = useModalStore('')
+const infoStore = useInfoStore('')
+const dataStore = useDataStore('')
 const route = useRoute()
 const router = useRouter()
 
@@ -187,7 +187,7 @@ const checkAndFetch = (index: number): boolean => {
   }
 }
 
-function prefetchMedia(index: number) {
+function prefetchMedia(index: number, isolationId: string) {
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
   const prefetch = async () => {
@@ -201,13 +201,13 @@ function prefetchMedia(index: number) {
       if (nextMeta !== undefined && nextMeta.ext_type === 'image') {
         checkAndFetch(nextIndex)
       } else if (nextMeta === undefined && nextIndex <= prefetchStore.dataLength - 1) {
-        fetchDataInWorker(Math.floor(nextIndex / batchNumber))
+        fetchDataInWorker(Math.floor(nextIndex / batchNumber), isolationId)
       }
 
       if (prevMeta !== undefined && prevMeta.ext_type === 'image') {
         checkAndFetch(prevIndex)
       } else if (prevMeta === undefined && prevIndex >= 0) {
-        fetchDataInWorker(Math.floor(prevIndex / batchNumber))
+        fetchDataInWorker(Math.floor(prevIndex / batchNumber), isolationId)
       }
 
       await delay(100)
@@ -225,7 +225,7 @@ watch(
         checkAndFetch(props.index)
 
         // Prefetch next and previous 10 hashes if they exist
-        prefetchMedia(props.index)
+        prefetchMedia(props.index, '')
         // console.log(props.metadata) // debug usage
       }
     }

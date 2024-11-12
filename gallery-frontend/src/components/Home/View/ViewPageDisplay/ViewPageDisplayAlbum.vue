@@ -124,8 +124,8 @@ import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 
 const route = useRoute()
-const albumStore = useAlbumStore()
-const modalStore = useModalStore()
+const albumStore = useAlbumStore('')
+const modalStore = useModalStore('')
 
 function dater(timestamp: number): string {
   const locale = navigator.language
@@ -143,5 +143,5 @@ defineProps<{
   colHeight: number
 }>()
 
-const imgStore = useImgStore()
+const imgStore = useImgStore('')
 </script>

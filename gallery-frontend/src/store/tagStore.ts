@@ -4,7 +4,7 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'
 
-export const useTagStore = (isolationId: string = '') =>
+export const useTagStore = (isolationId: string ) =>
   defineStore({
     id: 'tagStore' + isolationId,
     state: (): {

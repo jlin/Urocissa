@@ -4,7 +4,7 @@ import { useDataStore } from '@/store/dataStore'
 
 export function useHandleClick(router: Router, route: RouteLocationNormalizedLoaded) {
   const handleClick = async (event: MouseEvent, currentIndex: number) => {
-    const collectionStore = useCollectionStore()
+    const collectionStore = useCollectionStore('')
     if (collectionStore.editModeOn) {
       if (event.shiftKey && collectionStore.lastClick !== null) {
         const start = Math.min(collectionStore.lastClick, currentIndex)
@@ -39,7 +39,7 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
       }
     } else {
       // collectionStore.editModeOn === false
-      const dataStore = useDataStore()
+      const dataStore = useDataStore('')
       const abstractData = dataStore.data.get(currentIndex)!
 
       const hashOrId = abstractData.database ? abstractData.database.hash : abstractData.album!.id

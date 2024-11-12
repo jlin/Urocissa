@@ -50,9 +50,15 @@ import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+
+const props = defineProps<{
+  isolationId: string
+}>()
+
 const route = useRoute()
-const uploadStore = useUploadStore()
-const modalStore = useModalStore()
+
+const uploadStore = useUploadStore(props.isolationId)
+const modalStore = useModalStore(props.isolationId)
 
 const hasHoveringEffect = computed(() => {
   const path = route.path

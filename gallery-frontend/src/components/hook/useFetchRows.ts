@@ -14,9 +14,9 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
  * @param scrollTop - The given scroll position in pixels.
  * @returns The sum of offsets for all rows above the given scroll position.
  */
-function computeOffSetSumOfAboveRowsIndex(scrollTop: number) {
+function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string) {
   const aboveRowsIndex: number[] = []
-  const rowStore = useRowStore()
+  const rowStore = useRowStore(isolationId)
 
   for (const row of rowStore.rowData.values()) {
     if (row.topPixelAccumulated! + row.offset < scrollTop) {
@@ -24,7 +24,7 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number) {
     }
   }
 
-  const offsetStore = useOffsetStore()
+  const offsetStore = useOffsetStore(isolationId)
   let offsetSum = 0
 
   aboveRowsIndex.forEach((rowIndex) => {
@@ -46,17 +46,18 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number) {
 export function useFetchRows(
   startHeight: Ref<number>,
   endHeight: Ref<number>,
+  isolationId: string,
   debounceTime = 50,
-  maxWait = 100
+  maxWait = 100,
 ) {
-  const initializedStore = useInitializedStore()
-  const prefetchStore = usePrefetchStore()
-  const scrollTopStore = useScrollTopStore()
+  const initializedStore = useInitializedStore(isolationId)
+  const prefetchStore = usePrefetchStore(isolationId)
+  const scrollTopStore = useScrollTopStore(isolationId)
 
   const debouncedFetch = debounce(
     () => {
       if (initializedStore.initialized) {
-        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(scrollTopStore.scrollTop)
+        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(scrollTopStore.scrollTop, isolationId)
         const fixedHeight = 2400
         const startHeightOffseted = startHeight.value - offSetSumOfAboveRowsIndex - fixedHeight
         const endHeightOffseted = endHeight.value - offSetSumOfAboveRowsIndex + fixedHeight
@@ -64,16 +65,16 @@ export function useFetchRows(
         const endIndex = Math.ceil(endHeightOffseted / fixedHeight)
 
         for (let i = startIndex; i < endIndex; i++) {
-          fetchRowInWorker(i)
+          fetchRowInWorker(i, isolationId)
         }
 
         const prependBatch = Math.floor(startHeightOffseted / fixedHeight) - 1
 
-        fetchRowInWorker(prependBatch)
+        fetchRowInWorker(prependBatch, isolationId)
 
         const appendBatch = Math.ceil(endHeightOffseted / fixedHeight) + 1
 
-        fetchRowInWorker(appendBatch)
+        fetchRowInWorker(appendBatch, isolationId)
       }
     },
     debounceTime,

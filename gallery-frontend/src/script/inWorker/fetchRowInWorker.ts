@@ -11,10 +11,10 @@ import { bindActionDispatch } from 'typesafe-agent-events'
  *
  * @param {number} index - The index of the row to fetch.
  */
-export function fetchRowInWorker(index: number) {
-  const prefetchStore = usePrefetchStore()
-  const locationStore = useLocationStore()
-  const queueStore = useQueueStore()
+export function fetchRowInWorker(index: number, isolationId: string) {
+  const prefetchStore = usePrefetchStore(isolationId)
+  const locationStore = useLocationStore(isolationId)
+  const queueStore = useQueueStore(isolationId)
 
   if (prefetchStore.rowLength === 0) {
     return // No data to fetch
@@ -30,10 +30,10 @@ export function fetchRowInWorker(index: number) {
     return // If a specific row is anchored, this make sure to fetch only that row
   }
 
-  const workerStore = useWorkerStore()
+  const workerStore = useWorkerStore(isolationId)
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker(isolationId)
   }
   const dataWorker = workerStore.worker!
 

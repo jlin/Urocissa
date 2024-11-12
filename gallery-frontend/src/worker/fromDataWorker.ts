@@ -18,19 +18,23 @@ import { useConfigStore } from '@/store/configStore'
 import { useAlbumStore } from '@/store/albumStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
-export function handleDataWorkerReturn(dataWorker: Worker) {
-  const dataStore = useDataStore()
-  const messageStore = useMessageStore()
-  const prefetchStore = usePrefetchStore()
-  const tagStore = useTagStore()
-  const initializedStore = useInitializedStore()
-  const scrollbarStore = useScrollbarStore()
-  const offsetStore = useOffsetStore()
-  const rowStore = useRowStore()
-  const locationStore = useLocationStore()
-  const modalStore = useModalStore()
-  const configStore = useConfigStore()
-  const albumStore = useAlbumStore()
+export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string ) {
+
+  console.log("isolationIdisolationId is", isolationId);
+  
+
+  const dataStore = useDataStore(isolationId)
+  const messageStore = useMessageStore(isolationId)
+  const prefetchStore = usePrefetchStore(isolationId)
+  const tagStore = useTagStore(isolationId)
+  const initializedStore = useInitializedStore(isolationId)
+  const scrollbarStore = useScrollbarStore(isolationId)
+  const offsetStore = useOffsetStore(isolationId)
+  const rowStore = useRowStore(isolationId)
+  const locationStore = useLocationStore(isolationId)
+  const modalStore = useModalStore(isolationId)
+  const configStore = useConfigStore(isolationId)
+  const albumStore = useAlbumStore(isolationId)
 
   const handler = createHandler<typeof fromDataWorker>({
     returnData: (payload) => {
@@ -100,7 +104,7 @@ export function handleDataWorkerReturn(dataWorker: Worker) {
         await albumStore.fetchAlbums()
       }
 
-      fetchScrollbarInWorker()
+      fetchScrollbarInWorker(isolationId)
 
       try {
         const response = await axios.get('/get/get-config.json')

@@ -8,11 +8,12 @@
     persistent
     transition="false"
   >
-    test1234
+    <Home isolation-id="`idid`" />
   </v-overlay>
 </template>
 <script setup lang="ts">
 import { useModalStore } from '@/store/modalStore'
+import Home from './Home.vue'
 
-const modalStore = useModalStore()
+const modalStore = useModalStore('')
 </script>

@@ -9,14 +9,14 @@ export function editTagsInWorker(
   addTagsArray: string[],
   removeTagsArray: string[]
 ) {
-  const workerStore = useWorkerStore()
-  const prefetchStore = usePrefetchStore()
-  const tagStore = useTagStore()
+  const workerStore = useWorkerStore('')
+  const prefetchStore = usePrefetchStore('')
+  const tagStore = useTagStore('')
 
   tagStore.fetched = false
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker('')
   }
 
   const dataWorker = workerStore.worker!

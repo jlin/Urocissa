@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useModalStore = (isolationId: string = '') =>
+export const useModalStore = (isolationId: string ) =>
   defineStore({
     id: 'modalStore' + isolationId,
     state: (): {

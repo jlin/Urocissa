@@ -6,12 +6,13 @@ export function prefetchInWorker(
   filterJsonString: string | null,
   priorityId: string | undefined = 'default',
   reverse: string | undefined,
-  locate: string | null = null
+  locate: string | null = null,
+  isolationId: string
 ) {
-  const workerStore = useWorkerStore()
+  const workerStore = useWorkerStore(isolationId)
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker(isolationId)
   }
 
   const dataWorker = workerStore.worker!

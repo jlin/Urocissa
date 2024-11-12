@@ -5,7 +5,7 @@
 
 import { defineStore } from 'pinia'
 
-export const useConfigStore = (isolationId: string = '') =>
+export const useConfigStore = (isolationId: string ) =>
   defineStore('configStore' + isolationId, {
     state: (): {
       disableImg: boolean

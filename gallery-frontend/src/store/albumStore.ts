@@ -4,7 +4,7 @@ import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'
 
-export const useAlbumStore = (isolationId: string = '') =>
+export const useAlbumStore = (isolationId: string ) =>
   defineStore({
     id: 'albumStore' + isolationId,
     state: (): {

@@ -1,7 +1,7 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
-  <router-view></router-view>
-  <ScrollBar v-if="imageContainerRef" />
+  <router-view v-if="isolationId === ''"></router-view>
+  <ScrollBar v-if="imageContainerRef" :isolationId="isolationId" />
   <div
     id="image-container"
     ref="imageContainerRef"
@@ -20,8 +20,12 @@
     <Buffer
       v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
       :bufferHeight="bufferHeight"
+      :isolationId="isolationId"
     />
-    <HomeEmptyCard v-if="initializedStore.initialized && prefetchStore.dataLength === 0" />
+    <HomeEmptyCard
+      v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
+      :isolationId="isolationId"
+    />
   </div>
 </template>
 
@@ -63,18 +67,25 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-const scrollTopStore = useScrollTopStore()
-const offsetStore = useOffsetStore()
-const rowStore = useRowStore()
-const dataStore = useDataStore()
-const filterStore = useFilterStore()
-const collectionStore = useCollectionStore()
-const prefetchStore = usePrefetchStore()
-const workerStore = useWorkerStore()
-const initializedStore = useInitializedStore()
-const queueStore = useQueueStore()
-const imgStore = useImgStore()
-const locationStore = useLocationStore()
+
+const props = defineProps<{
+  isolationId?: string
+}>()
+
+const isolationId = props.isolationId || ''
+
+const scrollTopStore = useScrollTopStore(isolationId)
+const offsetStore = useOffsetStore(isolationId)
+const rowStore = useRowStore(isolationId)
+const dataStore = useDataStore(isolationId)
+const filterStore = useFilterStore(isolationId)
+const collectionStore = useCollectionStore(isolationId)
+const prefetchStore = usePrefetchStore(isolationId)
+const workerStore = useWorkerStore(isolationId)
+const initializedStore = useInitializedStore(isolationId)
+const queueStore = useQueueStore(isolationId)
+const imgStore = useImgStore(isolationId)
+const locationStore = useLocationStore(isolationId)
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -98,7 +109,8 @@ const throttledHandleScroll = handleScroll(
   lastScrollTop,
   mobile,
   stopScroll,
-  windowHeight
+  windowHeight,
+  isolationId
 )
 
 watch(windowWidth, () => {
@@ -116,7 +128,7 @@ watch(windowWidth, () => {
 const resizeDebounce = debounce(() => {
   const locationRowIndex = Math.floor(locationStore.locationIndex! / layoutBatchNumber)
   scrollTopStore.scrollTop = locationRowIndex * 2400
-  fetchRowInWorker(locationRowIndex)
+  fetchRowInWorker(locationRowIndex, isolationId)
 }, 100)
 
 const bufferHeight = computed(() => {
@@ -132,13 +144,16 @@ const bufferHeight = computed(() => {
 onMounted(async () => {
   filterStore.handleFilterString(route)
   filterStore.handleBasicString(route)
-  prefetch(filterStore.generateFilterJsonString(), windowWidth, route)
+  console.log('isolationId is', isolationId)
+
+  prefetch(filterStore.generateFilterJsonString(), windowWidth, route, isolationId)
   useInitializeScrollPosition(
     imageContainerRef,
     bufferHeight,
     lastScrollTop,
     clientHeight,
-    windowWidth
+    windowWidth,
+    isolationId
   )
 })
 
@@ -159,18 +174,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-#image-container {
-  -ms-overflow-style: none;
-  /* IE and Edge */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-#image-container::-webkit-scrollbar {
-  display: none;
-  /* Chrome, Safari, and Opera */
-}
-
 img {
   transition: border 0.1s linear;
 }

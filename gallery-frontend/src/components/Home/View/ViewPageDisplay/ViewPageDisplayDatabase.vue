@@ -48,7 +48,7 @@ defineProps<{
   colHeight: number
 }>()
 
-const imgStore = useImgStore()
+const imgStore = useImgStore('')
 const route = useRoute()
 
 const hash = computed(() => {

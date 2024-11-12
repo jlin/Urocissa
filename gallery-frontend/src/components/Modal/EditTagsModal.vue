@@ -48,11 +48,11 @@ import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
-const modalStore = useModalStore()
-const storeData = useDataStore()
+const modalStore = useModalStore('')
+const storeData = useDataStore('')
 const route = useRoute()
 const changedTagsArray = ref<string[]>([])
-const tagStore = useTagStore()
+const tagStore = useTagStore('')
 const tagList = computed(() => {
   return tagStore.tags
 })

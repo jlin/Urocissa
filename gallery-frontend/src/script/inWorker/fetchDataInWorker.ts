@@ -3,14 +3,14 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { toDataWorker } from '@/worker/workerApi'
 
-export function fetchDataInWorker(batch: number) {
-  const workerStore = useWorkerStore()
+export function fetchDataInWorker(batch: number, isolationId: string) {
+  const workerStore = useWorkerStore(isolationId)
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker(isolationId)
   }
 
-  const prefetchStore = usePrefetchStore()
+  const prefetchStore = usePrefetchStore(isolationId)
   const dataWorker = workerStore.worker!
 
   const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))

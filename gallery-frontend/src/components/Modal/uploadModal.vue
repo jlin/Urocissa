@@ -43,7 +43,7 @@
  */
 import { useUploadStore } from '@/store/uploadStore'
 import humanizeDuration from 'humanize-duration'
-const uploadStore = useUploadStore()
+const uploadStore = useUploadStore('')
 </script>
 
 <style scoped></style>

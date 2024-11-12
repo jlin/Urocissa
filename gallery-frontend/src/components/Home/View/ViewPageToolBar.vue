@@ -97,8 +97,8 @@ import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-const modalStore = useModalStore()
-const infoStore = useInfoStore()
+const modalStore = useModalStore('')
+const infoStore = useInfoStore('')
 
 const props = defineProps<Props>()
 interface Props {
@@ -107,8 +107,8 @@ interface Props {
 const hash = computed(() => {
   return route.params.hash as string
 })
-const dataStore = useDataStore()
-const collectionStore = useCollectionStore()
+const dataStore = useDataStore('')
+const collectionStore = useCollectionStore('')
 const route = useRoute()
 const computedPath = computed(() => {
   const path = route.path

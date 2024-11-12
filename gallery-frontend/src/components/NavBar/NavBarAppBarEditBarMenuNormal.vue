@@ -64,10 +64,10 @@ import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 
 const route = useRoute()
-const collectionStore = useCollectionStore()
-const prefetchStore = usePrefetchStore()
-const dataStore = useDataStore()
-const modalStore = useModalStore()
+const collectionStore = useCollectionStore('')
+const prefetchStore = usePrefetchStore('')
+const dataStore = useDataStore('')
+const modalStore = useModalStore('')
 
 // Methods
 const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {

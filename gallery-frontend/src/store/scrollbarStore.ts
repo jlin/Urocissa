@@ -1,6 +1,6 @@
 import { ScrollbarData } from '@/script/common/types'
 import { defineStore } from 'pinia'
-export const useScrollbarStore = (isolationId: string = '') =>
+export const useScrollbarStore = (isolationId: string) =>
   defineStore({
     id: 'scrollbarStore' + isolationId,
     state: (): {

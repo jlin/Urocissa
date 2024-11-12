@@ -4,8 +4,8 @@ import { fromImgWorker } from '@/worker/workerApi'
 import router from '@/script/routes'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
-export function handleImgWorker(imgWorker: Worker) {
-  const imgStore = useImgStore()
+export function handleImgWorker(imgWorker: Worker, isolationId: string) {
+  const imgStore = useImgStore(isolationId)
 
   const handler = createHandler<typeof fromImgWorker>({
     smallImageProcessed({ index, url }) {

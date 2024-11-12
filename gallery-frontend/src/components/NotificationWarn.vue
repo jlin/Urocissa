@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import { useMessageStore } from '@/store/messageStore'
-const messageStore = useMessageStore()
+const messageStore = useMessageStore('')
 </script>
 
 <style scoped></style>

@@ -210,19 +210,20 @@ import { useWorkerStore } from '@/store/workerStore'
 import Cookies from 'js-cookie'
 
 const props = defineProps<{
-  row: Row
+  row: Row,
+  isolationId: string
 }>()
 
 const router = useRouter()
 const route = useRoute()
 const mobile = inject<string | null>('mobile')!
-const prefetchStore = usePrefetchStore()
-const collectionStore = useCollectionStore()
-const dataStore = useDataStore()
-const imgStore = useImgStore()
-const configStore = useConfigStore()
-const queueStore = useQueueStore()
-const workerStore = useWorkerStore()
+const prefetchStore = usePrefetchStore(props.isolationId)
+const collectionStore = useCollectionStore(props.isolationId)
+const dataStore = useDataStore(props.isolationId)
+const imgStore = useImgStore(props.isolationId)
+const configStore = useConfigStore(props.isolationId)
+const queueStore = useQueueStore(props.isolationId)
+const workerStore = useWorkerStore(props.isolationId)
 const timeInterval = ref(0)
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID

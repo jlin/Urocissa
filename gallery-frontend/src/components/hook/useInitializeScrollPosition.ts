@@ -20,10 +20,11 @@ export function useInitializeScrollPosition(
   bufferHeight: ComputedRef<number>,
   lastScrollTop: Ref<number>,
   clientHeight: Ref<number>,
-  windowWidth: Ref<number>
+  windowWidth: Ref<number>,
+  isolationId: string
 ): void {
-  const initializedStore = useInitializedStore()
-  const prefetchStore = usePrefetchStore()
+  const initializedStore = useInitializedStore(isolationId)
+  const prefetchStore = usePrefetchStore(isolationId)
 
   watch(
     // Here windowWidth is watched for the case that when resizing,
@@ -31,7 +32,7 @@ export function useInitializeScrollPosition(
     [() => initializedStore.initialized, windowWidth],
 
     async () => {
-      const scrollTopStore = useScrollTopStore()
+      const scrollTopStore = useScrollTopStore(isolationId)
       const imageContainer = imageContainerRef.value
       if (imageContainer !== null && initializedStore.initialized) {
         imageContainer.scrollTop = bufferHeight.value / 3
@@ -44,7 +45,7 @@ export function useInitializeScrollPosition(
         if (jumpTo !== null) {
           const targetRowIndex = Math.floor(jumpTo / layoutBatchNumber)
           scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
-          fetchRowInWorker(targetRowIndex)
+          fetchRowInWorker(targetRowIndex, isolationId)
           prefetchStore.locateTo = null
         }
       }

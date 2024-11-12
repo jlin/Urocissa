@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useUploadStore = (isolationId: string = '') =>
+export const useUploadStore = (isolationId: string ) =>
   defineStore({
     id: 'uploadStore' + isolationId,
     state: (): {

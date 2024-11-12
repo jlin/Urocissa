@@ -25,7 +25,7 @@
       }"
       :start="`${row.start}`"
     >
-      <RowBlock :row="row" />
+      <RowBlock :row="row" :isolationId="isolationId" />
     </div>
     <BufferPlaceholder
       id="placeholderBottom"
@@ -77,8 +77,13 @@ import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 
-const prefetchStore = usePrefetchStore()
-const scrollTopStore = useScrollTopStore()
+const props = defineProps<{
+  isolationId: string
+  bufferHeight: number
+}>()
+
+const prefetchStore = usePrefetchStore(props.isolationId)
+const scrollTopStore = useScrollTopStore(props.isolationId)
 
 const windowWidth = inject<Ref<number>>('windowWidth')!
 const windowHeight = inject<Ref<number>>('windowHeight')!
@@ -99,20 +104,16 @@ const endHeight = computed(() => scrollTopStore.scrollTop + windowHeight.value)
 
 const { visibleRows } = useUpdateVisibleRows(
   imageContainerRef,
-
   startHeight,
   endHeight,
   lastRowBottom,
-  windowHeight
+  windowHeight,
+  props.isolationId
 )
-useFetchImgs(visibleRows, visibleRowsLength, batchNumber)
-useFetchRows(startHeight, endHeight)
+useFetchImgs(visibleRows, visibleRowsLength, batchNumber, props.isolationId)
+useFetchRows(startHeight, endHeight, props.isolationId)
 
 watch(windowWidth, () => {
   visibleRows.value = []
 })
-
-defineProps<{
-  bufferHeight: number
-}>()
 </script>

@@ -63,11 +63,11 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
 const formIsValid = ref(false)
-const modalStore = useModalStore()
+const modalStore = useModalStore('')
 const addTagsArray = ref<string[]>([])
 const removeTagsArray = ref<string[]>([])
-const collectionStore = useCollectionStore()
-const tagStore = useTagStore()
+const collectionStore = useCollectionStore('')
+const tagStore = useTagStore('')
 const tagList = computed(() => {
   return tagStore.tags.map((tag) => tag.tag)
 })

@@ -49,9 +49,10 @@ function findRowInRange(rowMap: Map<number, Row>, startRange: number, endRange: 
 function getCurrentVisibleRows(
   lastVisibleRow: Map<number, Row>,
   startHeight: number,
-  endHeight: number
+  endHeight: number,
+  isolationId: string
 ): Row[] {
-  const rowStore = useRowStore()
+  const rowStore = useRowStore(isolationId)
   let extraShift = 0
 
   // Find rows within the current viewport range that were visible in the previous frame
@@ -98,8 +99,8 @@ function getCurrentVisibleRows(
  * @param visibleRows - Array of currently visible rows.
  * @param rowData - Map of all rows by index.
  */
-function appendAndPrependRow(visibleRows: Ref<Row[]>) {
-  const rowStore = useRowStore()
+function appendAndPrependRow(visibleRows: Ref<Row[]>, isolationId: string) {
+  const rowStore = useRowStore(isolationId)
 
   const lastRowIndex = visibleRows.value[visibleRows.value.length - 1].rowIndex
   const appendRow = rowStore.rowData.get(lastRowIndex + 1)
@@ -122,8 +123,8 @@ function appendAndPrependRow(visibleRows: Ref<Row[]>) {
  *
  * @param visibleRows - Array of currently visible rows.
  */
-function filterRowForLocation(visibleRows: Ref<Row[]>) {
-  const locationStore = useLocationStore()
+function filterRowForLocation(visibleRows: Ref<Row[]>, isolationId: string) {
+  const locationStore = useLocationStore(isolationId)
   if (locationStore.anchor !== null) {
     visibleRows.value = visibleRows.value.filter((rowData) => {
       return rowData.rowIndex === locationStore.anchor
@@ -143,9 +144,9 @@ function filterRowForLocation(visibleRows: Ref<Row[]>) {
  * @param scrollTop - Current scroll position.
  * @param scrollingBound - Maximum allowed scroll position.
  */
-function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number) {
-  const rowStore = useRowStore()
-  const scrollTopStore = useScrollTopStore()
+function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number, isolationId: string) {
+  const rowStore = useRowStore(isolationId)
+  const scrollTopStore = useScrollTopStore(isolationId)
 
   const lastCurrentRowThatInLastVisibleRow = visibleRows.value.findLast((row) => {
     return rowStore.lastVisibleRow.has(row.rowIndex)
@@ -168,8 +169,8 @@ function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number) {
  *
  * @param visibleRows - Array of currently visible rows.
  */
-function updateLastVisibleRow(visibleRows: Ref<Row[]>) {
-  const rowStore = useRowStore()
+function updateLastVisibleRow(visibleRows: Ref<Row[]>, isolationId: string) {
+  const rowStore = useRowStore(isolationId)
   rowStore.lastVisibleRow.clear()
   visibleRows.value.forEach((row) => {
     rowStore.lastVisibleRow.set(row.rowIndex, structuredClone(toRaw(row)))
@@ -182,8 +183,8 @@ function updateLastVisibleRow(visibleRows: Ref<Row[]>) {
  * @param visibleRows - Array of currently visible rows.
  * @param scrollTop - Current scroll position.
  */
-function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number) {
-  const locationStore = useLocationStore()
+function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number, isolationId: string) {
+  const locationStore = useLocationStore(isolationId)
   for (const row of visibleRows.value) {
     if (row.topPixelAccumulated! + row.rowHeight + row.offset >= scrollTop) {
       const topPixelAccumulatedOffseted = row.topPixelAccumulated! + row.offset
@@ -214,16 +215,17 @@ function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number) {
 function updateLastRowBottom(
   visibleRows: Ref<Row[]>,
   lastRowBottom: Ref<number>,
-  endHeight: number
+  endHeight: number,
+  isolationId: string
 ) {
-  const prefetchStore = usePrefetchStore()
+  const prefetchStore = usePrefetchStore(isolationId)
   if (visibleRows.value.length > 0) {
     const lastRow = visibleRows.value[visibleRows.value.length - 1]
     const lastRowBottomComputed = lastRow.topPixelAccumulated! + lastRow.offset + lastRow.rowHeight
     lastRowBottom.value = lastRowBottomComputed
     if (lastRowBottomComputed <= endHeight && lastRow.end < prefetchStore.dataLength) {
       const lastRowIndex = lastRow.rowIndex
-      fetchRowInWorker(lastRowIndex + 1)
+      fetchRowInWorker(lastRowIndex + 1, isolationId)
       setTimeout(() => {
         prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
       }, 500)
@@ -248,35 +250,38 @@ export function useUpdateVisibleRows(
   startHeight: Ref<number>,
   endHeight: Ref<number>,
   lastRowBottom: Ref<number>,
-  windowHeight: Ref<number>
+  windowHeight: Ref<number>,
+  isolationId: string
 ) {
   const visibleRows: Ref<Row[]> = ref<Row[]>([])
-  const prefetchStore = usePrefetchStore()
-  const rowStore = useRowStore()
-  const scrollTopStore = useScrollTopStore()
+  const prefetchStore = usePrefetchStore(isolationId)
+  const rowStore = useRowStore(isolationId)
+  const scrollTopStore = useScrollTopStore(isolationId)
 
   const updateVisibleRows = () => {
     if (imageContainerRef.value) {
       visibleRows.value = getCurrentVisibleRows(
         rowStore.lastVisibleRow,
         startHeight.value,
-        endHeight.value
+        endHeight.value,
+        isolationId
       )
 
       if (visibleRows.value.length > 0) {
         // The logic in getCurrentVisibleRows might miss the top and bottom rows, so we add them back
-        appendAndPrependRow(visibleRows)
+        appendAndPrependRow(visibleRows, isolationId)
 
-        filterRowForLocation(visibleRows)
+        filterRowForLocation(visibleRows, isolationId)
 
         scrollTopOffsetFix(
           visibleRows,
-          prefetchStore.totalHeight - windowHeight.value - paddingPixel
+          prefetchStore.totalHeight - windowHeight.value - paddingPixel,
+          isolationId
         )
       }
-      updateLastVisibleRow(visibleRows)
-      updateLocationIndex(visibleRows, scrollTopStore.scrollTop)
-      updateLastRowBottom(visibleRows, lastRowBottom, endHeight.value)
+      updateLastVisibleRow(visibleRows, isolationId)
+      updateLocationIndex(visibleRows, scrollTopStore.scrollTop, isolationId)
+      updateLastRowBottom(visibleRows, lastRowBottom, endHeight.value, isolationId)
     }
   }
 

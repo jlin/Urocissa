@@ -3,12 +3,12 @@ import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
-export function fetchScrollbarInWorker() {
-  const workerStore = useWorkerStore()
-  const prefetchStore = usePrefetchStore()
+export function fetchScrollbarInWorker(isolationId: string) {
+  const workerStore = useWorkerStore(isolationId)
+  const prefetchStore = usePrefetchStore(isolationId)
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker(isolationId)
   }
   const dataWorker = workerStore.worker!
 

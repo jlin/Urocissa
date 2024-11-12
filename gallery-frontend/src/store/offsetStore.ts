@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useOffsetStore = (isolationId: string = '') =>
+export const useOffsetStore = (isolationId: string ) =>
   defineStore({
     id: 'offsetStore' + isolationId,
     state: (): {

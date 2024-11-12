@@ -9,14 +9,14 @@ export function editAlbumsInWorker(
   addAlbumsArray: string[],
   removeAlbumsArray: string[]
 ) {
-  const workerStore = useWorkerStore()
-  const prefetchStore = usePrefetchStore()
-  const albumStore = useAlbumStore()
+  const workerStore = useWorkerStore('')
+  const prefetchStore = usePrefetchStore('')
+  const albumStore = useAlbumStore('')
 
   albumStore.fetched = false
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker()
+    workerStore.initializeWorker('')
   }
 
   const dataWorker = workerStore.worker!

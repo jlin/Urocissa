@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useLocationStore = (isolationId: string = '') =>
+export const useLocationStore = (isolationId: string ) =>
   defineStore('locateStore' + isolationId, {
     state: (): {
       /**

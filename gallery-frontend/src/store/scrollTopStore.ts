@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useScrollTopStore = (isolationId: string = '') =>
+export const useScrollTopStore = (isolationId: string ) =>
   defineStore('scrollTopStore' + isolationId, {
     state: (): {
       scrollTop: number

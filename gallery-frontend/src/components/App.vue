@@ -23,7 +23,7 @@ import { useScrollbarStore } from '@/store/scrollbarStore'
 const NotificationWarn = defineAsyncComponent(() => import('@/components/NotificationWarn.vue'))
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
 
-const scrollbarStore = useScrollbarStore()
+const scrollbarStore = useScrollbarStore('')
 
 // Function to check if cookie has no password field
 async function checkCookieAndRedirect() {

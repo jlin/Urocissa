@@ -24,8 +24,8 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 
-const collectionStore = useCollectionStore()
-const dataStore = useDataStore()
+const collectionStore = useCollectionStore('')
+const dataStore = useDataStore('')
 const route = useRoute()
 
 const albumId = computed(() => {
