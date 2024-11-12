@@ -18,9 +18,9 @@ use router::{
     },
     get::get_img::compressed_file,
     get::get_page::{
-        album_page, all, all_view, archived, archived_view, catch_view_routes, favicon, favorite,
-        favorite_view, login, redirect_to_login, redirect_to_photo, redirect_to_photo_2, setting,
-        tags, trashed, trashed_view, unauthorized,
+        album_page, albums, albums_view, all, all_view, archived, archived_view, catch_view_routes,
+        favicon, favorite, favorite_view, login, redirect_to_login, redirect_to_photo,
+        redirect_to_photo_2, setting, tags, trashed, trashed_view, unauthorized,
     },
     post::{
         authenticate::authenticate, authenticate::authenticate_share, create_album::create_album,
@@ -121,7 +121,9 @@ async fn rocket() -> _ {
                 get_albums,
                 edit_album,
                 set_album_cover,
-                album_page
+                album_page,
+                albums,
+                albums_view
             ],
         )
 }
