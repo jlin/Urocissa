@@ -16,14 +16,38 @@
         <v-card-item>
           <v-card-subtitle>
             Wow, so empty!<br />
-            Try adding some photos here!
+            {{ computedMessage }}
           </v-card-subtitle>
         </v-card-item>
       </v-card>
     </v-hover>
   </v-container>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+
+const computedMessage = computed(() => {
+  const path = route.path
+
+  if (path.startsWith('/favorite')) {
+    return 'Quickly find your favorite photos and videos here!'
+  } else if (path.startsWith('/archived')) {
+    return 'Archived photos won’t appear on the home page.'
+  } else if (path.startsWith('/trashed')) {
+    return 'Deleted photos and videos will only appear here.'
+  } else if (path.startsWith('/albums')) {
+    return 'The album feature is still under development!'
+  } else if (path.startsWith('/all')) {
+    return 'Try uploading some photos here!'
+  } else if (path.startsWith('/album-') && path.includes('/')) {
+    return 'Add some photos to this album!'
+  } else {
+    return 'Try uploading some photos here!'
+  }
+})
+</script>
 <style scoped>
 .hover-cursor {
   cursor: pointer !important;
