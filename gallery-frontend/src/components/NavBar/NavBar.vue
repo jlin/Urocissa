@@ -34,6 +34,7 @@
   <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
   <UploadModal v-if="modalStore.showUploadModal && uploadStore.uploading" />
   <CreateAlbumsModal v-if="modalStore.showCreateAlbumsModal" />
+  <IsolatedHomeModal v-if="modalStore.showIsolatedHomeModal" />
 </template>
 
 <script setup lang="ts">
@@ -44,6 +45,7 @@ import UploadModal from '@/components/Modal/uploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
 import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
+import IsolatedHomeModal from '@/components/Home/IsolatedHome.vue'
 
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'

@@ -10,13 +10,15 @@ export const useModalStore = (isolationId: string = '') =>
       showBatchEditAlbumsModal: boolean
       showCreateAlbumsModal: boolean
       showUploadModal: boolean
+      showIsolatedHomeModal: boolean
     } => ({
       showEditTagsModal: false,
       showBatchEditTagsModal: false,
       showEditAlbumsModal: false,
       showBatchEditAlbumsModal: false,
       showCreateAlbumsModal: false,
-      showUploadModal: false
+      showUploadModal: false,
+      showIsolatedHomeModal: false
     }),
     actions: {}
   })()

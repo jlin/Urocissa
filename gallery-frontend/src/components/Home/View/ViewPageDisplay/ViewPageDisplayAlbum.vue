@@ -1,5 +1,4 @@
 <template>
-  <router-view></router-view>
   <v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
     <v-row>
       <v-col
@@ -74,7 +73,7 @@
               color="teal-accent-4"
               variant="flat"
               class="ma-2 button button-submit"
-              :to="`${route.fullPath}/isolated`"
+              @click="modalStore.showIsolatedHomeModal = true"
             >
               test enter
             </v-btn>
@@ -122,8 +121,11 @@ import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
 import { useAlbumStore } from '@/store/albumStore'
 import { useRoute } from 'vue-router'
+import { useModalStore } from '@/store/modalStore'
+
 const route = useRoute()
 const albumStore = useAlbumStore()
+const modalStore = useModalStore()
 
 function dater(timestamp: number): string {
   const locale = navigator.language

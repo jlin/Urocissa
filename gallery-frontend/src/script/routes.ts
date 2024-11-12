@@ -51,14 +51,7 @@ function createRoute(path: string, component: () => Promise<any>, name: string):
         path: 'view/:hash',
         component: () => import('@/components/Home/View/ViewPage.vue'),
         name: `${name}ViewPage`,
-        meta: { navigation: false, isViewPage: true, sortable: false },
-        children: [
-          {
-            path: 'isolated',
-            component: () => import('@/components/Home/IsolatedHome.vue'),
-            name: `${name}IsolatedHomePage`
-          }
-        ]
+        meta: { navigation: false, isViewPage: true, sortable: false }
       }
     ],
     props: path.includes(':') // Enable props if the path has dynamic segments
