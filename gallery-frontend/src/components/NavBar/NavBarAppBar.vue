@@ -95,7 +95,7 @@ const triggerModal = () => {
 }
 
 watchEffect(() => {
-  console.log('modalStore.showCreateAlbumsModal is', modalStore.showCreateAlbumsModal)
+  uploadStore.uploadButton = fileInput.value
 })
 
 const handleSearch = async () => {

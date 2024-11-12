@@ -46,9 +46,13 @@
   </v-container>
 </template>
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { useModalStore } from '@/store/modalStore'
+import { useUploadStore } from '@/store/uploadStore'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
+const uploadStore = useUploadStore()
+const modalStore = useModalStore()
 
 const hasHoveringEffect = computed(() => {
   const path = route.path
@@ -90,7 +94,22 @@ const computedMessage = computed(() => {
   }
 })
 
-const clickEmptyCard = () => {}
+const clickEmptyCard = () => {
+  const path = route.path
+
+  if (path.startsWith('/albums')) {
+    modalStore.showCreateAlbumsModal = true
+  } else if (path.startsWith('/all')) {
+    if (uploadStore.uploadButton !== null) {
+      uploadStore.uploadButton.click()
+    }
+  } else if (path.startsWith('/album-')) {
+  } else {
+    if (uploadStore.uploadButton !== null) {
+      uploadStore.uploadButton.click()
+    }
+  }
+}
 </script>
 <style scoped>
 .hover-cursor {

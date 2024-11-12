@@ -7,11 +7,13 @@ export const useUploadStore = defineStore({
     total: number | undefined
     loaded: number | undefined
     startTime: number | undefined
+    uploadButton: HTMLInputElement | null
   } => ({
     uploading: false,
     total: undefined,
     loaded: undefined,
-    startTime: undefined
+    startTime: undefined,
+    uploadButton: null
   }),
   actions: {
     percentComplete() {
