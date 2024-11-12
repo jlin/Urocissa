@@ -3,7 +3,7 @@ import { generateJsonString } from '@/script/lexer/generateJson'
 import { defineStore } from 'pinia'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 
-export const useFilterStore = (isolationId: string ) =>
+export const useFilterStore = (isolationId: string) =>
   defineStore({
     id: 'filterStore' + isolationId,
     state: (): {
@@ -11,7 +11,15 @@ export const useFilterStore = (isolationId: string ) =>
       basicString: string | null
       // Records the gallery search filter
       filterString: string | null
-      currentPage: 'default' | 'all' | 'favorite' | 'archived' | 'trashed' | 'albums' | 'album'
+      currentPage:
+        | 'default'
+        | 'all'
+        | 'favorite'
+        | 'archived'
+        | 'trashed'
+        | 'albums'
+        | 'album'
+        | 'view'
     } => ({
       basicString: null,
       filterString: null,

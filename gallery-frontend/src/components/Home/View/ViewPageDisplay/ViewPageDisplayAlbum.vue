@@ -1,4 +1,5 @@
 <template>
+  <router-view></router-view>
   <v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
     <v-row>
       <v-col
@@ -73,7 +74,7 @@
               color="teal-accent-4"
               variant="flat"
               class="ma-2 button button-submit"
-              @click="modalStore.showIsolatedHomeModal = true"
+              :to="`${route.fullPath}/read`"
             >
               test enter
             </v-btn>
