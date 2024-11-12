@@ -3,7 +3,6 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    :style="{ transition: 'width 0.3s ease-in-out' }"
     :class="{ 'show-info': infoStore.showInfo, 'not-show-info': !infoStore.showInfo }"
     class="h-100"
   >

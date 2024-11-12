@@ -6,6 +6,7 @@
     class="d-flex"
     id="view-page"
     persistent
+    transition="false"
   >
     <v-container
       fluid
