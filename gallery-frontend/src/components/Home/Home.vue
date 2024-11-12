@@ -1,5 +1,17 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
+  <v-toolbar
+    v-if="route.meta.isReadPage === true"
+    class="position-relative"
+    :style="{
+      backgroundColor: '#212121'
+    }"
+  >
+    <v-btn
+      icon="mdi mdi-arrow-left"
+      :to="albumStore.leaveAlbumPath ? albumStore.leaveAlbumPath : '/'"
+    ></v-btn>
+  </v-toolbar>
   <router-view v-if="isolationId === ''"></router-view>
   <ScrollBar v-if="imageContainerRef" :isolationId="isolationId" />
   <div
@@ -67,6 +79,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { useAlbumStore } from '@/store/albumStore'
 
 const props = defineProps<{
   isolationId?: string
@@ -86,6 +99,7 @@ const initializedStore = useInitializedStore(isolationId)
 const queueStore = useQueueStore(isolationId)
 const imgStore = useImgStore(isolationId)
 const locationStore = useLocationStore(isolationId)
+const albumStore = useAlbumStore('')
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)

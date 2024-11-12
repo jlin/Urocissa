@@ -110,6 +110,7 @@ const hash = computed(() => {
 const dataStore = useDataStore('')
 const collectionStore = useCollectionStore('')
 const route = useRoute()
+
 const computedPath = computed(() => {
   const path = route.path
 
@@ -134,6 +135,7 @@ const computedPath = computed(() => {
     return '/'
   }
 })
+
 const isViewPath = computed(() => {
   const path = route.path
   return (

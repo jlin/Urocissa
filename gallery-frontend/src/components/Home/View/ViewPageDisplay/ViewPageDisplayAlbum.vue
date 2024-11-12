@@ -75,6 +75,11 @@
               variant="flat"
               class="ma-2 button button-submit"
               :to="`${route.fullPath}/read`"
+              @click="
+                () => {
+                  albumStore.leaveAlbumPath = route.fullPath
+                }
+              "
             >
               test enter
             </v-btn>

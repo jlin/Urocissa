@@ -56,7 +56,8 @@ function createRoute(path: string, component: () => Promise<any>, name: string):
           {
             path: 'read',
             component: () => import('@/components/Home/IsolatedHome.vue'),
-            name: `${name}ReadPage`
+            name: `${name}ReadPage`,
+            meta: { isReadPage: true }
           }
         ]
       }
