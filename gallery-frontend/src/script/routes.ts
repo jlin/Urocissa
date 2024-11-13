@@ -76,6 +76,7 @@ function createRoute(
             children: [
               {
                 path: 'view/:subhash',
+                name: `${name}ReadViewPage`,
                 component: () => import('@/components/Home/View/isolatedViewPage.vue'),
                 meta: { isReadPage: true, isViewPage: true, basicString: basicString }
               }
@@ -83,10 +84,8 @@ function createRoute(
           }
         ]
       }
-    ],
-    props: true
+    ]
   }
-
   return [mainRoute]
 }
 
@@ -180,6 +179,8 @@ export function pathLeave(route: RouteLocationNormalizedLoadedGeneric) {
   if (pathSegments.length > 1) {
     pathSegments.pop()
     const parentPath = pathSegments.join('/') || '/'
+    console.log('result is', parentPath)
+
     return parentPath
   } else {
     // Already the root path, return '/'
@@ -213,6 +214,7 @@ export function pathLeaveDouble(route: RouteLocationNormalizedLoadedGeneric) {
 
   // Reconstruct the parent path
   const parentPath = '/' + pathSegments.join('/')
+  console.log('result is', '/' + pathSegments.join('/'))
 
   // Ensure at least '/' is returned
   return parentPath || '/'
@@ -227,6 +229,7 @@ export function appendViewPath(route: RouteLocationNormalizedLoadedGeneric, hash
 
   // Build the new path
   const newPath = `${normalizedPath}/view/${encodeURIComponent(hashOrId)}`
+  console.log('resulty is', newPath)
 
   // Return the route object, including query parameters and hash if needed to preserve
   return {
@@ -240,6 +243,31 @@ declare module 'vue-router' {
     isReadPage: boolean
     isViewPage: boolean
     basicString: string | null
+  }
+}
+
+export function leaveViewPage(route: RouteLocationNormalizedLoadedGeneric) {
+  if (!route.meta.isReadPage) {
+    // this is in the main page, so leave to
+    const suffix = 'ViewPage'
+    const fullName = route.name! as string // e.g., 'UserViewPage'
+    console.log('fullNameis', fullName)
+
+    const name = fullName.replace(suffix, '') // 'User'
+    return { name: name, query: route.query }
+  } else {
+    const suffix = 'ReadViewPage'
+    const fullName = route.name! as string // e.g., 'UserViewPage'
+    console.log('fullNameis', fullName)
+
+    const name = fullName.replace(suffix, '') // 'User'
+    return {
+      name: `${name}ReadPage`,
+      params: {
+        hash: route.params.hash
+      },
+      query: route.query
+    }
   }
 }
 

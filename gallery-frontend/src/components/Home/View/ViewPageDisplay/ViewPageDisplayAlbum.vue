@@ -69,7 +69,7 @@
           <!-- Use this div to take up remaining space -->
           <div class="flex-grow-1"></div>
 
-          <v-card-actions class="justify-end">
+          <v-card-actions class="justify-end" v-if="route.meta.isViewPage">
             <v-btn
               color="teal-accent-4"
               variant="flat"
@@ -82,19 +82,6 @@
               "
             >
               test enter
-            </v-btn>
-            <v-btn
-              color="teal-accent-4"
-              variant="flat"
-              class="ma-2 button button-submit"
-              :to="`/album-${metadata.album!.id}`"
-              @click="
-                () => {
-                  albumStore.leaveAlbumPath = route.fullPath
-                }
-              "
-            >
-              Enter Album
             </v-btn>
           </v-card-actions>
         </v-card>

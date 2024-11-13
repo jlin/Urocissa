@@ -1,8 +1,9 @@
 <template>
   <v-toolbar class="position-absolute my-toolbar">
     <v-btn
+      v-if="route.meta.isViewPage"
       icon="mdi mdi-arrow-left"
-      :to="{ path: pathLeaveDouble(route), query: route.query }"
+      :to="leaveViewPage(route)"
     ></v-btn>
     <v-spacer></v-spacer>
     <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
@@ -98,7 +99,7 @@ import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { useModalStore } from '@/store/modalStore'
-import { pathLeaveDouble } from '@/script/routes'
+import { pathLeaveDouble, leaveViewPage } from '@/script/routes'
 
 import axios from 'axios'
 import Cookies from 'js-cookie'
