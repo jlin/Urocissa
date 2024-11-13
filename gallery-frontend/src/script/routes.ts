@@ -17,7 +17,9 @@ const simpleRoutes: RouteRecordRaw[] = [
     component: () => import('@/components/Page/TagsPage.vue'),
     name: 'TagsPage',
     meta: {
-      navigation: true
+      isReadPage: false,
+      isViewPage: false,
+      basicString: null
     }
   },
   {
@@ -25,7 +27,9 @@ const simpleRoutes: RouteRecordRaw[] = [
     component: () => import('@/components/LoginPage.vue'),
     name: 'LoginPage',
     meta: {
-      navigation: true
+      isReadPage: false,
+      isViewPage: false,
+      basicString: null
     }
   }
 ]
@@ -42,29 +46,37 @@ const simpleRoutes: RouteRecordRaw[] = [
  * @param name - The unique name for the route.
  * @returns An array containing the RouteRecordRaw object.
  */
-function createRoute(path: string, component: () => Promise<any>, name: string): RouteRecordRaw[] {
+function createRoute(
+  path: string,
+  component: () => Promise<any>,
+  name: string,
+  basicString: string | null
+): RouteRecordRaw[] {
   const mainRoute: RouteRecordRaw = {
     path: `/${path}`,
     component: component,
     name: name,
-
+    meta: {
+      isReadPage: false,
+      basicString: basicString
+    },
     children: [
       {
         path: 'view/:hash',
         component: () => import('@/components/Home/View/ViewPage.vue'),
         name: `${name}ViewPage`,
-        meta: { isViewPage: true },
+        meta: { isReadPage: false, isViewPage: true, basicString: basicString },
         children: [
           {
             path: 'read',
             component: () => import('@/components/Home/IsolatedHome.vue'),
             name: `${name}ReadPage`,
-            meta: { isReadPage: true, isViewPage: false },
+            meta: { isReadPage: true, isViewPage: false, basicString: basicString },
             children: [
               {
                 path: 'view/:hash',
                 component: () => import('@/components/Home/View/ViewPage.vue'),
-                meta: { isViewPage: true }
+                meta: { isReadPage: true, isViewPage: true, basicString: basicString }
               }
             ]
           }
@@ -81,32 +93,46 @@ function createRoute(path: string, component: () => Promise<any>, name: string):
 // 3. Create Routes Using the Helper Function
 // ======================================
 
-const homePageRoutes = createRoute('', () => import('@/components/Home/Home.vue'), 'HomePage')
+const homePageRoutes = createRoute(
+  '',
+  () => import('@/components/Home/Home.vue'),
+  'HomePage',
+  'and(not(tag: _archived), not(tag:_trashed))'
+)
 
-const allPageRoutes = createRoute('all', () => import('@/components/Page/AllPage.vue'), 'AllPage')
+const allPageRoutes = createRoute(
+  'all',
+  () => import('@/components/Page/AllPage.vue'),
+  'AllPage',
+  null
+)
 
 const favoritePageRoutes = createRoute(
   'favorite',
   () => import('@/components/Page/FavoritePage.vue'),
-  'FavoritePage'
+  'FavoritePage',
+  'and(tag:_favorite, not(tag:_trashed))'
 )
 
 const archivedPageRoutes = createRoute(
   'archived',
   () => import('@/components/Page/ArchivedPage.vue'),
-  'ArchivedPage'
+  'ArchivedPage',
+  'and(tag:_archived, not(tag:_trashed))'
 )
 
 const trashedPageRoutes = createRoute(
   'trashed',
   () => import('@/components/Page/TrashedPage.vue'),
-  'TrashedPage'
+  'TrashedPage',
+  'and(tag:_trashed)'
 )
 
 const albumsPageRoutes = createRoute(
   'albums',
   () => import('@/components/Page/AlbumsPage.vue'),
-  'AlbumsPage'
+  'AlbumsPage',
+  'type:album'
 )
 
 // ======================================
@@ -205,6 +231,13 @@ export function appendViewPath(route: RouteLocationNormalizedLoadedGeneric, hash
   return {
     path: newPath,
     query: route.query // Preserve query parameters (optional)
+  }
+}
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    isReadPage: boolean
+    basicString: string | null
   }
 }
 
