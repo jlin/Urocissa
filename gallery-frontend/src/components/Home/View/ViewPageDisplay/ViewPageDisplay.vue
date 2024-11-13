@@ -14,6 +14,7 @@
         :metadata="metadata"
         :colWidth="colWidth"
         :colHeight="colHeight"
+        :isolationId="isolationId"
       />
       <ViewPageDisplayAlbum
         v-if="metadata"
@@ -76,18 +77,19 @@ const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
+  isolationId: string
   metadata: AbstractData | undefined
   index: number
 }>()
 
-const prefetchStore = usePrefetchStore('')
-const workerStore = useWorkerStore('')
-const queueStore = useQueueStore('')
-const imgStore = useImgStore('')
-const initializedStore = useInitializedStore('')
-const modalStore = useModalStore('')
-const infoStore = useInfoStore('')
-const dataStore = useDataStore('')
+const prefetchStore = usePrefetchStore(props.isolationId)
+const workerStore = useWorkerStore(props.isolationId)
+const queueStore = useQueueStore(props.isolationId)
+const imgStore = useImgStore(props.isolationId)
+const initializedStore = useInitializedStore(props.isolationId)
+const modalStore = useModalStore(props.isolationId)
+const infoStore = useInfoStore(props.isolationId)
+const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
 
@@ -114,7 +116,7 @@ const previousHash = computed(() => {
 })
 
 const index = computed(() => {
-  return dataStore.hashMapData.get(route.params.hash as string)!
+  return dataStore.hashMapData.get((route.params.subhash || route.params.hash) as string)!
 })
 
 const previousPage = computed(() => {

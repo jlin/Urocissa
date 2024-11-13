@@ -41,17 +41,22 @@ import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
 import { computed } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   index: number
   metadata: AbstractData
   colWidth: number
   colHeight: number
+  isolationId: string
 }>()
 
-const imgStore = useImgStore('')
+const imgStore = useImgStore(props.isolationId)
 const route = useRoute()
 
 const hash = computed(() => {
-  return route.params.hash as string
+  if (props.isolationId === '') {
+    return route.params.hash as string
+  } else {
+    return route.params.subhash as string
+  }
 })
 </script>

@@ -14,7 +14,8 @@ const simpleRoutes: RouteRecordRaw[] = [
     meta: {
       isReadPage: false,
       isViewPage: false,
-      basicString: null
+      basicString: null,
+      baseName: 'tags'
     }
   },
   {
@@ -24,7 +25,8 @@ const simpleRoutes: RouteRecordRaw[] = [
     meta: {
       isReadPage: false,
       isViewPage: false,
-      basicString: null
+      basicString: null,
+      baseName: 'login'
     }
   }
 ]
@@ -54,26 +56,32 @@ function createRoute(
     meta: {
       isReadPage: false,
       isViewPage: false,
-      basicString: basicString
+      basicString: basicString,
+      baseName: name
     },
     children: [
       {
         path: 'view/:hash',
         component: () => import('@/components/Home/View/mainViewPage.vue'),
         name: `${name}ViewPage`,
-        meta: { isReadPage: false, isViewPage: true, basicString: basicString },
+        meta: { isReadPage: false, isViewPage: true, basicString: basicString, baseName: name },
         children: [
           {
             path: 'read',
             component: () => import('@/components/Home/IsolatedHome.vue'),
             name: `${name}ReadPage`,
-            meta: { isReadPage: true, isViewPage: false, basicString: basicString },
+            meta: { isReadPage: true, isViewPage: false, basicString: basicString, baseName: name },
             children: [
               {
                 path: 'view/:subhash',
                 name: `${name}ReadViewPage`,
                 component: () => import('@/components/Home/View/isolatedViewPage.vue'),
-                meta: { isReadPage: true, isViewPage: true, basicString: basicString }
+                meta: {
+                  isReadPage: true,
+                  isViewPage: true,
+                  basicString: basicString,
+                  baseName: name
+                }
               }
             ]
           }
@@ -157,6 +165,7 @@ declare module 'vue-router' {
   interface RouteMeta {
     isReadPage: boolean
     isViewPage: boolean
+    baseName: string
     basicString: string | null
   }
 }

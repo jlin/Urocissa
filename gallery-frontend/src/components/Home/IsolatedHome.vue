@@ -8,7 +8,7 @@
     persistent
     transition="false"
   >
-    <Home :isolationId="`idid`" />
+    <Home :isolationId="'idid'" />
   </v-overlay>
 </template>
 <script setup lang="ts">
