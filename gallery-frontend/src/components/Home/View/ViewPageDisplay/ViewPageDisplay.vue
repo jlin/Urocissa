@@ -11,6 +11,7 @@
       <ViewPageDisplayDatabase
         v-if="metadata"
         :index="index"
+        :hash="hash"
         :metadata="metadata"
         :colWidth="colWidth"
         :colHeight="colHeight"
@@ -78,8 +79,9 @@ const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
   isolationId: string
-  metadata: AbstractData | undefined
+  hash: string
   index: number
+  metadata: AbstractData | undefined
 }>()
 
 const prefetchStore = usePrefetchStore(props.isolationId)
@@ -113,10 +115,6 @@ const previousHash = computed(() => {
   } else {
     return undefined
   }
-})
-
-const index = computed(() => {
-  return dataStore.hashMapData.get((route.params.subhash || route.params.hash) as string)!
 })
 
 const previousPage = computed(() => {
@@ -220,7 +218,7 @@ function prefetchMedia(index: number, isolationId: string) {
 }
 
 watch(
-  [index, () => initializedStore.initialized],
+  [() => initializedStore.initialized],
   () => {
     if (initializedStore.initialized) {
       if (props.index !== undefined) {

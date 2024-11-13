@@ -33,30 +33,20 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 import Cookies from 'js-cookie'
 import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
-import { computed } from 'vue'
 
 const props = defineProps<{
+  isolationId: string
+  hash: string
   index: number
   metadata: AbstractData
   colWidth: number
   colHeight: number
-  isolationId: string
 }>()
 
 const imgStore = useImgStore(props.isolationId)
-const route = useRoute()
-
-const hash = computed(() => {
-  if (props.isolationId === '') {
-    return route.params.hash as string
-  } else {
-    return route.params.subhash as string
-  }
-})
 </script>
