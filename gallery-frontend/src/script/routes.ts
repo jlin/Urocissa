@@ -64,7 +64,7 @@ function createRoute(
     children: [
       {
         path: 'view/:hash',
-        component: () => import('@/components/Home/View/ViewPage.vue'),
+        component: () => import('@/components/Home/View/mainViewPage.vue'),
         name: `${name}ViewPage`,
         meta: { isReadPage: false, isViewPage: true, basicString: basicString },
         children: [
@@ -75,8 +75,8 @@ function createRoute(
             meta: { isReadPage: true, isViewPage: false, basicString: basicString },
             children: [
               {
-                path: 'view/:hash',
-                component: () => import('@/components/Home/View/ViewPage.vue'),
+                path: 'view/:subhash',
+                component: () => import('@/components/Home/View/isolatedViewPage.vue'),
                 meta: { isReadPage: true, isViewPage: true, basicString: basicString }
               }
             ]
@@ -84,7 +84,7 @@ function createRoute(
         ]
       }
     ],
-    props: path.includes(':') // Enable props if the path has dynamic segments
+    props: true
   }
 
   return [mainRoute]
@@ -96,7 +96,7 @@ function createRoute(
 
 const homePageRoutes = createRoute(
   '',
-  () => import('@/components/Home/Home.vue'),
+  () => import('@/components/Home/mainHome.vue'),
   'HomePage',
   'and(not(tag: _archived), not(tag:_trashed))'
 )

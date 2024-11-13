@@ -10,7 +10,7 @@
     <v-btn icon="mdi mdi-arrow-left" :to="pathLeave(route)"></v-btn>
   </v-toolbar>
   <router-view></router-view>
-  <ScrollBar v-if="imageContainerRef" :isolationId="isolationId" />
+  <ScrollBar v-if="imageContainerRef" :isolationId="props.isolationId" />
   <div
     id="image-container"
     ref="imageContainerRef"
@@ -29,11 +29,11 @@
     <Buffer
       v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
       :bufferHeight="bufferHeight"
-      :isolationId="isolationId"
+      :isolationId="props.isolationId"
     />
     <HomeEmptyCard
       v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-      :isolationId="isolationId"
+      :isolationId="props.isolationId"
     />
   </div>
 </template>
@@ -79,23 +79,21 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
 import { pathLeave } from '@/script/routes'
 
 const props = defineProps<{
-  isolationId?: string
+  isolationId: string
 }>()
 
-const isolationId = props.isolationId || ''
-
-const scrollTopStore = useScrollTopStore(isolationId)
-const offsetStore = useOffsetStore(isolationId)
-const rowStore = useRowStore(isolationId)
-const dataStore = useDataStore(isolationId)
-const filterStore = useFilterStore(isolationId)
-const collectionStore = useCollectionStore(isolationId)
-const prefetchStore = usePrefetchStore(isolationId)
-const workerStore = useWorkerStore(isolationId)
-const initializedStore = useInitializedStore(isolationId)
-const queueStore = useQueueStore(isolationId)
-const imgStore = useImgStore(isolationId)
-const locationStore = useLocationStore(isolationId)
+const scrollTopStore = useScrollTopStore(props.isolationId)
+const offsetStore = useOffsetStore(props.isolationId)
+const rowStore = useRowStore(props.isolationId)
+const dataStore = useDataStore(props.isolationId)
+const filterStore = useFilterStore(props.isolationId)
+const collectionStore = useCollectionStore(props.isolationId)
+const prefetchStore = usePrefetchStore(props.isolationId)
+const workerStore = useWorkerStore(props.isolationId)
+const initializedStore = useInitializedStore(props.isolationId)
+const queueStore = useQueueStore(props.isolationId)
+const imgStore = useImgStore(props.isolationId)
+const locationStore = useLocationStore(props.isolationId)
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -120,7 +118,7 @@ const throttledHandleScroll = handleScroll(
   mobile,
   stopScroll,
   windowHeight,
-  isolationId
+  props.isolationId
 )
 
 watch(windowWidth, () => {
@@ -138,7 +136,7 @@ watch(windowWidth, () => {
 const resizeDebounce = debounce(() => {
   const locationRowIndex = Math.floor(locationStore.locationIndex! / layoutBatchNumber)
   scrollTopStore.scrollTop = locationRowIndex * 2400
-  fetchRowInWorker(locationRowIndex, isolationId)
+  fetchRowInWorker(locationRowIndex, props.isolationId)
 }, 100)
 
 const bufferHeight = computed(() => {
@@ -153,16 +151,16 @@ const bufferHeight = computed(() => {
 
 onMounted(async () => {
   filterStore.handleFilterString(route)
-  filterStore.handleBasicString(route, isolationId)
+  filterStore.handleBasicString(route, props.isolationId)
 
-  prefetch(filterStore.generateFilterJsonString(), windowWidth, route, isolationId)
+  prefetch(filterStore.generateFilterJsonString(), windowWidth, route, props.isolationId)
   useInitializeScrollPosition(
     imageContainerRef,
     bufferHeight,
     lastScrollTop,
     clientHeight,
     windowWidth,
-    isolationId
+    props.isolationId
   )
 })
 

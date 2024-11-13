@@ -43,7 +43,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
           dataStore.hashMapData.set(data.album.id, index)
         }
       })
-
       dataStore.batchFetched.set(payload.batch, true)
     },
     fetchRowReturn: (payload) => {
@@ -80,6 +79,8 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
     },
     prefetchReturn: async (payload) => {
+      console.log('dataworker isolationId is', isolationId)
+
       const result: Prefetch = payload.result
       if (result.dataLength === 0) {
         messageStore.message = 'Wow, so empty! Try adding some photos here!'

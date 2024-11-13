@@ -1,5 +1,6 @@
 <template>
   <v-overlay
+    v-if="index !== undefined"
     :model-value="true"
     :height="'100%'"
     :width="'100%'"
@@ -28,14 +29,29 @@ import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/Home/View/ViewPageDisplay/ViewPageDisplay.vue'
 import MetadataCol from '@/components/Home/View/ViewPageMetadata.vue'
 
-const index = computed(() => {
-  return dataStore.hashMapData.get(route.params.hash as string)!
+const props = defineProps<{
+  isolationId: string
+}>()
+
+const dataStore = useDataStore(props.isolationId)
+
+const route = useRoute()
+const hash = computed(() => {
+  if (props.isolationId === '') {
+    return route.params.hash as string
+  } else {
+    return route.params.subhash as string
+  }
 })
 
-const dataStore = useDataStore('')
-const route = useRoute()
+const index = computed(() => {
+  return dataStore.hashMapData.get(hash.value)
+})
+
 const abstractData = computed(() => {
-  return dataStore.data.get(index.value)!
+  if (index.value !== undefined) {
+    return dataStore.data.get(index.value)
+  }
 })
 </script>
 <style scoped>
