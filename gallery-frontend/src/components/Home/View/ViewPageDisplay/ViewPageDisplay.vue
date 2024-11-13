@@ -30,7 +30,7 @@
         color="transparent"
         class="navigate-left h-100 d-flex align-center justify-center"
         style="position: absolute; left: 0"
-        :to="{ path: previousPage, query: $route.query }"
+        :to="previousPage"
       >
         <v-icon>mdi-arrow-left</v-icon>
       </v-card>
@@ -40,7 +40,7 @@
         color="transparent"
         class="navigate-right h-100 d-flex align-center justify-center"
         style="position: absolute; right: 0"
-        :to="{ path: nextPage, query: $route.query }"
+        :to="nextPage"
       >
         <v-icon>mdi-arrow-right</v-icon>
       </v-card>
@@ -73,6 +73,7 @@ import { AbstractData } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
 import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayDatabase.vue'
 import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
+import { leaveViewPage } from '@/script/navigator'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -118,42 +119,25 @@ const previousHash = computed(() => {
 })
 
 const previousPage = computed(() => {
-  if (route.path.startsWith('/favorite')) {
-    return `/favorite/view/${previousHash.value}`
-  } else if (route.path.startsWith('/archived')) {
-    return `/archived/view/${previousHash.value}`
-  } else if (route.path.startsWith('/all')) {
-    return `/all/view/${previousHash.value}`
-  } else if (route.path.startsWith('/trashed')) {
-    return `/trashed/view/${previousHash.value}`
-  } else if (route.path.startsWith('/albums')) {
-    return `/albums/view/${previousHash.value}`
-  } else if (route.path.startsWith('/album-')) {
-    // Extract the album identifier
-    const albumId = route.path.split('/')[1]
-    return `/${albumId}/view/${previousHash.value}`
+  if (!route.meta.isReadPage) {
+    const updatedParams = { ...route.params, hash: previousHash.value }
+
+    return { ...route, params: updatedParams }
   } else {
-    return `/view/${previousHash.value}`
+    const updatedParams = { ...route.params, subhash: previousHash.value }
+
+    return { ...route, params: updatedParams }
   }
 })
-
 const nextPage = computed(() => {
-  if (route.path.startsWith('/favorite')) {
-    return `/favorite/view/${nextHash.value}`
-  } else if (route.path.startsWith('/archived')) {
-    return `/archived/view/${nextHash.value}`
-  } else if (route.path.startsWith('/all')) {
-    return `/all/view/${nextHash.value}`
-  } else if (route.path.startsWith('/trashed')) {
-    return `/trashed/view/${nextHash.value}`
-  } else if (route.path.startsWith('/albums')) {
-    return `/albums/view/${nextHash.value}`
-  } else if (route.path.startsWith('/album-')) {
-    // Extract the album identifier
-    const albumId = route.path.split('/')[1]
-    return `/${albumId}/view/${nextHash.value}`
+  if (!route.meta.isReadPage) {
+    const updatedParams = { ...route.params, hash: nextHash.value }
+
+    return { ...route, params: updatedParams }
   } else {
-    return `/view/${nextHash.value}`
+    const updatedParams = { ...route.params, subhash: nextHash.value }
+
+    return { ...route, params: updatedParams }
   }
 })
 
@@ -256,33 +240,8 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
-const computedPath = computed(() => {
-  const path = route.path
-
-  if (path.startsWith('/view')) {
-    return '/'
-  } else if (path.startsWith('/favorite/view')) {
-    return '/favorite'
-  } else if (path.startsWith('/archived/view')) {
-    return '/archived'
-  } else if (path.startsWith('/trashed/view')) {
-    return '/trashed'
-  } else if (path.startsWith('/albums/view')) {
-    return '/albums'
-  } else if (path.startsWith('/all/view')) {
-    return '/all'
-  } else if (path.startsWith('/album-') && path.includes('/view/')) {
-    // Extract the album identifier
-    const segments = path.split('/')
-    const albumId = segments.find((segment) => segment.startsWith('album-'))
-    return `/${albumId}`
-  } else {
-    return '/'
-  }
-})
-
 const handlePopState = () => {
-  router.push({ path: computedPath.value, query: route.query })
+  router.push(leaveViewPage(route))
 }
 
 window.addEventListener('popstate', handlePopState)
