@@ -99,7 +99,7 @@ import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { useModalStore } from '@/store/modalStore'
-import { pathLeaveDouble, leaveViewPage } from '@/script/routes'
+import { leaveViewPage } from '@/script/navigator'
 
 import axios from 'axios'
 import Cookies from 'js-cookie'

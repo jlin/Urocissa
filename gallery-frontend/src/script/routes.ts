@@ -1,11 +1,6 @@
 // src/router.ts
 
-import {
-  createRouter,
-  createWebHistory,
-  RouteLocationNormalizedLoadedGeneric,
-  RouteRecordRaw
-} from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
 // ======================================
 // 1. Define Simple Static Routes
@@ -158,116 +153,11 @@ const router = createRouter({
   routes
 })
 
-export function pathLeave(route: RouteLocationNormalizedLoadedGeneric) {
-  // Get the current full path, removing query parameters and hash (if any)
-  let fullPath = route.fullPath.split('?')[0].split('#')[0]
-
-  // Ensure the path starts with a slash
-  if (!fullPath.startsWith('/')) {
-    fullPath = '/' + fullPath
-  }
-
-  // Split the path into an array by slashes
-  const pathSegments = fullPath.split('/')
-
-  // Remove the last empty element if the path ends with a slash
-  if (pathSegments[pathSegments.length - 1] === '') {
-    pathSegments.pop()
-  }
-
-  // Remove the last path segment
-  if (pathSegments.length > 1) {
-    pathSegments.pop()
-    const parentPath = pathSegments.join('/') || '/'
-    console.log('result is', parentPath)
-
-    return parentPath
-  } else {
-    // Already the root path, return '/'
-    return '/'
-  }
-}
-
-export function pathLeaveDouble(route: RouteLocationNormalizedLoadedGeneric) {
-  // Get the current full path, removing query parameters and hash (if any)
-  let fullPath = route.fullPath.split('?')[0].split('#')[0]
-
-  // Ensure the path starts with a slash
-  if (!fullPath.startsWith('/')) {
-    fullPath = '/' + fullPath
-  }
-
-  // Split the path into an array by slashes
-  let pathSegments = fullPath.split('/')
-
-  // Remove empty strings caused by leading or trailing slashes
-  pathSegments = pathSegments.filter((segment) => segment.length > 0)
-
-  // Delete the last two path segments
-  if (pathSegments.length >= 2) {
-    // Remove the last two elements
-    pathSegments.splice(-2, 2)
-  } else {
-    // If there are fewer than two path segments, return the root path
-    return '/'
-  }
-
-  // Reconstruct the parent path
-  const parentPath = '/' + pathSegments.join('/')
-  console.log('result is', '/' + pathSegments.join('/'))
-
-  // Ensure at least '/' is returned
-  return parentPath || '/'
-}
-
-export function appendViewPath(route: RouteLocationNormalizedLoadedGeneric, hashOrId: string) {
-  // Get the current path (excluding query parameters and hash)
-  const currentPath = route.path
-
-  // Ensure the path does not end with a slash to avoid double slashes
-  const normalizedPath = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath
-
-  // Build the new path
-  const newPath = `${normalizedPath}/view/${encodeURIComponent(hashOrId)}`
-  console.log('resulty is', newPath)
-
-  // Return the route object, including query parameters and hash if needed to preserve
-  return {
-    path: newPath,
-    query: route.query // Preserve query parameters (optional)
-  }
-}
-
 declare module 'vue-router' {
   interface RouteMeta {
     isReadPage: boolean
     isViewPage: boolean
     basicString: string | null
-  }
-}
-
-export function leaveViewPage(route: RouteLocationNormalizedLoadedGeneric) {
-  if (!route.meta.isReadPage) {
-    // this is in the main page, so leave to
-    const suffix = 'ViewPage'
-    const fullName = route.name! as string // e.g., 'UserViewPage'
-    console.log('fullNameis', fullName)
-
-    const name = fullName.replace(suffix, '') // 'User'
-    return { name: name, query: route.query }
-  } else {
-    const suffix = 'ReadViewPage'
-    const fullName = route.name! as string // e.g., 'UserViewPage'
-    console.log('fullNameis', fullName)
-
-    const name = fullName.replace(suffix, '') // 'User'
-    return {
-      name: `${name}ReadPage`,
-      params: {
-        hash: route.params.hash
-      },
-      query: route.query
-    }
   }
 }
 

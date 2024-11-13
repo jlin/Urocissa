@@ -1,7 +1,7 @@
 import { Router, RouteLocationNormalizedLoaded } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
-import { appendViewPath } from '@/script/routes'
+import { intoViewPage } from '@/script/navigator'
 
 export function useHandleClick(
   router: Router,
@@ -49,7 +49,7 @@ export function useHandleClick(
 
       const hashOrId = abstractData.database ? abstractData.database.hash : abstractData.album!.id
 
-      router.push(appendViewPath(route, hashOrId))
+      router.push(intoViewPage(route, hashOrId))
     }
     if (collectionStore.editModeCollection.size === 0) {
       collectionStore.editModeOn = false

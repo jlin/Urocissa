@@ -1,13 +1,13 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
   <v-toolbar
-    v-if="route.meta.isReadPage === true"
+    v-if="route.meta.isReadPage && !route.meta.isViewPage"
     class="position-relative"
     :style="{
       backgroundColor: '#212121'
     }"
   >
-    <v-btn icon="mdi mdi-arrow-left" :to="pathLeave(route)"></v-btn>
+    <v-btn icon="mdi mdi-arrow-left" :to="leaveRead(route)"></v-btn>
   </v-toolbar>
   <router-view></router-view>
   <ScrollBar v-if="imageContainerRef" :isolationId="props.isolationId" />
@@ -76,7 +76,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { pathLeave } from '@/script/routes'
+import { leaveRead } from '@/script/navigator'
 
 const props = defineProps<{
   isolationId: string
