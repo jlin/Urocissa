@@ -47,27 +47,24 @@ function createRoute(path: string, component: () => Promise<any>, name: string):
     path: `/${path}`,
     component: component,
     name: name,
-    meta: {
-      navigation: true,
-      sortable: true
-    },
+
     children: [
       {
         path: 'view/:hash',
         component: () => import('@/components/Home/View/ViewPage.vue'),
         name: `${name}ViewPage`,
-        meta: { navigation: false, isViewPage: true, sortable: false },
+        meta: { isViewPage: true },
         children: [
           {
             path: 'read',
             component: () => import('@/components/Home/IsolatedHome.vue'),
             name: `${name}ReadPage`,
-            meta: { isReadPage: true },
+            meta: { isReadPage: true, isViewPage: false },
             children: [
               {
                 path: 'view/:hash',
                 component: () => import('@/components/Home/View/ViewPage.vue'),
-                meta: { navigation: false, isViewPage: true, sortable: false }
+                meta: { isViewPage: true }
               }
             ]
           }
@@ -113,7 +110,7 @@ const albumsPageRoutes = createRoute(
 )
 
 // ======================================
-// 6. Combine All Routes
+// 4. Combine All Routes
 // ======================================
 
 const routes: RouteRecordRaw[] = [
@@ -127,7 +124,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 // ======================================
-// 7. Create and Export the Router Instance
+// 5. Create and Export the Router Instance
 // ======================================
 
 const router = createRouter({
