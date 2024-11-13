@@ -210,7 +210,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import Cookies from 'js-cookie'
 
 const props = defineProps<{
-  row: Row,
+  row: Row
   isolationId: string
 }>()
 
@@ -228,7 +228,7 @@ const timeInterval = ref(0)
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
 
-const { handleClick } = useHandleClick(router, route)
+const { handleClick } = useHandleClick(router, route, props.isolationId)
 
 const handleClickIcon = (event: MouseEvent, currentIndex: number) => {
   if (collectionStore.editModeOn === false) {

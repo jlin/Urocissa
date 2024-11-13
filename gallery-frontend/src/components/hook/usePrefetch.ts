@@ -18,7 +18,6 @@ export function prefetch(
         const locate = route.meta.isViewPage
           ? (route.params.hash as string)
           : (route.query.locate as string) ?? null
-        console.log('ready to prefetch with id', isolationId)
 
         prefetchInWorker(filterJsonString, priorityId, reverse, locate, isolationId)
 

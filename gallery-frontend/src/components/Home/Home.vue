@@ -76,7 +76,6 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { useAlbumStore } from '@/store/albumStore'
 import { pathLeave } from '@/script/routes'
 
 const props = defineProps<{
@@ -84,7 +83,6 @@ const props = defineProps<{
 }>()
 
 const isolationId = props.isolationId || ''
-
 
 const scrollTopStore = useScrollTopStore(isolationId)
 const offsetStore = useOffsetStore(isolationId)
@@ -98,7 +96,6 @@ const initializedStore = useInitializedStore(isolationId)
 const queueStore = useQueueStore(isolationId)
 const imgStore = useImgStore(isolationId)
 const locationStore = useLocationStore(isolationId)
-const albumStore = useAlbumStore('')
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -156,8 +153,7 @@ const bufferHeight = computed(() => {
 
 onMounted(async () => {
   filterStore.handleFilterString(route)
-  filterStore.handleBasicString(route)
-  console.log('isolationId is', isolationId)
+  filterStore.handleBasicString(route, isolationId)
 
   prefetch(filterStore.generateFilterJsonString(), windowWidth, route, isolationId)
   useInitializeScrollPosition(

@@ -58,6 +58,7 @@ function createRoute(
     name: name,
     meta: {
       isReadPage: false,
+      isViewPage: false,
       basicString: basicString
     },
     children: [
@@ -237,6 +238,7 @@ export function appendViewPath(route: RouteLocationNormalizedLoadedGeneric, hash
 declare module 'vue-router' {
   interface RouteMeta {
     isReadPage: boolean
+    isViewPage: boolean
     basicString: string | null
   }
 }

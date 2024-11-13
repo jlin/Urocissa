@@ -18,11 +18,7 @@ import { useConfigStore } from '@/store/configStore'
 import { useAlbumStore } from '@/store/albumStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
-export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string ) {
-
-  console.log("isolationIdisolationId is", isolationId);
-  
-
+export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
   const dataStore = useDataStore(isolationId)
   const messageStore = useMessageStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)

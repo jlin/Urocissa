@@ -3,7 +3,11 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
 import { appendViewPath } from '@/script/routes'
 
-export function useHandleClick(router: Router, route: RouteLocationNormalizedLoaded) {
+export function useHandleClick(
+  router: Router,
+  route: RouteLocationNormalizedLoaded,
+  isolationId: string
+) {
   const handleClick = async (event: MouseEvent, currentIndex: number) => {
     const collectionStore = useCollectionStore('')
     if (collectionStore.editModeOn) {
@@ -40,7 +44,7 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
       }
     } else {
       // collectionStore.editModeOn === false
-      const dataStore = useDataStore('')
+      const dataStore = useDataStore(isolationId)
       const abstractData = dataStore.data.get(currentIndex)!
 
       const hashOrId = abstractData.database ? abstractData.database.hash : abstractData.album!.id

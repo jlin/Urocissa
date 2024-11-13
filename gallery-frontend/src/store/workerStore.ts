@@ -14,7 +14,7 @@ type postToWorkerType = {
   processImage: (payload: processImagePayload) => void
   processAbort: (payload: processAbortPayload) => void
 }
-export const useWorkerStore = (isolationId: string ) =>
+export const useWorkerStore = (isolationId: string) =>
   defineStore({
     id: 'workerStore' + isolationId,
     state: (): {
@@ -29,9 +29,7 @@ export const useWorkerStore = (isolationId: string ) =>
       postToWorkerList: undefined
     }),
     actions: {
-      initializeWorker(isolationId: string ) {
-        console.log('intiailzie worker isolationId is', isolationId)
-
+      initializeWorker(isolationId: string) {
         if (this.worker === null) {
           this.worker = new Worker(new URL('../worker/toDataWorker.ts', import.meta.url), {
             type: 'module'
