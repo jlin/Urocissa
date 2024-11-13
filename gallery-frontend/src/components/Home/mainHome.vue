@@ -1,5 +1,5 @@
 <template>
-  <Home :isolation-id="''" />
+  <Home :isolationId="''" />
 </template>
 <script setup lang="ts">
 import Home from './Home.vue'
