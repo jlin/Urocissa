@@ -118,17 +118,6 @@ const previousHash = computed(() => {
   }
 })
 
-const previousPage = computed(() => {
-  if (!route.meta.isReadPage) {
-    const updatedParams = { ...route.params, hash: previousHash.value }
-
-    return { ...route, params: updatedParams }
-  } else {
-    const updatedParams = { ...route.params, subhash: previousHash.value }
-
-    return { ...route, params: updatedParams }
-  }
-})
 const nextPage = computed(() => {
   if (!route.meta.isReadPage) {
     const updatedParams = { ...route.params, hash: nextHash.value }
@@ -136,6 +125,18 @@ const nextPage = computed(() => {
     return { ...route, params: updatedParams }
   } else {
     const updatedParams = { ...route.params, subhash: nextHash.value }
+
+    return { ...route, params: updatedParams }
+  }
+})
+
+const previousPage = computed(() => {
+  if (!route.meta.isReadPage) {
+    const updatedParams = { ...route.params, hash: previousHash.value }
+
+    return { ...route, params: updatedParams }
+  } else {
+    const updatedParams = { ...route.params, subhash: previousHash.value }
 
     return { ...route, params: updatedParams }
   }
