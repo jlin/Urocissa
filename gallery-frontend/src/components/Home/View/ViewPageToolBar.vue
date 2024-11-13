@@ -1,6 +1,9 @@
 <template>
   <v-toolbar class="position-absolute my-toolbar">
-    <v-btn icon="mdi mdi-arrow-left" :to="{ path: computedPath, query: route.query }"></v-btn>
+    <v-btn
+      icon="mdi mdi-arrow-left"
+      :to="{ path: pathLeaveDouble(route), query: route.query }"
+    ></v-btn>
     <v-spacer></v-spacer>
     <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
     <v-btn
@@ -95,6 +98,8 @@ import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { useModalStore } from '@/store/modalStore'
+import { pathLeaveDouble } from '@/script/routes'
+
 import axios from 'axios'
 import Cookies from 'js-cookie'
 const modalStore = useModalStore('')
@@ -110,31 +115,6 @@ const hash = computed(() => {
 const dataStore = useDataStore('')
 const collectionStore = useCollectionStore('')
 const route = useRoute()
-
-const computedPath = computed(() => {
-  const path = route.path
-
-  if (path.startsWith('/view')) {
-    return '/'
-  } else if (path.startsWith('/favorite/view')) {
-    return '/favorite'
-  } else if (path.startsWith('/archived/view')) {
-    return '/archived'
-  } else if (path.startsWith('/trashed/view')) {
-    return '/trashed'
-  } else if (path.startsWith('/albums/view')) {
-    return '/albums'
-  } else if (path.startsWith('/all/view')) {
-    return '/all'
-  } else if (path.startsWith('/album-') && path.includes('/view/')) {
-    // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
-    const segments = path.split('/')
-    const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
-    return `/${albumIdentifier}`
-  } else {
-    return '/'
-  }
-})
 
 const isViewPath = computed(() => {
   const path = route.path

@@ -7,12 +7,9 @@
       backgroundColor: '#212121'
     }"
   >
-    <v-btn
-      icon="mdi mdi-arrow-left"
-      :to="albumStore.leaveAlbumPath ? albumStore.leaveAlbumPath : '/'"
-    ></v-btn>
+    <v-btn icon="mdi mdi-arrow-left" :to="pathLeave(route)"></v-btn>
   </v-toolbar>
-  <router-view v-if="isolationId === ''"></router-view>
+  <router-view></router-view>
   <ScrollBar v-if="imageContainerRef" :isolationId="isolationId" />
   <div
     id="image-container"
@@ -80,12 +77,14 @@ import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { useAlbumStore } from '@/store/albumStore'
+import { pathLeave } from '@/script/routes'
 
 const props = defineProps<{
   isolationId?: string
 }>()
 
 const isolationId = props.isolationId || ''
+
 
 const scrollTopStore = useScrollTopStore(isolationId)
 const offsetStore = useOffsetStore(isolationId)

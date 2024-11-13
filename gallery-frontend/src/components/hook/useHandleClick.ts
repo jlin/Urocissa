@@ -1,6 +1,7 @@
 import { Router, RouteLocationNormalizedLoaded } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
+import { appendViewPath } from '@/script/routes'
 
 export function useHandleClick(router: Router, route: RouteLocationNormalizedLoaded) {
   const handleClick = async (event: MouseEvent, currentIndex: number) => {
@@ -44,29 +45,7 @@ export function useHandleClick(router: Router, route: RouteLocationNormalizedLoa
 
       const hashOrId = abstractData.database ? abstractData.database.hash : abstractData.album!.id
 
-      if (route.path.startsWith('/favorite')) {
-        router.push({ path: `/favorite/view/${hashOrId}`, query: { ...route.query } })
-      } else if (route.path.startsWith('/archived')) {
-        router.push({ path: `/archived/view/${hashOrId}`, query: { ...route.query } })
-      } else if (route.path.startsWith('/all')) {
-        router.push({ path: `/all/view/${hashOrId}`, query: { ...route.query } })
-      } else if (route.path.startsWith('/trashed')) {
-        router.push({ path: `/trashed/view/${hashOrId}`, query: { ...route.query } })
-      } else if (route.path.startsWith('/albums')) {
-        router.push({ path: `/albums/view/${hashOrId}`, query: { ...route.query } })
-      } else if (route.path.startsWith('/album-')) {
-        // Extract the album identifier from the path
-        const segments = route.path.split('/')
-        const albumIdentifier = segments.find((segment) => segment.startsWith('album-'))
-        if (albumIdentifier) {
-          router.push({ path: `/${albumIdentifier}/view/${hashOrId}`, query: { ...route.query } })
-        } else {
-          // Fallback if album identifier is not found
-          router.push({ path: `/view/${hashOrId}`, query: { ...route.query } })
-        }
-      } else {
-        router.push({ path: `/view/${hashOrId}`, query: { ...route.query } })
-      }
+      router.push(appendViewPath(route, hashOrId))
     }
     if (collectionStore.editModeCollection.size === 0) {
       collectionStore.editModeOn = false
