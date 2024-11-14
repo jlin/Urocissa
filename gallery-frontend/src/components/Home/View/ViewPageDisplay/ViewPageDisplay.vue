@@ -119,11 +119,11 @@ const previousHash = computed(() => {
 })
 
 const nextPage = computed(() => {
-  if (!route.meta.isReadPage) {
+  if (!route.meta.isReadPag) {
     const updatedParams = { ...route.params, hash: nextHash.value }
 
     return { ...route, params: updatedParams }
-  } else {
+  } else if (props.isolationId === 'idid') {
     const updatedParams = { ...route.params, subhash: nextHash.value }
 
     return { ...route, params: updatedParams }
@@ -131,11 +131,11 @@ const nextPage = computed(() => {
 })
 
 const previousPage = computed(() => {
-  if (!route.meta.isReadPage) {
+  if (!route.meta.isReadPage && props.isolationId === '') {
     const updatedParams = { ...route.params, hash: previousHash.value }
 
     return { ...route, params: updatedParams }
-  } else {
+  } else if (props.isolationId === 'idid') {
     const updatedParams = { ...route.params, subhash: previousHash.value }
 
     return { ...route, params: updatedParams }

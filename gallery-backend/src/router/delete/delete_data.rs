@@ -1,10 +1,7 @@
-use crate::public::abstract_data::AbstractData;
-use crate::public::database_struct::database::definition::DataBase;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 use std::sync::atomic::Ordering;
