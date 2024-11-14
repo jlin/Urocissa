@@ -69,12 +69,14 @@ const hasHoveringEffect = computed(() => {
     return false
   } else if (path.startsWith('/trashed')) {
     return false
+  } else if (route.meta.isReadPage) {
+    return false
   } else if (path.startsWith('/albums')) {
     return true
   } else if (path.startsWith('/all')) {
     return true
-  } else if (path.startsWith('/album-')) {
-    return true
+  } else if (path.startsWith('/view')) {
+    return false
   } else {
     return true
   }
@@ -89,12 +91,12 @@ const computedMessage = computed(() => {
     return 'Archived photos won’t appear on the home page.'
   } else if (path.startsWith('/trashed')) {
     return 'Deleted photos and videos will only appear here.'
-  } else if (path.startsWith('/albums')) {
-    return 'The album feature is still under development!'
   } else if (path.startsWith('/all')) {
     return 'Try uploading some photos here!'
-  } else if (path.startsWith('/album-')) {
+  } else if (route.meta.isReadPage) {
     return 'Add some photos to this album!'
+  } else if (path.startsWith('/albums')) {
+    return 'Try creating some albums here!'
   } else {
     return 'Try uploading some photos here!'
   }
@@ -109,7 +111,6 @@ const clickEmptyCard = () => {
     if (uploadStore.uploadButton !== null) {
       uploadStore.uploadButton.click()
     }
-  } else if (path.startsWith('/album-')) {
   } else {
     if (uploadStore.uploadButton !== null) {
       uploadStore.uploadButton.click()

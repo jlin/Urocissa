@@ -2,7 +2,7 @@ use std::sync::atomic::Ordering;
 
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
-use crate::public::redb::DATA_TABLE;
+use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::start_loop::SHOULD_RESET;
 
@@ -24,6 +24,7 @@ pub async fn edit_tag(json_data: Json<EditTagsData>) -> Json<Vec<TagInfo>> {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
             let mut write_table = txn.open_table(DATA_TABLE).unwrap();
+            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
             let timestamp = &json_data.timestamp;
             let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
@@ -32,15 +33,42 @@ pub async fn edit_tag(json_data: Json<EditTagsData>) -> Json<Vec<TagInfo>> {
                 .iter()
                 .for_each(|index| {
                     let hash = tree_snapshot.get_hash(*index);
-                    let mut data = write_table.get(hash.as_str()).unwrap().unwrap().value();
-                    json_data.add_tags_content.iter().for_each(|tag| {
-                        data.tag.insert(tag.clone());
-                    });
-                    json_data.remove_tags_content.iter().for_each(|tag| {
-                        data.tag.remove(tag);
-                    });
+                    let data_opt = match write_table.get(hash.as_str()).unwrap() {
+                        Some(data) => {
+                            let mut data = data.value();
+                            json_data.add_tags_content.iter().for_each(|tag| {
+                                data.tag.insert(tag.clone());
+                            });
+                            json_data.remove_tags_content.iter().for_each(|tag| {
+                                data.tag.remove(tag);
+                            });
+                            Some(data)
+                        }
+                        None => None,
+                    };
 
-                    write_table.insert(&*data.hash, &data).unwrap();
+                    if let Some(data) = data_opt {
+                        write_table.insert(&*data.hash, &data).unwrap();
+                        return;
+                    }
+
+                    let album_opt = match album_table.get(hash.as_str()).unwrap() {
+                        Some(data) => {
+                            let mut data = data.value();
+                            json_data.add_tags_content.iter().for_each(|tag| {
+                                data.tag.insert(tag.clone());
+                            });
+                            json_data.remove_tags_content.iter().for_each(|tag| {
+                                data.tag.remove(tag);
+                            });
+                            Some(data)
+                        }
+                        None => None,
+                    };
+                    if let Some(album) = album_opt {
+                        album_table.insert(&*album.id, &album).unwrap();
+                        return;
+                    }
                 });
         }
         txn.commit().unwrap();
