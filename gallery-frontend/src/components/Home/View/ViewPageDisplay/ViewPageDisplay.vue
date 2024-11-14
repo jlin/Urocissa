@@ -25,7 +25,7 @@
         :colHeight="colHeight"
       />
       <v-card
-        id="previous-page-anchor"
+        :id="`${isolationId}-previous-page-anchor`"
         v-if="previousHash !== undefined"
         color="transparent"
         class="navigate-left h-100 d-flex align-center justify-center"
@@ -35,7 +35,7 @@
         <v-icon>mdi-arrow-left</v-icon>
       </v-card>
       <v-card
-        id="next-page-anchor"
+        :id="`${isolationId}-next-page-anchor`"
         v-if="nextHash !== undefined"
         color="transparent"
         class="navigate-right h-100 d-flex align-center justify-center"
@@ -227,17 +227,19 @@ onUnmounted(() => {
 })
 
 function handleKeyDown(event: KeyboardEvent) {
-  if (modalStore.showEditTagsModal) {
-    return
-  }
-  let anchor: HTMLElement | null = null
-  if (event.key === 'ArrowRight') {
-    anchor = document.getElementById('next-page-anchor')
-  } else if (event.key === 'ArrowLeft') {
-    anchor = document.getElementById('previous-page-anchor')
-  }
-  if (anchor) {
-    anchor.click()
+  if (!route.meta.isReadPage || (route.meta.isReadPage && props.isolationId === 'idid')) {
+    if (modalStore.showEditTagsModal) {
+      return
+    }
+    let anchor: HTMLElement | null = null
+    if (event.key === 'ArrowRight') {
+      anchor = document.getElementById(`${props.isolationId}-next-page-anchor`)
+    } else if (event.key === 'ArrowLeft') {
+      anchor = document.getElementById(`${props.isolationId}-previous-page-anchor`)
+    }
+    if (anchor) {
+      anchor.click()
+    }
   }
 }
 
