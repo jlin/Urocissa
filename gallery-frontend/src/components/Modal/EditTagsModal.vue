@@ -9,7 +9,7 @@
           multiple
           item-title="tag"
           item-value="tag"
-          :items="tagList.filter((tag) => !specialTag(tag.tag))"
+          :items="tagList.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)"
           label="Tags"
           closable-chips
         ></v-combobox>
@@ -87,6 +87,11 @@ const change = () => {
   const removeTagsArrayComputed = defaultTags.value.filter(
     (tag) => !specialTag(tag) && !changedTagsArray.value.includes(tag)
   )
+  console.log('hashArray is ', hashArray)
+  console.log('addTagsArrayComputed is', addTagsArrayComputed)
+
+  console.log('removeTagsArrayComputed is', removeTagsArrayComputed)
+
   editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed)
 }
 </script>
