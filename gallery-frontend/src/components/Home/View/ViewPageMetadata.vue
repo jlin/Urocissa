@@ -164,7 +164,7 @@
           </v-list-item>
 
           <!-- Albums Section -->
-          <v-list-item>
+          <v-list-item v-show="false">
             <template v-slot:prepend>
               <v-avatar>
                 <v-icon color="black">mdi-image-album</v-icon>
@@ -183,7 +183,7 @@
                 {{ albumStore.albumMap.get(albumId)! }}
               </v-chip>
             </v-list-item-subtitle>
-            <v-list-item-subtitle>
+            <v-list-item-subtitle >
               <v-chip
                 prepend-icon="mdi-pencil"
                 color="black"

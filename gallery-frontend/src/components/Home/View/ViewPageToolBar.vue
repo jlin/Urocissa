@@ -49,7 +49,7 @@
         >
           <v-list-item-title class="wrap">{{ 'Edit Tags' }}</v-list-item-title>
         </v-list-item>
-        <v-list-item
+        <v-list-item v-if="false"
           prepend-icon="mdi-image-album"
           value="edit-albums"
           @click="modalStore.showEditAlbumsModal = true"
