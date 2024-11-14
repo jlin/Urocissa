@@ -1,5 +1,7 @@
 <template>
-  <router-view></router-view>
+  <router-view v-slot="{ Component }">
+    <component v-if="metadata.album" :is="Component" :title="metadata.album.title" />
+  </router-view>
   <v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
     <v-row>
       <v-col

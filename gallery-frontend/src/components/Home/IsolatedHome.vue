@@ -8,9 +8,13 @@
     persistent
     transition="false"
   >
-    <Home :isolationId="'idid'" />
+    <Home :isolationId="'idid'" :title="props.title" />
   </v-overlay>
 </template>
 <script setup lang="ts">
 import Home from './Home.vue'
+
+const props = defineProps<{
+  title: string
+}>()
 </script>

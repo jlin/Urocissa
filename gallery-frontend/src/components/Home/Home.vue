@@ -1,13 +1,16 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
   <v-toolbar
-    v-if="route.meta.isReadPage && !route.meta.isViewPage"
+    v-if="!(props.isolationId === '') && route.meta.isReadPage && !route.meta.isViewPage"
     class="position-relative"
     :style="{
       backgroundColor: '#212121'
     }"
   >
-    <v-btn icon="mdi mdi-arrow-left" :to="leaveRead(route)"></v-btn>
+    <v-btn icon="mdi mdi-arrow-left" :to="leaveRead(route)"></v-btn
+    ><v-card>
+      <v-card-title> {{ props.title }}</v-card-title>
+    </v-card>
   </v-toolbar>
   <router-view></router-view>
   <ScrollBar v-if="imageContainerRef" :isolationId="props.isolationId" />
@@ -80,6 +83,7 @@ import { leaveRead } from '@/script/navigator'
 
 const props = defineProps<{
   isolationId: string
+  title: string | undefined
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)
