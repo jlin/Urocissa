@@ -1,7 +1,7 @@
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database::definition::DataBase;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::SHOULD_RESET;
+use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -52,27 +52,20 @@ pub async fn delete_data(json_data: Json<DeleteList>) {
 
                 let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
-                match album_table.get(hash.as_str()).unwrap() {
-                    Some(data) => {
-                        let album = data.value();
-                        let ref_data = TREE.in_memory.read().unwrap();
-                        ref_data.iter().for_each(|database_timestamp| {
-                            match &database_timestamp.abstract_data {
-                                AbstractData::DataBase(database) => {
-                                    if database.album.contains(&album.id) {
-                                        let mut database = database.clone();
-                                        database.album.remove(&album.id);
-                                        table.insert(&*database.hash.clone(), database).unwrap();
-                                    }
-                                }
-                                AbstractData::Album(_) => (),
-                            }
-                        });
+                let id_opt = match album_table.get(hash.as_str()).unwrap() {
+                    Some(album) => {
+                        let album = album.value();
+                        Some(album.id)
                     }
-                    None => (),
+                    None => None,
                 };
-                if found_data {
-                    table.remove(hash.as_str()).unwrap();
+                if let Some(id) = id_opt {
+                    album_table.remove(&*id).unwrap();
+                    ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
+                        .get()
+                        .unwrap()
+                        .send(vec![id])
+                        .unwrap();
                 }
             }
         }

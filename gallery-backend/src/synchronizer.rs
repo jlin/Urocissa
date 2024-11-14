@@ -1,5 +1,6 @@
 use crate::executor::compressor::video_compressor::generate_compressed;
 use crate::executor::executor;
+use crate::public::abstract_data::AbstractData;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::start_loop::SHOULD_RESET;
@@ -7,6 +8,7 @@ use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
 use log::info;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
@@ -172,11 +174,46 @@ pub async fn start_sync() -> anyhow::Result<()> {
             {
                 let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
                 id_vec.into_iter().for_each(|album_id| {
-                    let mut album = album_table.get(&*album_id).unwrap().unwrap().value();
-                    album.pending = true;
-                    album.self_update();
-                    album.pending = false;
-                    album_table.insert(&*album_id, album).unwrap();
+                    let album_opt = match album_table.get(&*album_id).unwrap() {
+                        Some(album) => {
+                            let mut album = album.value();
+                            album.pending = true;
+                            album.self_update();
+                            album.pending = false;
+                            Some(album)
+                        }
+                        None => {
+                            let ref_data = TREE.in_memory.read().unwrap();
+
+                            let hash_list: Vec<_> = ref_data
+                                .par_iter()
+                                .filter_map(|database_timestamp| {
+                                    match &database_timestamp.abstract_data {
+                                        AbstractData::DataBase(database) => {
+                                            if database.album.contains(&album_id) {
+                                                Some(database.hash)
+                                            } else {
+                                                None
+                                            }
+                                        }
+                                        AbstractData::Album(_) => None,
+                                    }
+                                })
+                                .collect();
+                            let mut table = txn.open_table(DATA_TABLE).unwrap();
+
+                            hash_list.into_iter().for_each(|hash| {
+                                let mut database = table.get(&*hash).unwrap().unwrap().value();
+                                database.album.remove(&*album_id);
+                                table.insert(&*hash, database).unwrap();
+                            });
+                            info!("remove album from all data complete");
+                            None
+                        }
+                    };
+                    if let Some(album) = album_opt {
+                        album_table.insert(&*album_id, album).unwrap();
+                    };
                 });
             }
             txn.commit().unwrap();
