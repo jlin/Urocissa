@@ -8,8 +8,8 @@
     }"
   >
     <v-btn icon="mdi mdi-arrow-left" :to="leaveRead(route)"></v-btn
-    ><v-card>
-      <v-card-title> {{ props.title }}</v-card-title>
+    ><v-card elevation="0">
+      <v-card-title > {{ props.title }}</v-card-title>
     </v-card>
   </v-toolbar>
   <router-view></router-view>
