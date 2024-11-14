@@ -86,7 +86,7 @@
                 }
               "
             >
-              test enter
+              Enter Album
             </v-btn>
           </v-card-actions>
         </v-card>

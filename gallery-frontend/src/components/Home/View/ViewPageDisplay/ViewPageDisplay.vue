@@ -206,7 +206,7 @@ function prefetchMedia(index: number, isolationId: string) {
 }
 
 watch(
-  [() => initializedStore.initialized],
+  [() => props.index, () => initializedStore.initialized],
   () => {
     if (initializedStore.initialized) {
       if (props.index !== undefined) {
