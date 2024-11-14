@@ -180,16 +180,20 @@ function prefetchMedia(index: number, isolationId: string) {
       const nextIndex = index + i
       const prevIndex = index - i
 
-      const nextMeta = dataStore.data.get(nextIndex)?.database!
-      const prevMeta = dataStore.data.get(prevIndex)?.database!
+      const nextMeta = dataStore.data.get(nextIndex)?.database
+      const prevMeta = dataStore.data.get(prevIndex)?.database
 
       if (nextMeta !== undefined && nextMeta.ext_type === 'image') {
+        checkAndFetch(nextIndex)
+      } else if (dataStore.data.get(nextIndex)?.album) {
         checkAndFetch(nextIndex)
       } else if (nextMeta === undefined && nextIndex <= prefetchStore.dataLength - 1) {
         fetchDataInWorker(Math.floor(nextIndex / batchNumber), isolationId)
       }
 
       if (prevMeta !== undefined && prevMeta.ext_type === 'image') {
+        checkAndFetch(prevIndex)
+      } else if (dataStore.data.get(prevIndex)?.album) {
         checkAndFetch(prevIndex)
       } else if (prevMeta === undefined && prevIndex >= 0) {
         fetchDataInWorker(Math.floor(prevIndex / batchNumber), isolationId)
@@ -227,6 +231,7 @@ onUnmounted(() => {
 })
 
 function handleKeyDown(event: KeyboardEvent) {
+  // prevent two ViewPageDisplay triggered simultaneously
   if (!route.meta.isReadPage || (route.meta.isReadPage && props.isolationId === 'idid')) {
     if (modalStore.showEditTagsModal) {
       return
