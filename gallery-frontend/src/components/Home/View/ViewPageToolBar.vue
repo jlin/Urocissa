@@ -151,7 +151,7 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
       removeTagsArray = ['_trashed']
     }
   }
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray)
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 const deleteData = () => {

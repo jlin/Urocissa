@@ -92,7 +92,9 @@ const change = () => {
 
   console.log('removeTagsArrayComputed is', removeTagsArrayComputed)
 
-  editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed)
+  const isolationId = route.meta.isReadPage ? 'idid' : ''
+
+  editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
 }
 </script>
 

@@ -1,6 +1,7 @@
 // src/router.ts
 
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import 'vue-router'
 
 // ======================================
 // 1. Define Simple Static Routes

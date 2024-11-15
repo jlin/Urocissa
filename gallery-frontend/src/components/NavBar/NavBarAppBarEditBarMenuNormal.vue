@@ -84,7 +84,7 @@ const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {
     addTagsArray = ['_trashed']
   }
 
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray)
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, '')
 }
 
 const showBatchEditTagsModal = () => {

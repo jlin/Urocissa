@@ -21,7 +21,13 @@
           :hash="hash"
           :isolationId="isolationId"
         />
-        <MetadataCol v-if="abstractData" :metadata="abstractData" />
+        <MetadataCol
+          v-if="abstractData"
+          :metadata="abstractData"
+          :index="index"
+          :hash="hash"
+          :isolationId="isolationId"
+        />
       </v-row>
     </v-container>
   </v-overlay>

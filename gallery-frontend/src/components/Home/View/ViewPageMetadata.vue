@@ -215,6 +215,9 @@ import { AbstractData } from '@/script/common/types'
 import { dater } from '@/script/common/functions'
 
 const props = defineProps<{
+  isolationId: string
+  hash: string
+  index: number
   metadata: AbstractData
 }>()
 
@@ -266,14 +269,14 @@ function quickAddTags(tag: string) {
   const indexArray = [index.value]
   const addTagsArray: string[] = [tag]
   const removeTagsArray: string[] = []
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray)
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 function quickRemoveTags(tag: string) {
   const indexArray = [index.value]
   const addTagsArray: string[] = []
   const removeTagsArray: string[] = [tag]
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray)
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 async function searchByTag(tag: string) {
