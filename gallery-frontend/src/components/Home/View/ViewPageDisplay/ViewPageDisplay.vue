@@ -25,7 +25,6 @@
         :colHeight="colHeight"
       />
       <v-card
-        :id="`${isolationId}-previous-page-anchor`"
         v-if="previousHash !== undefined"
         color="transparent"
         class="navigate-left h-100 d-flex align-center justify-center"
@@ -35,7 +34,6 @@
         <v-icon>mdi-arrow-left</v-icon>
       </v-card>
       <v-card
-        :id="`${isolationId}-next-page-anchor`"
         v-if="nextHash !== undefined"
         color="transparent"
         class="navigate-right h-100 d-flex align-center justify-center"
@@ -243,20 +241,19 @@ const handlePopState = () => {
   router.push(leaveViewPage(route))
 }
 
-const handleKeyDown = (event: KeyboardEvent) => {
-  // prevent two ViewPageDisplay triggered simultaneously
-  if (!route.meta.isReadPage || (route.meta.isReadPage && props.isolationId === 'idid')) {
+const handleKeyDown = async (event: KeyboardEvent) => {
+  if (
+    (!route.meta.isReadPage && props.isolationId === '') ||
+    (route.meta.isReadPage && props.isolationId === 'idid')
+    // prevent two ViewPageDisplay triggered simultaneously
+  ) {
     if (modalStore.showEditTagsModal) {
       return
     }
-    let anchor: HTMLElement | null = null
-    if (event.key === 'ArrowRight') {
-      anchor = document.getElementById(`${props.isolationId}-next-page-anchor`)
-    } else if (event.key === 'ArrowLeft') {
-      anchor = document.getElementById(`${props.isolationId}-previous-page-anchor`)
-    }
-    if (anchor) {
-      anchor.click()
+    if (event.key === 'ArrowRight' && nextPage.value) {
+      await router.push(nextPage.value)
+    } else if (event.key === 'ArrowLeft' && previousPage.value) {
+      await router.push(previousPage.value)
     }
   }
 }
