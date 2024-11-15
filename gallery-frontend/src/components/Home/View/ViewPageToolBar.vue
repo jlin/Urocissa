@@ -102,16 +102,14 @@ import { leaveViewPage } from '@/script/navigator'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 
-const modalStore = useModalStore('')
-const infoStore = useInfoStore('')
-
-const props = defineProps<Props>()
-interface Props {
+const props = defineProps<{
   isolationId: string
   hash: string
   index: number
   metadata: AbstractData | undefined
-}
+}>()
+const modalStore = useModalStore('')
+const infoStore = useInfoStore(props.isolationId)
 
 const route = useRoute()
 

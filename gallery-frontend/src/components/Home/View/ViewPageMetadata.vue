@@ -222,10 +222,12 @@ const props = defineProps<{
 }>()
 
 // Stores
-const infoStore = useInfoStore('')
+
+const infoStore = useInfoStore(props.isolationId)
+
 const modalStore = useModalStore('')
 const albumStore = useAlbumStore('')
-const dataStore = useDataStore('') // Import dataStore
+const dataStore = useDataStore(props.isolationId)
 const router = useRouter()
 
 const filePathComplete = computed(() => {
