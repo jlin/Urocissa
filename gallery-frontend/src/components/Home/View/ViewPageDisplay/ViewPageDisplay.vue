@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { VCol } from 'vuetify/components'
@@ -173,65 +173,67 @@ const checkAndFetch = (index: number): boolean => {
   }
 }
 
-function prefetchMedia(index: number, isolationId: string) {
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+async function delay(ms: number) {
+  new Promise((resolve) => setTimeout(resolve, ms))
+}
 
-  const prefetch = async () => {
-    for (let i = 1; i <= 10; i++) {
-      const nextIndex = index + i
-      const prevIndex = index - i
-
-      const nextMeta = dataStore.data.get(nextIndex)?.database
-      const prevMeta = dataStore.data.get(prevIndex)?.database
-
-      if (nextMeta !== undefined && nextMeta.ext_type === 'image') {
+async function prefetch(index: number, isolationId: string) {
+  for (let i = 1; i <= 10; i++) {
+    const nextIndex = index + i
+    const nextAbstractData = dataStore.data.get(nextIndex)
+    if (nextAbstractData) {
+      if (nextAbstractData.database && nextAbstractData.database.ext_type === 'image') {
         checkAndFetch(nextIndex)
-      } else if (dataStore.data.get(nextIndex)?.album) {
+      } else {
+        // is album
         checkAndFetch(nextIndex)
-      } else if (nextMeta === undefined && nextIndex <= prefetchStore.dataLength - 1) {
+      }
+    } else {
+      // dataStore.data.get(nextIndex) is undefined then fetch that data
+      if (nextIndex <= prefetchStore.dataLength - 1) {
         fetchDataInWorker(Math.floor(nextIndex / batchNumber), isolationId)
       }
-
-      if (prevMeta !== undefined && prevMeta.ext_type === 'image') {
-        checkAndFetch(prevIndex)
-      } else if (dataStore.data.get(prevIndex)?.album) {
-        checkAndFetch(prevIndex)
-      } else if (prevMeta === undefined && prevIndex >= 0) {
-        fetchDataInWorker(Math.floor(prevIndex / batchNumber), isolationId)
-      }
-
-      await delay(100)
     }
-  }
 
-  prefetch().catch((error) => console.error('Error prefetching media:', error))
+    const previousIndex = index - i
+    const previousAbstractData = dataStore.data.get(previousIndex)
+    if (previousAbstractData) {
+      if (previousAbstractData.database && previousAbstractData.database.ext_type === 'image') {
+        checkAndFetch(previousIndex)
+      } else {
+        // is album
+        checkAndFetch(previousIndex)
+      }
+    } else {
+      // dataStore.data.get(previousIndex) is undefined then fetch that data
+      if (previousIndex >= 0) {
+        fetchDataInWorker(Math.floor(previousIndex / batchNumber), isolationId)
+      }
+    }
+
+    await delay(100)
+  }
 }
 
 watch(
   [() => props.index, () => initializedStore.initialized],
-  () => {
+  async () => {
     if (initializedStore.initialized) {
       if (props.index !== undefined) {
         checkAndFetch(props.index)
-
         // Prefetch next and previous 10 hashes if they exist
-        prefetchMedia(props.index, '')
+        await prefetch(props.index, props.isolationId)
         // console.log(props.metadata) // debug usage
       }
     }
   },
-  { immediate: true } // Executes the watcher immediately on component mount
+  { immediate: true }
 )
 
-onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
-})
-
-function handleKeyDown(event: KeyboardEvent) {
+const handlePopState = () => {
+  router.push(leaveViewPage(route))
+}
+const handleKeyDown = (event: KeyboardEvent) => {
   // prevent two ViewPageDisplay triggered simultaneously
   if (!route.meta.isReadPage || (route.meta.isReadPage && props.isolationId === 'idid')) {
     if (modalStore.showEditTagsModal) {
@@ -249,13 +251,11 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 }
 
-const handlePopState = () => {
-  router.push(leaveViewPage(route))
-}
-
 window.addEventListener('popstate', handlePopState)
+window.addEventListener('keydown', handleKeyDown)
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
   window.removeEventListener('popstate', handlePopState)
 })
 </script>
