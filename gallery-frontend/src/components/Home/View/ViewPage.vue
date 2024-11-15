@@ -48,7 +48,7 @@ const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 
 const hash = computed(() => {
-  if (props.isolationId === '') {
+  if (props.isolationId === 'mainId') {
     return route.params.hash as string
   } else {
     return route.params.subhash as string

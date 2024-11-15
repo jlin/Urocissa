@@ -30,8 +30,8 @@ import NavBarAppBarEditBarMenuNormal from '@/components/NavBar/NavBarAppBarEditB
 import NavBarAppBarEditBarMenuAlbum from './NavBarAppBarEditBarMenuAlbum.vue'
 
 const route = useRoute()
-const collectionStore = useCollectionStore('')
-const prefetchStore = usePrefetchStore('')
+const collectionStore = useCollectionStore('mainId')
+const prefetchStore = usePrefetchStore('mainId')
 
 // Methods
 const leaveEdit = () => {

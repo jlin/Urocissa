@@ -45,8 +45,8 @@ import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
 import { ref } from 'vue'
 const albumName = ref<string>('')
-const modalStore = useModalStore('')
-const messageStore = useMessageStore('')
+const modalStore = useModalStore('mainId')
+const messageStore = useMessageStore('mainId')
 
 const rules = {
   required: (value: string) => !!value || 'Album Name is required'

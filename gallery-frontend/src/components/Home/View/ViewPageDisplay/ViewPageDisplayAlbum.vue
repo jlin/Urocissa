@@ -121,8 +121,8 @@ import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
 
 const route = useRoute()
-const albumStore = useAlbumStore('')
-const imgStore = useImgStore('')
+const albumStore = useAlbumStore('mainId')
+const imgStore = useImgStore('mainId')
 
 defineProps<{
   index: number

@@ -44,8 +44,8 @@ import { useTagStore } from '@/store/tagStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
-const initializedStore = useInitializedStore('')
-const tagStore = useTagStore('')
+const initializedStore = useInitializedStore('mainId')
+const tagStore = useTagStore('mainId')
 const router = useRouter()
 const dynamicWidth = ref<number>(0)
 const tableRef = ref<HTMLElement | null>(null)

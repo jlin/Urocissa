@@ -82,17 +82,17 @@ import { useUploadStore } from '@/store/uploadStore'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 
-const albumStore = useAlbumStore('')
-const modalStore = useModalStore('')
+const albumStore = useAlbumStore('mainId')
+const modalStore = useModalStore('mainId')
 const showDrawer = inject('showDrawer') as Ref<boolean>
-const uploadStore = useUploadStore('')
-const collectionStore = useCollectionStore('')
+const uploadStore = useUploadStore('mainId')
+const collectionStore = useCollectionStore('mainId')
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
-const messageStor = useMessageStore('')
+const messageStor = useMessageStore('mainId')
 const fileInput: Ref<HTMLInputElement | null> = ref(null)
-const filterStore = useFilterStore('')
+const filterStore = useFilterStore('mainId')
 
 const triggerModal = () => {
   modalStore.showCreateAlbumsModal = true
@@ -122,7 +122,7 @@ function triggerFileInput(): void {
 }
 
 async function handleFileUpload(event: Event): Promise<void> {
-  const messageStore = useMessageStore('')
+  const messageStore = useMessageStore('mainId')
   const target = event.target as HTMLInputElement
   const files = target.files
   if (!files || files.length === 0) return

@@ -108,7 +108,7 @@ const props = defineProps<{
   index: number
   metadata: AbstractData | undefined
 }>()
-const modalStore = useModalStore('')
+const modalStore = useModalStore('mainId')
 const infoStore = useInfoStore(props.isolationId)
 
 const route = useRoute()

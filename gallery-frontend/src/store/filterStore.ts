@@ -34,7 +34,7 @@ export const useFilterStore = (isolationId: string) =>
       },
       handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: string) {
         if (route.meta.isReadPage) {
-          if (isolationId === '') {
+          if (isolationId === 'mainId') {
             this.basicString = route.meta.basicString
           } else {
             const album_id = route.params.hash

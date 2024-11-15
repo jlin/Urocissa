@@ -68,12 +68,12 @@ import { useAlbumStore } from '@/store/albumStore'
 import { AlbumInfo } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 
-const albumStore = useAlbumStore('')
+const albumStore = useAlbumStore('mainId')
 const formIsValid = ref(false)
-const modalStore = useModalStore('')
+const modalStore = useModalStore('mainId')
 const addAlbumsArray = ref<AlbumInfo[]>([])
 const removeAlbumsArray = ref<AlbumInfo[]>([])
-const collectionStore = useCollectionStore('')
+const collectionStore = useCollectionStore('mainId')
 
 // Rule for Add Albums to ensure no album is added that's already in Remove Albums
 const addAlbumsRule = (inputArray: AlbumInfo[]) => {

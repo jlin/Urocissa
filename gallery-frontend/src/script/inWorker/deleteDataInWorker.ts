@@ -4,11 +4,11 @@ import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
 export function deleteDataInWorker(indexArray: number[]) {
-  const workerStore = useWorkerStore('')
-  const prefetchStore = usePrefetchStore('')
+  const workerStore = useWorkerStore('mainId')
+  const prefetchStore = usePrefetchStore('mainId')
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker('')
+    workerStore.initializeWorker('mainId')
   }
   const dataWorker = workerStore.worker!
 

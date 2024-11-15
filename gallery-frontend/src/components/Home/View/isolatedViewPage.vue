@@ -1,5 +1,5 @@
 <template>
-  <ViewPage :isolation-id="'idid'" />
+  <ViewPage isolation-id="subId" />
 </template>
 <script setup lang="ts">
 import ViewPage from './ViewPage.vue'

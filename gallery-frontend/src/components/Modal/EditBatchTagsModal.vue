@@ -64,12 +64,12 @@ import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
 import { useRoute } from 'vue-router'
 const formIsValid = ref(false)
-const modalStore = useModalStore('')
+const modalStore = useModalStore('mainId')
 const addTagsArray = ref<string[]>([])
 const removeTagsArray = ref<string[]>([])
-const collectionStore = useCollectionStore('')
+const collectionStore = useCollectionStore('mainId')
 const route = useRoute()
-const tagStore = useTagStore('')
+const tagStore = useTagStore('mainId')
 const tagList = computed(() => {
   return tagStore.tags.map((tag) => tag.tag)
 })
@@ -90,7 +90,7 @@ const removeTagsRule = (inputArray: string[]) =>
 
 const submit = () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
-  const isolationId = route.meta.isReadPage ? 'idid' : ''
+  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
   editTagsInWorker(hashArray, addTagsArray.value, removeTagsArray.value, isolationId)
   modalStore.showBatchEditTagsModal = false
 }

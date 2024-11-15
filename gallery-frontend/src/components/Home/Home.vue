@@ -1,7 +1,7 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
   <v-toolbar
-    v-if="!(props.isolationId === '') && route.meta.isReadPage && !route.meta.isViewPage"
+    v-if="!(props.isolationId === 'mainId') && route.meta.isReadPage && !route.meta.isViewPage"
     class="position-relative"
     :style="{
       backgroundColor: '#212121'

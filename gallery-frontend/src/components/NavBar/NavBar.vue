@@ -50,11 +50,11 @@ import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { provide, ref } from 'vue'
 import { useUploadStore } from '@/store/uploadStore'
-const uploadStore = useUploadStore('')
+const uploadStore = useUploadStore('mainId')
 const showDrawer = ref(false)
 const route = useRoute()
-const initializedStore = useInitializedStore('')
-const modalStore = useModalStore('')
+const initializedStore = useInitializedStore('mainId')
+const modalStore = useModalStore('mainId')
 const router = useRouter()
 
 router.beforeEach((to, from, next) => {

@@ -225,8 +225,8 @@ const props = defineProps<{
 
 const infoStore = useInfoStore(props.isolationId)
 
-const modalStore = useModalStore('')
-const albumStore = useAlbumStore('')
+const modalStore = useModalStore('mainId')
+const albumStore = useAlbumStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const router = useRouter()
 

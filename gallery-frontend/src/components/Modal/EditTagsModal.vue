@@ -48,11 +48,11 @@ import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
-const modalStore = useModalStore('')
-const storeData = useDataStore('')
+const modalStore = useModalStore('mainId')
+const storeData = useDataStore('mainId')
 const route = useRoute()
 const changedTagsArray = ref<string[]>([])
-const tagStore = useTagStore('')
+const tagStore = useTagStore('mainId')
 const tagList = computed(() => {
   return tagStore.tags
 })
@@ -92,7 +92,7 @@ const change = () => {
 
   console.log('removeTagsArrayComputed is', removeTagsArrayComputed)
 
-  const isolationId = route.meta.isReadPage ? 'idid' : ''
+  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
 
   editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
 }

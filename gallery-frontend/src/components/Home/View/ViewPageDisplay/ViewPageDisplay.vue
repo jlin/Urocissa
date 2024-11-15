@@ -129,7 +129,7 @@ const nextPage = computed(() => {
   if (!route.meta.isReadPage) {
     const updatedParams = { ...route.params, hash: nextHash.value }
     return { ...route, params: updatedParams }
-  } else if (props.isolationId === 'idid') {
+  } else if (props.isolationId === 'subId') {
     const updatedParams = { ...route.params, subhash: nextHash.value }
     return { ...route, params: updatedParams }
   }
@@ -143,7 +143,7 @@ const previousPage = computed(() => {
     const updatedParams = { ...route.params, hash: previousHash.value }
 
     return { ...route, params: updatedParams }
-  } else if (props.isolationId === 'idid') {
+  } else if (props.isolationId === 'subId') {
     const updatedParams = { ...route.params, subhash: previousHash.value }
 
     return { ...route, params: updatedParams }
@@ -254,8 +254,8 @@ const handlePopState = () => {
 
 const handleKeyDown = async (event: KeyboardEvent) => {
   if (
-    (!route.meta.isReadPage && props.isolationId === '') ||
-    (route.meta.isReadPage && props.isolationId === 'idid')
+    (!route.meta.isReadPage && props.isolationId === 'mainId') ||
+    (route.meta.isReadPage && props.isolationId === 'subId')
     // prevent two ViewPageDisplay triggered simultaneously
   ) {
     if (modalStore.showEditTagsModal) {
