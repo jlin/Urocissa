@@ -35,9 +35,9 @@
 <script setup lang="ts">
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
-import Cookies from 'js-cookie'
 import { getSrc } from '@/../config.ts'
 import { AbstractData } from '@/script/common/types'
+import Cookies from 'js-cookie'
 
 const props = defineProps<{
   isolationId: string

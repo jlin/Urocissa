@@ -112,25 +112,17 @@
 </template>
 
 <script setup lang="ts">
-import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
-
+import { useAlbumStore } from '@/store/albumStore'
+import { VCol } from 'vuetify/components'
 import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
-import { useAlbumStore } from '@/store/albumStore'
 import { useRoute } from 'vue-router'
+import { dater } from '@/script/common/functions'
 
 const route = useRoute()
 const albumStore = useAlbumStore('')
-
-function dater(timestamp: number): string {
-  const locale = navigator.language
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(timestamp)
-}
+const imgStore = useImgStore('')
 
 defineProps<{
   index: number
@@ -138,6 +130,4 @@ defineProps<{
   colWidth: number
   colHeight: number
 }>()
-
-const imgStore = useImgStore('')
 </script>

@@ -56,3 +56,12 @@ export function useCurrentPage(
   })
   return currentPage
 }
+
+export function dater(timestamp: number): string {
+  const locale = navigator.language
+  return new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(timestamp)
+}

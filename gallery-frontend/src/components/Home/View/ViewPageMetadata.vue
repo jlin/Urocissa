@@ -212,6 +212,7 @@ import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { filesize } from 'filesize'
 import { useDataStore } from '@/store/dataStore'
 import { AbstractData } from '@/script/common/types'
+import { dater } from '@/script/common/functions'
 
 const props = defineProps<{
   metadata: AbstractData
@@ -330,15 +331,6 @@ function formatExifData(exifData: any): ExifData {
   }
 
   return formattedExifData
-}
-
-function dater(timestamp: number): string {
-  const locale = navigator.language
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(timestamp)
 }
 
 function timer(timestamp: number): string {
