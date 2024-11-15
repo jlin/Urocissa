@@ -70,16 +70,27 @@ import { useDataStore } from '@/store/dataStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { AlbumInfo } from '@/script/common/types'
+import { getIsolationIdByRoute } from '@/script/common/functions'
 
-const modalStore = useModalStore('mainId')
-const storeData = useDataStore('mainId')
 const route = useRoute()
-const vModelAlbumsArray = ref<AlbumInfo[]>([])
+const isolationId = getIsolationIdByRoute(route)
+const storeData = useDataStore(isolationId)
+const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
+
+const vModelAlbumsArray = ref<AlbumInfo[]>([])
+
+const hash = computed(() => {
+  if (isolationId === 'mainId') {
+    return route.params.hash as string
+  } else {
+    return route.params.subhash as string
+  }
+})
 
 const defaultAlbums = computed(() => {
   // defaultAlbums should be the list of albums in data.database.album
-  const data = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!
+  const data = storeData.data.get(storeData.hashMapData.get(hash.value)!)!
   const result = data.database!.album.map((albumId) => ({
     albumId,
     albumName: albumStore.albumMap.get(albumId)!

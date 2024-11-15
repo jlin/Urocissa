@@ -65,3 +65,8 @@ export function dater(timestamp: number): string {
     day: 'numeric'
   }).format(timestamp)
 }
+
+export function getIsolationIdByRoute(route: RouteLocationNormalizedLoaded) {
+  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
+  return isolationId
+}

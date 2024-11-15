@@ -9,7 +9,7 @@ export function useHandleClick(
   isolationId: string
 ) {
   const handleClick = async (event: MouseEvent, currentIndex: number) => {
-    const collectionStore = useCollectionStore('mainId')
+    const collectionStore = useCollectionStore(isolationId)
     if (collectionStore.editModeOn) {
       if (event.shiftKey && collectionStore.lastClick !== null) {
         const start = Math.min(collectionStore.lastClick, currentIndex)
