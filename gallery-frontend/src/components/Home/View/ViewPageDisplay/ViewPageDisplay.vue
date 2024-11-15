@@ -74,6 +74,7 @@ import { useElementSize } from '@vueuse/core'
 import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayDatabase.vue'
 import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
 import { leaveViewPage } from '@/script/navigator'
+import delay from 'delay'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -149,32 +150,40 @@ const postToWorker = bindActionDispatch(toImgWorker, (action) => {
 })
 
 const checkAndFetch = (index: number): boolean => {
+  // If the image is already fetched, return true
   if (imgStore.imgOriginal.has(index)) {
     return true
-  } else {
-    if (!queueStore.original.has(index)) {
-      const abstractData = dataStore.data.get(index)
-      if (abstractData) {
-        queueStore.original.add(index)
-        const hash = abstractData.database ? abstractData.database.hash : abstractData.album!.cover
-        if (hash !== null) {
-          postToWorker.processImage({
-            index: index,
-            hash: hash,
-            devicePixelRatio: window.devicePixelRatio,
-            jwt: Cookies.get('jwt')!
-          })
-        }
-      }
-      return false
-    }
+  }
 
+  // If the image is already in the queue, fetching is not done
+  if (queueStore.original.has(index)) {
     return false
   }
-}
 
-async function delay(ms: number) {
-  new Promise((resolve) => setTimeout(resolve, ms))
+  // Retrieve the abstract data for the given index
+  const abstractData = dataStore.data.get(index)
+  if (!abstractData) {
+    return false
+  }
+
+  // Add the index to the fetch queue
+  queueStore.original.add(index)
+
+  // Determine the hash from database or album cover
+  const hash = abstractData.database?.hash ?? abstractData.album?.cover
+
+  // If a valid hash exists, initiate the image processing
+  if (hash != null) {
+    postToWorker.processImage({
+      index,
+      hash,
+      devicePixelRatio: window.devicePixelRatio,
+      jwt: Cookies.get('jwt')! // Assuming JWT is always present
+    })
+  }
+
+  // Fetching has been initiated but not completed
+  return false
 }
 
 async function prefetch(index: number, isolationId: string) {
@@ -233,6 +242,7 @@ watch(
 const handlePopState = () => {
   router.push(leaveViewPage(route))
 }
+
 const handleKeyDown = (event: KeyboardEvent) => {
   // prevent two ViewPageDisplay triggered simultaneously
   if (!route.meta.isReadPage || (route.meta.isReadPage && props.isolationId === 'idid')) {
