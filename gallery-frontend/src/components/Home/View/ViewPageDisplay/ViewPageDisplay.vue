@@ -7,7 +7,12 @@
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
-      <ViewPageToolBar :metadata="metadata" />
+      <ViewPageToolBar
+        :metadata="metadata"
+        :index="index"
+        :hash="hash"
+        :isolationId="isolationId"
+      />
       <ViewPageDisplayDatabase
         v-if="metadata"
         :index="index"

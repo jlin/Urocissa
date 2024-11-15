@@ -7,16 +7,17 @@ import { bindActionDispatch } from 'typesafe-agent-events'
 export function editTagsInWorker(
   indexArray: number[],
   addTagsArray: string[],
-  removeTagsArray: string[]
+  removeTagsArray: string[],
+  isolationId: string
 ) {
-  const workerStore = useWorkerStore('')
-  const prefetchStore = usePrefetchStore('')
-  const tagStore = useTagStore('')
+  const workerStore = useWorkerStore(isolationId)
+  const prefetchStore = usePrefetchStore(isolationId)
+  const tagStore = useTagStore(isolationId)
 
   tagStore.fetched = false
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker('')
+    workerStore.initializeWorker(isolationId)
   }
 
   const dataWorker = workerStore.worker!

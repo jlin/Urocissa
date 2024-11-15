@@ -39,8 +39,8 @@ const props = defineProps<{
 }>()
 
 const dataStore = useDataStore(props.isolationId)
-
 const route = useRoute()
+
 const hash = computed(() => {
   if (props.isolationId === '') {
     return route.params.hash as string

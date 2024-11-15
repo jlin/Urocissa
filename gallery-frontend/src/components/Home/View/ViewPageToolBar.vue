@@ -91,8 +91,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-import { useDataStore } from '@/store/dataStore'
-import { useCollectionStore } from '@/store/collectionStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { AbstractData } from '@/script/common/types'
 import { getSrc } from '@/../config'
@@ -103,18 +101,18 @@ import { leaveViewPage } from '@/script/navigator'
 
 import axios from 'axios'
 import Cookies from 'js-cookie'
+
 const modalStore = useModalStore('')
 const infoStore = useInfoStore('')
 
 const props = defineProps<Props>()
 interface Props {
+  isolationId: string
+  hash: string
+  index: number
   metadata: AbstractData | undefined
 }
-const hash = computed(() => {
-  return route.params.hash as string
-})
-const dataStore = useDataStore('')
-const collectionStore = useCollectionStore('')
+
 const route = useRoute()
 
 const isViewPath = computed(() => {
@@ -130,10 +128,7 @@ const isViewPath = computed(() => {
 function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
   let indexArray: number[] = []
   if (isViewPath.value) {
-    const index = dataStore.hashMapData.get(route.params.hash as string)!
-    indexArray = [index]
-  } else {
-    indexArray = Array.from(collectionStore.editModeCollection)
+    indexArray = [props.index]
   }
   let removeTagsArray: string[] = []
   let addTagsArray: string[] = []
@@ -161,9 +156,8 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
 
 const deleteData = () => {
   if (props.metadata) {
-    const index = dataStore.hashMapData.get(props.metadata.database!.hash)
-    if (index !== undefined) {
-      deleteDataInWorker([index])
+    if (props.index !== undefined) {
+      deleteDataInWorker([props.index])
     }
   }
 }
