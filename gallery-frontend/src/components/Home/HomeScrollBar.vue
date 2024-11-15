@@ -122,7 +122,8 @@ const queueStore = useQueueStore(props.isolationId)
 const reachBottom = computed(() => {
   return (
     windowHeight !== undefined &&
-    scrollTopStore.scrollTop === prefetchStore.totalHeight - windowHeight.value - paddingPixel
+    scrollTopStore.scrollTop ===
+      Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0)
   )
 })
 
@@ -193,7 +194,10 @@ const getTargetRowIndex = (percentage: number) => {
   return clamp(targetRowIndex, 0, rowLength.value - 1)
 }
 
-const debouncedFetchRow = debounce((index: number) => fetchRowInWorker(index, props.isolationId), 100)
+const debouncedFetchRow = debounce(
+  (index: number) => fetchRowInWorker(index, props.isolationId),
+  100
+)
 
 /**
  * Handle a click event on the scrollbar.

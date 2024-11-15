@@ -159,7 +159,6 @@ function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number, iso
       rowStore.lastVisibleRow.get(lastCurrentRowThatInLastVisibleRow.rowIndex)!.offset
 
     // Adjust scrollTop while ensuring it does not exceed the scrollingBound
-
     scrollTopStore.scrollTop = Math.min(scrollTopStore.scrollTop + shift, scrollingBound)
   }
 }
@@ -275,7 +274,7 @@ export function useUpdateVisibleRows(
 
         scrollTopOffsetFix(
           visibleRows,
-          prefetchStore.totalHeight - windowHeight.value - paddingPixel,
+          Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0),
           isolationId
         )
       }
