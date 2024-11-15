@@ -123,6 +123,9 @@ const previousHash = computed(() => {
 })
 
 const nextPage = computed(() => {
+  if (!nextHash.value) {
+    return undefined
+  }
   if (!route.meta.isReadPage) {
     const updatedParams = { ...route.params, hash: nextHash.value }
     return { ...route, params: updatedParams }
@@ -133,6 +136,9 @@ const nextPage = computed(() => {
 })
 
 const previousPage = computed(() => {
+  if (!previousHash.value) {
+    return undefined
+  }
   if (!route.meta.isReadPage) {
     const updatedParams = { ...route.params, hash: previousHash.value }
 
