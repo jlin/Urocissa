@@ -124,7 +124,6 @@ const nextPage = computed(() => {
     return { ...route, params: updatedParams }
   } else if (props.isolationId === 'idid') {
     const updatedParams = { ...route.params, subhash: nextHash.value }
-
     return { ...route, params: updatedParams }
   }
 })
@@ -152,21 +151,24 @@ const postToWorker = bindActionDispatch(toImgWorker, (action) => {
 const checkAndFetch = (index: number): boolean => {
   if (imgStore.imgOriginal.has(index)) {
     return true
-  } else if (!queueStore.original.has(index)) {
-    queueStore.original.add(index)
-    const hash = dataStore.data.get(index)!.database
-      ? dataStore.data.get(index)!.database!.hash
-      : dataStore.data.get(index)!.album!.cover
-    if (hash !== null) {
-      postToWorker.processImage({
-        index: index,
-        hash: hash,
-        devicePixelRatio: window.devicePixelRatio,
-        jwt: Cookies.get('jwt')!
-      })
-    }
-    return false
   } else {
+    if (!queueStore.original.has(index)) {
+      const abstractData = dataStore.data.get(index)
+      if (abstractData) {
+        queueStore.original.add(index)
+        const hash = abstractData.database ? abstractData.database.hash : abstractData.album!.cover
+        if (hash !== null) {
+          postToWorker.processImage({
+            index: index,
+            hash: hash,
+            devicePixelRatio: window.devicePixelRatio,
+            jwt: Cookies.get('jwt')!
+          })
+        }
+      }
+      return false
+    }
+
     return false
   }
 }
