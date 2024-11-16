@@ -53,7 +53,7 @@ axios.interceptors.response.use(
 
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
-    fetchData: (payload) => {
+    fetchData: async (payload) => {
       const { batch, timestamp } = payload
       // if there are too many batch are processed then try to terminate the oldest request
       if (shouldProcessBatch.length >= 6) {
