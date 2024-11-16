@@ -23,6 +23,7 @@ import { ref } from 'vue'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { z } from 'zod'
 const password = ref('')
 const token = ref<string>('') // To store the JWT token
 const router = useRouter()
@@ -33,7 +34,11 @@ const handleLogin = async () => {
         'Content-Type': 'application/json'
       }
     })
-    token.value = response.data
+
+    // Validate response.data using Zod
+    const tokenValue = z.string().parse(response.data) // Ensures response.data is a string
+
+    token.value = tokenValue
 
     // Store the JWT in a cookie with security attributes
     Cookies.set('jwt', token.value, {
@@ -45,7 +50,7 @@ const handleLogin = async () => {
 
     await router.push('/')
   } catch (error) {
-    console.error(error)
+    console.error('Error during login:', error)
   }
 }
 </script>
