@@ -14,8 +14,8 @@ export function handleImgWorker(imgWorker: Worker, isolationId: string) {
     imageProcessed({ index, url }) {
       imgStore.imgOriginal.set(index, url)
     },
-    unauthorized: () => {
-      router.push('/login')
+    unauthorized: async () => {
+      await router.push('/login')
     }
   })
 
