@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useUploadStore = (isolationId: string ) =>
+export const useUploadStore = (isolationId: string) =>
   defineStore({
     id: 'uploadStore' + isolationId,
     state: (): {
@@ -18,13 +18,13 @@ export const useUploadStore = (isolationId: string ) =>
     }),
     actions: {
       percentComplete() {
-        if (this.total && this.loaded !== undefined) {
+        if (this.total !== undefined && this.loaded !== undefined) {
           return Math.floor((this.loaded / this.total) * 100)
         }
         return 0
       },
       elapsedTime() {
-        if (this.startTime) {
+        if (this.startTime !== undefined) {
           return (Date.now() - this.startTime) / 1000 // time in seconds
         }
         return 0
