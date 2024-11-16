@@ -50,7 +50,7 @@ const router = useRouter()
 const dynamicWidth = ref<number>(0)
 const tableRef = ref<HTMLElement | null>(null)
 const updateDynamicWidth = () => {
-  const tableWidth = tableRef.value?.offsetWidth || 0
+  const tableWidth = tableRef.value?.offsetWidth ?? 0
   dynamicWidth.value = tableWidth <= 300 ? 300 : tableWidth
 }
 
@@ -83,9 +83,9 @@ async function SearchByTag(tag: string) {
   })
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (!tagStore.fetched) {
-    tagStore.fetchTags()
+    await tagStore.fetchTags()
   }
   initializedStore.initialized = true
 })
