@@ -80,7 +80,7 @@ const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {
     addTagsArray = ['_favorite']
   } else if (category === 'archive') {
     addTagsArray = ['_archived']
-  } else if (category === 'trashed') {
+  } else {
     addTagsArray = ['_trashed']
   }
 
