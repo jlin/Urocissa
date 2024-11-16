@@ -19,7 +19,9 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string
   const rowStore = useRowStore(isolationId)
 
   for (const row of rowStore.rowData.values()) {
-    if (row.topPixelAccumulated! + row.offset < scrollTop) {
+    if (row.topPixelAccumulated === undefined) {
+      console.error('row.topPixelAccumulated is undeifned')
+    } else if (row.topPixelAccumulated + row.offset < scrollTop) {
       aboveRowsIndex.push(row.rowIndex)
     }
   }
@@ -28,7 +30,12 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string
   let offsetSum = 0
 
   aboveRowsIndex.forEach((rowIndex) => {
-    offsetSum += offsetStore.offset.get(rowIndex)!
+    const offset = offsetStore.offset.get(rowIndex)
+    if (offset !== undefined) {
+      offsetSum += offset
+    } else {
+      console.error('offset is undefined')
+    }
   })
 
   return offsetSum
@@ -48,7 +55,7 @@ export function useFetchRows(
   endHeight: Ref<number>,
   isolationId: string,
   debounceTime = 50,
-  maxWait = 100,
+  maxWait = 100
 ) {
   const initializedStore = useInitializedStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
@@ -57,7 +64,10 @@ export function useFetchRows(
   const debouncedFetch = debounce(
     () => {
       if (initializedStore.initialized) {
-        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(scrollTopStore.scrollTop, isolationId)
+        const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(
+          scrollTopStore.scrollTop,
+          isolationId
+        )
         const fixedHeight = 2400
         const startHeightOffseted = startHeight.value - offSetSumOfAboveRowsIndex - fixedHeight
         const endHeightOffseted = endHeight.value - offSetSumOfAboveRowsIndex + fixedHeight
