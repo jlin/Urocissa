@@ -74,7 +74,7 @@ router.beforeEach((to, from, next) => {
 
 function extractDynamicBase(path: string) {
   // Return '/share/[id]' if the path includes it
-  const match = path.match(/\/share\/[a-zA-Z0-9]+/)
+  const match = /\/share\/[a-zA-Z0-9]+/.exec(path)
   return match ? match[0] : ''
 }
 provide('showDrawer', showDrawer)
