@@ -19,7 +19,7 @@ import {
 } from '@/script/common/types'
 import { SubRow } from '@/script/common/types'
 import { batchNumber, fixedBigRowHeight } from '@/script/common/constants'
-import { createAbstractData, createDataBase } from '@/script/common/functions'
+import { createAbstractData, createDataBase, getArrayValue } from '@/script/common/functions'
 
 import axios from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
@@ -276,28 +276,28 @@ async function fetchRow(
  */
 function lineWrap(displayElements: number[], windowWidth: number): number[] {
   const n = displayElements.length
-  const minBadness = Array(n + 1).fill(Infinity)
-  const breaks = Array(n + 1).fill(0)
+  const minBadness = Array<number>(n + 1).fill(Infinity)
+  const breaks = Array<number>(n + 1).fill(0)
 
   minBadness[0] = 0
 
   for (let i = 1; i <= n; i++) {
     let currentWidth = 0
     for (let j = i; j > 0; j--) {
-      currentWidth += displayElements[j - 1]
+      currentWidth += getArrayValue(displayElements, j - 1)
 
       if (currentWidth > windowWidth) break
 
       const badness = Math.pow(windowWidth - currentWidth, 2)
-      if (minBadness[j - 1] + badness < minBadness[i]) {
-        minBadness[i] = minBadness[j - 1] + badness
+      if (getArrayValue(minBadness, j - 1) + badness < getArrayValue(minBadness, i)) {
+        minBadness[i] = getArrayValue(minBadness, j - 1) + badness
         breaks[i] = j - 1
       }
     }
 
     // Check if a valid line break was found. If not, start a new line with the current element.
     if (minBadness[i] === Infinity) {
-      minBadness[i] = minBadness[i - 1] + Math.pow(windowWidth - currentWidth, 2)
+      minBadness[i] = getArrayValue(minBadness, i - 1) + Math.pow(windowWidth - currentWidth, 2)
       breaks[i] = i - 1
     }
   }
@@ -305,7 +305,7 @@ function lineWrap(displayElements: number[], windowWidth: number): number[] {
   const lineCounts: number[] = []
   let end = n
   while (end > 0) {
-    const start = breaks[end]
+    const start = getArrayValue(breaks, end)
     lineCounts.unshift(end - start) // Calculate the number of elements in each line
     end = start
   }
