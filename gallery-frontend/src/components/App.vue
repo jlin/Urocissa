@@ -15,9 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { computed, defineAsyncComponent, onMounted } from 'vue'
-import Cookies from 'js-cookie'
+import { useRoute } from 'vue-router'
+import { computed, defineAsyncComponent } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 
 const NotificationWarn = defineAsyncComponent(() => import('@/components/NotificationWarn.vue'))
@@ -25,16 +24,7 @@ const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue
 
 const scrollbarStore = useScrollbarStore('mainId')
 
-// Function to check if cookie has no password field
-async function checkCookieAndRedirect() {
-  const jwt = Cookies.get('jwt')
-  if (!jwt) {
-    router.push('/login')
-  }
-}
-
 const route = useRoute()
-const router = useRouter()
 
 const currentPage = computed(() => {
   if (route.path.startsWith('/favorite')) {
@@ -50,13 +40,13 @@ const currentPage = computed(() => {
 
 // The routeKey is used to ensure that the router-view reloads the Home.vue component properly.
 // Without it, Vue may cache the component for optimization, potentially causing bugs.
-const routeKey = computed(
-  () =>
-    `${currentPage.value}-${route.query.search}-${route.query.locate}-${route.query.priority_id}-${route.query.reverse}`
-)
+const routeKey = computed(() => {
+  const search = typeof route.query.search === 'string' ? route.query.search : ''
+  const locate = typeof route.query.locate === 'string' ? route.query.locate : ''
+  const priorityId = typeof route.query.priority_id === 'string' ? route.query.priority_id : ''
+  const reverse = typeof route.query.reverse === 'string' ? route.query.reverse : ''
 
-onMounted(() => {
-  checkCookieAndRedirect()
+  return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}`
 })
 </script>
 
