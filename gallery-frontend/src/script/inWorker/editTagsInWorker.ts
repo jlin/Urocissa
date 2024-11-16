@@ -21,7 +21,7 @@ export function editTagsInWorker(
   }
 
   const dataWorker = workerStore.worker!
-  const postToWorker = bindActionDispatch(toDataWorker, (action) => dataWorker.postMessage(action))
+  const postToWorker = bindActionDispatch(toDataWorker, (action) => { dataWorker.postMessage(action); })
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {

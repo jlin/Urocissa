@@ -28,7 +28,7 @@ import { z } from 'zod'
 
 const shouldProcessBatch: number[] = []
 
-const fetchedRowData: Map<number, Row> = new Map()
+const fetchedRowData = new Map<number, Row>()
 
 function unauthorized() {
   const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
@@ -53,7 +53,7 @@ axios.interceptors.response.use(
 
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
-    fetchData: async (payload) => {
+    fetchData: (payload) => {
       const { batch, timestamp } = payload
       // if there are too many batch are processed then try to terminate the oldest request
       if (shouldProcessBatch.length >= 6) {
@@ -185,7 +185,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
   const response = await axios.get<DataBase[]>(fetchUrl)
   const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
-  const data: Map<number, AbstractData> = new Map()
+  const data = new Map<number, AbstractData>()
 
   for (let index = 0; index < databaseTimestampArray.length; index++) {
     if (!shouldProcessBatch.includes(batchIndex)) {

@@ -5,45 +5,45 @@ export interface ExpressionCstNode extends CstNode {
   children: ExpressionCstChildren;
 }
 
-export type ExpressionCstChildren = {
+export interface ExpressionCstChildren {
   orExpression?: OrExpressionCstNode[];
   andExpression?: AndExpressionCstNode[];
   notExpression?: NotExpressionCstNode[];
   atomicExpression?: AtomicExpressionCstNode[];
-};
+}
 
 export interface OrExpressionCstNode extends CstNode {
   name: "orExpression";
   children: OrExpressionCstChildren;
 }
 
-export type OrExpressionCstChildren = {
+export interface OrExpressionCstChildren {
   Or: IToken[];
   OpenParenthesis: IToken[];
   expression: (ExpressionCstNode)[];
   Comma?: IToken[];
   CloseParenthesis: IToken[];
-};
+}
 
 export interface AndExpressionCstNode extends CstNode {
   name: "andExpression";
   children: AndExpressionCstChildren;
 }
 
-export type AndExpressionCstChildren = {
+export interface AndExpressionCstChildren {
   And: IToken[];
   OpenParenthesis: IToken[];
   expression: (ExpressionCstNode)[];
   Comma?: IToken[];
   CloseParenthesis: IToken[];
-};
+}
 
 export interface AtomicExpressionCstNode extends CstNode {
   name: "atomicExpression";
   children: AtomicExpressionCstChildren;
 }
 
-export type AtomicExpressionCstChildren = {
+export interface AtomicExpressionCstChildren {
   tagExpression?: TagExpressionCstNode[];
   typeExpression?: TypeExpressionCstNode[];
   extExpression?: ExtExpressionCstNode[];
@@ -52,99 +52,99 @@ export type AtomicExpressionCstChildren = {
   albumExpression?: AlbumExpressionCstNode[];
   pathExpression?: PathExpressionCstNode[];
   anyExpression?: AnyExpressionCstNode[];
-};
+}
 
 export interface NotExpressionCstNode extends CstNode {
   name: "notExpression";
   children: NotExpressionCstChildren;
 }
 
-export type NotExpressionCstChildren = {
+export interface NotExpressionCstChildren {
   Not: IToken[];
   OpenParenthesis: IToken[];
   expression: ExpressionCstNode[];
   CloseParenthesis: IToken[];
-};
+}
 
 export interface TagExpressionCstNode extends CstNode {
   name: "tagExpression";
   children: TagExpressionCstChildren;
 }
 
-export type TagExpressionCstChildren = {
+export interface TagExpressionCstChildren {
   Tag: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface TypeExpressionCstNode extends CstNode {
   name: "typeExpression";
   children: TypeExpressionCstChildren;
 }
 
-export type TypeExpressionCstChildren = {
+export interface TypeExpressionCstChildren {
   Type: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface ExtExpressionCstNode extends CstNode {
   name: "extExpression";
   children: ExtExpressionCstChildren;
 }
 
-export type ExtExpressionCstChildren = {
+export interface ExtExpressionCstChildren {
   Ext: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface MakeExpressionCstNode extends CstNode {
   name: "makeExpression";
   children: MakeExpressionCstChildren;
 }
 
-export type MakeExpressionCstChildren = {
+export interface MakeExpressionCstChildren {
   Makel: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface ModelExpressionCstNode extends CstNode {
   name: "modelExpression";
   children: ModelExpressionCstChildren;
 }
 
-export type ModelExpressionCstChildren = {
+export interface ModelExpressionCstChildren {
   Model: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface AlbumExpressionCstNode extends CstNode {
   name: "albumExpression";
   children: AlbumExpressionCstChildren;
 }
 
-export type AlbumExpressionCstChildren = {
+export interface AlbumExpressionCstChildren {
   Album: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface PathExpressionCstNode extends CstNode {
   name: "pathExpression";
   children: PathExpressionCstChildren;
 }
 
-export type PathExpressionCstChildren = {
+export interface PathExpressionCstChildren {
   Path: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface AnyExpressionCstNode extends CstNode {
   name: "anyExpression";
   children: AnyExpressionCstChildren;
 }
 
-export type AnyExpressionCstChildren = {
+export interface AnyExpressionCstChildren {
   Any: IToken[];
   Identifier: IToken[];
-};
+}
 
 export interface ICstNodeVisitor<IN, OUT> extends ICstVisitor<IN, OUT> {
   expression(children: ExpressionCstChildren, param?: IN): OUT;

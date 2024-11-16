@@ -9,7 +9,7 @@ import {
 import { defineStore } from 'pinia'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
-type postToWorkerType = {
+interface postToWorkerType {
   processSmallImage: (payload: processSmallImagePayload) => void
   processImage: (payload: processImagePayload) => void
   processAbort: (payload: processAbortPayload) => void
@@ -47,7 +47,7 @@ export const useWorkerStore = (isolationId: string) =>
             })
             this.imgWorker.push(worker)
             const postToWorker = bindActionDispatch(toImgWorker, (action) =>
-              worker.postMessage(action)
+              { worker.postMessage(action); }
             )
             this.postToWorkerList.push(postToWorker)
           }

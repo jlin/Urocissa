@@ -17,7 +17,7 @@ import { createActionCreators } from 'typesafe-agent-events'
  * ================================================================================ */
 
 // Define payload types for image processing actions
-export type processSmallImagePayload = {
+export interface processSmallImagePayload {
   index: number
   hash: string
   width: number
@@ -27,14 +27,14 @@ export type processSmallImagePayload = {
   albumMode?: boolean
 }
 
-export type processImagePayload = {
+export interface processImagePayload {
   index: number
   hash: string
   devicePixelRatio: number
   jwt: string
 }
 
-export type processAbortPayload = {
+export interface processAbortPayload {
   index: number
 }
 
@@ -65,28 +65,41 @@ export const fromImgWorker = createActionCreators({
  * ================================================================================ */
 
 // Define the parameter types for different actions to manage data and UI state
-type FetchDataParams = { batch: number; timestamp: string }
-type FetchRowParams = { index: number; timestamp: string; windowWidth: number; isLastRow: boolean }
-type PrefetchParams = {
+interface FetchDataParams {
+  batch: number
+  timestamp: string
+}
+interface FetchRowParams {
+  index: number
+  timestamp: string
+  windowWidth: number
+  isLastRow: boolean
+}
+interface PrefetchParams {
   filterJsonString: string | null
   priorityId: string
   reverse: string | undefined
   locate: string | null
 }
-type EditTagsParams = {
+interface EditTagsParams {
   indexArray: number[]
   addTagsArray: string[]
   removeTagsArray: string[]
   timestamp: string
 }
-type EditAlbumsParams = {
+interface EditAlbumsParams {
   idArray: number[]
   addAlbumsArray: string[]
   removeAlbumsArray: string[]
   timestamp: string
 }
-type DeleteDataParams = { indexArray: number[]; timestamp: string }
-type FetchScrollBarParams = { timestamp: string }
+interface DeleteDataParams {
+  indexArray: number[]
+  timestamp: string
+}
+interface FetchScrollBarParams {
+  timestamp: string
+}
 
 // Define actions for the worker to receive and execute tasks
 export const toDataWorker = createActionCreators({
@@ -106,14 +119,27 @@ export const toDataWorker = createActionCreators({
  * ================================================================================ */
 
 // Define the parameter types for responses from the worker back to the main thread
-type ReturnDataParams = { batch: number; slicedDataArray: SlicedData[] }
-type FetchRowReturnParams = { rowWithOffset: RowWithOffset; timestamp: string }
-type PrefetchReturnParams = { result: Prefetch }
-type EditTagsReturnParams = {
+interface ReturnDataParams {
+  batch: number
+  slicedDataArray: SlicedData[]
+}
+interface FetchRowReturnParams {
+  rowWithOffset: RowWithOffset
+  timestamp: string
+}
+interface PrefetchReturnParams {
+  result: Prefetch
+}
+interface EditTagsReturnParams {
   returnedTagsArray: TagInfo[] | undefined
 }
-type FetchScrollBarReturnParams = { scrollbarDataArray: ScrollbarData[] }
-type NotificationReturnParams = { message: string; messageType: 'info' | 'warn' }
+interface FetchScrollBarReturnParams {
+  scrollbarDataArray: ScrollbarData[]
+}
+interface NotificationReturnParams {
+  message: string
+  messageType: 'info' | 'warn'
+}
 
 // Define actions for the worker to send responses back to the main thread
 export const fromDataWorker = createActionCreators({

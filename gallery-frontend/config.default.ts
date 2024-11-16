@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export const batchNumber = 100
 export const scrollBarWidth = 50
 export const paddingPixel = 4

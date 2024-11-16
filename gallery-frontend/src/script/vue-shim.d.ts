@@ -5,8 +5,6 @@ declare module '*.vue' {
 }
 
 declare module '*/dataWorker?worker&inline' {
-  const workerConstructor: {
-    new (): Worker
-  }
+  const workerConstructor: new () => Worker
   export default workerConstructor
 }

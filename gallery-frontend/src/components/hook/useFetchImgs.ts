@@ -12,7 +12,7 @@ import debounce from 'lodash/debounce'
  * @param maxWait - Max wait time for the debounced function.
  */
 export function useFetchImgs(
-  visibleRows: Ref<Array<{ start: number; end: number }>>,
+  visibleRows: Ref<{ start: number; end: number }[]>,
   visibleRowsLength: Ref<number>,
   batchNumber: number,
   isolationId: string,
