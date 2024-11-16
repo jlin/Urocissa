@@ -21,7 +21,7 @@ import { SubRow } from '@/script/common/types'
 import { batchNumber, fixedBigRowHeight } from '@/script/common/constants'
 import { createAbstractData, createDataBase, getArrayValue } from '@/script/common/functions'
 
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
 import { fromDataWorker, toDataWorker } from './workerApi'
 import { z } from 'zod'
@@ -37,17 +37,29 @@ function unauthorized() {
 
 // Response interceptor to handle 401 Unauthorized
 axios.interceptors.response.use(
-  (response) => response, // Pass through valid responses
+  (response: AxiosResponse) => response, // Pass through valid responses
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      unauthorized()
-      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-      postToMain.notification({ message: 'Unauthorized. Please log in.', messageType: 'warn' })
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        unauthorized()
+        const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+        postToMain.notification({ message: 'Unauthorized. Please log in.', messageType: 'warn' })
+      } else if (error.response) {
+        const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+        postToMain.notification({ message: 'An error occurred', messageType: 'warn' })
+      } else {
+        // Handle cases where there is no response (e.g., network errors)
+        const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+        postToMain.notification({ message: 'No response from server', messageType: 'warn' })
+      }
     } else {
+      // Handle non-Axios errors if necessary
+      console.error('Unexpected error:', error)
       const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-      postToMain.notification({ message: 'An error occured', messageType: 'warn' })
+      postToMain.notification({ message: 'An unexpected error occurred', messageType: 'warn' })
     }
-    return Promise.reject(error) // Always reject the error to maintain default behavior
+    console.error(error)
+    if (error instanceof Error) return Promise.reject(error) // Always reject the error to maintain default behavior
   }
 )
 
@@ -70,8 +82,7 @@ self.addEventListener('message', (e) => {
 
         //Push the result Map into a SlicedData[]
         const slicedDataArray: SlicedData[] = []
-        for (let i = 0; i < indices.length; i++) {
-          const index = indices[i]
+        for (const index of indices) {
           const getResult = result.get(index)
           if (getResult !== undefined) {
             slicedDataArray.push({ index, data: getResult })
@@ -86,22 +97,20 @@ self.addEventListener('message', (e) => {
       const { index, timestamp, windowWidth, isLastRow } = payload
 
       const rowWithOffset = await fetchRow(index, timestamp, windowWidth, isLastRow)
-      if (rowWithOffset !== undefined) {
-        const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-        postToMain.fetchRowReturn({
-          rowWithOffset: rowWithOffset,
-          timestamp: timestamp
-        })
-      }
+
+      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+      postToMain.fetchRowReturn({
+        rowWithOffset: rowWithOffset,
+        timestamp: timestamp
+      })
     },
     prefetch: async (payload) => {
       const { filterJsonString, priorityId, reverse, locate } = payload
       shouldProcessBatch.push(0)
       const result = await prefetch(filterJsonString, priorityId, reverse, locate)
       const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-      if (result !== undefined) {
-        postToMain.prefetchReturn({ result: result })
-      }
+
+      postToMain.prefetchReturn({ result: result })
     },
     editTags: async (payload) => {
       const { indexArray, addTagsArray, removeTagsArray, timestamp } = payload
@@ -131,7 +140,7 @@ self.addEventListener('message', (e) => {
       postToMain.fetchScrollbarReturn({ scrollbarDataArray: scrollbarDataArray })
     }
   })
-  handler(e.data)
+  handler(e.data as ReturnType<(typeof toDataWorker)[keyof typeof toDataWorker]>)
 })
 
 /**
