@@ -84,11 +84,15 @@ onMounted(() => {
   const useSubmit = (): undefined | (() => void) => {
     const initializeResult = getHashIndexDataFromRoute(route)
     if (initializeResult === undefined) {
+      console.error(
+        "useSubmit Error: Failed to initialize result. 'getHashIndexDataFromRoute(route)' returned undefined."
+      )
       return undefined
     }
 
-    const { index: index, data: data } = initializeResult
+    const { index, data } = initializeResult
     if (data.database === undefined) {
+      console.error("useSubmit Error: 'data.database' is undefined.")
       return undefined
     }
 
@@ -97,28 +101,28 @@ onMounted(() => {
     for (const albumId of data.database.album) {
       const albumName = albumStore.albumMap.get(albumId)
       if (albumName === undefined) {
-        // Early return if albumName is not found
+        console.error(`useSubmit Error: Album name not found for albumId '${albumId}'.`)
         return undefined
       }
       defaultAlbums.push({ albumId, albumName })
     }
 
-    // by default vModelAlbumsArray is empty
-    // initialize vModelAlbumsArray by setting to defaultAlbums
+    // Initialize vModelAlbumsArray with defaultAlbums
     vModelAlbumsArray.value = defaultAlbums
 
     const innerSubmit = () => {
-      // hash of the current photo/video
+      // Hash of the current photo/video
       const idArray: number[] = [index]
 
-      // albums that should be added = albums that are not in default, but in v-model
+      // Albums to be added: present in vModelAlbumsArray but not in defaultAlbums
       const addAlbumsArrayComputed = vModelAlbumsArray.value.filter(
-        (album) => !defaultAlbums.map((album) => album.albumId).includes(album.albumId)
+        (album) => !defaultAlbums.some((defaultAlbum) => defaultAlbum.albumId === album.albumId)
       )
 
-      // albums that should be deleted = albums that are in default, but not in v-model
+      // Albums to be removed: present in defaultAlbums but not in vModelAlbumsArray
       const removeAlbumsArrayComputed = defaultAlbums.filter(
-        (album) => !vModelAlbumsArray.value.map((album) => album.albumId).includes(album.albumId)
+        (defaultAlbum) =>
+          !vModelAlbumsArray.value.some((album) => album.albumId === defaultAlbum.albumId)
       )
 
       editAlbumsInWorker(
@@ -128,8 +132,10 @@ onMounted(() => {
       )
       modalStore.showEditAlbumsModal = false
     }
+
     return innerSubmit
   }
+
   submit.value = useSubmit()
 })
 
