@@ -20,7 +20,7 @@ export function useFetchImgs(
   maxWait = 1000
 ) {
   const debouncedFetch = debounce(
-    async () => {
+    () => {
       const dataStore = useDataStore(isolationId)
       const length = visibleRowsLength.value
       if (length > 0) {
@@ -31,7 +31,7 @@ export function useFetchImgs(
         const endBatchIndex = Math.floor(visibleRows.value[length - 1].end / batchNumber) + 1
 
         for (let batchIndex = startBatchIndex; batchIndex <= endBatchIndex; batchIndex++) {
-          if (!dataStore.batchFetched.get(batchIndex)) {
+          if (dataStore.batchFetched.get(batchIndex) !== true) {
             fetchDataInWorker(batchIndex, isolationId)
           }
         }
@@ -47,7 +47,9 @@ export function useFetchImgs(
   const visibleRowsId = computed(() => {
     const length = visibleRows.value.length
     if (length > 0) {
-      return `${visibleRows.value[0].start}-${visibleRows.value[length - 1].end}`
+      const start = visibleRows.value[0].start.toString()
+      const end = visibleRows.value[length - 1].end.toString()
+      return `${start}-${end}`
     } else {
       return ''
     }
