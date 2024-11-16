@@ -38,7 +38,9 @@ export const useFilterStore = (isolationId: string) =>
             this.basicString = route.meta.basicString
           } else {
             const album_id = route.params.hash
-            this.basicString = `album:${album_id}`
+            if (typeof album_id === 'string') {
+              this.basicString = `album:${album_id}`
+            }
           }
         } else {
           this.basicString = route.meta.basicString
