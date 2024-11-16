@@ -104,9 +104,7 @@ export function getHashIndexDataFromRoute(route: RouteLocationNormalizedLoaded) 
 export function getArrayValue<T>(array: T[], index: number): T {
   const result = array[index]
   if (result === undefined) {
-    throw new RangeError(
-      `Index ${index.toString()} is out of bounds for array of length ${array.length.toString()}`
-    )
+    throw new RangeError(`Index ${index} is out of bounds for array of length ${array.length}`)
   } else {
     return result
   }

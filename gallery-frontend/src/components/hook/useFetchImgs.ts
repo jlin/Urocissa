@@ -47,8 +47,8 @@ export function useFetchImgs(
   const visibleRowsId = computed(() => {
     const length = visibleRows.value.length
     if (length > 0) {
-      const start = visibleRows.value[0].start.toString()
-      const end = visibleRows.value[length - 1].end.toString()
+      const start = visibleRows.value[0].start
+      const end = visibleRows.value[length - 1].end
       return `${start}-${end}`
     } else {
       return ''

@@ -151,7 +151,7 @@ async function prefetch(
 ) {
   void priorityId
   void reverse
-  const fetchUrl = `/get/prefetch?${locate ? `locate=${locate}` : ''}`
+  const fetchUrl = `/get/prefetch?${locate !== null ? `locate=${locate}` : ''}`
 
   const axiosResponse = await axios.post<Prefetch>(fetchUrl, filterJsonString, {
     headers: {
@@ -161,11 +161,7 @@ async function prefetch(
 
   const prefetch = prefetchSchema.parse(axiosResponse.data)
 
-  if (prefetch === null) {
-    return
-  } else {
-    return prefetch
-  }
+  return prefetch
 }
 
 /**
@@ -192,16 +188,21 @@ async function fetchData(batchIndex: number, timestamp: string) {
       break // Stop processing further if the batch should no longer be processed
     }
     const item = databaseTimestampArray[index]
-
-    if ('DataBase' in item.abstractData) {
+    if (item !== undefined && 'DataBase' in item.abstractData) {
       const dataBaseInstance = createDataBase(item.abstractData.DataBase, item.timestamp)
       const abstractData = createAbstractData(dataBaseInstance)
       const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
-    } else if ('Album' in item.abstractData) {
+    } else if (item !== undefined && 'Album' in item.abstractData) {
       const abstractData = createAbstractData(item.abstractData.Album)
       const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
+    } else {
+      console.error(
+        `Error processing item at batchIndex: ${batchIndex}, batchNumber: ${batchNumber}, index: ${index}. ` +
+          `Item is undefined or lacks 'DataBase' and 'Album' in abstractData.`,
+        item
+      )
     }
 
     if (index % 100 === 0) {
@@ -229,12 +230,9 @@ async function fetchRow(
   windowWidth: number,
   isLastRow: boolean
 ): Promise<RowWithOffset> {
-  let row: Row
+  let row = fetchedRowData.get(index)
 
-  // Obtain row
-  if (fetchedRowData.has(index)) {
-    row = fetchedRowData.get(index)!
-  } else {
+  if (row === undefined) {
     const response = await axios.get<Row>(
       `/get/get-rows?index=${index}&timestamp=${timestamp}&window_width=${Math.round(windowWidth)}`
     )

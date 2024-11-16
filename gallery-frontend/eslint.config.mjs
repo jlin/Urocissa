@@ -24,7 +24,8 @@ export default tseslint.config(
       }
     },
     rules: {
-      '@typescript-eslint/strict-boolean-expressions': 'error'
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }]
     }
   },
   prettierConfig

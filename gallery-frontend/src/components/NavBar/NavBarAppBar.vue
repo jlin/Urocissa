@@ -137,12 +137,12 @@ async function handleFileUpload(event: Event): Promise<void> {
   let totalSize = 0
 
   Array.from(files).forEach((file, i) => {
-    formData.append('lastModified' + i.toString(), file.lastModified.toString())
-    formData.append('file' + i.toString(), file)
+    formData.append('lastModified' + i, file.lastModified)
+    formData.append('file' + i, file)
     totalSize += file.size
   })
 
-  console.log(`Total upload size: ${totalSize.toString()} bytes`)
+  console.log(`Total upload size: ${totalSize} bytes`)
 
   try {
     const startTime = Date.now()
@@ -162,8 +162,8 @@ async function handleFileUpload(event: Event): Promise<void> {
           uploadStore.loaded = progressEvent.loaded
           uploadStore.startTime = startTime
 
-          console.log(`Upload is ${uploadStore.percentComplete().toString()}% complete`)
-          console.log(`Remaining time: ${uploadStore.remainingTime().toString()} seconds`)
+          console.log(`Upload is ${uploadStore.percentComplete()}% complete`)
+          console.log(`Remaining time: ${uploadStore.remainingTime()} seconds`)
         }
       }
     })
