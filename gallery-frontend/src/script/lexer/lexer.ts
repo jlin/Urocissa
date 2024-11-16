@@ -14,6 +14,7 @@ import {
   TagExpressionCstChildren,
   TypeExpressionCstChildren
 } from './MyParserCst'
+import { getArrayValue } from '../common/functions.ts'
 const WhiteSpace = createToken({
   name: 'WhiteSpace',
   pattern: /\s+/,
@@ -161,7 +162,7 @@ export class MyParser extends CstParser {
 }
 
 const parserInstance: MyParser = new MyParser()
-const BaseVisitor = parserInstance.getBaseCstVisitorConstructor()
+const BaseVisitor = parserInstance.getBaseCstVisitorConstructor<unknown, unknown>()
 export class MyVisitor extends BaseVisitor {
   constructor() {
     super()
@@ -231,29 +232,29 @@ export class MyVisitor extends BaseVisitor {
 
   // Visit a tagExpression node
   tagExpression(children: TagExpressionCstChildren) {
-    return { Tag: children.Identifier[0].image }
+    return { Tag: getArrayValue(children.Identifier, 0).image }
   }
 
   typeExpression(children: TypeExpressionCstChildren) {
-    return { ExtType: children.Identifier[0].image }
+    return { ExtType: getArrayValue(children.Identifier, 0).image }
   }
 
   extExpression(children: ExtExpressionCstChildren) {
-    return { Ext: children.Identifier[0].image }
+    return { Ext: getArrayValue(children.Identifier, 0).image }
   }
   makeExpression(children: MakeExpressionCstChildren) {
-    return { Make: children.Identifier[0].image }
+    return { Make: getArrayValue(children.Identifier, 0).image }
   }
   modelExpression(children: ModelExpressionCstChildren) {
-    return { Model: children.Identifier[0].image }
+    return { Model: getArrayValue(children.Identifier, 0).image }
   }
   albumExpression(children: AlbumExpressionCstChildren) {
-    return { Album: children.Identifier[0].image }
+    return { Album: getArrayValue(children.Identifier, 0).image }
   }
   pathExpression(children: PathExpressionCstChildren) {
-    return { Path: children.Identifier[0].image }
+    return { Path: getArrayValue(children.Identifier, 0).image }
   }
   anyExpression(children: AnyExpressionCstChildren) {
-    return { Any: children.Identifier[0].image }
+    return { Any: getArrayValue(children.Identifier, 0).image }
   }
 }

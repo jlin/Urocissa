@@ -6,7 +6,7 @@ import { DataBaseParse } from './schemas'
 import { DataBase, AbstractData, Album } from './types'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ComputedRef } from 'vue'
-import { useDataStore } from '@/store/dataStore'
+import { useDataStore } from '../../store/dataStore.ts'
 
 /**
  * Creates a DataBase instance from parsed data and timestamp.

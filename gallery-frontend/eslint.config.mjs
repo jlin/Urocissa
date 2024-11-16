@@ -6,7 +6,12 @@ import pluginVue from 'eslint-plugin-vue'
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**/*', '**/dist/**/*', 'src/script/lexer/*', '**/*.mjs']
+    ignores: [
+      '**/node_modules/**/*',
+      '**/dist/**/*',
+      'src/script/lexer/MyParserCst.d.ts',
+      '**/*.mjs'
+    ]
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
