@@ -7,7 +7,12 @@ import prettierConfig from 'eslint-config-prettier'
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**/*', '**/dist/**/*', 'src/script/lexer/MyParserCst.d.ts']
+    ignores: [
+      '**/node_modules/**/*',
+      '**/dist/**/*',
+      'src/script/lexer/MyParserCst.d.ts',
+      'src/script/lexer/lexer.ts'
+    ]
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
