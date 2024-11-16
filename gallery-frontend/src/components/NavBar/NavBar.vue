@@ -1,5 +1,5 @@
 <template>
-  <AppBar />
+  <NavBarAppBar />
   <v-app-bar flat height="2" class="no-select">
     <v-progress-linear
       v-if="!initializedStore.initialized"
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
 import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
-import AppBar from '@/components//NavBar/NavBarAppBar.vue'
+import NavBarAppBar from '@/components//NavBar/NavBarAppBar.vue'
 import UploadModal from '@/components/Modal/uploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
