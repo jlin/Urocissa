@@ -1,15 +1,20 @@
 <template>
   <v-app-bar v-if="!collectionStore.editModeOn">
-    <v-btn v-if="!route.meta.isInsideAlbum" @click="showDrawer = !showDrawer" icon="mdi-menu">
-    </v-btn>
+    <v-btn v-if="!route.meta.isReadPage" @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
     <v-btn
       v-else
       icon="mdi mdi-arrow-left"
       :to="albumStore.leaveAlbumPath ? albumStore.leaveAlbumPath : '/'"
     ></v-btn>
-    <v-card v-if="route.meta.isInsideAlbum" elevation="0" class="w-50">
+    <v-card
+      v-if="
+        route.meta.isReadPage && !route.meta.isViewPage && typeof route.params.hash === 'string'
+      "
+      elevation="0"
+      class="w-50"
+    >
       <v-card-title class="text-truncate">
-        {{ albumStore.albumMap.get(route.path.split('/')[1].replace('album-', '')) }}
+        {{ albumStore.albumMap.get(route.params.hash) }}
       </v-card-title>
     </v-card>
     <v-card
@@ -24,7 +29,7 @@
           class="ma-0"
           v-model="searchQuery"
           bg-color="grey-darken-2"
-          @click:prependInner="handleSearch"
+          @click:prepend-inner="handleSearch"
           @click:clear="handleSearch"
           @keyup.enter="handleSearch"
           clearable
@@ -36,7 +41,7 @@
           hide-details
           style="margin-right: 10px"
         >
-          <template v-slot:label>
+          <template #label>
             <span class="text-caption">Search</span>
           </template>
         </v-text-field>
@@ -44,7 +49,7 @@
     </v-card>
 
     <v-menu v-if="!route.meta.isInsideAlbum">
-      <template v-slot:activator="{ props }">
+      <template #activator="{ props }">
         <v-btn v-bind="props" icon="mdi-plus"></v-btn>
       </template>
       <v-list>
@@ -82,9 +87,10 @@ import { useUploadStore } from '@/store/uploadStore'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 
+const showDrawer = inject('showDrawer')
+
 const albumStore = useAlbumStore('mainId')
 const modalStore = useModalStore('mainId')
-const showDrawer = inject('showDrawer') as Ref<boolean>
 const uploadStore = useUploadStore('mainId')
 const collectionStore = useCollectionStore('mainId')
 const route = useRoute()
@@ -130,13 +136,13 @@ async function handleFileUpload(event: Event): Promise<void> {
   let formData = new FormData()
   let totalSize = 0
 
-  for (let i = 0; i < files.length; i++) {
-    formData.append('lastModifiede' + i, files[i].lastModified.toString())
-    formData.append('file' + i, files[i])
-    totalSize += files[i].size
-  }
+  Array.from(files).forEach((file, i) => {
+    formData.append('lastModified' + i.toString(), file.lastModified.toString())
+    formData.append('file' + i.toString(), file)
+    totalSize += file.size
+  })
 
-  console.log(`Total upload size: ${totalSize} bytes`)
+  console.log(`Total upload size: ${totalSize.toString()} bytes`)
 
   try {
     const startTime = Date.now()
@@ -151,15 +157,13 @@ async function handleFileUpload(event: Event): Promise<void> {
         'Content-Type': 'multipart/form-data'
       },
       onUploadProgress: (progressEvent) => {
-        if (progressEvent.total) {
+        if (progressEvent.total !== undefined) {
           uploadStore.total = progressEvent.total
           uploadStore.loaded = progressEvent.loaded
           uploadStore.startTime = startTime
 
-          console.log(`Upload is ${uploadStore.percentComplete()}% complete`)
-          console.log(`Remaining time: ${uploadStore.remainingTime()} seconds`)
-        } else {
-          console.log(`Uploaded ${uploadStore.loaded} bytes`)
+          console.log(`Upload is ${uploadStore.percentComplete().toString()}% complete`)
+          console.log(`Remaining time: ${uploadStore.remainingTime().toString()} seconds`)
         }
       }
     })
@@ -169,7 +173,13 @@ async function handleFileUpload(event: Event): Promise<void> {
     messageStore.showMessage = true
   } catch (error) {
     console.error('There was an error uploading the files: ', error)
-    messageStor.message = `There was an error uploading the files: ${error}`
+
+    if (error instanceof Error) {
+      messageStor.message = `There was an error uploading the files: ${error.message}`
+    } else {
+      messageStor.message = `There was an error uploading the files: ${String(error)}`
+    }
+
     messageStor.warn = true
     messageStor.showMessage = true
   }
