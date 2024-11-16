@@ -19,7 +19,7 @@ export function createDataBase(
     ...databaseParse,
     timestamp: timestamp,
     thumbhashUrl: thumbHashToDataURL(databaseParse.thumbhash),
-    filename: databaseParse.alias[0]?.file.split('/').pop() || ''
+    filename: databaseParse.alias[0]?.file.split('/').pop() ?? ''
   }
   return database
 }
