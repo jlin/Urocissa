@@ -1,7 +1,6 @@
 {
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "eslint.config.mjs"],
+  "include": ["src/**/*"],
   "compilerOptions": {
-    "allowJs": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

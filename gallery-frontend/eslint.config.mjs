@@ -1,17 +1,17 @@
-// @ts-check
-
 import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import vueParser from 'vue-eslint-parser'
 import prettierConfig from 'eslint-config-prettier'
+import pluginVue from 'eslint-plugin-vue'
 
 export default tseslint.config(
   {
-    ignores: ['**/node_modules/**/*', '**/dist/**/*', 'src/script/lexer/*']
+    ignores: ['**/node_modules/**/*', '**/dist/**/*', 'src/script/lexer/*', '**/*.mjs']
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
+  ...pluginVue.configs['flat/strongly-recommended'],
   {
     languageOptions: {
       parser: vueParser,
@@ -27,6 +27,5 @@ export default tseslint.config(
       '@typescript-eslint/strict-boolean-expressions': 'error'
     }
   },
-
   prettierConfig
 )
