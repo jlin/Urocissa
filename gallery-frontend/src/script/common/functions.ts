@@ -6,6 +6,7 @@ import { DataBaseParse } from './schemas'
 import { DataBase, AbstractData, Album } from './types'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ComputedRef } from 'vue'
+import { useDataStore } from '@/store/dataStore'
 
 /**
  * Creates a DataBase instance from parsed data and timestamp.
@@ -69,4 +70,33 @@ export function dater(timestamp: number): string {
 export function getIsolationIdByRoute(route: RouteLocationNormalizedLoaded) {
   const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
   return isolationId
+}
+
+export function getHashIndexDataFromRoute(route: RouteLocationNormalizedLoaded) {
+  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
+  const storeData = useDataStore(isolationId)
+
+  let hash: string
+
+  if (isolationId === 'mainId' && typeof route.params.hash === 'string') {
+    hash = route.params.hash
+  } else if (isolationId === 'subId' && typeof route.params.subhash === 'string') {
+    hash = route.params.subhash
+  } else {
+    return undefined
+  }
+
+  const index = storeData.hashMapData.get(hash)
+
+  if (index === undefined) {
+    return undefined
+  }
+
+  const data = storeData.data.get(index)
+
+  if (data === undefined) {
+    return undefined
+  }
+
+  return { hash: hash, index: index, data: data }
 }

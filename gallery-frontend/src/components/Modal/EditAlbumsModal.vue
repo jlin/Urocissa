@@ -1,5 +1,6 @@
 <template>
   <v-dialog
+    v-if="submit !== undefined"
     v-model="modalStore.showEditAlbumsModal"
     variant="flat"
     persistent
@@ -64,71 +65,77 @@
  * This modal is used for editing the album of a single photo on the single photo view page.
  */
 import { useModalStore } from '@/store/modalStore'
-import { ref, computed, onMounted, watchEffect } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDataStore } from '@/store/dataStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { AlbumInfo } from '@/script/common/types'
-import { getIsolationIdByRoute } from '@/script/common/functions'
+import { getHashIndexDataFromRoute } from '@/script/common/functions'
 
+const submit = ref<(() => void) | undefined>(undefined)
 const route = useRoute()
-const isolationId = getIsolationIdByRoute(route)
-const storeData = useDataStore(isolationId)
+
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
 
 const vModelAlbumsArray = ref<AlbumInfo[]>([])
 
-const hash = computed(() => {
-  if (isolationId === 'mainId') {
-    return route.params.hash as string
-  } else {
-    return route.params.subhash as string
-  }
-})
-
-const defaultAlbums = computed(() => {
-  // defaultAlbums should be the list of albums in data.database.album
-  const data = storeData.data.get(storeData.hashMapData.get(hash.value)!)!
-  const result = data.database!.album.map((albumId) => ({
-    albumId,
-    albumName: albumStore.albumMap.get(albumId)!
-  }))
-  return result
-})
-
 onMounted(() => {
-  // by default vModelAlbumsArray is empty
-  // initialize vModelAlbumsArray by setting to defaultAlbums
-  vModelAlbumsArray.value = defaultAlbums.value
+  const useSubmit = (): undefined | (() => void) => {
+    const initializeResult = getHashIndexDataFromRoute(route)
+    if (initializeResult === undefined) {
+      return undefined
+    }
+
+    const { index: index, data: data } = initializeResult
+    if (data.database === undefined) {
+      return undefined
+    }
+
+    const defaultAlbums: AlbumInfo[] = []
+
+    for (const albumId of data.database.album) {
+      const albumName = albumStore.albumMap.get(albumId)
+      if (albumName === undefined) {
+        // Early return if albumName is not found
+        return undefined
+      }
+      defaultAlbums.push({ albumId, albumName })
+    }
+
+    // by default vModelAlbumsArray is empty
+    // initialize vModelAlbumsArray by setting to defaultAlbums
+    vModelAlbumsArray.value = defaultAlbums
+
+    const innerSubmit = () => {
+      // hash of the current photo/video
+      const idArray: number[] = [index]
+
+      // albums that should be added = albums that are not in default, but in v-model
+      const addAlbumsArrayComputed = vModelAlbumsArray.value.filter(
+        (album) => !defaultAlbums.map((album) => album.albumId).includes(album.albumId)
+      )
+
+      // albums that should be deleted = albums that are in default, but not in v-model
+      const removeAlbumsArrayComputed = defaultAlbums.filter(
+        (album) => !vModelAlbumsArray.value.map((album) => album.albumId).includes(album.albumId)
+      )
+
+      editAlbumsInWorker(
+        idArray,
+        addAlbumsArrayComputed.map((album) => album.albumId),
+        removeAlbumsArrayComputed.map((album) => album.albumId)
+      )
+      modalStore.showEditAlbumsModal = false
+    }
+    return innerSubmit
+  }
+  submit.value = useSubmit()
 })
 
 watchEffect(() => {
   console.log('vModelAlbumsArray is', vModelAlbumsArray.value)
 })
-
-const submit = () => {
-  // hash of the current photo/video
-  const hashArray: number[] = [storeData.hashMapData.get(route.params.hash as string)!]
-
-  // albums that should be added = albums that are not in default, but in v-model
-  const addAlbumsArrayComputed = vModelAlbumsArray.value.filter(
-    (album) => !defaultAlbums.value?.map((album) => album.albumId)!.includes(album.albumId)
-  )
-
-  // albums that should be deleted = albums that are in default, but not in v-model
-  const removeAlbumsArrayComputed = defaultAlbums.value!.filter(
-    (album) => !vModelAlbumsArray.value?.map((album) => album.albumId).includes(album.albumId)
-  )
-
-  editAlbumsInWorker(
-    hashArray,
-    addAlbumsArrayComputed.map((album) => album.albumId),
-    removeAlbumsArrayComputed.map((album) => album.albumId)
-  )
-  modalStore.showEditAlbumsModal = false
-}
 </script>
 
 <style scoped></style>
