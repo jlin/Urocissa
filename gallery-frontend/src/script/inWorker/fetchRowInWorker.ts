@@ -35,9 +35,13 @@ export function fetchRowInWorker(index: number, isolationId: string) {
   if (workerStore.worker === null) {
     workerStore.initializeWorker(isolationId)
   }
-  const dataWorker = workerStore.worker!
+  const dataWorker = workerStore.worker
 
-  const postToWorker = bindActionDispatch(toDataWorker, (action) => { dataWorker.postMessage(action); })
+  const postToWorker = bindActionDispatch(toDataWorker, (action) => {
+    if (dataWorker) {
+      dataWorker.postMessage(action)
+    }
+  })
   const timestamp = prefetchStore.timestamp
 
   if (timestamp !== null) {

@@ -15,8 +15,12 @@ export function prefetchInWorker(
     workerStore.initializeWorker(isolationId)
   }
 
-  const dataWorker = workerStore.worker!
-  const postToWorker = bindActionDispatch(toDataWorker, (action) => { dataWorker.postMessage(action); })
+  const dataWorker = workerStore.worker
+  const postToWorker = bindActionDispatch(toDataWorker, (action) => {
+    if (dataWorker) {
+      dataWorker.postMessage(action)
+    }
+  })
 
   postToWorker.prefetch({
     filterJsonString: filterJsonString,

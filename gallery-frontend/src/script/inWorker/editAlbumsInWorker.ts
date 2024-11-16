@@ -19,8 +19,13 @@ export function editAlbumsInWorker(
     workerStore.initializeWorker('mainId')
   }
 
-  const dataWorker = workerStore.worker!
-  const postToWorker = bindActionDispatch(toDataWorker, (action) => { dataWorker.postMessage(action); })
+  const dataWorker = workerStore.worker
+
+  const postToWorker = bindActionDispatch(toDataWorker, (action) => {
+    if (dataWorker) {
+      dataWorker.postMessage(action)
+    }
+  })
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {
