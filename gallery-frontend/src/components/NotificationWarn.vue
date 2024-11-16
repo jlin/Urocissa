@@ -6,7 +6,7 @@
       timer="2000"
     >
       {{ messageStore.message }}
-      <template v-slot:actions> </template>
+      <template #actions> </template>
     </v-snackbar>
   </div>
 </template>
