@@ -19,14 +19,14 @@
           :metadata="abstractData"
           :index="index"
           :hash="hash"
-          :isolationId="isolationId"
+          :isolation-id="isolationId"
         />
         <MetadataCol
           v-if="abstractData"
           :metadata="abstractData"
           :index="index"
           :hash="hash"
-          :isolationId="isolationId"
+          :isolation-id="isolationId"
         />
       </v-row>
     </v-container>
