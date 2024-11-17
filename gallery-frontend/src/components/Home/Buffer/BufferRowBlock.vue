@@ -10,7 +10,7 @@
       class="ma-1"
     >
       <v-hover>
-        <template #default="{ isHovering: imgIsHovering, props }">
+        <template #default="{ isHovering: imgIsHovering, props: hoverProps }">
           <div
             class="position-relative w-100 h-100"
             :style="{
@@ -20,11 +20,11 @@
                   ? '4px solid #81D4FA'
                   : ''
             }"
-            v-bind="props"
+            v-bind="hoverProps"
           >
             <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
               <v-hover v-if="!mobile">
-                <template #default="{ isHovering: iconIsHovering, props }">
+                <template #default="{ isHovering: iconIsHovering, props: iconHoverProps }">
                   <v-icon
                     v-show="imgIsHovering"
                     icon="mdi-check-circle"
@@ -33,7 +33,7 @@
                     :style="{
                       zIndex: 4
                     }"
-                    v-bind="props"
+                    v-bind="iconHoverProps"
                     @click="handleClickIcon($event, row.start + subIndex)"
                   ></v-icon>
                 </template>
@@ -201,13 +201,19 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
 import { useImgStore } from '@/store/imgStore'
-import { inject, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useHandleClick } from '@/components/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import Cookies from 'js-cookie'
+
+import {
+  getArrayValue,
+  getCookiesJwt,
+  getInjectValue,
+  getMapValue
+} from '@/script/common/functions'
 
 const props = defineProps<{
   row: Row
@@ -216,7 +222,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const mobile = inject<string | null>('mobile')!
+const mobile = getInjectValue('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const dataStore = useDataStore(props.isolationId)
@@ -231,7 +237,7 @@ const pressTimer = ref<number | null>(null) // 定時器 ID
 const { handleClick } = useHandleClick(router, route, props.isolationId)
 
 const handleClickIcon = (event: MouseEvent, currentIndex: number) => {
-  if (collectionStore.editModeOn === false) {
+  if (!collectionStore.editModeOn) {
     collectionStore.editModeOn = true
     collectionStore.addApi(currentIndex)
     collectionStore.lastClick = currentIndex
@@ -249,7 +255,7 @@ const handlePointerdown = (event: MouseEvent, currentIndex: number) => {
 }
 
 const handlePointerUp = (event: MouseEvent, currentIndex: number) => {
-  if (pressTimer.value) {
+  if (pressTimer.value !== null) {
     clearTimeout(pressTimer.value) // 清除定時器
     pressTimer.value = null
   }
@@ -259,14 +265,14 @@ const handlePointerUp = (event: MouseEvent, currentIndex: number) => {
 }
 
 const handlePointerLeave = () => {
-  if (pressTimer.value) {
+  if (pressTimer.value !== null) {
     clearTimeout(pressTimer.value) // 取消長按事件
     pressTimer.value = null
   }
 }
 
 const handleLongPressClick = (event: MouseEvent, currentIndex: number) => {
-  if (collectionStore.editModeOn === false) {
+  if (!collectionStore.editModeOn) {
     collectionStore.editModeOn = true
     collectionStore.addApi(currentIndex)
     collectionStore.lastClick = currentIndex
@@ -283,24 +289,24 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
     const workerIndex = index % workerStore.concurrencyNumber
 
     if (workerStore.postToWorkerList !== undefined) {
-      const data = dataStore.data.get(index)!
+      const data = getMapValue(dataStore.data, index) // always succeed by v-if
       if (data.database) {
-        workerStore.postToWorkerList[workerIndex].processSmallImage({
+        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
           index: index,
           hash: data.database.hash,
           width: displayWidth,
           height: displayHeight,
           devicePixelRatio: window.devicePixelRatio,
-          jwt: Cookies.get('jwt')!
+          jwt: getCookiesJwt()
         })
-      } else if (data.album?.cover) {
-        workerStore.postToWorkerList[workerIndex].processSmallImage({
+      } else if (data.album?.cover !== null && data.album?.cover !== undefined) {
+        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
           index: index,
-          hash: data.album?.cover,
+          hash: data.album.cover,
           width: displayWidth,
           height: displayHeight,
           devicePixelRatio: window.devicePixelRatio,
-          jwt: Cookies.get('jwt')!,
+          jwt: getCookiesJwt(),
           albumMode: true
         })
       }
@@ -325,9 +331,13 @@ function formatDuration(durationString: string) {
   // Determine the formatted duration based on the presence of hours, minutes, and seconds
   let formattedDuration = ''
   if (hours > 0) {
-    formattedDuration = `${hours}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')}`
+    formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`
   } else {
-    formattedDuration = `${minutes}:${seconds.padStart(2, '0')}`
+    formattedDuration = `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`
   }
 
   return formattedDuration
@@ -348,7 +358,7 @@ onBeforeUnmount(() => {
   for (let abortIndex = props.row.start; abortIndex <= props.row.end; abortIndex++) {
     const workerIndex = abortIndex % workerStore.concurrencyNumber
     if (workerStore.postToWorkerList !== undefined) {
-      workerStore.postToWorkerList[workerIndex].processAbort({
+      getArrayValue(workerStore.postToWorkerList, workerIndex).processAbort({
         index: abortIndex
       })
     } else {
