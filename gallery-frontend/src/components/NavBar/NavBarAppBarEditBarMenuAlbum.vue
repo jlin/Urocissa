@@ -1,6 +1,6 @@
 <template>
   <v-menu>
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn v-bind="props" icon>
         <v-icon>mdi-dots-vertical</v-icon>
       </v-btn>
@@ -34,7 +34,7 @@ const albumId = computed(() => {
     // Extract the album identifier (e.g., 'album-3jwdp89ndzovner66kqicnu2m37yuhjsqg2g6psro86izspduz3u4if02wughxm3')
     const segments = path.split('/')
     const albumSegment = segments.find((segment) => segment.startsWith('album-'))
-    return albumSegment ? albumSegment.slice('album-'.length) : undefined
+    return albumSegment?.slice('album-'.length)
   } else {
     return undefined
   }
@@ -49,17 +49,22 @@ const setCover = async () => {
 
     // Extract the only cover hash index from the collection
     const coverHashIndex = Array.from(collectionStore.editModeCollection)[0]
+    if (coverHashIndex === undefined) {
+      throw new Error(
+        "Failed to retrieve the cover hash index: 'editModeCollection' is empty or does not contain a valid cover hash."
+      )
+    }
 
     // Retrieve the cover hash from the data store
     const dataEntry = dataStore.data.get(coverHashIndex)
-    if (!dataEntry || !dataEntry.database || !dataEntry.database.hash) {
+    if (dataEntry?.database?.hash === undefined) {
       throw new Error('Invalid cover hash data.')
     }
     const coverHash = dataEntry.database.hash
 
     // Retrieve the album ID
     const currentAlbumId = albumId.value
-    if (!currentAlbumId) {
+    if (currentAlbumId === undefined) {
       throw new Error('Album ID is not available.')
     }
 
@@ -81,7 +86,7 @@ const setCover = async () => {
     } else {
       throw new Error(`Unexpected response status: ${response.status}`)
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error setting album cover:', error)
     // Optionally, show an error message
   }
