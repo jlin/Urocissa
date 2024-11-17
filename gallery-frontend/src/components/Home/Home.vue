@@ -137,9 +137,13 @@ watch(windowWidth, () => {
 })
 
 const resizeDebounce = debounce(() => {
-  const locationRowIndex = Math.floor(locationStore.locationIndex! / layoutBatchNumber)
-  scrollTopStore.scrollTop = locationRowIndex * 2400
-  fetchRowInWorker(locationRowIndex, props.isolationId)
+  if (locationStore.locationIndex === null) {
+    throw new Error('Resize operation failed: locationIndex is null.')
+  } else {
+    const locationRowIndex = Math.floor(locationStore.locationIndex / layoutBatchNumber)
+    scrollTopStore.scrollTop = locationRowIndex * 2400
+    fetchRowInWorker(locationRowIndex, props.isolationId)
+  }
 }, 100)
 
 const bufferHeight = computed(() => {
@@ -152,7 +156,7 @@ const bufferHeight = computed(() => {
   }
 })
 
-onMounted(async () => {
+onMounted(() => {
   filterStore.handleFilterString(route)
   filterStore.handleBasicString(route, props.isolationId)
 
