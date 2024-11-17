@@ -30,7 +30,8 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/strict-boolean-expressions': 'error',
-      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }]
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
+      'vue/multi-word-component-names': 'off'
     }
   },
   prettierConfig
