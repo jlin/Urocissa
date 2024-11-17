@@ -136,7 +136,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
   })
 
   const messageHandler = (e: MessageEvent) => {
-    handler(e.data)
+    handler(e.data as ReturnType<(typeof fromDataWorker)[keyof typeof fromDataWorker]>)
   }
 
   dataWorker.addEventListener('message', messageHandler)

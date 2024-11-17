@@ -20,7 +20,7 @@ export function handleImgWorker(imgWorker: Worker, isolationId: string) {
   })
 
   const messageHandler = (e: MessageEvent) => {
-    handler(e.data)
+    handler(e.data as ReturnType<(typeof fromImgWorker)[keyof typeof fromImgWorker]>)
   }
 
   imgWorker.addEventListener('message', messageHandler)
