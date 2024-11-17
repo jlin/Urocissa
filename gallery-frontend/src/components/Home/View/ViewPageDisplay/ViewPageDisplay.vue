@@ -69,7 +69,6 @@ import { toImgWorker } from '@/worker/workerApi'
 import { useWorkerStore } from '@/store/workerStore'
 import { useQueueStore } from '@/store/queueStore'
 import { batchNumber } from '@/script/common/constants'
-import Cookies from 'js-cookie'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { AbstractData } from '@/script/common/types'
@@ -78,6 +77,7 @@ import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/View
 import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
 import { leaveViewPage } from '@/script/navigator'
 import delay from 'delay'
+import { getCookiesJwt } from '@/script/common/functions'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -187,7 +187,7 @@ const checkAndFetch = (index: number): boolean => {
       index,
       hash,
       devicePixelRatio: window.devicePixelRatio,
-      jwt: Cookies.get('jwt')! // Assuming JWT is always present
+      jwt: getCookiesJwt() // Assuming JWT is always present
     })
   }
 
