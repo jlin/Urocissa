@@ -2,6 +2,7 @@ import { computed, Ref, watch } from 'vue'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { useDataStore } from '@/store/dataStore'
 import debounce from 'lodash/debounce'
+import { getArrayValue } from '@/script/common/functions'
 /**
  * Hook to fetch image batches for visible rows in a virtual scroll.
  *
@@ -25,10 +26,11 @@ export function useFetchImgs(
       const length = visibleRowsLength.value
       if (length > 0) {
         const startBatchIndex = Math.max(
-          Math.floor(visibleRows.value[0].start / batchNumber) - 1,
+          Math.floor(getArrayValue(visibleRows.value, 0).start / batchNumber) - 1,
           0
         )
-        const endBatchIndex = Math.floor(visibleRows.value[length - 1].end / batchNumber) + 1
+        const endBatchIndex =
+          Math.floor(getArrayValue(visibleRows.value, length - 1).end / batchNumber) + 1
 
         for (let batchIndex = startBatchIndex; batchIndex <= endBatchIndex; batchIndex++) {
           if (dataStore.batchFetched.get(batchIndex) !== true) {
@@ -47,8 +49,8 @@ export function useFetchImgs(
   const visibleRowsId = computed(() => {
     const length = visibleRows.value.length
     if (length > 0) {
-      const start = visibleRows.value[0].start
-      const end = visibleRows.value[length - 1].end
+      const start = getArrayValue(visibleRows.value, 0).start
+      const end = getArrayValue(visibleRows.value, length - 1).end
       return `${start}-${end}`
     } else {
       return ''
