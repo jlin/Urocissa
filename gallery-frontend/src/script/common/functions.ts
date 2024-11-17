@@ -7,6 +7,7 @@ import { DataBase, AbstractData, Album } from './types'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ComputedRef, inject } from 'vue'
 import { useDataStore } from '../../store/dataStore.ts'
+import Cookies from 'js-cookie'
 
 /**
  * Creates a DataBase instance from parsed data and timestamp.
@@ -122,4 +123,32 @@ export function getInjectValue<T>(key: string | symbol): T {
     throw new RangeError(`Injection for key "${String(key)}" is undefined.`)
   }
   return result
+}
+
+/**
+ * Retrieves a value from a Map and ensures it's not undefined.
+ * @param map - The Map to retrieve the value from.
+ * @param key - The key whose associated value is to be returned.
+ * @returns The value associated with the specified key.
+ * @throws {RangeError} If the key does not exist in the Map.
+ */
+export function getMapValue<K, V>(map: Map<K, V>, key: K): V {
+  const value = map.get(key)
+  if (value === undefined) {
+    throw new RangeError(`No value found for key "${String(key)}" in the map.`)
+  }
+  return value
+}
+
+/**
+ * Retrieves the 'jwt' cookie and ensures it exists.
+ * @returns The value of the 'jwt' cookie as a string.`
+ * @throws {RangeError} If the 'jwt' cookie is not found.
+ */
+export function getCookiesJwt(): string {
+  const jwt = Cookies.get('jwt')
+  if (jwt === undefined) {
+    throw new RangeError('JWT cookie is missing.')
+  }
+  return jwt
 }
