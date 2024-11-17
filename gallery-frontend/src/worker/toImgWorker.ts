@@ -24,8 +24,9 @@ axiosRetry(axios, {
     }
 
     // Check if the error is an AxiosError and has a response property
-    if ((error as AxiosError).response) {
-      return (error as AxiosError).response!.status !== 200
+    const response = (error as AxiosError).response
+    if (response) {
+      return response.status !== 200
     }
 
     // Handle other unknown situations
@@ -39,23 +40,28 @@ const handler = createHandler<typeof toImgWorker>({
     try {
       const controller = new AbortController()
       controllerMap.set(event.index, controller)
-      const response = await axios.get(getSrc(event.hash, false, 'jpg', event.jwt, undefined), {
-        signal: controller.signal,
-        responseType: 'blob'
-      })
+      const response = await axios.get<Blob>(
+        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
+        {
+          signal: controller.signal,
+          responseType: 'blob'
+        }
+      )
       controllerMap.delete(event.index)
       const blob = response.data
       const img = await createImageBitmap(blob)
 
+      const albumMode = event.albumMode === true
+
       const converted: Blob = await readAndCompressImage(img, {
         argorithm: 'bilinear',
         quality: 1,
-        maxWidth: event.albumMode
+        maxWidth: albumMode
           ? img.width *
             Math.max(event.width / img.width, event.height / img.height) *
             event.devicePixelRatio
           : event.width * event.devicePixelRatio,
-        maxHeight: event.albumMode
+        maxHeight: albumMode
           ? img.height *
             Math.max(event.width / img.width, event.height / img.height) *
             event.devicePixelRatio
@@ -74,9 +80,12 @@ const handler = createHandler<typeof toImgWorker>({
   },
   async processImage(event: processImagePayload) {
     try {
-      const response = await axios.get(getSrc(event.hash, false, 'jpg', event.jwt, undefined), {
-        responseType: 'blob'
-      })
+      const response = await axios.get<Blob>(
+        getSrc(event.hash, false, 'jpg', event.jwt, undefined),
+        {
+          responseType: 'blob'
+        }
+      )
       const blob = response.data
       const img = await createImageBitmap(blob)
 
@@ -94,7 +103,7 @@ const handler = createHandler<typeof toImgWorker>({
       console.error(error)
     }
   },
-  async processAbort(event: processAbortPayload) {
+  processAbort(event: processAbortPayload) {
     const controller = controllerMap.get(event.index)
     if (controller !== undefined) {
       controller.abort()
@@ -104,5 +113,5 @@ const handler = createHandler<typeof toImgWorker>({
 })
 
 self.addEventListener('message', (e) => {
-  handler(e.data)
+  handler(e.data as ReturnType<(typeof toImgWorker)[keyof typeof toImgWorker]>)
 })
