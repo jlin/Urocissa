@@ -36,7 +36,7 @@ export function handleScroll(
 
         if (result < 0) {
           // If scrolling exceeds the lower bound, reset the scroll position to 0.
-          if (mobile) {
+          if (mobile !== null) {
             stopScroll.value = true
             scrollTopStore.scrollTop = 0
             setTimeout(() => {
@@ -47,7 +47,7 @@ export function handleScroll(
           }
         } else if (result >= prefetchStore.totalHeight - windowHeight.value - paddingPixel) {
           // If scrolling exceeds the upper bound, reset the scroll position to the maximum allowed value.
-          if (mobile) {
+          if (mobile !== null) {
             stopScroll.value = true
             scrollTopStore.scrollTop = prefetchStore.totalHeight - windowHeight.value - paddingPixel
             setTimeout(() => {
