@@ -6,6 +6,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { useRowStore } from '@/store/rowStore'
 import { Ref, ref, toRaw, watch } from 'vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { getArrayValue, getMapValue } from '@/script/common/functions'
 
 /**
  * Finds and returns rows that overlap within the given range.
@@ -21,17 +22,15 @@ function findRowInRange(rowMap: Map<number, Row>, startRange: number, endRange: 
 
   for (const [, row] of rowMap) {
     if (
-      row.topPixelAccumulated! + row.rowHeight + row.offset >= startRange &&
-      row.topPixelAccumulated! + row.offset < endRange
+      row.topPixelAccumulated + row.rowHeight + row.offset >= startRange &&
+      row.topPixelAccumulated + row.offset < endRange
     ) {
       visibleRows.push(row)
     }
   }
 
   // Sort the rows by their top position (topPixelAccumulated) plus offset
-  visibleRows.sort(
-    (a, b) => a.topPixelAccumulated! + a.offset - (b.topPixelAccumulated! + b.offset)
-  )
+  visibleRows.sort((a, b) => a.topPixelAccumulated + a.offset - (b.topPixelAccumulated + b.offset))
 
   return visibleRows
 }
@@ -58,16 +57,16 @@ function getCurrentVisibleRows(
   // Find rows within the current viewport range that were visible in the previous frame
   const rowsInRange = findRowInRange(lastVisibleRow, startHeight, endHeight)
 
-  if (rowsInRange.length !== 0) {
+  if (rowsInRange.length > 0) {
     // If there are rows from the previous frame within the current viewport,
     // calculate the shift in row offsets.
-    const lastRow = rowsInRange[rowsInRange.length - 1]
+    const lastRow = getArrayValue(rowsInRange, rowsInRange.length - 1)
     const lastRowOffset = lastRow.offset
-    const currentRowOffset = rowStore.rowData.get(lastRow.rowIndex)!.offset
+    const currentRowOffset = getMapValue(rowStore.rowData, lastRow.rowIndex).offset
     extraShift = currentRowOffset - lastRowOffset
   }
 
-  if (rowsInRange.length !== 0 && extraShift === 0) {
+  if (rowsInRange.length > 0 && extraShift === 0) {
     // If there are rows from the previous frame visible in the current viewport
     // and there is no offset shift, return these rows directly as they are
     // correctly positioned.
@@ -100,16 +99,17 @@ function getCurrentVisibleRows(
  * @param rowData - Map of all rows by index.
  */
 function appendAndPrependRow(visibleRows: Ref<Row[]>, isolationId: string) {
+  // assume visibleRows.value.length > 0
   const rowStore = useRowStore(isolationId)
 
-  const lastRowIndex = visibleRows.value[visibleRows.value.length - 1].rowIndex
+  const lastRowIndex = getArrayValue(visibleRows.value, visibleRows.value.length - 1).rowIndex
   const appendRow = rowStore.rowData.get(lastRowIndex + 1)
 
   if (appendRow) {
     visibleRows.value.push(appendRow)
   }
 
-  const firstRowIndex = visibleRows.value[0].rowIndex
+  const firstRowIndex = getArrayValue(visibleRows.value, 0).rowIndex
   const prependRow = rowStore.rowData.get(firstRowIndex - 1)
 
   if (prependRow) {
@@ -148,18 +148,17 @@ function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number, iso
   const rowStore = useRowStore(isolationId)
   const scrollTopStore = useScrollTopStore(isolationId)
 
-  const lastCurrentRowThatInLastVisibleRow = visibleRows.value.findLast((row) => {
-    return rowStore.lastVisibleRow.has(row.rowIndex)
-  })
+  const lastRow = visibleRows.value.findLast((row) => rowStore.lastVisibleRow.has(row.rowIndex))
 
-  if (lastCurrentRowThatInLastVisibleRow !== undefined) {
-    // Compute the difference between the current and last known offset
-    const shift =
-      lastCurrentRowThatInLastVisibleRow.offset -
-      rowStore.lastVisibleRow.get(lastCurrentRowThatInLastVisibleRow.rowIndex)!.offset
+  if (lastRow) {
+    const lastKnownRow = rowStore.lastVisibleRow.get(lastRow.rowIndex)
+    if (lastKnownRow) {
+      // Compute the difference between the current and last known offset
+      const shift = lastRow.offset - lastKnownRow.offset
 
-    // Adjust scrollTop while ensuring it does not exceed the scrollingBound
-    scrollTopStore.scrollTop = Math.min(scrollTopStore.scrollTop + shift, scrollingBound)
+      // Adjust scrollTop while ensuring it does not exceed the scrollingBound
+      scrollTopStore.scrollTop = Math.min(scrollTopStore.scrollTop + shift, scrollingBound)
+    }
   }
 }
 
@@ -185,14 +184,14 @@ function updateLastVisibleRow(visibleRows: Ref<Row[]>, isolationId: string) {
 function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number, isolationId: string) {
   const locationStore = useLocationStore(isolationId)
   for (const row of visibleRows.value) {
-    if (row.topPixelAccumulated! + row.rowHeight + row.offset >= scrollTop) {
-      const topPixelAccumulatedOffseted = row.topPixelAccumulated! + row.offset
+    if (row.topPixelAccumulated + row.rowHeight + row.offset >= scrollTop) {
+      const topPixelAccumulatedOffseted = row.topPixelAccumulated + row.offset
 
       for (let index = 0; index < row.displayElements.length; index++) {
-        const displayElement = row.displayElements[index]
+        const displayElement = getArrayValue(row.displayElements, index)
         if (
           topPixelAccumulatedOffseted +
-            displayElement.displayTopPixelAccumulated! +
+            displayElement.displayTopPixelAccumulated +
             displayElement.displayHeight >=
           scrollTop
         ) {
@@ -218,9 +217,9 @@ function updateLastRowBottom(
   isolationId: string
 ) {
   const prefetchStore = usePrefetchStore(isolationId)
-  if (visibleRows.value.length > 0) {
-    const lastRow = visibleRows.value[visibleRows.value.length - 1]
-    const lastRowBottomComputed = lastRow.topPixelAccumulated! + lastRow.offset + lastRow.rowHeight
+  const lastRow = visibleRows.value[visibleRows.value.length - 1]
+  if (lastRow) {
+    const lastRowBottomComputed = lastRow.topPixelAccumulated + lastRow.offset + lastRow.rowHeight
     lastRowBottom.value = lastRowBottomComputed
     if (lastRowBottomComputed <= endHeight && lastRow.end < prefetchStore.dataLength) {
       const lastRowIndex = lastRow.rowIndex

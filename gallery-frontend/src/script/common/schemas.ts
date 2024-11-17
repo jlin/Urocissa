@@ -18,7 +18,7 @@ export const AliasSchema = z.object({
 export const displayElementSchema = z.object({
   displayWidth: z.number(),
   displayHeight: z.number(),
-  displayTopPixelAccumulated: z.number().optional()
+  displayTopPixelAccumulated: z.number().optional().default(0)
 })
 
 /**
@@ -29,11 +29,10 @@ export const rowSchema = z.object({
   end: z.number(),
   rowHeight: z.number().optional().default(fixedBigRowHeight),
   displayElements: z.array(displayElementSchema),
-  topPixelAccumulated: z.number().optional(),
+  topPixelAccumulated: z.number().default(0), // Changed line
   rowIndex: z.number(),
   offset: z.number().optional().default(0)
 })
-
 /**
  * Schema for rows with offset.
  */
