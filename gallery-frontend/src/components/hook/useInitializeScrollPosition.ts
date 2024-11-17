@@ -31,7 +31,7 @@ export function useInitializeScrollPosition(
     // the imageContainer.scrollTop may be reset to 0 (whenever bufferHeight becomes 0).
     [() => initializedStore.initialized, windowWidth],
 
-    async () => {
+    () => {
       const scrollTopStore = useScrollTopStore(isolationId)
       const imageContainer = imageContainerRef.value
       if (imageContainer !== null && initializedStore.initialized) {
