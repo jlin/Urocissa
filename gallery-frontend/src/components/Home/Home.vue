@@ -13,7 +13,7 @@
     </v-card>
   </v-toolbar>
   <router-view></router-view>
-  <ScrollBar v-if="imageContainerRef" :isolationId="props.isolationId" />
+  <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
   <div
     id="image-container"
     ref="imageContainerRef"
@@ -31,12 +31,12 @@
   >
     <Buffer
       v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
-      :bufferHeight="bufferHeight"
-      :isolationId="props.isolationId"
+      :buffer-height="bufferHeight"
+      :isolation-id="props.isolationId"
     />
     <HomeEmptyCard
       v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-      :isolationId="props.isolationId"
+      :isolation-id="props.isolationId"
     />
   </div>
 </template>

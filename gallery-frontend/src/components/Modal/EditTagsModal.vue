@@ -1,5 +1,11 @@
 <template>
-  <v-dialog v-model="modalStore.showEditTagsModal" variant="flat" persistent id="edit-tag-overlay">
+  <v-dialog
+    v-if="submit !== undefined"
+    v-model="modalStore.showEditTagsModal"
+    variant="flat"
+    persistent
+    id="edit-tag-overlay"
+  >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated" retain-focus>
       <v-card-title> Edit Tags </v-card-title>
       <v-container>
@@ -28,7 +34,7 @@
           color="teal-accent-4"
           variant="outlined"
           class="ma-2 button button-submit"
-          @click="change()"
+          @click="submit()"
           :loading="!tagStore.fetched"
         >
           Submit
@@ -45,14 +51,11 @@
 import { useModalStore } from '@/store/modalStore'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDataStore } from '@/store/dataStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
-import { getIsolationIdByRoute } from '@/script/common/functions'
+import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
 
 const route = useRoute()
-const isolationId = getIsolationIdByRoute(route)
-const storeData = useDataStore(isolationId)
 const modalStore = useModalStore('mainId')
 const tagStore = useTagStore('mainId')
 
@@ -61,41 +64,47 @@ const tagList = computed(() => {
   return tagStore.tags
 })
 
+const submit = ref<(() => void) | undefined>(undefined)
+
 const specialTag = (tag: string): boolean => {
   return tag == '_archived' || tag == '_favorite'
 }
 
 onMounted(() => {
-  const data = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!
-  if (data.database) {
-    changedTagsArray.value = data.database.tag.filter((tag) => !specialTag(tag))
-  } else if (data.album) {
-    changedTagsArray.value = data.album.tag.filter((tag) => !specialTag(tag))
+  const useSubmit = (): undefined | (() => void) => {
+    const initializeResult = getHashIndexDataFromRoute(route)
+    if (initializeResult === undefined) {
+      console.error(
+        "useSubmit Error: Failed to initialize result. 'getHashIndexDataFromRoute(route)' returned undefined."
+      )
+      return undefined
+    }
+    const { index, data } = initializeResult
+    if (data.database === undefined) {
+      console.error("useSubmit Error: 'data.database' is undefined.")
+      return undefined
+    }
+
+    const defaultTags = data.database.tag
+    changedTagsArray.value = defaultTags
+
+    const innerSubmit = () => {
+      const hashArray: number[] = [index]
+      const addTagsArrayComputed = changedTagsArray.value.filter(
+        (tag) => !specialTag(tag) && !defaultTags.includes(tag)
+      )
+      const removeTagsArrayComputed = defaultTags.filter(
+        (tag) => !specialTag(tag) && !changedTagsArray.value.includes(tag)
+      )
+
+      const isolationId = getIsolationIdByRoute(route)
+
+      editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
+    }
+    return innerSubmit
   }
+  submit.value = useSubmit()
 })
-
-const defaultTags = computed(() => {
-  const data = storeData.data.get(storeData.hashMapData.get(route.params.hash as string)!)!
-  if (data.database) {
-    return data.database.tag
-  } else {
-    return data.album!.tag
-  }
-})
-
-const change = () => {
-  const hashArray: number[] = [storeData.hashMapData.get(route.params.hash as string)!]
-  const addTagsArrayComputed = changedTagsArray.value.filter(
-    (tag) => !specialTag(tag) && !defaultTags.value.includes(tag)
-  )
-  const removeTagsArrayComputed = defaultTags.value.filter(
-    (tag) => !specialTag(tag) && !changedTagsArray.value.includes(tag)
-  )
-
-  const isolationId = getIsolationIdByRoute(route)
-
-  editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
-}
 </script>
 
 <style scoped></style>

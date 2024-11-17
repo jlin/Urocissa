@@ -1,15 +1,27 @@
 <template>
-  <div class="w-100 position-absolute" ref="placeholderRef" :style="{
-    top: `${modifyTopPixel ? topPixel - placeholderRefHeight : topPixel}px`
-  }">
+  <div
+    class="w-100 position-absolute"
+    ref="placeholderRef"
+    :style="{
+      top: `${modifyTopPixel ? topPixel - placeholderRefHeight : topPixel}px`
+    }"
+  >
     <div class="d-flex flex-wrap" v-for="index in placeholderRowNumScaled" :key="`extra-${index}`">
-      <div v-for="subindex in placeholderColNum" class="bg-grey-darken-2 ma-1" ref="placeholderRowRef"
-        :key="`extra-${subindex}`" :style="{
+      <div
+        v-for="subindex in placeholderColNum"
+        class="bg-grey-darken-2 ma-1"
+        ref="placeholderRowRef"
+        :key="`extra-${subindex}`"
+        :style="{
           flexGrow: '1',
           position: 'relative',
           width: `${placeholderWidth}px`
-        }">
-        <i class="d-block" :style="{ paddingBottom: `${(placeHolderHeight / placeholderWidth) * 100}%` }"></i>
+        }"
+      >
+        <i
+          class="d-block"
+          :style="{ paddingBottom: `${(placeHolderHeight / placeholderWidth) * 100}%` }"
+        ></i>
       </div>
     </div>
   </div>
@@ -17,10 +29,11 @@
 
 <script setup lang="ts">
 import { paddingPixel } from '@/script/common/constants'
-import { computed, inject, onMounted, Ref, ref, watchEffect } from 'vue'
+import { getInjectValue } from '@/script/common/functions'
+import { computed, onMounted, Ref, ref, watchEffect } from 'vue'
 const placeholderRef = ref<HTMLElement>()
-const windowWidth = inject<Ref<number>>('windowWidth')!
-const windowHeight = inject<Ref<number>>('windowHeight')!
+const windowWidth = getInjectValue<Ref<number>>('windowWidth')
+const windowHeight = getInjectValue<Ref<number>>('windowHeight')
 
 const placeholderRefHeight = ref(0)
 const placeholderRowRef = ref<HTMLElement[]>([])
@@ -62,11 +75,7 @@ onMounted(() => {
     }
   })
   watchEffect(() => {
-    if (
-      placeholderRowRef.value !== null &&
-      placeholderRowRef.value.length > 0 &&
-      placeholderRowRef.value[0].clientHeight > 0
-    ) {
+    if (placeholderRowRef.value[0] !== undefined && placeholderRowRef.value[0].clientHeight > 0) {
       placeholderRowRefHeight.value = placeholderRowRef.value[0].clientHeight
     }
   })

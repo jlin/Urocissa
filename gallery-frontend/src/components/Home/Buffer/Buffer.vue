@@ -7,12 +7,12 @@
   >
     <BufferPlaceholder
       id="placeholderTop"
-      v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
-      :topPixel="visibleRows[0].topPixelAccumulated! -
+      v-if="visibleRows[0] !== undefined && !(prefetchStore.totalHeight <= windowHeight)"
+      :top-pixel="visibleRows[0].topPixelAccumulated! -
         scrollTopStore.scrollTop +
         bufferHeight / 3 +
         visibleRows[0].offset"
-      :modifyTopPixel="true"
+      :modify-top-pixel="true"
     />
     <div
       v-for="row in visibleRows"
@@ -25,29 +25,32 @@
       }"
       :start="`${row.start}`"
     >
-      <RowBlock :row="row" :isolationId="isolationId" />
+      <RowBlock :row="row" :isolation-id="isolationId" />
     </div>
     <BufferPlaceholder
       id="placeholderBottom"
       v-if="visibleRows.length > 0 && !(prefetchStore.totalHeight <= windowHeight)"
-      :topPixel="visibleRows[visibleRows.length - 1].topPixelAccumulated! -
+      :top-pixel="(()=>{
+        const lastData = getArrayValue(visibleRows, visibleRows.length - 1)
+        return lastData.topPixelAccumulated! -
         scrollTopStore.scrollTop +
         bufferHeight / 3 +
-        visibleRows[visibleRows.length - 1].offset +
-        visibleRows[visibleRows.length - 1].rowHeight"
-      :modifyTopPixel="false"
+        lastData.offset +
+        lastData.rowHeight
+      })()"
+      :modify-top-pixel="false"
     />
     <BufferPlaceholder
       id="placeholderNone"
       ref="placeholderNoneRef"
       v-if="visibleRows.length === 0 && windowWidth > 0"
-      :topPixel="
+      :top-pixel="
         ((lastRowBottom - scrollTopStore.scrollTop + windowHeight) %
           (placeholderNoneRowRefHeight + 2 * paddingPixel)) +
         bufferHeight / 3 -
         windowHeight
       "
-      :modifyTopPixel="false"
+      :modify-top-pixel="false"
     />
   </div>
 </template>
@@ -67,7 +70,7 @@
  * `scrollTop` is used to manage user scrolling because the scrollTop of the parent (image-container) is reset for every frame.
  * `bufferHeight / 3` is used to position the RowBlock at a sufficient distance from the top of the component so that the parent Homepage can scroll up without reaching the top prematurely.
  */
-import { ComponentPublicInstance, Ref, computed, inject, ref, watch } from 'vue'
+import { ComponentPublicInstance, Ref, computed, ref, watch } from 'vue'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useFetchImgs } from '../../hook/useFetchImgs'
 import { useUpdateVisibleRows } from '../../hook/useUpdateVisibleRows'
@@ -76,6 +79,7 @@ import { batchNumber, paddingPixel } from '@/script/common/constants'
 import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { getArrayValue, getInjectValue } from '@/script/common/functions'
 
 const props = defineProps<{
   isolationId: string
@@ -85,9 +89,9 @@ const props = defineProps<{
 const prefetchStore = usePrefetchStore(props.isolationId)
 const scrollTopStore = useScrollTopStore(props.isolationId)
 
-const windowWidth = inject<Ref<number>>('windowWidth')!
-const windowHeight = inject<Ref<number>>('windowHeight')!
-const imageContainerRef = inject<Ref<HTMLElement>>('imageContainerRef')!
+const windowWidth = getInjectValue<Ref<number>>('windowWidth')
+const windowHeight = getInjectValue<Ref<number>>('windowHeight')
+const imageContainerRef = getInjectValue<Ref<HTMLElement>>('imageContainerRef')
 
 type BufferPlaceholderInstance = ComponentPublicInstance<{
   placeholderRowRefHeight: number
