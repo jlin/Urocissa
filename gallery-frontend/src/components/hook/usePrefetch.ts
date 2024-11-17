@@ -11,13 +11,20 @@ export function prefetch(
 ) {
   const stopWatcher = watchDebounced(
     windowWidth,
-    async () => {
+    () => {
       if (windowWidth.value > 0) {
         const priorityId = route.query.priorityId as string
         const reverse = route.query.reverse as string
-        const locate = route.meta.isViewPage
-          ? (route.params.hash as string)
-          : (route.query.locate as string) ?? null
+        let locate: string | null = null
+
+        if (route.meta.isViewPage) {
+          locate = route.params.hash as string
+        } else {
+          const queryLocate = route.query.locate
+          if (typeof queryLocate === 'string') {
+            locate = queryLocate
+          }
+        }
 
         prefetchInWorker(filterJsonString, priorityId, reverse, locate, isolationId)
 
