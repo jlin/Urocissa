@@ -19,7 +19,7 @@
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <!-- Metadata Items -->
           <v-list-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-image</v-icon>
               </v-avatar>
@@ -32,7 +32,7 @@
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-folder</v-icon>
               </v-avatar>
@@ -45,7 +45,7 @@
             }}</v-list-item-subtitle>
           </v-list-item>
           <v-list-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-calendar</v-icon>
               </v-avatar>
@@ -63,7 +63,7 @@
               metadata.database.exif_vec.Model !== undefined
             "
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-camera-iris</v-icon>
               </v-avatar>
@@ -90,7 +90,7 @@
           <!-- Tags Section -->
           <v-divider></v-divider>
           <v-list-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-tag</v-icon>
               </v-avatar>
@@ -165,7 +165,7 @@
 
           <!-- Albums Section -->
           <v-list-item>
-            <template v-slot:prepend>
+            <template #prepend>
               <v-avatar>
                 <v-icon color="black">mdi-image-album</v-icon>
               </v-avatar>
@@ -231,11 +231,13 @@ const dataStore = useDataStore(props.isolationId)
 const router = useRouter()
 
 const filePathComplete = computed(() => {
-  return `${props.metadata?.database!.alias[0].file}`
+  return props.metadata.database?.alias[0]?.file
 })
+
 const filePath = computed(() => {
-  return `${filePathComplete.value.split('/').pop()}`
+  return `${filePathComplete.value?.split('/').pop()}`
 })
+
 const separator = computed(() => {
   return filePath.value.includes('\\') ? '\\' : '/'
 })
@@ -246,39 +248,52 @@ const filteredTags = computed(() => {
     return props.metadata.database.tag.filter(
       (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
     )
-  } else {
-    return props.metadata.album!.tag.filter(
+  } else if (props.metadata.album) {
+    return props.metadata.album.tag.filter(
       (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
     )
+  } else {
+    // Throw an error if neither database nor album metadata is available
+    throw new Error('Invalid metadata: Neither database nor album is available for filtering tags.')
   }
 })
 
 // Retrieve index based on metadata hash
 const index = computed(() => {
   if (props.metadata.database) {
-    return dataStore.hashMapData.get(props.metadata.database.hash)!
+    return dataStore.hashMapData.get(props.metadata.database.hash)
+  } else if (props.metadata.album?.cover !== null && props.metadata.album?.cover !== undefined) {
+    return dataStore.hashMapData.get(props.metadata.album.cover)
   } else {
-    return dataStore.hashMapData.get(props.metadata.album!.cover!)!
+    // Throw an error if neither database nor album.cover is provided
+    throw new Error('Invalid metadata: Neither database nor album cover is available.')
   }
 })
-
 // Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
 }
 
 function quickAddTags(tag: string) {
-  const indexArray = [index.value]
-  const addTagsArray: string[] = [tag]
-  const removeTagsArray: string[] = []
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
+  if (index.value !== undefined) {
+    const indexArray = [index.value]
+    const addTagsArray: string[] = [tag]
+    const removeTagsArray: string[] = []
+    editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
+  } else {
+    throw new Error()
+  }
 }
 
 function quickRemoveTags(tag: string) {
-  const indexArray = [index.value]
-  const addTagsArray: string[] = []
-  const removeTagsArray: string[] = [tag]
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
+  if (index.value !== undefined) {
+    const indexArray = [index.value]
+    const addTagsArray: string[] = []
+    const removeTagsArray: string[] = [tag]
+    editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
+  } else {
+    throw new Error()
+  }
 }
 
 async function searchByTag(tag: string) {
@@ -289,18 +304,18 @@ function openEditTagsModal() {
   modalStore.showEditTagsModal = true
 }
 
-function navigateToAlbum(albumId: string) {
+async function navigateToAlbum(albumId: string) {
   const albumPath = `/album/${albumId}` // Adjust the path as necessary
-  router.push({ path: albumPath })
+  await router.push({ path: albumPath })
 }
 
 function openEditAlbumsModal() {
   modalStore.showEditAlbumsModal = true
 }
 
-function generateExifMake(exifData: any): string {
-  let make_formated: string = ''
-  let model_formated: string = ''
+function generateExifMake(exifData: Record<string, string>): string {
+  let make_formated = ''
+  let model_formated = ''
   if (exifData.Make !== undefined) {
     const make: string = exifData.Make.replace(/"/g, '')
     make_formated = make
@@ -327,17 +342,23 @@ interface ExifData {
   PhotographicSensitivity: string
 }
 
-function formatExifData(exifData: any): ExifData {
+function formatExifData(exifData: Record<string, string | undefined>): ExifData {
   const formattedExifData: ExifData = {
-    FNumber: exifData.FNumber.replace('f/', 'ƒ/'),
-    ExposureTime: `1/${exifData.ExposureTime.replace(' s', '').replace('1/', '')}`,
-    FocalLength: `${exifData.FocalLength.replace(' mm', '')} mm`,
-    PhotographicSensitivity: `ISO ${exifData.PhotographicSensitivity}`
+    FNumber: exifData.FNumber !== undefined ? exifData.FNumber.replace('f/', 'ƒ/') : '',
+    ExposureTime:
+      exifData.ExposureTime !== undefined
+        ? `1/${exifData.ExposureTime.replace(' s', '').replace('1/', '')}`
+        : '',
+    FocalLength:
+      exifData.FocalLength !== undefined ? `${exifData.FocalLength.replace(' mm', '')} mm` : '',
+    PhotographicSensitivity:
+      exifData.PhotographicSensitivity !== undefined
+        ? `ISO ${exifData.PhotographicSensitivity}`
+        : ''
   }
 
   return formattedExifData
 }
-
 function timer(timestamp: number): string {
   const locale = navigator.language
   return new Intl.DateTimeFormat(locale, {
