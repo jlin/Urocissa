@@ -8,7 +8,7 @@ export function useHandleClick(
   route: RouteLocationNormalizedLoaded,
   isolationId: string
 ) {
-  const handleClick = (event: MouseEvent, currentIndex: number) => {
+  const handleClick = async (event: MouseEvent, currentIndex: number) => {
     const collectionStore = useCollectionStore(isolationId)
     if (collectionStore.editModeOn) {
       if (event.shiftKey && collectionStore.lastClick !== null) {
@@ -45,11 +45,24 @@ export function useHandleClick(
     } else {
       // collectionStore.editModeOn === false
       const dataStore = useDataStore(isolationId)
-      const abstractData = dataStore.data.get(currentIndex)!
-
-      const hashOrId = abstractData.database ? abstractData.database.hash : abstractData.album!.id
-
-      router.push(intoViewPage(route, hashOrId))
+      const abstractData = dataStore.data.get(currentIndex)
+      if (abstractData) {
+        const hashOrId = abstractData.database
+          ? abstractData.database.hash
+          : abstractData.album
+          ? abstractData.album.id
+          : undefined
+        if (hashOrId !== undefined) {
+          await router.push(intoViewPage(route, hashOrId))
+        } else {
+          console.error('Abstract Data Details:', abstractData)
+          throw new Error(
+            'Navigation failed: Neither "abstractData.database.hash" nor "abstractData.album.id" is defined.'
+          )
+        }
+      } else {
+        console.warn(`abstractData with index ${currentIndex} is not fetched.`)
+      }
     }
     if (collectionStore.editModeCollection.size === 0) {
       collectionStore.editModeOn = false
