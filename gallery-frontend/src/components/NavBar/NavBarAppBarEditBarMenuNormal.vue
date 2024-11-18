@@ -1,7 +1,7 @@
 <!-- NavBarAppBarEditBarMenuNormal.vue -->
 <template>
   <v-menu>
-    <template v-slot:activator="{ props }">
+    <template #activator="{ props }">
       <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
     </template>
     <v-list>
@@ -58,10 +58,12 @@ import { useDataStore } from '@/store/dataStore'
 import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
-import Cookies from 'js-cookie'
-import { getSrc } from '@/../config'
+import { batchNumber, getSrc } from '@/../config'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
+import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
+import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
+import { AbstractData } from '@/script/common/types'
 
 const route = useRoute()
 const collectionStore = useCollectionStore('mainId')
@@ -118,28 +120,69 @@ const deleteData = () => {
   deleteDataInWorker(indexArray)
 }
 
+const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise<AbstractData> => {
+  console.log(`data with index ${index} not fetch; waiting...`)
+
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now()
+
+    const checkMetadata = () => {
+      const metadata = dataStore.data.get(index)
+
+      if (metadata) {
+        console.log(`index ${index} waiting done`)
+        resolve(metadata)
+      } else if (Date.now() - startTime > timeout) {
+        console.error(`index ${index} waiting timeout`)
+        reject(new Error(`Timeout waiting for metadata at index ${index}`))
+      } else {
+        setTimeout(checkMetadata, interval)
+      }
+    }
+    checkMetadata()
+  })
+}
+
 const downloadAllFiles = async () => {
   const indexArray = Array.from(collectionStore.editModeCollection)
   const concurrencyLimit = 8
   const delay = 1000
   const delayFunction = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
+  const isolationId = getIsolationIdByRoute(route)
   try {
     for (let i = 0; i < indexArray.length; i += concurrencyLimit) {
       const batchIndex = indexArray.slice(i, i + concurrencyLimit)
       const downloadPromises = batchIndex.map(async (index) => {
-        const metadata = dataStore.data.get(index)!
+        let metadata = dataStore.data.get(index)
+        if (!metadata) {
+          // Initiate data fetch
+          fetchDataInWorker(Math.floor(index / batchNumber), isolationId)
+
+          // Wait for metadata to be available
+          try {
+            metadata = await waitForMetadata(index)
+          } catch (error) {
+            console.error(error)
+            return // Skip this index if metadata isn't available
+          }
+        }
+
         if (metadata.database) {
           const url = getSrc(
             metadata.database.hash,
             true,
             metadata.database.ext,
-            Cookies.get('jwt')!,
+            getCookiesJwt(),
             undefined
           )
-          const response = await axios.get(url, { responseType: 'blob' })
-          const fileName = `${metadata.database.hash}.${metadata.database.ext}`
-          saveAs(response.data, fileName)
+          try {
+            const response = await axios.get<Blob>(url, { responseType: 'blob' })
+            const fileName = `${metadata.database.hash}.${metadata.database.ext}`
+
+            saveAs(response.data, fileName)
+          } catch (downloadError) {
+            console.error(`Failed to download file for index ${index}:`, downloadError)
+          }
         }
       })
 
