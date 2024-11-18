@@ -7,7 +7,12 @@
     :style="{ backgroundColor: 'white' }"
   >
     <v-row v-if="metadata.database" no-gutters class="position-relative">
-      <v-toolbar color="white">
+      <v-toolbar
+        color="white"
+        :style="{
+          backgroundColor: '#212121'
+        }"
+      >
         <!-- Icon button with increased size -->
         <v-btn icon @click="toggleInfo">
           <v-icon>mdi-close</v-icon>

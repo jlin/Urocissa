@@ -1,5 +1,10 @@
 <template>
-  <v-app-bar v-if="!collectionStore.editModeOn">
+  <v-toolbar
+    v-if="!collectionStore.editModeOn"
+    :style="{
+      backgroundColor: '#212121'
+    }"
+  >
     <v-btn v-if="!route.meta.isReadPage" @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
     <v-btn
       v-else
@@ -61,7 +66,7 @@
         </v-list-item>
       </v-list>
     </v-menu>
-  </v-app-bar>
+  </v-toolbar>
   <!-- If collectionStore.editModeOn === true then show the Editbar -->
   <EditBar v-else />
   <input

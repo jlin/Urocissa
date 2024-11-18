@@ -1,6 +1,10 @@
 <!-- NavBarAppBarEditBar.vue -->
 <template>
-  <v-app-bar>
+  <v-toolbar
+    :style="{
+      backgroundColor: '#212121'
+    }"
+  >
     <v-btn icon="mdi-close" @click="leaveEdit"></v-btn>
     <v-card
       variant="flat"
@@ -17,21 +21,21 @@
     <v-btn v-else icon="mdi-select-remove" @click="selectRemove"></v-btn>
     <v-btn icon="mdi-select-inverse" @click="selectInverse"></v-btn>
     <!-- Use the new Menu Component -->
-    <NavBarAppBarEditBarMenuNormal v-if="!route.meta.isInsideAlbum" />
-    <NavBarAppBarEditBarMenuAlbum v-else />
-  </v-app-bar>
+    <NavBarAppBarEditBarMenuNormal />
+  </v-toolbar>
 </template>
 
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { useRoute } from 'vue-router'
 import NavBarAppBarEditBarMenuNormal from '@/components/NavBar/NavBarAppBarEditBarMenuNormal.vue'
-import NavBarAppBarEditBarMenuAlbum from './NavBarAppBarEditBarMenuAlbum.vue'
-
+import { useRoute } from 'vue-router'
+import { getIsolationIdByRoute } from '@/script/common/functions'
 const route = useRoute()
-const collectionStore = useCollectionStore('mainId')
-const prefetchStore = usePrefetchStore('mainId')
+const isolationId = getIsolationIdByRoute(route)
+
+const collectionStore = useCollectionStore(isolationId)
+const prefetchStore = usePrefetchStore(isolationId)
 
 // Methods
 const leaveEdit = () => {
