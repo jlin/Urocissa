@@ -1,20 +1,20 @@
 import { defineStore } from 'pinia'
 
-export const useLocationStore = (isolationId: string ) =>
+export const useLocationStore = (isolationId: string) =>
   defineStore('locateStore' + isolationId, {
     state: (): {
       /**
        * Index of the first photo that appears (partially) in the viewport
        */
-      locationIndex: number | null
+      locationIndex: number
       anchor: number | null
     } => ({
-      locationIndex: null,
+      locationIndex: 0,
       anchor: null
     }),
     actions: {
       clearAll() {
-        this.locationIndex = null
+        this.locationIndex = 0
         this.anchor = null
       },
       triggerForResize() {

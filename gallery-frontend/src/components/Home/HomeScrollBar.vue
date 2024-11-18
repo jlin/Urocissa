@@ -102,6 +102,7 @@ import {
   scrollBarWidth
 } from '@/script/common/constants'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { getInjectValue } from '@/script/common/functions'
 const isScrolling = ref(false)
 const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)
@@ -118,16 +119,15 @@ const scrollbarStore = useScrollbarStore(props.isolationId)
 const rowStore = useRowStore(props.isolationId)
 const offsetStore = useOffsetStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
+const windowHeight = getInjectValue<Ref<number>>('windowHeight')
 
 const reachBottom = computed(() => {
   return (
-    windowHeight !== undefined &&
     scrollTopStore.scrollTop ===
-      Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0)
+    Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0)
   )
 })
 
-const windowHeight = inject<Ref<number>>('windowHeight')!
 const imageContainerRef = inject<Ref<HTMLElement | null>>('imageContainerRef')
 const scrollbarRef = ref<HTMLElement | null>(null)
 
@@ -149,7 +149,7 @@ const rowIndexDifferenceLowerBound = computed(() => Math.ceil(chipSize / singleR
  * Index of the first batch that appears (partially) in the viewport.
  */
 const currentBatchIndex = computed(() =>
-  Math.floor(locationStore.locationIndex! / layoutBatchNumber)
+  Math.floor(locationStore.locationIndex / layoutBatchNumber)
 )
 
 /**
@@ -194,32 +194,29 @@ const getTargetRowIndex = (percentage: number) => {
   return clamp(targetRowIndex, 0, rowLength.value - 1)
 }
 
-const debouncedFetchRow = debounce(
-  (index: number) => fetchRowInWorker(index, props.isolationId),
-  100
-)
+const debouncedFetchRow = debounce((index: number) => {
+  fetchRowInWorker(index, props.isolationId)
+}, 100)
 
 /**
  * Handle a click event on the scrollbar.
  */
 const handleClick = () => {
-  if (scrollTopStore.scrollTop !== undefined) {
-    const clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
-    const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
+  const clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
 
-    if (targetRowIndex === currentDateChipIndex.value) {
-      return
-    }
-
-    currentDateChipIndex.value = targetRowIndex
-    locationStore.anchor = targetRowIndex
-    offsetStore.clearAll()
-    queueStore.clearAll()
-    prefetchStore.clearForResize()
-    rowStore.clearForResize()
-    scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
-    debouncedFetchRow(targetRowIndex)
+  if (targetRowIndex === currentDateChipIndex.value) {
+    return
   }
+
+  currentDateChipIndex.value = targetRowIndex
+  locationStore.anchor = targetRowIndex
+  offsetStore.clearAll()
+  queueStore.clearAll()
+  prefetchStore.clearForResize()
+  rowStore.clearForResize()
+  scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
+  debouncedFetchRow(targetRowIndex)
 }
 
 /**
@@ -231,7 +228,7 @@ const handleMove = () => {
     const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      if (scrollbarStore.isDragging) handleClick()
+      handleClick()
       hoverLabelRowIndex.value = targetRowIndex
     }
   }
