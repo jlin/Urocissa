@@ -11,23 +11,23 @@
         :metadata="metadata"
         :index="index"
         :hash="hash"
-        :isolationId="isolationId"
+        :isolation-id="isolationId"
       />
       <ViewPageDisplayDatabase
         v-if="metadata"
         :index="index"
         :hash="hash"
         :metadata="metadata"
-        :colWidth="colWidth"
-        :colHeight="colHeight"
-        :isolationId="isolationId"
+        :col-width="colWidth"
+        :col-height="colHeight"
+        :isolation-id="isolationId"
       />
       <ViewPageDisplayAlbum
         v-if="metadata"
         :index="index"
         :metadata="metadata"
-        :colWidth="colWidth"
-        :colHeight="colHeight"
+        :col-width="colWidth"
+        :col-height="colHeight"
       />
       <v-card
         v-if="previousHash !== undefined"
@@ -102,9 +102,9 @@ const router = useRouter()
 
 const nextHash = computed(() => {
   const nextData = dataStore.data.get(props.index + 1)
-  if (nextData !== undefined && nextData.database) {
+  if (nextData?.database) {
     return nextData.database.hash
-  } else if (nextData !== undefined && nextData.album) {
+  } else if (nextData?.album) {
     return nextData.album.id
   } else {
     return undefined
@@ -113,9 +113,9 @@ const nextHash = computed(() => {
 
 const previousHash = computed(() => {
   const previousData = dataStore.data.get(props.index - 1)
-  if (previousData !== undefined && previousData.database) {
+  if (previousData?.database) {
     return previousData.database.hash
-  } else if (previousData !== undefined && previousData.album) {
+  } else if (previousData?.album) {
     return previousData.album.id
   } else {
     return undefined
@@ -123,7 +123,7 @@ const previousHash = computed(() => {
 })
 
 const nextPage = computed(() => {
-  if (!nextHash.value) {
+  if (nextHash.value === undefined) {
     return undefined
   }
   if (!route.meta.isReadPage) {
@@ -132,21 +132,23 @@ const nextPage = computed(() => {
   } else if (props.isolationId === 'subId') {
     const updatedParams = { ...route.params, subhash: nextHash.value }
     return { ...route, params: updatedParams }
+  } else {
+    return undefined
   }
 })
 
 const previousPage = computed(() => {
-  if (!previousHash.value) {
+  if (previousHash.value === undefined) {
     return undefined
   }
   if (!route.meta.isReadPage) {
     const updatedParams = { ...route.params, hash: previousHash.value }
-
     return { ...route, params: updatedParams }
   } else if (props.isolationId === 'subId') {
     const updatedParams = { ...route.params, subhash: previousHash.value }
-
     return { ...route, params: updatedParams }
+  } else {
+    return undefined
   }
 })
 
@@ -155,7 +157,12 @@ const workerIndex = computed(() => {
 })
 
 const postToWorker = bindActionDispatch(toImgWorker, (action) => {
-  workerStore.imgWorker[workerIndex.value]!.postMessage(action)
+  const worker = workerStore.imgWorker[workerIndex.value]
+  if (worker) {
+    worker.postMessage(action)
+  } else {
+    throw new Error(`Worker not found for index: ${workerIndex.value}`)
+  }
 })
 
 const checkAndFetch = (index: number): boolean => {
@@ -237,22 +244,25 @@ watch(
   [() => props.index, () => initializedStore.initialized],
   async () => {
     if (initializedStore.initialized) {
-      if (props.index !== undefined) {
-        checkAndFetch(props.index)
-        // Prefetch next and previous 10 hashes if they exist
-        await prefetch(props.index, props.isolationId)
-        // console.log(props.metadata) // debug usage
-      }
+      checkAndFetch(props.index)
+      // Prefetch next and previous 10 hashes if they exist
+      await prefetch(props.index, props.isolationId)
+      // console.log(props.metadata) // debug usage
     }
   },
   { immediate: true }
 )
 
 const handlePopState = () => {
-  router.push(leaveViewPage(route))
+  router
+    .push(leaveViewPage(route))
+    .then(() => ({}))
+    .catch((error: unknown) => {
+      console.error('Navigation Error:', error)
+    })
 }
 
-const handleKeyDown = async (event: KeyboardEvent) => {
+const handleKeyDown = (event: KeyboardEvent) => {
   if (
     (!route.meta.isReadPage && props.isolationId === 'mainId') ||
     (route.meta.isReadPage && props.isolationId === 'subId')
@@ -262,9 +272,19 @@ const handleKeyDown = async (event: KeyboardEvent) => {
       return
     }
     if (event.key === 'ArrowRight' && nextPage.value) {
-      await router.push(nextPage.value)
+      router
+        .push(nextPage.value)
+        .then(() => ({}))
+        .catch((error: unknown) => {
+          console.error('Navigation Error:', error)
+        })
     } else if (event.key === 'ArrowLeft' && previousPage.value) {
-      await router.push(previousPage.value)
+      router
+        .push(previousPage.value)
+        .then(() => ({}))
+        .catch((error: unknown) => {
+          console.error('Navigation Error:', error)
+        })
     }
   }
 }
