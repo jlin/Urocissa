@@ -19,9 +19,7 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string
   const rowStore = useRowStore(isolationId)
 
   for (const row of rowStore.rowData.values()) {
-    if (row.topPixelAccumulated === undefined) {
-      console.error('row.topPixelAccumulated is undeifned')
-    } else if (row.topPixelAccumulated + row.offset < scrollTop) {
+    if (row.topPixelAccumulated + row.offset < scrollTop) {
       aboveRowsIndex.push(row.rowIndex)
     }
   }
