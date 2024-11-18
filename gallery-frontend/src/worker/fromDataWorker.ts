@@ -81,11 +81,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
     },
     prefetchReturn: async (payload) => {
       const result: Prefetch = payload.result
-      if (result.dataLength === 0) {
-        messageStore.message = 'Wow, so empty! Try adding some photos here!'
-        messageStore.warn = false
-        messageStore.showMessage = true
-      }
       prefetchStore.timestamp = result.timestamp
       prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
       prefetchStore.calculateLength(result.dataLength)
