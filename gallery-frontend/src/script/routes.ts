@@ -1,5 +1,6 @@
 // src/router.ts
 
+import { Component } from 'vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import 'vue-router'
 
@@ -46,7 +47,7 @@ const simpleRoutes: RouteRecordRaw[] = [
  */
 function createRoute(
   path: string,
-  component: () => Promise<any>,
+  component: () => Promise<Component>,
   name: string,
   basicString: string | null
 ): RouteRecordRaw[] {
