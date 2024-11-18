@@ -3,6 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import HomePage from '@/components/Home/mainHome.vue';
+import HomePage from '@/components/Home/HomeMain.vue';
 
 </script>

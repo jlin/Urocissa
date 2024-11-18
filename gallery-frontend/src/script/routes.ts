@@ -64,20 +64,20 @@ function createRoute(
     children: [
       {
         path: 'view/:hash',
-        component: () => import('@/components/Home/View/mainViewPage.vue'),
+        component: () => import('@/components/Home/View/ViewPageMain.vue'),
         name: `${name}ViewPage`,
         meta: { isReadPage: false, isViewPage: true, basicString: basicString, baseName: name },
         children: [
           {
             path: 'read',
-            component: () => import('@/components/Home/IsolatedHome.vue'),
+            component: () => import('@/components/Home/HomeIsolated.vue'),
             name: `${name}ReadPage`,
             meta: { isReadPage: true, isViewPage: false, basicString: basicString, baseName: name },
             children: [
               {
                 path: 'view/:subhash',
                 name: `${name}ReadViewPage`,
-                component: () => import('@/components/Home/View/isolatedViewPage.vue'),
+                component: () => import('@/components/Home/View/ViewPageIsolated.vue'),
                 meta: {
                   isReadPage: true,
                   isViewPage: true,
@@ -100,7 +100,7 @@ function createRoute(
 
 const homePageRoutes = createRoute(
   '',
-  () => import('@/components/Home/mainHome.vue'),
+  () => import('@/components/Home/HomeMain.vue'),
   'HomePage',
   'and(not(tag: _archived), not(tag:_trashed))'
 )
