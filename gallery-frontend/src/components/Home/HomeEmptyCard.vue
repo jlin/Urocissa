@@ -1,6 +1,6 @@
 <template>
   <v-container class="d-flex align-center justify-center" fluid>
-    <v-hover v-slot="{ isHovering, props }">
+    <v-hover v-slot="{ isHovering, props: hoverProps }">
       <v-card
         v-if="hasHoveringEffect"
         class="pa-4 text-center mx-auto hover-cursor"
@@ -11,7 +11,7 @@
         max-width="600"
         rounded="lg"
         width="100%"
-        v-bind="props"
+        v-bind="hoverProps"
         @click="clickEmptyCard()"
       >
         <v-icon class="mb-5" color="grey" size="100"> mdi-image-plus </v-icon>
