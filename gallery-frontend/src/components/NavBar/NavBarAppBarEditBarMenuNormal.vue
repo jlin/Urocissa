@@ -64,11 +64,11 @@ import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
 import { AbstractData } from '@/script/common/types'
-
 const route = useRoute()
-const collectionStore = useCollectionStore('mainId')
-const prefetchStore = usePrefetchStore('mainId')
-const dataStore = useDataStore('mainId')
+const isolationId = getIsolationIdByRoute(route)
+const collectionStore = useCollectionStore(isolationId)
+const prefetchStore = usePrefetchStore(isolationId)
+const dataStore = useDataStore(isolationId)
 const modalStore = useModalStore('mainId')
 
 // Methods
@@ -86,7 +86,7 @@ const handleQuickEdit = (category: 'favorite' | 'archive' | 'trashed') => {
     addTagsArray = ['_trashed']
   }
 
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, 'mainId')
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, isolationId)
 }
 
 const showBatchEditTagsModal = () => {
