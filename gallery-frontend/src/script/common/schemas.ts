@@ -169,3 +169,9 @@ export const databaseTimestampSchema = z.object({
 export const SubRowSchema = z.object({
   displayElements: z.array(displayElementSchema)
 })
+
+
+export const PublicConfigSchema = z.object({
+  readOnlyMode: z.boolean(),
+  disableImg: z.boolean(),
+})

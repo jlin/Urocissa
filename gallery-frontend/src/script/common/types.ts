@@ -13,7 +13,8 @@ import {
   DataBaseSchema,
   AbstractDataSchema,
   SubRowSchema,
-  albumInfoSchema
+  albumInfoSchema,
+  PublicConfigSchema
 } from './schemas'
 
 /**
@@ -102,3 +103,5 @@ export type AbstractData = z.infer<typeof AbstractDataSchema>
  * Represents SubRow.
  */
 export type SubRow = z.infer<typeof SubRowSchema>
+
+export type PublicConfig = z.infer<typeof PublicConfigSchema>

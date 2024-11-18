@@ -16,6 +16,7 @@ import router from '@/script/routes'
 import axios from 'axios'
 import { useConfigStore } from '@/store/configStore'
 import { useAlbumStore } from '@/store/albumStore'
+import { PublicConfigSchema } from '@/script/common/schemas'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
@@ -103,8 +104,8 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
 
       try {
         const response = await axios.get('/get/get-config.json')
-
-        configStore.disableImg = response.data.disableImg
+        const publicConfig = PublicConfigSchema.parse(response.data)
+        configStore.disableImg = publicConfig.disableImg
       } catch (error) {
         console.error('Error fetching config:', error)
         throw error
