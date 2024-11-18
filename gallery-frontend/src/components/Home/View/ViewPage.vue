@@ -62,6 +62,8 @@ const index = computed(() => {
 const abstractData = computed(() => {
   if (index.value !== undefined) {
     return dataStore.data.get(index.value)
+  } else {
+    return undefined
   }
 })
 </script>
