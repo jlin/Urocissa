@@ -55,7 +55,7 @@ export const toImgWorker = createActionCreators({
 export const fromImgWorker = createActionCreators({
   smallImageProcessed: (payload: { index: number; url: string }) => payload,
   imageProcessed: (payload: { index: number; url: string }) => payload,
-  unauthorized: (payload: {}) => payload
+  unauthorized: () => ({})
 })
 
 /* ================================================================================
