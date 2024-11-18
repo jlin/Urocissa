@@ -1,17 +1,10 @@
 <template>
   <!-- This router-view contains the ViewPage.vue -->
-  <v-toolbar
+  <HomeReadingBar
     v-if="!(props.isolationId === 'mainId') && route.meta.isReadPage && !route.meta.isViewPage"
-    class="position-relative"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
-    <v-btn icon="mdi mdi-arrow-left" :to="leaveRead(route)"></v-btn
-    ><v-card elevation="0">
-      <v-card-title> {{ props.title }}</v-card-title>
-    </v-card>
-  </v-toolbar>
+    :isolation-id="isolationId"
+    :title="title"
+  />
   <router-view></router-view>
   <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
   <div
@@ -70,6 +63,7 @@ import { useImgStore } from '@/store/imgStore'
 import MobileDetect from 'mobile-detect'
 import Buffer from '@/components/Home/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/HomeScrollBar.vue'
+import HomeReadingBar from './HomeReadingBar.vue'
 import '@/style/HomePage.css'
 import { layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
 import { useOffsetStore } from '@/store/offsetStore'
@@ -79,7 +73,6 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { leaveRead } from '@/script/navigator'
 
 const props = defineProps<{
   isolationId: string
