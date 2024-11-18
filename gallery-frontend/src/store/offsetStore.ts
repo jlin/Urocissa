@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useOffsetStore = (isolationId: string ) =>
+export const useOffsetStore = (isolationId: string) =>
   defineStore({
     id: 'offsetStore' + isolationId,
     state: (): {
@@ -17,7 +17,7 @@ export const useOffsetStore = (isolationId: string ) =>
           if (key < currentRowIndex) {
             sum += value
           }
-          setTimeout(() => {}, 0)
+          setTimeout(() => ({}), 0)
         })
         return sum
       },
