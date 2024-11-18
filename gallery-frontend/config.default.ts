@@ -9,7 +9,7 @@ export function getSrc(
   original: boolean,
   ext: string,
   _password: string,
-  _customParams: any
+  _customParams: unknown
 ) {
   const compressedOrImported = original ? 'imported' : 'compressed'
   return `/object/${compressedOrImported}/${hash.slice(0, 2)}/${hash}.${ext}`
