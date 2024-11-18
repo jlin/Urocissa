@@ -10,7 +10,7 @@
     <v-btn
       v-if="metadata && metadata.database"
       :icon="metadata.database.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
-      @click="quickEditTags('favorite')"
+      @click="quickEditTags(metadata.database, 'favorite')"
     ></v-btn>
     <v-btn
       v-if="metadata && metadata.database"
@@ -19,11 +19,11 @@
           ? 'mdi-archive-arrow-up-outline'
           : 'mdi-archive-arrow-down-outline'
       "
-      @click="quickEditTags('archived')"
+      @click="quickEditTags(metadata.database, 'archived')"
     ></v-btn>
     <v-menu v-if="metadata && metadata.database">
-      <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
+      <template #activator="{ props: MenuBtn }">
+        <v-btn v-bind="MenuBtn" icon="mdi-dots-vertical"></v-btn>
       </template>
       <v-list>
         <v-list-item
@@ -64,7 +64,7 @@
           v-if="!metadata.database.tag.includes('_trashed')"
           prepend-icon="mdi-trash-can-outline"
           value="delete-file"
-          @click="quickEditTags('trashed')"
+          @click="quickEditTags(metadata.database, 'trashed')"
         >
           <v-list-item-title class="wrap">{{ 'Delete' }}</v-list-item-title>
         </v-list-item>
@@ -80,7 +80,7 @@
         <v-list-item
           prepend-icon="mdi-image-refresh-outline"
           value="regenerate-preview"
-          @click="regeneratePreview()"
+          @click="regeneratePreview(metadata.database)"
         >
           <v-list-item-title class="wrap">{{ 'Regenerate Preview' }}</v-list-item-title>
         </v-list-item>
@@ -92,7 +92,7 @@
 import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, DataBase } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
@@ -123,7 +123,7 @@ const isViewPath = computed(() => {
   )
 })
 
-function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
+function quickEditTags(database: DataBase, category: 'favorite' | 'archived' | 'trashed') {
   let indexArray: number[] = []
   if (isViewPath.value) {
     indexArray = [props.index]
@@ -131,19 +131,19 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
   let removeTagsArray: string[] = []
   let addTagsArray: string[] = []
   if (category === 'favorite') {
-    if (!props.metadata?.database!.tag.includes('_favorite')) {
+    if (database.tag.includes('_favorite')) {
       addTagsArray = ['_favorite']
     } else {
       removeTagsArray = ['_favorite']
     }
   } else if (category === 'archived') {
-    if (!props.metadata?.database!.tag.includes('_archived')) {
+    if (database.tag.includes('_archived')) {
       addTagsArray = ['_archived']
     } else {
       removeTagsArray = ['_archived']
     }
-  } else if (category === 'trashed') {
-    if (!props.metadata?.database!.tag.includes('_trashed')) {
+  } else {
+    if (database.tag.includes('_trashed')) {
       addTagsArray = ['_trashed']
     } else {
       removeTagsArray = ['_trashed']
@@ -153,16 +153,12 @@ function quickEditTags(category: 'favorite' | 'archived' | 'trashed') {
 }
 
 const deleteData = () => {
-  if (props.metadata) {
-    if (props.index !== undefined) {
-      deleteDataInWorker([props.index])
-    }
-  }
+  deleteDataInWorker([props.index])
 }
 
-const regeneratePreview = async () => {
+const regeneratePreview = async (database: DataBase) => {
   if (props.metadata) {
-    const hash = props.metadata.database!.hash
+    const hash = database.hash
     const data = [hash] // Replace with your actual data
 
     try {
