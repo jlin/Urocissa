@@ -8,7 +8,7 @@ export function useHandleClick(
   route: RouteLocationNormalizedLoaded,
   isolationId: string
 ) {
-  const handleClick = async (event: MouseEvent, currentIndex: number) => {
+  const handleClick = (event: MouseEvent, currentIndex: number) => {
     const collectionStore = useCollectionStore(isolationId)
     if (collectionStore.editModeOn) {
       if (event.shiftKey && collectionStore.lastClick !== null) {
@@ -53,7 +53,12 @@ export function useHandleClick(
           ? abstractData.album.id
           : undefined
         if (hashOrId !== undefined) {
-          await router.push(intoViewPage(route, hashOrId))
+          router
+            .push(intoViewPage(route, hashOrId))
+            .then(() => ({}))
+            .catch((error: unknown) => {
+              console.error('Navigation Error:', error)
+            })
         } else {
           console.error('Abstract Data Details:', abstractData)
           throw new Error(
