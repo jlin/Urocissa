@@ -131,19 +131,19 @@ function quickEditTags(database: DataBase, category: 'favorite' | 'archived' | '
   let removeTagsArray: string[] = []
   let addTagsArray: string[] = []
   if (category === 'favorite') {
-    if (database.tag.includes('_favorite')) {
+    if (!database.tag.includes('_favorite')) {
       addTagsArray = ['_favorite']
     } else {
       removeTagsArray = ['_favorite']
     }
   } else if (category === 'archived') {
-    if (database.tag.includes('_archived')) {
+    if (!database.tag.includes('_archived')) {
       addTagsArray = ['_archived']
     } else {
       removeTagsArray = ['_archived']
     }
   } else {
-    if (database.tag.includes('_trashed')) {
+    if (!database.tag.includes('_trashed')) {
       addTagsArray = ['_trashed']
     } else {
       removeTagsArray = ['_trashed']
