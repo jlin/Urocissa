@@ -476,7 +476,7 @@ const editAlbums = async (
 
   console.log('Successfully edited tags.')
   const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-  postToMain.notification({ message: 'Successfully edited tags.', messageType: 'info' })
+  postToMain.notification({ message: 'Successfully edited albums.', messageType: 'info' })
 }
 
 /**
