@@ -1,7 +1,8 @@
 <template>
   <v-app
     :style="{
-      userSelect: scrollbarStore.isDragging ? 'none' : 'auto' // Prevent accidental selection while scrolling.
+      userSelect:
+        scrollbarStore.isDragging || scrollbarStoreInsideAlbum.isDragging ? 'none' : 'auto' // Prevent accidental selection while scrolling.
     }"
   >
     <component :is="NavBar" v-if="route.name !== 'LoginPage'" />
@@ -23,6 +24,7 @@ const NotificationWarn = defineAsyncComponent(() => import('@/components/Notific
 const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
 
 const scrollbarStore = useScrollbarStore('mainId')
+const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 
 const route = useRoute()
 
