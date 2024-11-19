@@ -37,13 +37,11 @@ import NavBarProgessBar from './NavBarProgessBar.vue'
 
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
-import { useInitializedStore } from '@/store/initializedStore'
 import { provide, ref } from 'vue'
 import { useUploadStore } from '@/store/uploadStore'
 const uploadStore = useUploadStore('mainId')
 const showDrawer = ref(false)
 const route = useRoute()
-const initializedStore = useInitializedStore('mainId')
 const modalStore = useModalStore('mainId')
 const router = useRouter()
 
