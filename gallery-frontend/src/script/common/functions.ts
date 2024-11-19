@@ -155,5 +155,5 @@ export function getCookiesJwt(): string {
 }
 
 export function getScrollUpperBound(totalHeight: number, windowHeight: number): number {
-  return totalHeight - windowHeight + navBarHeight - 2 // 2 is the loading bar height
+  return totalHeight - windowHeight + navBarHeight
 }
