@@ -10,7 +10,11 @@
     <v-btn
       v-if="metadata && metadata.database"
       :icon="metadata.database.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
-      @click="quickEditTags(metadata.database, 'favorite')"
+      @click="
+        metadata.database.tag.includes('_favorite')
+          ? quickRemoveTags('_favorite', index, isolationId)
+          : quickAddTags('_favorite', index, isolationId)
+      "
     ></v-btn>
     <v-btn
       v-if="metadata && metadata.database"
@@ -19,7 +23,11 @@
           ? 'mdi-archive-arrow-up-outline'
           : 'mdi-archive-arrow-down-outline'
       "
-      @click="quickEditTags(metadata.database, 'archived')"
+      @click="
+        metadata.database.tag.includes('_archived')
+          ? quickRemoveTags('_archived', index, isolationId)
+          : quickAddTags('_archived', index, isolationId)
+      "
     ></v-btn>
     <v-menu v-if="metadata && metadata.database">
       <template #activator="{ props: MenuBtn }">
@@ -64,7 +72,7 @@
           v-if="!metadata.database.tag.includes('_trashed')"
           prepend-icon="mdi-trash-can-outline"
           value="delete-file"
-          @click="quickEditTags(metadata.database, 'trashed')"
+          @click="quickAddTags('_trashed', index, isolationId)"
         >
           <v-list-item-title class="wrap">{{ 'Delete' }}</v-list-item-title>
         </v-list-item>
@@ -90,8 +98,7 @@
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
+import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { AbstractData, DataBase } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import { useInfoStore } from '@/store/infoStore'
@@ -112,45 +119,6 @@ const modalStore = useModalStore('mainId')
 const infoStore = useInfoStore(props.isolationId)
 
 const route = useRoute()
-
-const isViewPath = computed(() => {
-  const path = route.path
-  return (
-    path.startsWith('/view') ||
-    path.startsWith('/favorite/view') ||
-    path.startsWith('/archived/view') ||
-    path.startsWith('/all/view')
-  )
-})
-
-function quickEditTags(database: DataBase, category: 'favorite' | 'archived' | 'trashed') {
-  let indexArray: number[] = []
-  if (isViewPath.value) {
-    indexArray = [props.index]
-  }
-  let removeTagsArray: string[] = []
-  let addTagsArray: string[] = []
-  if (category === 'favorite') {
-    if (!database.tag.includes('_favorite')) {
-      addTagsArray = ['_favorite']
-    } else {
-      removeTagsArray = ['_favorite']
-    }
-  } else if (category === 'archived') {
-    if (!database.tag.includes('_archived')) {
-      addTagsArray = ['_archived']
-    } else {
-      removeTagsArray = ['_archived']
-    }
-  } else {
-    if (!database.tag.includes('_trashed')) {
-      addTagsArray = ['_trashed']
-    } else {
-      removeTagsArray = ['_trashed']
-    }
-  }
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
-}
 
 const deleteData = () => {
   deleteDataInWorker([props.index])
