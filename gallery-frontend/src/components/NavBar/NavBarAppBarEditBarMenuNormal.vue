@@ -17,7 +17,7 @@
         <v-list-item-title class="wrap">Batch Edit Tags</v-list-item-title>
       </v-list-item>
 
-      <v-list-item v-if="false"  prepend-icon="mdi-image-album" @click="showBatchEditAlbumsModal">
+      <v-list-item prepend-icon="mdi-image-album" @click="showBatchEditAlbumsModal">
         <v-list-item-title class="wrap">Batch Edit Albums</v-list-item-title>
       </v-list-item>
 

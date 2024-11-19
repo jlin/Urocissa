@@ -51,7 +51,7 @@
         <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
           <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
         </v-list-item>
-        <v-list-item v-if="false" prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
+        <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
           <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
         </v-list-item>
       </v-list>
