@@ -1,5 +1,5 @@
 <template>
-  <v-menu v-if="metadata && metadata.database">
+  <v-menu>
     <template #activator="{ props: MenuBtn }">
       <v-btn v-bind="MenuBtn" icon="mdi-dots-vertical"></v-btn>
     </template>
@@ -7,7 +7,7 @@
       <v-list-item
         prepend-icon="mdi-open-in-new"
         value="view-original-file"
-        :href="getSrc(metadata.database.hash, true, metadata.database.ext, Cookies.get('jwt')!, undefined )"
+        :href="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!, undefined )"
         target="_blank"
       >
         <v-list-item-title class="wrap">{{ 'View Original File' }}</v-list-item-title>
@@ -15,8 +15,8 @@
       <v-list-item
         prepend-icon="mdi-download"
         value="download-original-file"
-        :href="getSrc(metadata.database.hash,  true, metadata.database.ext, Cookies.get('jwt')!, undefined)"
-        :download="`${metadata.database.hash}.${metadata.database.ext}`"
+        :href="getSrc(database.hash,  true, database.ext, Cookies.get('jwt')!, undefined)"
+        :download="`${database.hash}.${database.ext}`"
       >
         <v-list-item-title class="wrap">{{ 'Download Original File' }}</v-list-item-title>
       </v-list-item>
@@ -39,7 +39,7 @@
         <v-list-item-title class="wrap">{{ 'Edit Albums' }}</v-list-item-title>
       </v-list-item>
       <v-list-item
-        v-if="!metadata.database.tag.includes('_trashed')"
+        v-if="!database.tag.includes('_trashed')"
         prepend-icon="mdi-trash-can-outline"
         value="delete-file"
         @click="quickAddTags('_trashed', index, isolationId)"
@@ -58,7 +58,7 @@
       <v-list-item
         prepend-icon="mdi-image-refresh-outline"
         value="regenerate-preview"
-        @click="regeneratePreview(metadata.database)"
+        @click="regeneratePreview(database)"
       >
         <v-list-item-title class="wrap">{{ 'Regenerate Preview' }}</v-list-item-title>
       </v-list-item>
@@ -67,7 +67,7 @@
 </template>
 <script setup lang="ts">
 import { quickAddTags } from '@/script/common/quickEditTags'
-import { AbstractData, DataBase } from '@/script/common/types'
+import { DataBase } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { useModalStore } from '@/store/modalStore'
@@ -78,7 +78,7 @@ const props = defineProps<{
   isolationId: string
   hash: string
   index: number
-  metadata: AbstractData | undefined
+  database: DataBase
 }>()
 const modalStore = useModalStore('mainId')
 
@@ -87,20 +87,18 @@ const deleteData = () => {
 }
 
 const regeneratePreview = async (database: DataBase) => {
-  if (props.metadata) {
-    const hash = database.hash
-    const data = [hash] // Replace with your actual data
+  const hash = database.hash
+  const data = [hash] // Replace with your actual data
 
-    try {
-      const response = await axios.post('/put/regenerate-preview', data, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log('Response:', response.data)
-    } catch (error) {
-      console.error('Error:', error)
-    }
+  try {
+    const response = await axios.post('/put/regenerate-preview', data, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log('Response:', response.data)
+  } catch (error) {
+    console.error('Error:', error)
   }
 }
 </script>
