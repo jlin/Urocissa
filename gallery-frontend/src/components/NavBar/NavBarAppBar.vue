@@ -1,5 +1,14 @@
 <template>
   <v-toolbar
+    flat
+    height="2"
+    class="no-select"
+    :style="{
+      backgroundColor: '#212121'
+    }"
+  >
+  </v-toolbar>
+  <v-toolbar
     v-if="!collectionStore.editModeOn"
     :style="{
       backgroundColor: '#212121'
@@ -23,12 +32,12 @@
       </v-card-title>
     </v-card>
     <v-card
-    elevation="0"
+      elevation="0"
       :style="{
         width: `${route.meta.isInsideAlbum ? '50%' : '100%'}`
       }"
     >
-      <v-card-text  class="pa-0">
+      <v-card-text class="pa-0">
         <v-text-field
           id="nav-search-input"
           rounded
