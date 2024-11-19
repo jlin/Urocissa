@@ -18,7 +18,7 @@ import {
   TagInfo
 } from '@/script/common/types'
 import { SubRow } from '@/script/common/types'
-import { batchNumber, fixedBigRowHeight } from '@/script/common/constants'
+import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/script/common/constants'
 import { createAbstractData, createDataBase, getArrayValue } from '@/script/common/functions'
 
 import axios, { AxiosResponse } from 'axios'
@@ -289,9 +289,9 @@ function lineWrap(displayElements: number[], windowWidth: number): number[] {
   minBadness[0] = 0
 
   for (let i = 1; i <= n; i++) {
-    let currentWidth = 0
+    let currentWidth =  0
     for (let j = i; j > 0; j--) {
-      currentWidth += getArrayValue(displayElements, j - 1)
+      currentWidth += getArrayValue(displayElements, j - 1) + 2 * paddingPixel
 
       if (currentWidth > windowWidth) break
 
@@ -332,7 +332,7 @@ function KnuthPlassLayout(row: Row, windowWidth: number): SubRow[] {
 
   // Calculate the list of widths after scaling based on the subrow height
   const shrinkedWidthList = row.displayElements.map((displayElement) => {
-    return (displayElement.displayWidth * subRowHeight) / displayElement.displayHeight
+    return Math.round((displayElement.displayWidth * subRowHeight) / displayElement.displayHeight)
   })
 
   // Use the lineWrap function to determine how many elements fit in each line
@@ -394,25 +394,25 @@ function normalizeSubrows(
         0
       )
 
-      const ratio = (windowWidth - subRow.displayElements.length * 8) / widthSum
+      const ratio = (windowWidth - subRow.displayElements.length * 2 * paddingPixel) / widthSum
       const scaledHeight = subRowHeight * ratio
 
       // Adjust elements' width and height based on the ratio
-      widthSum = 4 // Reset width sum with initial padding
+      widthSum = paddingPixel // Reset width sum with initial padding
       subRow.displayElements.forEach((displayElement, index) => {
         if (index < subRow.displayElements.length - 1) {
           displayElement.displayWidth = Math.round(displayElement.displayWidth * ratio)
           displayElement.displayHeight = Math.round(scaledHeight)
-          widthSum += displayElement.displayWidth + 8
+          widthSum += displayElement.displayWidth + 2 * paddingPixel
         } else {
-          displayElement.displayWidth = windowWidth - widthSum - 4
+          displayElement.displayWidth = windowWidth - widthSum - paddingPixel
           displayElement.displayHeight = Math.round(scaledHeight)
         }
         displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
       })
 
-      displayTopPixelAccumulated += Math.round(scaledHeight + 8)
-      scaledTotalHeight += Math.round(scaledHeight + 8)
+      displayTopPixelAccumulated += Math.round(scaledHeight + 2 * paddingPixel)
+      scaledTotalHeight += Math.round(scaledHeight + 2 * paddingPixel)
     } else {
       // Skip scaling logic, use fixed subRowHeight for the last subrow
       subRow.displayElements.forEach((displayElement) => {
@@ -420,8 +420,8 @@ function normalizeSubrows(
         displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
       })
 
-      displayTopPixelAccumulated += subRowHeight + 8
-      scaledTotalHeight += subRowHeight + 8
+      displayTopPixelAccumulated += subRowHeight + 2 * paddingPixel
+      scaledTotalHeight += subRowHeight + 2 * paddingPixel
     }
   })
 
