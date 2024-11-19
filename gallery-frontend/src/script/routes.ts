@@ -137,7 +137,7 @@ const albumsPageRoutes = createRoute(
   'albums',
   () => import('@/components/Page/AlbumsPage.vue'),
   'AlbumsPage',
-  'type:album'
+  'and(type:album, not(tag:_trashed))'
 )
 
 // ======================================
