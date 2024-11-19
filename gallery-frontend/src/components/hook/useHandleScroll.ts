@@ -1,4 +1,4 @@
-import { paddingPixel } from '@/script/common/constants'
+import { navBarHeight, paddingPixel } from '@/script/common/constants'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { throttle } from 'lodash'
@@ -45,16 +45,21 @@ export function handleScroll(
           } else {
             scrollTopStore.scrollTop = 0
           }
-        } else if (result >= prefetchStore.totalHeight - windowHeight.value - paddingPixel) {
+        } else if (
+          result >=
+          prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight
+        ) {
           // If scrolling exceeds the upper bound, reset the scroll position to the maximum allowed value.
           if (mobile !== null) {
             stopScroll.value = true
-            scrollTopStore.scrollTop = prefetchStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTopStore.scrollTop =
+              prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight
             setTimeout(() => {
               stopScroll.value = false
             }, 100)
           } else {
-            scrollTopStore.scrollTop = prefetchStore.totalHeight - windowHeight.value - paddingPixel
+            scrollTopStore.scrollTop =
+              prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight
           }
         } else {
           // Adjust the scroll position normally within the allowed range.

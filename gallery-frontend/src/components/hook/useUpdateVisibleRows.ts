@@ -1,5 +1,5 @@
 import { Row } from '@/script/common/types'
-import { paddingPixel } from '@/script/common/constants'
+import { navBarHeight, paddingPixel } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
@@ -273,7 +273,7 @@ export function useUpdateVisibleRows(
 
         scrollTopOffsetFix(
           visibleRows,
-          Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0),
+          Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight, 0),
           isolationId
         )
       }

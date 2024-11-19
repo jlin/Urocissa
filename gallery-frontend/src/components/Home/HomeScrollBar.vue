@@ -98,6 +98,7 @@ import { ScrollbarData } from '@/script/common/types'
 import {
   fixedBigRowHeight,
   layoutBatchNumber,
+  navBarHeight,
   paddingPixel,
   scrollBarWidth
 } from '@/script/common/constants'
@@ -124,7 +125,7 @@ const windowHeight = getInjectValue<Ref<number>>('windowHeight')
 const reachBottom = computed(() => {
   return (
     scrollTopStore.scrollTop ===
-    Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel, 0)
+    Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight, 0)
   )
 })
 
