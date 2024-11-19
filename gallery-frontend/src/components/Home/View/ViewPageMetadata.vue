@@ -330,7 +330,6 @@ import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { filesize } from 'filesize'
-import { useDataStore } from '@/store/dataStore'
 import { AbstractData } from '@/script/common/types'
 import { dater } from '@/script/common/functions'
 
@@ -347,7 +346,6 @@ const infoStore = useInfoStore(props.isolationId)
 
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
-const dataStore = useDataStore(props.isolationId)
 const router = useRouter()
 
 const filePathComplete = computed(() => {
@@ -378,43 +376,23 @@ const filteredTags = computed(() => {
   }
 })
 
-// Retrieve index based on metadata hash
-const index = computed(() => {
-  if (props.metadata.database) {
-    return dataStore.hashMapData.get(props.metadata.database.hash)
-  } else if (props.metadata.album) {
-    return dataStore.hashMapData.get(props.metadata.album.id)
-  } else {
-    // Throw an error if neither database nor album.cover is provided
-    throw new Error('Invalid metadata: Neither database nor album cover is available.')
-  }
-})
-
 // Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
 }
 
 function quickAddTags(tag: string) {
-  if (index.value !== undefined) {
-    const indexArray = [index.value]
-    const addTagsArray: string[] = [tag]
-    const removeTagsArray: string[] = []
-    editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
-  } else {
-    throw new Error()
-  }
+  const indexArray = [props.index]
+  const addTagsArray: string[] = [tag]
+  const removeTagsArray: string[] = []
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 function quickRemoveTags(tag: string) {
-  if (index.value !== undefined) {
-    const indexArray = [index.value]
-    const addTagsArray: string[] = []
-    const removeTagsArray: string[] = [tag]
-    editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
-  } else {
-    throw new Error()
-  }
+  const indexArray = [props.index]
+  const addTagsArray: string[] = []
+  const removeTagsArray: string[] = [tag]
+  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 async function searchByTag(tag: string) {
