@@ -223,7 +223,7 @@
           <v-list-item>
             <template #prepend>
               <v-avatar>
-                <v-icon color="black">mdi-image</v-icon>
+                <v-icon color="black">mdi-image-album</v-icon>
               </v-avatar>
             </template>
             <v-list-item-title class="text-wrap">{{ metadata.album.title }}</v-list-item-title>
