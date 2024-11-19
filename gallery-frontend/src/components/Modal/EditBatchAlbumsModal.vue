@@ -67,12 +67,17 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { AlbumInfo } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
+import { getIsolationIdByRoute } from '@/script/common/functions'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const isolationId = getIsolationIdByRoute(route)
 
 const formIsValid = ref(false)
 
-const collectionStore = useCollectionStore('mainId')
-const albumStore = useAlbumStore('mainId')
-const modalStore = useModalStore('mainId')
+const collectionStore = useCollectionStore(isolationId)
+const albumStore = useAlbumStore(isolationId)
+const modalStore = useModalStore(isolationId)
 
 const addAlbumsArray = ref<AlbumInfo[]>([])
 const removeAlbumsArray = ref<AlbumInfo[]>([])

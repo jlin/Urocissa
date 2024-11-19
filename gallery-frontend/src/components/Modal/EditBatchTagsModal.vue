@@ -66,10 +66,10 @@ import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 const formIsValid = ref(false)
 const route = useRoute()
-
-const modalStore = useModalStore('mainId')
-const collectionStore = useCollectionStore('mainId')
-const tagStore = useTagStore('mainId')
+const isolationId = getIsolationIdByRoute(route)
+const modalStore = useModalStore(isolationId)
+const collectionStore = useCollectionStore(isolationId)
+const tagStore = useTagStore(isolationId)
 
 const addTagsArray = ref<string[]>([])
 const removeTagsArray = ref<string[]>([])

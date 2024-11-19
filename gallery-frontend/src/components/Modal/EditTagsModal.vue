@@ -56,8 +56,9 @@ import { useTagStore } from '@/store/tagStore'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
 
 const route = useRoute()
-const modalStore = useModalStore('mainId')
-const tagStore = useTagStore('mainId')
+const isolationId = getIsolationIdByRoute(route)
+const modalStore = useModalStore(isolationId)
+const tagStore = useTagStore(isolationId)
 
 const changedTagsArray = ref<string[]>([])
 const tagList = computed(() => {
