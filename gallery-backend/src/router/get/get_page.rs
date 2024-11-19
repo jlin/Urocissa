@@ -57,8 +57,8 @@ pub async fn favorite() -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/favorite/view/<_hash>")]
-pub async fn favorite_view(_hash: String) -> Option<NamedFile> {
+#[get("/favorite/view/<_path..>")]
+pub async fn favorite_view(_path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
@@ -71,8 +71,8 @@ pub async fn albums() -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/albums/view/<_hash>")]
-pub async fn albums_view(_hash: String) -> Option<NamedFile> {
+#[get("/albums/view/<_path..>")]
+pub async fn albums_view(_path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
@@ -96,8 +96,8 @@ pub async fn archived() -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/archived/view/<_hash>")]
-pub async fn archived_view(_hash: String) -> Option<NamedFile> {
+#[get("/archived/view/<_path..>")]
+pub async fn archived_view(_path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
@@ -110,8 +110,8 @@ pub async fn trashed() -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/trashed/view/<_hash>")]
-pub async fn trashed_view(_hash: String) -> Option<NamedFile> {
+#[get("/trashed/view/<_path..>")]
+pub async fn trashed_view(_path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
@@ -124,8 +124,8 @@ pub async fn all() -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/all/view/<_hash>")]
-pub async fn all_view(_hash: String) -> Option<NamedFile> {
+#[get("/all/view/<_path..>")]
+pub async fn all_view(_path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
