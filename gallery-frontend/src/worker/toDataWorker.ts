@@ -417,7 +417,6 @@ function normalizeSubrows(
       // Skip scaling logic, use fixed subRowHeight for the last subrow
       subRow.displayElements.forEach((displayElement) => {
         displayElement.displayHeight = subRowHeight
-        widthSum += displayElement.displayWidth + 8
         displayElement.displayTopPixelAccumulated = displayTopPixelAccumulated
       })
 
