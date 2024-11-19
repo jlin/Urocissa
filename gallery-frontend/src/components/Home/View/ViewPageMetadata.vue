@@ -108,7 +108,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_favorite')"
+                @click="quickRemoveTags('_favorite', index, isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -118,7 +118,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_favorite')"
+                @click="quickAddTags('_favorite', index, isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -128,7 +128,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_archived')"
+                @click="quickRemoveTags('_archived', index, isolationId)"
                 >archived</v-chip
               >
               <v-chip
@@ -138,7 +138,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_archived')"
+                @click="quickAddTags('_archived', index, isolationId)"
                 >archived</v-chip
               >
             </v-list-item-title>
@@ -257,7 +257,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_favorite')"
+                @click="quickRemoveTags('_favorite', index, isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -267,7 +267,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_favorite')"
+                @click="quickAddTags('_favorite', index, isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -277,7 +277,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_archived')"
+                @click="quickRemoveTags('_archived', index, isolationId)"
                 >archived</v-chip
               >
               <v-chip
@@ -287,7 +287,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_archived')"
+                @click="quickAddTags('_archived', index, isolationId)"
                 >archived</v-chip
               >
             </v-list-item-title>
@@ -328,10 +328,10 @@ import { useRouter } from 'vue-router'
 import { useInfoStore } from '@/store/infoStore'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { filesize } from 'filesize'
 import { AbstractData } from '@/script/common/types'
 import { dater } from '@/script/common/functions'
+import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 
 const props = defineProps<{
   isolationId: string
@@ -379,20 +379,6 @@ const filteredTags = computed(() => {
 // Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
-}
-
-function quickAddTags(tag: string) {
-  const indexArray = [props.index]
-  const addTagsArray: string[] = [tag]
-  const removeTagsArray: string[] = []
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
-}
-
-function quickRemoveTags(tag: string) {
-  const indexArray = [props.index]
-  const addTagsArray: string[] = []
-  const removeTagsArray: string[] = [tag]
-  editTagsInWorker(indexArray, addTagsArray, removeTagsArray, props.isolationId)
 }
 
 async function searchByTag(tag: string) {
