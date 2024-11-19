@@ -203,7 +203,122 @@
         </v-list>
       </v-col>
     </v-row>
-    <v-row v-else> </v-row>
+    <v-row v-if="metadata.album" no-gutters class="position-relative">
+      <v-toolbar
+        color="white"
+        :style="{
+          backgroundColor: '#212121'
+        }"
+      >
+        <!-- Icon button with increased size -->
+        <v-btn icon @click="toggleInfo">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <!-- Wrapped Info text with increased font size -->
+        <v-toolbar-title class="text-h5">Info</v-toolbar-title>
+      </v-toolbar>
+      <v-col class="h-100 w-100" cols="auto">
+        <v-list bg-color="white" class="pa-0" height="100%" lines="two">
+          <!-- Metadata Items -->
+          <v-list-item>
+            <template #prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-image</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="text-wrap">{{ metadata.album.title }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <template #prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-image</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="text-wrap">{{
+              `${metadata.album.itemCount} items`
+            }}</v-list-item-title>
+            <v-list-item-subtitle class="text-wrap">
+              {{ filesize(metadata.album.itemSize) }}
+            </v-list-item-subtitle>
+          </v-list-item>
+          <!-- Tags Section -->
+          <v-divider></v-divider>
+          <v-list-item>
+            <template #prepend>
+              <v-avatar>
+                <v-icon color="black">mdi-tag</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title>
+              <v-chip
+                v-if="metadata.album.tag.includes('_favorite')"
+                prepend-icon="mdi-star"
+                color="black"
+                variant="tonal"
+                class="ma-1"
+                link
+                @click="quickRemoveTags('_favorite')"
+                >favorite</v-chip
+              >
+              <v-chip
+                v-else
+                prepend-icon="mdi-star-outline"
+                color="grey"
+                variant="tonal"
+                class="ma-1"
+                link
+                @click="quickAddTags('_favorite')"
+                >favorite</v-chip
+              >
+              <v-chip
+                v-if="metadata.album.tag.includes('_archived')"
+                prepend-icon="mdi-archive-arrow-down"
+                color="black"
+                variant="tonal"
+                class="ma-1"
+                link
+                @click="quickRemoveTags('_archived')"
+                >archived</v-chip
+              >
+              <v-chip
+                v-else
+                prepend-icon="mdi-archive-arrow-down"
+                color="grey"
+                variant="tonal"
+                class="ma-1"
+                link
+                @click="quickAddTags('_archived')"
+                >archived</v-chip
+              >
+            </v-list-item-title>
+            <v-list-item-subtitle class="text-wrap">
+              <v-chip
+                variant="flat"
+                color="black"
+                v-for="tag in filteredTags"
+                :key="tag"
+                link
+                class="ma-1"
+                @click="searchByTag(tag)"
+              >
+                {{ tag }}
+              </v-chip>
+            </v-list-item-subtitle>
+            <v-list-item-subtitle>
+              <v-chip
+                prepend-icon="mdi-pencil"
+                color="black"
+                variant="outlined"
+                class="ma-1"
+                link
+                @click="openEditTagsModal"
+                >edit</v-chip
+              >
+            </v-list-item-subtitle>
+          </v-list-item>
+        </v-list>
+      </v-col>
+    </v-row>
   </v-col>
 </template>
 
@@ -267,13 +382,14 @@ const filteredTags = computed(() => {
 const index = computed(() => {
   if (props.metadata.database) {
     return dataStore.hashMapData.get(props.metadata.database.hash)
-  } else if (props.metadata.album?.cover !== null && props.metadata.album?.cover !== undefined) {
-    return dataStore.hashMapData.get(props.metadata.album.cover)
+  } else if (props.metadata.album) {
+    return dataStore.hashMapData.get(props.metadata.album.id)
   } else {
     // Throw an error if neither database nor album.cover is provided
     throw new Error('Invalid metadata: Neither database nor album cover is available.')
   }
 })
+
 // Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
