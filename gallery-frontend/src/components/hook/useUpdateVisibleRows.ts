@@ -1,12 +1,11 @@
 import { Row } from '@/script/common/types'
-import { navBarHeight, paddingPixel } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useRowStore } from '@/store/rowStore'
 import { Ref, ref, toRaw, watch } from 'vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { getArrayValue, getMapValue } from '@/script/common/functions'
+import { getArrayValue, getMapValue, getScrollUpperBound } from '@/script/common/functions'
 
 /**
  * Finds and returns rows that overlap within the given range.
@@ -273,7 +272,7 @@ export function useUpdateVisibleRows(
 
         scrollTopOffsetFix(
           visibleRows,
-          Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight, 0),
+          Math.max(getScrollUpperBound(prefetchStore.totalHeight, windowHeight.value), 0),
           isolationId
         )
       }

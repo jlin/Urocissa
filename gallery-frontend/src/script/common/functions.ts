@@ -8,6 +8,7 @@ import { RouteLocationNormalizedLoaded } from 'vue-router'
 import { computed, ComputedRef, inject } from 'vue'
 import { useDataStore } from '../../store/dataStore.ts'
 import Cookies from 'js-cookie'
+import { navBarHeight } from './constants.ts'
 
 /**
  * Creates a DataBase instance from parsed data and timestamp.
@@ -151,4 +152,8 @@ export function getCookiesJwt(): string {
     throw new RangeError('JWT cookie is missing.')
   }
   return jwt
+}
+
+export function getScrollUpperBound(totalHeight: number, windowHeight: number): number {
+  return totalHeight - windowHeight + navBarHeight - 2 // 2 is the loading bar height
 }

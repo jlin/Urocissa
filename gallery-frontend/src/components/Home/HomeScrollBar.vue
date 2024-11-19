@@ -95,15 +95,9 @@ import { useQueueStore } from '@/store/queueStore'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { ScrollbarData } from '@/script/common/types'
-import {
-  fixedBigRowHeight,
-  layoutBatchNumber,
-  navBarHeight,
-  paddingPixel,
-  scrollBarWidth
-} from '@/script/common/constants'
+import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { getInjectValue } from '@/script/common/functions'
+import { getInjectValue, getScrollUpperBound } from '@/script/common/functions'
 const isScrolling = ref(false)
 const hoverLabelRowIndex = ref(0)
 const currentDateChipIndex = ref(0)
@@ -125,7 +119,7 @@ const windowHeight = getInjectValue<Ref<number>>('windowHeight')
 const reachBottom = computed(() => {
   return (
     scrollTopStore.scrollTop ===
-    Math.max(prefetchStore.totalHeight - windowHeight.value - paddingPixel + navBarHeight, 0)
+    Math.max(getScrollUpperBound(prefetchStore.totalHeight, windowHeight.value), 0)
   )
 })
 
