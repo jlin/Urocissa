@@ -5,7 +5,7 @@ import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
 export function editAlbumsInWorker(
-  idArray: number[],
+  hashArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[]
 ) {
@@ -29,7 +29,7 @@ export function editAlbumsInWorker(
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {
-      idArray: [...idArray],
+      idArray: [...hashArray],
       addAlbumsArray: [...addAlbumsArray],
       removeAlbumsArray: [...removeAlbumsArray],
       timestamp: timestamp
