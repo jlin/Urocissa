@@ -1,8 +1,8 @@
 <template>
   <router-view v-slot="{ Component }">
-    <component v-if="metadata.album" :is="Component" :title="metadata.album.title" />
+    <component :is="Component" :title="album.title" />
   </router-view>
-  <v-col v-if="metadata && metadata.album" class="h-100 d-flex align-center justify-center">
+  <v-col class="h-100 d-flex align-center justify-center">
     <v-row>
       <v-col
         :class="[
@@ -34,7 +34,6 @@
           }"
         />
         <v-card
-          v-if="metadata && metadata.album"
           :style="{
             width: `${Math.round(
               Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
@@ -50,20 +49,21 @@
           class="d-flex flex-column"
         >
           <v-card-item>
-            <v-card-title class="text-h4">
-              {{ metadata.album.title }}
-            </v-card-title>
+            <v-text-field
+              v-model="titleModel"
+              variant="underlined"
+              @blur="editTitle"
+            ></v-text-field>
           </v-card-item>
-          <v-divider></v-divider>
           <v-list>
             <v-list-item>
-              <v-list-item-title v-if="metadata.album.startTime">
-                {{ `${dater(metadata.album.startTime)} ~ ${dater(metadata.album.endTime!)}` }}
+              <v-list-item-title v-if="album.startTime">
+                {{ `${dater(album.startTime)} ~ ${dater(album.endTime!)}` }}
               </v-list-item-title>
               <v-list-item-subtitle>
-                {{ `${metadata.album.itemCount} item${metadata.album.itemCount === 1 ? '' : 's'}` }}
+                {{ `${album.itemCount} item${album.itemCount === 1 ? '' : 's'}` }}
                 •
-                {{ filesize(metadata.album.itemSize) }}
+                {{ filesize(album.itemSize) }}
               </v-list-item-subtitle>
             </v-list-item>
           </v-list>
@@ -92,22 +92,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-card
-      v-if="metadata?.database?.pending"
-      class="d-flex align-center justify-start"
-      outlined
-      style="padding: 16px"
-    >
-      <v-row align="center" no-gutters>
-        <v-col cols="auto" class="d-flex align-center">
-          <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
-        </v-col>
-        <v-col class="text-left pl-4">
-          <div>This video is currently being processed.</div>
-          <div>Please check back later.</div>
-        </v-col>
-      </v-row>
-    </v-card>
   </v-col>
 </template>
 
@@ -115,19 +99,39 @@
 import { useImgStore } from '@/store/imgStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { VCol } from 'vuetify/components'
-import { AbstractData } from '@/script/common/types'
 import { filesize } from 'filesize'
 import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
+import { Album } from '@/script/common/types'
+import { onMounted, ref } from 'vue'
+
+const titleModel = ref('')
 
 const route = useRoute()
 const albumStore = useAlbumStore('mainId')
 const imgStore = useImgStore('mainId')
 
-defineProps<{
+const props = defineProps<{
   index: number
-  metadata: AbstractData
+  album: Album
   colWidth: number
   colHeight: number
 }>()
+
+function editTitle() {}
+
+onMounted(() => {
+  const title = props.album.title
+  if (title !== null) {
+    titleModel.value = title
+  }
+})
 </script>
+<style scoped>
+.v-text-field >>> input {
+  font-size: 2.125rem;
+  font-weight: 400;
+  line-height: 1.175;
+  letter-spacing: 0.0073529412em;
+}
+</style>

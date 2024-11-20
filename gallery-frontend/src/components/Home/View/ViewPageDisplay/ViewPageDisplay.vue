@@ -23,9 +23,9 @@
         :isolation-id="isolationId"
       />
       <ViewPageDisplayAlbum
-        v-if="metadata"
+        v-if="metadata && metadata.album"
         :index="index"
-        :metadata="metadata"
+        :album="metadata.album"
         :col-width="colWidth"
         :col-height="colHeight"
       />
