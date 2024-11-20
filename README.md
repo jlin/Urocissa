@@ -19,6 +19,8 @@ The goal of this project is to efficiently serve one million photos on a 4 GB RA
 
 ## Demo
 
+⚠️ Demo servers may experience higher latency due to the ongoing [C-LION1 backbone outage](https://status.hetzner.com/incident/ec8a2f28-e964-46cb-94fa-bb4629c19777).
+
 You can explore the features of Urocissa through the following demos:
 
 ### Standard Demo  
