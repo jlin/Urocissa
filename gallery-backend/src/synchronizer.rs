@@ -79,7 +79,7 @@ pub async fn start_sync() -> anyhow::Result<()> {
     // CPU-intensive work is wrapped in tokio::task::spawn_blocking for async runtime
     tokio::task::spawn_blocking(move || {
         loop {
-            std::thread::sleep(std::time::Duration::from_secs(3));
+            std::thread::sleep(std::time::Duration::from_millis(500));
             let list_of_sync_files = {
                 let mut events_repository_lock = events_repository
                     .lock()
@@ -101,7 +101,7 @@ pub async fn start_sync() -> anyhow::Result<()> {
 
     // This thread is used to perform video_compression
     tokio::task::spawn_blocking(move || loop {
-        std::thread::sleep(std::time::Duration::from_secs(3));
+        std::thread::sleep(std::time::Duration::from_millis(500));
         let list_of_video_hash = {
             let mut video_queue_repository_repository_lock = video_queue_repository
                 .lock()
@@ -154,7 +154,7 @@ pub async fn start_sync() -> anyhow::Result<()> {
     });
 
     tokio::task::spawn_blocking(move || loop {
-        std::thread::sleep(std::time::Duration::from_secs(3));
+        std::thread::sleep(std::time::Duration::from_millis(500));
         let list_of_album_id = {
             let mut album_queue_repository_repository_lock = album_queue_repository
                 .lock()
