@@ -1,6 +1,6 @@
 <template>
   <router-view v-slot="{ Component }">
-    <component :is="Component" :title="album.title" />
+    <component :is="Component" :title="album.title === null ? '' : album.title" />
   </router-view>
   <v-col class="h-100 d-flex align-center justify-center">
     <v-row>
@@ -53,6 +53,7 @@
               v-model="titleModel"
               variant="underlined"
               @blur="editTitle"
+              :placeholder="titleModel === '' ? 'Add Title' : undefined"
             ></v-text-field>
           </v-card-item>
           <v-list>
@@ -104,6 +105,7 @@ import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
 import { Album } from '@/script/common/types'
 import { onMounted, ref } from 'vue'
+import axios from 'axios'
 
 const titleModel = ref('')
 
@@ -118,13 +120,17 @@ const props = defineProps<{
   colHeight: number
 }>()
 
-function editTitle() {}
+async function editTitle() {
+  if ((props.album.title ?? '') !== titleModel.value) {
+    await axios.post('/post/set_album_title', {
+      albumId: props.album.id,
+      title: titleModel.value === '' ? null : titleModel.value
+    })
+  }
+}
 
 onMounted(() => {
-  const title = props.album.title
-  if (title !== null) {
-    titleModel.value = title
-  }
+  titleModel.value = props.album.title ?? ''
 })
 </script>
 <style scoped>

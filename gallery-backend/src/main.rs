@@ -27,7 +27,7 @@ use router::{
         post_upload::upload,
     },
     put::{
-        edit_album::{edit_album, set_album_cover},
+        edit_album::{edit_album, set_album_cover, set_album_title},
         edit_tag::edit_tag,
         random::generate_random_data,
         regenerate_preview::regenerate_preview,
@@ -137,7 +137,8 @@ async fn rocket() -> _ {
                 set_album_cover,
                 album_page,
                 albums,
-                albums_view
+                albums_view,
+                set_album_title
             ],
         )
 }

@@ -111,3 +111,34 @@ pub async fn set_album_cover(set_album_cover: Json<SetAlbumCover>) -> Result<(),
     .await
     .unwrap()
 }
+
+#[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct SetAlbumTitle {
+    pub album_id: ArrayString<64>,
+    pub title: Option<String>,
+}
+
+#[post("/post/set_album_title", data = "<set_album_title>")]
+pub async fn set_album_title(set_album_title: Json<SetAlbumTitle>) -> Result<(), Status> {
+    tokio::task::spawn_blocking(move || {
+        let set_album_title_inner = set_album_title.into_inner();
+        let album_id = set_album_title_inner.album_id;
+
+        let txn = TREE.in_disk.begin_write().unwrap();
+        {
+            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
+
+            let mut album = album_table.get(&*album_id).unwrap().unwrap().value();
+
+            album.title = set_album_title_inner.title;
+            album_table.insert(&*album_id, album).unwrap();
+        }
+        txn.commit().unwrap();
+        SHOULD_RESET.swap(true, Ordering::SeqCst);
+
+        Ok(())
+    })
+    .await
+    .unwrap()
+}
