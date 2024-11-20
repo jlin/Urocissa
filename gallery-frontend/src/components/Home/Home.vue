@@ -76,7 +76,7 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
 
 const props = defineProps<{
   isolationId: string
-  title: string | undefined
+  title: string | null
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)

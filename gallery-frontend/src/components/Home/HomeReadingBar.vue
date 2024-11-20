@@ -32,7 +32,7 @@ import NavBarProgessBar from '../NavBar/NavBarProgessBar.vue'
 
 const props = defineProps<{
   isolationId: string
-  title: string | undefined
+  title: string | null
 }>()
 const route = useRoute()
 const collectionStore = useCollectionStore(props.isolationId)
