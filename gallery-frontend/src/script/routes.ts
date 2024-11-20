@@ -4,6 +4,18 @@ import { Component } from 'vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import 'vue-router'
 
+import TagsPage from '@/components/Page/TagsPage.vue'
+import LoginPage from '@/components/LoginPage.vue'
+import HomeMain from '@/components/Home/HomeMain.vue'
+import AllPage from '@/components/Page/AllPage.vue'
+import FavoritePage from '@/components/Page/FavoritePage.vue'
+import ArchivedPage from '@/components/Page/ArchivedPage.vue'
+import TrashedPage from '@/components/Page/TrashedPage.vue'
+import AlbumsPage from '@/components/Page/AlbumsPage.vue'
+import ViewPageMain from '@/components/Home/View/ViewPageMain.vue'
+import HomeIsolated from '@/components/Home/HomeIsolated.vue'
+import ViewPageIsolated from '@/components/Home/View/ViewPageIsolated.vue'
+
 // ======================================
 // 1. Define Simple Static Routes
 // ======================================
@@ -11,7 +23,7 @@ import 'vue-router'
 const simpleRoutes: RouteRecordRaw[] = [
   {
     path: '/tags',
-    component: () => import('@/components/Page/TagsPage.vue'),
+    component: TagsPage,
     name: 'TagsPage',
     meta: {
       isReadPage: false,
@@ -22,7 +34,7 @@ const simpleRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/login',
-    component: () => import('@/components/LoginPage.vue'),
+    component: LoginPage,
     name: 'LoginPage',
     meta: {
       isReadPage: false,
@@ -47,7 +59,7 @@ const simpleRoutes: RouteRecordRaw[] = [
  */
 function createRoute(
   path: string,
-  component: () => Promise<Component>,
+  component: Component,
   name: string,
   basicString: string | null
 ): RouteRecordRaw[] {
@@ -64,20 +76,20 @@ function createRoute(
     children: [
       {
         path: 'view/:hash',
-        component: () => import('@/components/Home/View/ViewPageMain.vue'),
+        component: ViewPageMain,
         name: `${name}ViewPage`,
         meta: { isReadPage: false, isViewPage: true, basicString: basicString, baseName: name },
         children: [
           {
             path: 'read',
-            component: () => import('@/components/Home/HomeIsolated.vue'),
+            component: HomeIsolated,
             name: `${name}ReadPage`,
             meta: { isReadPage: true, isViewPage: false, basicString: basicString, baseName: name },
             children: [
               {
                 path: 'view/:subhash',
                 name: `${name}ReadViewPage`,
-                component: () => import('@/components/Home/View/ViewPageIsolated.vue'),
+                component: ViewPageIsolated,
                 meta: {
                   isReadPage: true,
                   isViewPage: true,
@@ -100,42 +112,32 @@ function createRoute(
 
 const homePageRoutes = createRoute(
   '',
-  () => import('@/components/Home/HomeMain.vue'),
+  HomeMain,
   'HomePage',
   'and(not(tag: _archived), not(tag:_trashed))'
 )
 
-const allPageRoutes = createRoute(
-  'all',
-  () => import('@/components/Page/AllPage.vue'),
-  'AllPage',
-  null
-)
+const allPageRoutes = createRoute('all', AllPage, 'AllPage', null)
 
 const favoritePageRoutes = createRoute(
   'favorite',
-  () => import('@/components/Page/FavoritePage.vue'),
+  FavoritePage,
   'FavoritePage',
   'and(tag:_favorite, not(tag:_trashed))'
 )
 
 const archivedPageRoutes = createRoute(
   'archived',
-  () => import('@/components/Page/ArchivedPage.vue'),
+  ArchivedPage,
   'ArchivedPage',
   'and(tag:_archived, not(tag:_trashed))'
 )
 
-const trashedPageRoutes = createRoute(
-  'trashed',
-  () => import('@/components/Page/TrashedPage.vue'),
-  'TrashedPage',
-  'and(tag:_trashed)'
-)
+const trashedPageRoutes = createRoute('trashed', TrashedPage, 'TrashedPage', 'and(tag:_trashed)')
 
 const albumsPageRoutes = createRoute(
   'albums',
-  () => import('@/components/Page/AlbumsPage.vue'),
+  AlbumsPage,
   'AlbumsPage',
   'and(type:album, not(tag:_trashed))'
 )

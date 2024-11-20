@@ -17,11 +17,10 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed, defineAsyncComponent } from 'vue'
+import { computed } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
-
-const NotificationWarn = defineAsyncComponent(() => import('@/components/NotificationWarn.vue'))
-const NavBar = defineAsyncComponent(() => import('@/components/NavBar/NavBar.vue'))
+import NotificationWarn from '@/components/NotificationWarn.vue'
+import NavBar from '@/components/NavBar/NavBar.vue'
 
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
