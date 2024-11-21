@@ -183,19 +183,9 @@ cargo build --release
 
 ---
 
-### 6. Install Frontend Dependencies
+### 6. Build the Frontend
 
 In the `gallery-frontend` directory, run:
-
-```bash
-npm install
-```
-
----
-
-### 7. Build the Frontend
-
-Build the frontend by running:
 
 ```bash
 npm run build
@@ -203,7 +193,7 @@ npm run build
 
 ---
 
-### 8. Run the Application
+### 7. Run the Application
 
 Navigate to the `gallery-backend` directory and run the following command to start the app:
 
@@ -233,13 +223,7 @@ git pull
    cd ./Urocissa/gallery-frontend
    ```
 
-2. Install dependencies to ensure all packages are properly installed:
-
-   ```bash
-   npm install
-   ```
-
-3. Build the frontend:
+2. Build the frontend:
 
    ```bash
    npm run build
