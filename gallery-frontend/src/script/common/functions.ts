@@ -172,3 +172,10 @@ export function quickRemoveTags(tag: string, index: number, isolationId: string)
   editTagsInWorker(indexArray, addTagsArray, removeTagsArray, isolationId)
 }
  */
+
+export function allowedCharacters(value: string) {
+  const pattern = /^[\u0030-\u0039\u0041-\u005A\u0061-\u007A\u4E00-\u9FFF_\u002D\u0020]+$/
+  return (
+    pattern.test(value) || 'Only letters, numbers, spaces, underscores, and hyphens are allowed'
+  )
+}
