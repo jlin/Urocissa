@@ -10,7 +10,7 @@
       <v-container>
         <v-text-field
           v-model="albumName"
-          :rules="[rules.required]"
+          :rules="[rules.required, rules.allowedCharacters]"
           item-text="label"
           item-value="value"
           label="Album Name"
@@ -49,7 +49,13 @@ const modalStore = useModalStore('mainId')
 const messageStore = useMessageStore('mainId')
 
 const rules = {
-  required: (value: string) => !!value || 'Album Name is required'
+  required: (value: string) => !!value || 'Album Name is required',
+  allowedCharacters: (value: string) => {
+    const pattern = /^[\u0030-\u0039\u0041-\u005A\u0061-\u007A\u4E00-\u9FFF_\u002D\u0020]+$/
+    return (
+      pattern.test(value) || 'Only letters, numbers, spaces, underscores, and hyphens are allowed'
+    )
+  }
 }
 
 const createAlbum = async () => {
