@@ -7,39 +7,43 @@
     id="edit-tag-overlay"
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated" retain-focus>
-      <v-card-title> Edit Tags </v-card-title>
-      <v-container>
-        <v-combobox
-          v-model="changedTagsArray"
-          chips
-          multiple
-          item-title="tag"
-          item-value="tag"
-          :items="tagList.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)"
-          label="Tags"
-          closable-chips
-        ></v-combobox>
-      </v-container>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="teal-accent-4"
-          variant="outlined"
-          class="ma-2 button button-submit"
-          @click="modalStore.showEditTagsModal = false"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          color="teal-accent-4"
-          variant="outlined"
-          class="ma-2 button button-submit"
-          @click="submit()"
-          :loading="!tagStore.fetched"
-        >
-          Submit
-        </v-btn>
-      </v-card-actions>
+      <v-form v-model="formIsValid" @submit.prevent="submit" validate-on="input">
+        <v-card-title> Edit Tags </v-card-title>
+        <v-container>
+          <v-combobox
+            v-model="changedTagsArray"
+            chips
+            multiple
+            item-title="tag"
+            item-value="tag"
+            :items="tagList.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)"
+            label="Tags"
+            closable-chips
+            :rules="[rules.allowedCharacters]"
+          ></v-combobox>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="teal-accent-4"
+            variant="outlined"
+            class="ma-2 button button-submit"
+            @click="modalStore.showEditTagsModal = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="teal-accent-4"
+            variant="outlined"
+            class="ma-2 button button-submit"
+            :loading="!tagStore.fetched"
+            :disabled="!formIsValid"
+            type="submit"
+          >
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
@@ -54,6 +58,9 @@ import { useRoute } from 'vue-router'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
+import { allowedCharactersRegex } from '@/script/common/constants'
+
+const formIsValid = ref(false)
 
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
@@ -64,6 +71,15 @@ const changedTagsArray = ref<string[]>([])
 const tagList = computed(() => {
   return tagStore.tags
 })
+
+const rules = {
+  allowedCharacters: (value: string) => {
+    return (
+      allowedCharactersRegex.test(value) ||
+      'Only letters, numbers, spaces, underscores, and hyphens are allowed'
+    )
+  }
+}
 
 const submit = ref<(() => void) | undefined>(undefined)
 

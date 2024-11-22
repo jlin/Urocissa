@@ -7,9 +7,10 @@
     id="edit-album-overlay"
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated" retain-focus>
-      <v-card-title> Edit Albums </v-card-title>
-      <v-container>
-        <!-- 
+      <v-form v-model="formIsValid" @submit.prevent="submit" validate-on="input">
+        <v-card-title> Edit Albums </v-card-title>
+        <v-container>
+          <!-- 
   v-model="reactiveArray":
     - Binds to the list (reactiveArray) of selected objects.
     - Choose between `return-object` or `item-value`:
@@ -26,36 +27,38 @@
   label:
     - If set to "SomeText", displays "SomeText" to the user (in text field)
 -->
-        <v-select
-          v-model="vModelAlbumsArray"
-          chips
-          multiple
-          item-title="albumName"
-          :items="albumStore.albums"
-          label="Albums"
-          closable-chips
-          return-object
-        ></v-select>
-      </v-container>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="teal-accent-4"
-          variant="outlined"
-          class="ma-2 button button-submit"
-          @click="modalStore.showEditAlbumsModal = false"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          color="teal-accent-4"
-          variant="outlined"
-          class="ma-2 button button-submit"
-          @click="submit()"
-        >
-          Submit
-        </v-btn>
-      </v-card-actions>
+          <v-select
+            v-model="vModelAlbumsArray"
+            chips
+            multiple
+            item-title="albumName"
+            :items="albumStore.albums"
+            label="Albums"
+            closable-chips
+            return-object
+          ></v-select>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="teal-accent-4"
+            variant="outlined"
+            class="ma-2 button button-submit"
+            @click="modalStore.showEditAlbumsModal = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="teal-accent-4"
+            variant="outlined"
+            class="ma-2 button button-submit"
+            :disabled="!formIsValid"
+            type="submit"
+          >
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
@@ -74,6 +77,8 @@ import { getHashIndexDataFromRoute } from '@/script/common/functions'
 
 const submit = ref<(() => void) | undefined>(undefined)
 const route = useRoute()
+
+const formIsValid = ref(false)
 
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')

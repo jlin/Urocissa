@@ -58,6 +58,7 @@ const rules = {
     )
   }
 }
+
 const createAlbum = async () => {
   try {
     const createAlbumData = {
