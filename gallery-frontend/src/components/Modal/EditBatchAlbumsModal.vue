@@ -61,14 +61,14 @@
 /**
  * This modal is used for editing the albums of multiple photos on the home page.
  */
-import { useModalStore } from '@/store/modalStore'
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { AlbumInfo } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
-import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
@@ -111,5 +111,3 @@ const submit = () => {
   modalStore.showBatchEditAlbumsModal = false
 }
 </script>
-
-<style scoped></style>

@@ -65,25 +65,25 @@
 
 <script setup lang="ts">
 /**
- * This modal is used for editing the album of a single photo on the single photo view page.
+ * This modal is used for editing the albums of a single photo on the single photo view page.
  */
-import { useModalStore } from '@/store/modalStore'
 import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
+import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { AlbumInfo } from '@/script/common/types'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
 
-const submit = ref<(() => void) | undefined>(undefined)
 const route = useRoute()
-
-const formIsValid = ref(false)
 
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
 
+const formIsValid = ref(false)
 const vModelAlbumsArray = ref<AlbumInfo[]>([])
+
+const submit = ref<(() => void) | undefined>(undefined)
 
 onMounted(() => {
   const useSubmit = (): undefined | (() => void) => {

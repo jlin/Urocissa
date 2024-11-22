@@ -16,7 +16,7 @@
             multiple
             item-title="tag"
             item-value="tag"
-            :items="tagList.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)"
+            :items="filteredTagList"
             label="Tags"
             closable-chips
             :rules="[allowedCharactersForTags]"
@@ -50,36 +50,36 @@
 
 <script setup lang="ts">
 /**
- * This modal is used for editing the tag of a single photo on the single photo view page.
+ * This modal is used for editing the tags of a single photo on the single photo view page.
  */
-import { useModalStore } from '@/store/modalStore'
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
+import { useModalStore } from '@/store/modalStore'
 import { useTagStore } from '@/store/tagStore'
+import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
 import { allowedCharactersRegex } from '@/script/common/constants'
 
 const formIsValid = ref(false)
+const changedTagsArray = ref<string[]>([])
+const submit = ref<(() => void) | undefined>(undefined)
 
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const modalStore = useModalStore('mainId')
 const tagStore = useTagStore(isolationId)
 
-const changedTagsArray = ref<string[]>([])
-const tagList = computed(() => {
-  return tagStore.tags
-})
+const tagList = computed(() => tagStore.tags)
+const filteredTagList = computed(() =>
+  tagList.value.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)
+)
 
 const allowedCharactersForTags = (inputArray: string[]) =>
   inputArray.every((tag) => allowedCharactersRegex.test(tag)) ||
   'Only letters, numbers, spaces, underscores, and hyphens are allowed'
 
-const submit = ref<(() => void) | undefined>(undefined)
-
 const specialTag = (tag: string): boolean => {
-  return tag == '_archived' || tag == '_favorite'
+  return tag === '_archived' || tag === '_favorite'
 }
 
 onMounted(() => {

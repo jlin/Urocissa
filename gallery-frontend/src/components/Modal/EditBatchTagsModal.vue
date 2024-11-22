@@ -57,23 +57,25 @@
 /**
  * This modal is used for editing the tags of multiple photos on the home page.
  */
-import { useModalStore } from '@/store/modalStore'
-import { computed, ref } from 'vue'
-import { useCollectionStore } from '@/store/collectionStore'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
-import { useTagStore } from '@/store/tagStore'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useModalStore } from '@/store/modalStore'
+import { useCollectionStore } from '@/store/collectionStore'
+import { useTagStore } from '@/store/tagStore'
+import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 import { allowedCharactersRegex } from '@/script/common/constants'
+
 const formIsValid = ref(false)
+const addTagsArray = ref<string[]>([])
+const removeTagsArray = ref<string[]>([])
+
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
+
 const modalStore = useModalStore('mainId')
 const collectionStore = useCollectionStore(isolationId)
 const tagStore = useTagStore(isolationId)
-
-const addTagsArray = ref<string[]>([])
-const removeTagsArray = ref<string[]>([])
 
 const tagList = computed(() => {
   return tagStore.tags.map((tag) => tag.tag)
@@ -83,12 +85,10 @@ const specialTag = (tag: string): boolean => {
   return tag == '_archived' || tag == '_favorite'
 }
 
-// Rule for Add Tags to ensure no tag is added that's already in Remove Tags
 const addTagsRule = (inputArray: string[]) =>
   inputArray.every((tag) => !removeTagsArray.value.includes(tag)) ||
   'Some tags are already selected in Remove Tags'
 
-// Rule for Remove Tags to ensure no tag is added that's already in Add Tags
 const removeTagsRule = (inputArray: string[]) =>
   inputArray.every((tag) => !addTagsArray.value.includes(tag)) ||
   'Some tags are already selected in Add Tags'

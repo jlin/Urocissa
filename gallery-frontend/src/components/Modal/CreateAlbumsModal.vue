@@ -6,14 +6,12 @@
     id="edit-tag-overlay"
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated">
-      <v-form v-model="formIsValid" @submit.prevent="createAlbum()" validate-on="input">
-        <v-card-title class="text-h5"> Create Albums </v-card-title>
+      <v-form v-model="formIsValid" @submit.prevent="createAlbum" validate-on="input">
+        <v-card-title class="text-h5">Create Albums</v-card-title>
         <v-container>
           <v-text-field
             v-model="albumName"
             :rules="[rules.required, rules.allowedCharacters]"
-            item-text="label"
-            item-value="value"
             label="Album Name"
           ></v-text-field>
         </v-container>
@@ -23,7 +21,7 @@
             color="grey-lighten-2"
             variant="text"
             class="ma-2 button button-submit"
-            @click="modalStore.showCreateAlbumsModal = false"
+            @click="closeModal"
           >
             Cancel
           </v-btn>
@@ -43,24 +41,23 @@
 </template>
 
 <script setup lang="ts">
-import { allowedCharactersRegex } from '@/script/common/constants'
+import { ref } from 'vue'
+import axios from 'axios'
 import { useMessageStore } from '@/store/messageStore'
 import { useModalStore } from '@/store/modalStore'
-import axios from 'axios'
-import { ref } from 'vue'
-const albumName = ref<string>('')
+import { allowedCharactersRegex } from '@/script/common/constants'
+
 const modalStore = useModalStore('mainId')
 const messageStore = useMessageStore('mainId')
-const formIsValid = ref(false)
+
+const albumName = ref<string>('')
+const formIsValid = ref<boolean>(false)
 
 const rules = {
   required: (value: string) => !!value || 'Album Name is required',
-  allowedCharacters: (value: string) => {
-    return (
-      allowedCharactersRegex.test(value) ||
-      'Only letters, numbers, spaces, underscores, and hyphens are allowed'
-    )
-  }
+  allowedCharacters: (value: string) =>
+    allowedCharactersRegex.test(value) ||
+    'Only letters, numbers, spaces, underscores, and hyphens are allowed'
 }
 
 const createAlbum = async () => {
@@ -69,21 +66,30 @@ const createAlbum = async () => {
       title: albumName.value,
       elements: []
     }
-    const axiosResponse = await axios.post('/post/create_album', createAlbumData, {
+
+    const response = await axios.post('/post/create_album', createAlbumData, {
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    console.log(axiosResponse)
 
-    messageStore.message = 'Create Album successfully.'
+    console.log(response)
+
+    messageStore.message = 'Album created successfully.'
     messageStore.warn = false
     messageStore.showMessage = true
 
     modalStore.showCreateAlbumsModal = false
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error('Error creating album:', error)
+    messageStore.message = 'Failed to create album.'
+    messageStore.warn = true
+    messageStore.showMessage = true
   }
+}
+
+const closeModal = () => {
+  modalStore.showCreateAlbumsModal = false
 }
 </script>
 
