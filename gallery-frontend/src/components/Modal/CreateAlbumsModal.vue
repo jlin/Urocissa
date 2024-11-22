@@ -31,6 +31,7 @@
           variant="outlined"
           class="ma-2 button button-submit"
           @click="createAlbum()"
+          :disabled="!formIsValid"
         >
           Submit
         </v-btn>
@@ -48,6 +49,7 @@ import { ref } from 'vue'
 const albumName = ref<string>('')
 const modalStore = useModalStore('mainId')
 const messageStore = useMessageStore('mainId')
+const formIsValid = ref(false)
 
 const rules = {
   required: (value: string) => !!value || 'Album Name is required',
