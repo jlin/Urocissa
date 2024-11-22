@@ -105,7 +105,8 @@ const submit = () => {
   editAlbumsInWorker(
     hashArray,
     addAlbumsArray.value.map((album) => album.albumId),
-    removeAlbumsArray.value.map((album) => album.albumId)
+    removeAlbumsArray.value.map((album) => album.albumId),
+    isolationId
   )
   modalStore.showBatchEditAlbumsModal = false
 }

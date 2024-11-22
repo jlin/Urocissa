@@ -73,7 +73,7 @@ import { useRoute } from 'vue-router'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { AlbumInfo } from '@/script/common/types'
-import { getHashIndexDataFromRoute } from '@/script/common/functions'
+import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/common/functions'
 
 const submit = ref<(() => void) | undefined>(undefined)
 const route = useRoute()
@@ -133,7 +133,8 @@ onMounted(() => {
       editAlbumsInWorker(
         idArray,
         addAlbumsArrayComputed.map((album) => album.albumId),
-        removeAlbumsArrayComputed.map((album) => album.albumId)
+        removeAlbumsArrayComputed.map((album) => album.albumId),
+        getIsolationIdByRoute(route)
       )
       modalStore.showEditAlbumsModal = false
     }
