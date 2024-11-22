@@ -117,7 +117,7 @@ const regeneratePreview = async () => {
 
 const deleteData = () => {
   const indexArray = Array.from(collectionStore.editModeCollection)
-  deleteDataInWorker(indexArray)
+  deleteDataInWorker(indexArray, isolationId)
 }
 
 const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise<AbstractData> => {

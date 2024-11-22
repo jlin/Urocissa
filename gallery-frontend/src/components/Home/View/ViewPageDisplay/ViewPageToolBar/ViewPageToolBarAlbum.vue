@@ -49,6 +49,6 @@ const props = defineProps<{
 const modalStore = useModalStore('mainId')
 
 const deleteData = () => {
-  deleteDataInWorker([props.index])
+  deleteDataInWorker([props.index], props.isolationId)
 }
 </script>
