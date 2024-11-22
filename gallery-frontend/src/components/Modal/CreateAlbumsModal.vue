@@ -6,36 +6,38 @@
     id="edit-tag-overlay"
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated">
-      <v-card-title class="text-h5"> Create Albums </v-card-title>
-      <v-container>
-        <v-text-field
-          v-model="albumName"
-          :rules="[rules.required, rules.allowedCharacters]"
-          item-text="label"
-          item-value="value"
-          label="Album Name"
-        ></v-text-field>
-      </v-container>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="grey-lighten-2"
-          variant="text"
-          class="ma-2 button button-submit"
-          @click="modalStore.showCreateAlbumsModal = false"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          color="teal-accent-4"
-          variant="outlined"
-          class="ma-2 button button-submit"
-          @click="createAlbum()"
-          :disabled="!formIsValid"
-        >
-          Submit
-        </v-btn>
-      </v-card-actions>
+      <v-form v-model="formIsValid" @submit.prevent="createAlbum()" validate-on="input">
+        <v-card-title class="text-h5"> Create Albums </v-card-title>
+        <v-container>
+          <v-text-field
+            v-model="albumName"
+            :rules="[rules.required, rules.allowedCharacters]"
+            item-text="label"
+            item-value="value"
+            label="Album Name"
+          ></v-text-field>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="grey-lighten-2"
+            variant="text"
+            class="ma-2 button button-submit"
+            @click="modalStore.showCreateAlbumsModal = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="teal-accent-4"
+            variant="outlined"
+            class="ma-2 button button-submit"
+            :disabled="!formIsValid"
+            type="submit"
+          >
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </v-form>
     </v-card>
   </v-dialog>
 </template>
