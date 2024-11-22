@@ -5,7 +5,7 @@
     persistent
     id="edit-tag-overlay"
   >
-    <v-card class="mx-auto w-100" width="400" variant="elevated">
+    <v-card class="mx-auto w-100" max-width="400" variant="elevated">
       <v-card-title class="text-h5"> Create Albums </v-card-title>
       <v-container>
         <v-text-field
