@@ -19,7 +19,7 @@
             :items="tagList.filter((tag) => !specialTag(tag.tag)).map((tag) => tag.tag)"
             label="Tags"
             closable-chips
-            :rules="[rules.allowedCharacters]"
+            :rules="[allowedCharactersForTags]"
           ></v-combobox>
         </v-container>
         <v-card-actions>
@@ -72,14 +72,9 @@ const tagList = computed(() => {
   return tagStore.tags
 })
 
-const rules = {
-  allowedCharacters: (value: string) => {
-    return (
-      allowedCharactersRegex.test(value) ||
-      'Only letters, numbers, spaces, underscores, and hyphens are allowed'
-    )
-  }
-}
+const allowedCharactersForTags = (inputArray: string[]) =>
+  inputArray.every((tag) => allowedCharactersRegex.test(tag)) ||
+  'Only letters, numbers, spaces, underscores, and hyphens are allowed'
 
 const submit = ref<(() => void) | undefined>(undefined)
 
