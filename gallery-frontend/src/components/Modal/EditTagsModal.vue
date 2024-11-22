@@ -57,7 +57,7 @@ import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@/script/commo
 
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const modalStore = useModalStore(isolationId)
+const modalStore = useModalStore('mainId')
 const tagStore = useTagStore(isolationId)
 
 const changedTagsArray = ref<string[]>([])

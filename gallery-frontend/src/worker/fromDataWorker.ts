@@ -29,7 +29,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
   const offsetStore = useOffsetStore(isolationId)
   const rowStore = useRowStore(isolationId)
   const locationStore = useLocationStore(isolationId)
-  const modalStore = useModalStore(isolationId)
+  const modalStore = useModalStore('mainId')
   const configStore = useConfigStore(isolationId)
   const albumStore = useAlbumStore(isolationId)
 

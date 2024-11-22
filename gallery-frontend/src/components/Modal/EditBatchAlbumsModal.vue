@@ -77,7 +77,7 @@ const formIsValid = ref(false)
 
 const collectionStore = useCollectionStore(isolationId)
 const albumStore = useAlbumStore(isolationId)
-const modalStore = useModalStore(isolationId)
+const modalStore = useModalStore('mainId')
 
 const addAlbumsArray = ref<AlbumInfo[]>([])
 const removeAlbumsArray = ref<AlbumInfo[]>([])

@@ -58,7 +58,7 @@ const props = defineProps<{
 const route = useRoute()
 
 const uploadStore = useUploadStore(props.isolationId)
-const modalStore = useModalStore(props.isolationId)
+const modalStore = useModalStore('mainId')
 
 const hasHoveringEffect = computed(() => {
   const path = route.path
