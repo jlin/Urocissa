@@ -14,7 +14,7 @@
             chips
             multiple
             label="Add Tags"
-            :rules="[addTagsRule]"
+            :rules="[addTagsRule, allowedCharactersForTags]"
             :items="tagList.filter((tag) => !specialTag(tag))"
           ></v-combobox>
         </v-container>
@@ -24,7 +24,7 @@
             chips
             multiple
             label="Remove Tags"
-            :rules="[removeTagsRule]"
+            :rules="[removeTagsRule, allowedCharactersForTags]"
             :items="tagList.filter((tag) => !specialTag(tag))"
           ></v-combobox>
         </v-container>
@@ -64,10 +64,11 @@ import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { useTagStore } from '@/store/tagStore'
 import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@/script/common/functions'
+import { allowedCharactersRegex } from '@/script/common/constants'
 const formIsValid = ref(false)
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const modalStore = useModalStore(isolationId)
+const modalStore = useModalStore('mainId')
 const collectionStore = useCollectionStore(isolationId)
 const tagStore = useTagStore(isolationId)
 
@@ -91,6 +92,10 @@ const addTagsRule = (inputArray: string[]) =>
 const removeTagsRule = (inputArray: string[]) =>
   inputArray.every((tag) => !addTagsArray.value.includes(tag)) ||
   'Some tags are already selected in Add Tags'
+
+const allowedCharactersForTags = (inputArray: string[]) =>
+  inputArray.every((tag) => allowedCharactersRegex.test(tag)) ||
+  'Only letters, numbers, spaces, underscores, and hyphens are allowed'
 
 const submit = () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
