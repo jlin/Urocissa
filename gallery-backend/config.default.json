@@ -1,7 +1,0 @@
-{
-  "password": "password",
-  "readOnlyMode": false,
-  "syncPath": ["./upload"],
-  "disableImg": false,
-  "discordHookUrl": null
-}
