@@ -82,7 +82,7 @@ interface PrefetchParams {
   locate: string | null
 }
 export interface EditTagsParams {
-  indexArray: number[]
+  indexSet: Set<number>
   addTagsArray: string[]
   removeTagsArray: string[]
   timestamp: string

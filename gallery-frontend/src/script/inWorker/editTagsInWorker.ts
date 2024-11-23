@@ -26,12 +26,12 @@ export function editTagsInWorker(
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {
-      indexArray: [...indexArray],
+      indexSet: new Set(indexArray),
       addTagsArray: [...addTagsArray],
       removeTagsArray: [...removeTagsArray],
       timestamp: timestamp
     }
     postToWorker.editTags(payload)
-    optimisticUpdateTags.optimisticUpdateTags(payload)
+    optimisticUpdateTags.optimisticUpdateTags(payload, true)
   }
 }

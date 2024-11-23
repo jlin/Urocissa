@@ -113,9 +113,9 @@ self.addEventListener('message', (e) => {
       postToMain.prefetchReturn({ result: result })
     },
     editTags: async (payload) => {
-      const { indexArray, addTagsArray, removeTagsArray, timestamp } = payload
+      const { indexSet, addTagsArray, removeTagsArray, timestamp } = payload
       const { returnedTagsArray } = await editTags(
-        indexArray,
+        Array.from(indexSet),
         addTagsArray,
         removeTagsArray,
         timestamp
@@ -289,7 +289,7 @@ function lineWrap(displayElements: number[], windowWidth: number): number[] {
   minBadness[0] = 0
 
   for (let i = 1; i <= n; i++) {
-    let currentWidth =  0
+    let currentWidth = 0
     for (let j = i; j > 0; j--) {
       currentWidth += getArrayValue(displayElements, j - 1) + 2 * paddingPixel
 

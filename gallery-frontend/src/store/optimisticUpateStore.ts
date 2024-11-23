@@ -14,18 +14,21 @@ export const useOptimisticStore = (isolationId: string) =>
       queueOptimisticUpdate: []
     }),
     actions: {
-      optimisticUpdateTags(payload: EditTagsParams) {
+      optimisticUpdateTags(payload: EditTagsParams, pushIntoQueue: boolean) {
         const dataStore = useDataStore(isolationId)
-        payload.indexArray.forEach((index) => {
-          const addTagsResult = dataStore.addTags(index, payload.addTagsArray)
+        for (const index of dataStore.data.keys()) {
+          if (payload.indexSet.has(index)) {
+            const addTagsResult = dataStore.addTags(index, payload.addTagsArray)
 
-          const removeTagsResult = dataStore.removeTags(index, payload.removeTagsArray)
-          if (addTagsResult && removeTagsResult) {
-            payload.indexArray = payload.indexArray.filter((i) => i !== index)
+            const removeTagsResult = dataStore.removeTags(index, payload.removeTagsArray)
+            if (addTagsResult && removeTagsResult) {
+              payload.indexSet.delete(index)
+            }
           }
-        })
+        }
+        console.log('payload.indexSet.size is', payload.indexSet.size)
 
-        if (payload.indexArray.length !== 0) {
+        if (pushIntoQueue && payload.indexSet.size !== 0) {
           // some data has not been fetched yet
           this.queueOptimisticUpdate.push(payload)
         }
@@ -34,7 +37,7 @@ export const useOptimisticStore = (isolationId: string) =>
         console.log('perform selfupdate')
 
         this.queueOptimisticUpdate.forEach((payload) => {
-          this.optimisticUpdateTags(payload)
+          this.optimisticUpdateTags(payload, false)
         })
       }
     }
