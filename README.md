@@ -133,7 +133,7 @@ Make sure the following software is installed on your system:
    **config.json:**
 
    ```env
-   PASSWORD=your_password_here
+   PASSWORD=password
    SYNC_PATH=./upload
    DISCORD_HOOK_URL=
    ```
