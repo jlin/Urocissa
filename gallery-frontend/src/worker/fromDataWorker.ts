@@ -83,6 +83,15 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
     },
     prefetchReturn: async (payload) => {
+      try {
+        const response = await axios.get('/get/get-config.json')
+        const publicConfig = PublicConfigSchema.parse(response.data)
+        configStore.disableImg = publicConfig.disableImg
+      } catch (error) {
+        console.error('Error fetching config:', error)
+        throw error
+      }
+
       const result: Prefetch = payload.result
       prefetchStore.timestamp = result.timestamp
       prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
@@ -99,15 +108,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       }
 
       fetchScrollbarInWorker(isolationId)
-
-      try {
-        const response = await axios.get('/get/get-config.json')
-        const publicConfig = PublicConfigSchema.parse(response.data)
-        configStore.disableImg = publicConfig.disableImg
-      } catch (error) {
-        console.error('Error fetching config:', error)
-        throw error
-      }
 
       prefetchStore.updateFetchRowTrigger = !prefetchStore.updateFetchRowTrigger
     },
