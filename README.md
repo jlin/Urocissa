@@ -5,13 +5,13 @@
 Urocissa is a self-hosted gallery designed to serve massive collections, capable of handling millions of images and videos. It is built using Rust and Vue.
 
 ## Table of Contents
+
 - [Motivation](#motivation)
 - [Demo](#demo)
 - [Advantages](#advantages)
 - [Limitations](#limitations)
 - [Steps to Set Up and Use the App](#steps-to-set-up-and-use-the-app)
 - [Update](#update)
-
 
 ## Motivation
 
@@ -23,15 +23,17 @@ The goal of this project is to efficiently serve one million photos on a 4 GB RA
 
 You can explore the features of Urocissa through the following demos:
 
-### Standard Demo  
+### Standard Demo
+
 [https://demo.photoserver.tw](https://demo.photoserver.tw)  
-**Password:** `password`  
+**Password:** `password`
 
 This demo showcases the typical usage of Urocissa, allowing you to experience its core features and user interface.
 
-### One-Million-Photo Demo  
+### One-Million-Photo Demo
+
 [https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
-**Password:** `password`  
+**Password:** `password`
 
 This demo demonstrates Urocissa's ability to manage 1,000,000 photos, showcasing the power and scalability of Urocissa. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
 
@@ -51,28 +53,27 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 **Early Stage Development**: The app is still in its very early development phase. Many features are incomplete, and there are no automated tests. Additionally, Urocissa is currently optimized for Chrome and Firefox on Windows and Android, but it may encounter issues for browsers on iOS or Linux. The detailed features can be seen in this table:
 
-
-| Feature                                | Status     |
-|----------------------------------------|------------|
-| Upload Videos and Photos               | ✅          |
-| Auto Backup Folders                    | ✅          |
-| Download Photos and Videos             | ✅          |
-| EXIF Data                              | ✅          |
-| User-Defined Tags                      | ✅          |
-| Duplicate Handling                     | ✅          |
-| Instant Select All                     | ✅          |
-| Find in Timeline                       | ✅          |
-| Responsive Layout                      | ✅          |
-| Shareable Albums                       | 🛠️          |
-| Basic Editing                          | ⏳          |
-| Multi-User Support                     | ⏳          |
-| Docker Installation                    | ⏳          |
-| Discovery                              | ⏳          |
-| Object/Face Recognition                | ❌          |
-| Geolocation/Map                        | ❌          |
-| Android App                            | ❌          |
-| External Libraries                     | ❌          |
-| Existing Folders                       | ❌          |
+| Feature                    | Status |
+| -------------------------- | ------ |
+| Upload Videos and Photos   | ✅     |
+| Auto Backup Folders        | ✅     |
+| Download Photos and Videos | ✅     |
+| EXIF Data                  | ✅     |
+| User-Defined Tags          | ✅     |
+| Duplicate Handling         | ✅     |
+| Instant Select All         | ✅     |
+| Find in Timeline           | ✅     |
+| Responsive Layout          | ✅     |
+| Shareable Albums           | 🛠️     |
+| Basic Editing              | ⏳     |
+| Multi-User Support         | ⏳     |
+| Docker Installation        | ⏳     |
+| Discovery                  | ⏳     |
+| Object/Face Recognition    | ❌     |
+| Geolocation/Map            | ❌     |
+| Android App                | ❌     |
+| External Libraries         | ❌     |
+| Existing Folders           | ❌     |
 
 ## Steps to Set Up and Use the App
 
@@ -125,29 +126,23 @@ Make sure the following software is installed on your system:
 2. Copy the default config file and fill in the necessary settings:
 
    ```bash
-   cp config.default.json config.json
+   cp .env.default .env
    cp Rocket.default.toml Rocket.toml
    ```
 
    **config.json:**
 
-   ```json
-   {
-     "password": "your_password_here",
-     "readOnlyMode": false,
-     "syncPath": ["./upload"],
-     "disableImg": false,
-     "discordHookUrl": null
-   }
+   ```env
+   PASSWORD=your_password_here
+   SYNC_PATH=./upload
+   DISCORD_HOOK_URL=
    ```
 
-   *Explanation:*
+   _Explanation:_
 
-   - `password`: Your password for the app.
-   - `readOnlyMode`: Set to `false` to allow changes.
-   - `syncPath`: List of directories that the app will watch for new or modified photos.
-   - `disableImg`: For debugging purposes (leave it as `false`).
-   - `discordHookUrl`: (Optional) Fill in your Discord webhook URL to receive error notifications.
+   - `PASSWORD`: Your password for the app.
+   - `SYNC_PATH`: List of directories that the app will watch for new or modified photos.
+   - `DISCORD_HOOK_URL`: (Optional) Fill in your Discord webhook URL to receive error notifications.
 
    **Rocket.toml:**
 
