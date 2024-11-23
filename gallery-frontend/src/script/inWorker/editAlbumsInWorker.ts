@@ -3,9 +3,10 @@ import { useAlbumStore } from '@/store/albumStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { useOptimisticStore } from '@/store/optimisticUpateStore'
 
 export function editAlbumsInWorker(
-  hashArray: number[],
+  indexArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
   isolationId: string
@@ -13,6 +14,7 @@ export function editAlbumsInWorker(
   const prefetchStore = usePrefetchStore(isolationId)
   const workerStore = useWorkerStore(isolationId)
   const albumStore = useAlbumStore('mainId')
+  const optimisticUpateStore = useOptimisticStore(isolationId)
 
   albumStore.fetched = false
 
@@ -30,11 +32,12 @@ export function editAlbumsInWorker(
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     const payload = {
-      idArray: [...hashArray],
+      indexSet: new Set(indexArray),
       addAlbumsArray: [...addAlbumsArray],
       removeAlbumsArray: [...removeAlbumsArray],
       timestamp: timestamp
     }
     postToWorker.editAlbums(payload)
+    optimisticUpateStore.optimisticUpdateAlbums(payload, false)
   }
 }

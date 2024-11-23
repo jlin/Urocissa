@@ -58,6 +58,54 @@ export const useDataStore = (isolationId: string) =>
 
         // Neither database nor album exists for this index
         throw new Error(`No database or album found for index ${index}`)
+      },
+      addAlbums(index: number, albums: string[]): boolean {
+        const data = this.data.get(index)
+        if (!data) {
+          // Index does not exist
+          return false
+        }
+
+        // Determine the target object: database or album
+        const target = data.database
+
+        if (target) {
+          albums.forEach((album) => {
+            if (!target.album.includes(album)) {
+              target.album.push(album)
+            }
+          })
+          return true
+        }
+
+        if (data.album) {
+          return false
+        }
+
+        // Neither database nor album exists for this index
+        throw new Error(`No database found for index ${index}`)
+      },
+      removeAlbums(index: number, albums: string[]): boolean {
+        const data = this.data.get(index)
+        if (!data) {
+          // Index does not exist
+          return false
+        }
+
+        // Determine the target object: database or album
+        const target = data.database
+
+        if (target) {
+          target.album = target.album.filter((album) => !albums.includes(album))
+          return true
+        }
+
+        if (data.album) {
+          return false
+        }
+
+        // Neither database nor album exists for this index
+        throw new Error(`No database found for index ${index}`)
       }
     }
   })()

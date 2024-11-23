@@ -126,8 +126,8 @@ self.addEventListener('message', (e) => {
       })
     },
     editAlbums: async (payload) => {
-      const { idArray, addAlbumsArray, removeAlbumsArray, timestamp } = payload
-      await editAlbums(idArray, addAlbumsArray, removeAlbumsArray, timestamp)
+      const { indexSet, addAlbumsArray, removeAlbumsArray, timestamp } = payload
+      await editAlbums(Array.from(indexSet), addAlbumsArray, removeAlbumsArray, timestamp)
     },
     deleteData: async (payload) => {
       const { indexArray, timestamp } = payload

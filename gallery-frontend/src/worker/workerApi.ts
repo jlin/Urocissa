@@ -87,8 +87,8 @@ export interface EditTagsParams {
   removeTagsArray: string[]
   timestamp: string
 }
-interface EditAlbumsParams {
-  idArray: number[]
+export interface EditAlbumsParams {
+  indexSet: Set<number>
   addAlbumsArray: string[]
   removeAlbumsArray: string[]
   timestamp: string
