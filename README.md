@@ -130,7 +130,7 @@ Make sure the following software is installed on your system:
    cp Rocket.default.toml Rocket.toml
    ```
 
-   **config.json:**
+   **.env:**
 
    ```env
    PASSWORD=password
