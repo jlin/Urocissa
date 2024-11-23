@@ -390,7 +390,7 @@ function openEditTagsModal() {
 }
 
 async function navigateToAlbum(albumId: string) {
-  const albumPath = `/album/${albumId}` // Adjust the path as necessary
+  const albumPath = `/albums/view/${albumId}/read` // Adjust the path as necessary
   await router.push({ path: albumPath })
 }
 
