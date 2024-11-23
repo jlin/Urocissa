@@ -1,6 +1,6 @@
+use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
 use std::{fs::File, io, path::PathBuf, sync::LazyLock};
-
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PublicConfig {
@@ -30,12 +30,17 @@ pub static PUBLIC_CONFIG: LazyLock<PublicConfig> = LazyLock::new(|| {
 });
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
-#[serde(rename_all = "camelCase")]
 pub struct PrivateConfig {
     pub password: String,
     pub sync_path: Vec<PathBuf>,
     pub discord_hook_url: Option<String>,
 }
 
-pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> =
-    LazyLock::new(|| serde_json::from_reader(File::open("config.json").unwrap()).unwrap());
+pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
+    // Load environment variables from .env file if it exists
+    dotenv().ok();
+
+    // Deserialize environment variables into PrivateConfig
+    envy::from_env::<PrivateConfig>()
+        .expect("Failed to load configuration from environment variables")
+});
