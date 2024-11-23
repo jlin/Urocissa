@@ -205,6 +205,9 @@ const checkAndFetch = (index: number): boolean => {
 }
 
 async function prefetch(index: number, isolationId: string) {
+  if (configStore.disableImg) {
+    return
+  }
   for (let i = 1; i <= 10; i++) {
     const nextIndex = index + i
     const nextAbstractData = dataStore.data.get(nextIndex)
@@ -246,6 +249,9 @@ watch(
   [() => props.index, () => initializedStore.initialized],
   async () => {
     if (initializedStore.initialized) {
+      if (configStore.disableImg) {
+        return
+      }
       checkAndFetch(props.index)
       // Prefetch next and previous 10 hashes if they exist
       await prefetch(props.index, props.isolationId)
