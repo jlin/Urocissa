@@ -1,5 +1,4 @@
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { useTagStore } from '@/store/tagStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
@@ -12,9 +11,6 @@ export function editTagsInWorker(
 ) {
   const workerStore = useWorkerStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
-  const tagStore = useTagStore(isolationId)
-
-  tagStore.fetched = false
 
   if (workerStore.worker === null) {
     workerStore.initializeWorker(isolationId)
