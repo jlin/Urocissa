@@ -17,6 +17,7 @@ import axios from 'axios'
 import { useConfigStore } from '@/store/configStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { PublicConfigSchema } from '@/script/common/schemas'
+import { useOptimisticStore } from '@/store/optimisticUpateStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
@@ -32,6 +33,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
   const modalStore = useModalStore('mainId')
   const configStore = useConfigStore(isolationId)
   const albumStore = useAlbumStore(isolationId)
+  const optimisticUpateStore = useOptimisticStore(isolationId)
 
   const handler = createHandler<typeof fromDataWorker>({
     returnData: (payload) => {
@@ -45,6 +47,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
         }
       })
       dataStore.batchFetched.set(payload.batch, true)
+      optimisticUpateStore.selfUpdate()
     },
     fetchRowReturn: (payload) => {
       const timestamp = payload.timestamp

@@ -1,3 +1,4 @@
+import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
@@ -11,7 +12,7 @@ export function editTagsInWorker(
 ) {
   const workerStore = useWorkerStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
-
+  const optimisticUpdateTags = useOptimisticStore(isolationId)
   if (workerStore.worker === null) {
     workerStore.initializeWorker(isolationId)
   }
@@ -31,5 +32,6 @@ export function editTagsInWorker(
       timestamp: timestamp
     }
     postToWorker.editTags(payload)
+    optimisticUpdateTags.optimisticUpdateTags(payload)
   }
 }

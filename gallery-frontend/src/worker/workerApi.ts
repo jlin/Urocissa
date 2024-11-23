@@ -81,7 +81,7 @@ interface PrefetchParams {
   reverse: string | undefined
   locate: string | null
 }
-interface EditTagsParams {
+export interface EditTagsParams {
   indexArray: number[]
   addTagsArray: string[]
   removeTagsArray: string[]
