@@ -14,7 +14,7 @@
         :isolation-id="isolationId"
       />
       <ViewPageDisplayDatabase
-        v-if="metadata"
+        v-if="metadata && !configStore.disableImg"
         :index="index"
         :hash="hash"
         :metadata="metadata"
@@ -23,7 +23,7 @@
         :isolation-id="isolationId"
       />
       <ViewPageDisplayAlbum
-        v-if="metadata && metadata.album"
+        v-if="metadata && metadata.album && !configStore.disableImg"
         :index="index"
         :album="metadata.album"
         :col-width="colWidth"
@@ -78,6 +78,7 @@ import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPag
 import { leaveViewPage } from '@/script/navigator'
 import delay from 'delay'
 import { getCookiesJwt } from '@/script/common/functions'
+import { useConfigStore } from '@/store/configStore'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -89,6 +90,7 @@ const props = defineProps<{
   metadata: AbstractData | undefined
 }>()
 
+const configStore = useConfigStore(props.isolationId)
 const prefetchStore = usePrefetchStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
