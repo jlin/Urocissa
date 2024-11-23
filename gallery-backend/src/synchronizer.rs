@@ -19,16 +19,13 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{self, unbounded_channel, UnboundedSender};
 
 pub static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
 pub static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 pub static ALBUM_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 
 pub async fn start_sync() -> anyhow::Result<()> {
-    let (events_sender, mut events_receiver) = unbounded_channel::<Vec<PathBuf>>();
-    EVENTS_SENDER.set(events_sender).unwrap();
-
     let (video_queue_sender, mut video_queue_receiver) =
         unbounded_channel::<Vec<ArrayString<64>>>();
     VIDEO_QUEUE_SENDER.set(video_queue_sender).unwrap();
@@ -36,9 +33,6 @@ pub async fn start_sync() -> anyhow::Result<()> {
     let (album_queue_sender, mut album_queue_receiver) =
         unbounded_channel::<Vec<ArrayString<64>>>();
     ALBUM_QUEUE_SENDER.set(album_queue_sender).unwrap();
-
-    let events_repository: Arc<Mutex<Vec<PathBuf>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store events
-    let events_repository_clone: Arc<Mutex<Vec<PathBuf>>> = Arc::clone(&events_repository);
 
     let video_queue_repository: Arc<Mutex<Vec<ArrayString<64>>>> = Arc::new(Mutex::new(Vec::new())); // Vector to store video hash
     let video_queue_repository_repository_clone: Arc<Mutex<Vec<ArrayString<64>>>> =
@@ -49,14 +43,6 @@ pub async fn start_sync() -> anyhow::Result<()> {
         Arc::clone(&album_queue_repository);
 
     // Create a new thread to receive and process events
-    tokio::task::spawn(async move {
-        while let Some(event_paths) = events_receiver.recv().await {
-            events_repository_clone
-                .lock()
-                .expect("events_repository_arc_clone lock error")
-                .extend(event_paths);
-        }
-    });
 
     tokio::task::spawn(async move {
         while let Some(video_hash) = video_queue_receiver.recv().await {
@@ -76,25 +62,49 @@ pub async fn start_sync() -> anyhow::Result<()> {
         }
     });
 
-    // CPU-intensive work is wrapped in tokio::task::spawn_blocking for async runtime
-    tokio::task::spawn_blocking(move || {
-        loop {
-            std::thread::sleep(std::time::Duration::from_millis(500));
-            let list_of_sync_files = {
-                let mut events_repository_lock = events_repository
-                    .lock()
-                    .expect("events_repository lock error");
-                std::mem::take(&mut *events_repository_lock)
-            };
-            // Deduplication operation
-            let path = list_of_sync_files
-                .into_iter()
-                .collect::<HashSet<PathBuf>>()
-                .into_iter()
-                .collect::<Vec<PathBuf>>();
+    let (events_sender, mut events_receiver) = unbounded_channel::<Vec<PathBuf>>();
+    EVENTS_SENDER.set(events_sender).unwrap();
 
-            if !path.is_empty() {
-                executor(path);
+    tokio::task::spawn(async move {
+        const MAX_BATCH_SIZE: usize = 100;
+        println!("waiting");
+        while let Some(list_of_sync_files) = events_receiver.recv().await {
+            println!("receive; try batch");
+            // Initialize a batch with the received list
+            let mut batch = Vec::with_capacity(MAX_BATCH_SIZE);
+            batch.extend(list_of_sync_files);
+
+            // Attempt to drain additional items without waiting
+            while batch.len() < MAX_BATCH_SIZE {
+                println!("while batching {}", batch.len());
+                match events_receiver.try_recv() {
+                    Ok(mut more_files) => {
+                        batch.append(&mut more_files);
+                    }
+                    Err(mpsc::error::TryRecvError::Empty) => {
+                        // No more items are immediately available
+                        break;
+                    }
+                    Err(mpsc::error::TryRecvError::Disconnected) => {
+                        // Sender has been dropped; stop collecting
+                        break;
+                    }
+                }
+            }
+            println!("ready to perform task");
+
+            // Deduplicate the paths
+            let unique_paths: HashSet<PathBuf> = batch.into_iter().collect();
+            let paths: Vec<PathBuf> = unique_paths.into_iter().collect();
+
+            if !paths.is_empty() {
+                // Spawn a blocking task to handle the batch
+                let paths_clone = paths.clone();
+                tokio::task::spawn_blocking(move || {
+                    executor(paths_clone);
+                })
+                .await
+                .unwrap();
             }
         }
     });
