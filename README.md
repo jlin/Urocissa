@@ -77,7 +77,7 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Steps to Set Up and Use the App
 
-Follow these instructions to set up and run the Urocissa app.
+Follow these steps to set up and run the Urocissa app on Linux-based systems. For instructions on setting up the app on Windows, please refer to [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
 
 ### 1. Clone the Repository
 
