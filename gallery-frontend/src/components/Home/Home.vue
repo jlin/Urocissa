@@ -73,6 +73,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { useOptimisticStore } from '@/store/optimisticUpateStore'
 
 const props = defineProps<{
   isolationId: string
@@ -91,6 +92,7 @@ const initializedStore = useInitializedStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const imgStore = useImgStore(props.isolationId)
 const locationStore = useLocationStore(props.isolationId)
+const optimisticUpateStore = useOptimisticStore(props.isolationId)
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -173,6 +175,7 @@ onBeforeUnmount(() => {
   offsetStore.clearAll()
   rowStore.clearAll()
   locationStore.clearAll()
+  optimisticUpateStore.clearAll()
 })
 </script>
 

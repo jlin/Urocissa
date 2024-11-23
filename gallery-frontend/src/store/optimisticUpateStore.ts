@@ -14,6 +14,10 @@ export const useOptimisticStore = (isolationId: string) =>
       queueOptimisticUpdate: []
     }),
     actions: {
+      clearAll() {
+        this.backupData.clear()
+        this.queueOptimisticUpdate = []
+      },
       optimisticUpdateTags(payload: EditTagsParams, pushIntoQueue: boolean) {
         const dataStore = useDataStore(isolationId)
         for (const index of dataStore.data.keys()) {
@@ -26,7 +30,6 @@ export const useOptimisticStore = (isolationId: string) =>
             }
           }
         }
-        console.log('payload.indexSet.size is', payload.indexSet.size)
 
         if (pushIntoQueue && payload.indexSet.size !== 0) {
           // some data has not been fetched yet
@@ -34,8 +37,6 @@ export const useOptimisticStore = (isolationId: string) =>
         }
       },
       selfUpdate() {
-        console.log('perform selfupdate')
-
         this.queueOptimisticUpdate.forEach((payload) => {
           this.optimisticUpdateTags(payload, false)
         })
