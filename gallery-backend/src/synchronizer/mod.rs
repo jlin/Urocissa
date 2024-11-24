@@ -1,18 +1,21 @@
 use album::start_album_channel;
 use event::start_event_channel;
 use video::start_video_channel;
+use watch::start_watcher;
 
 use crate::public::tree::TREE;
 
 pub mod album;
 pub mod event;
 pub mod video;
+pub mod watch;
 pub async fn start_sync() {
     // Start all tasks
     let task1 = start_event_channel();
     let task2 = start_video_channel();
     let task3 = start_album_channel();
     let task4 = TREE.start_loop();
+    let task5 = start_watcher();
 
     info!("All channels started.");
 
@@ -41,5 +44,11 @@ pub async fn start_sync() {
                 Err(e) => panic!("Tree loop task failed: {:?}", e),
             }
         },
+        res = task5 => {
+            match res {
+                Ok(_) => error!("Watcher closed unexpectedly."),
+                Err(e) => error!("Watcher task failed: {:?}", e),
+            }
+        }
     }
 }

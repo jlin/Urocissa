@@ -1,9 +1,6 @@
 #[macro_use]
 extern crate rocket;
-use crate::public::error_data::{handle_error, ErrorData};
 use initialization::{initialize_folder, initialize_logger};
-use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
-use public::config::PRIVATE_CONFIG;
 use public::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::tree::start_loop::SHOULD_RESET;
 use public::tree::TREE;
@@ -34,9 +31,6 @@ use router::{
 };
 use std::time::Instant;
 use std::{fs, thread};
-use std::{panic::Location, path::PathBuf};
-use synchronizer::event::EVENTS_SENDER;
-use tokio::time::Duration;
 mod executor;
 mod initialization;
 mod public;
@@ -73,10 +67,6 @@ async fn rocket() -> _ {
     txn.commit().unwrap();
 
     SHOULD_RESET.notify_one();
-
-    tokio::spawn(async move {
-        start_watcher().await;
-    });
 
     // dedicated thread and tokio runtime for channel
     thread::spawn(|| {
@@ -136,66 +126,4 @@ async fn rocket() -> _ {
                 set_album_title
             ],
         )
-}
-
-async fn start_watcher() {
-    let sync_path_list: &Vec<PathBuf> = &PRIVATE_CONFIG.sync_path;
-    let mut watcher: RecommendedWatcher =
-        notify::recommended_watcher(move |watcher_result: notify::Result<Event>| {
-            match watcher_result {
-                Ok(wacher_events) => {
-                    match wacher_events.kind {
-                        EventKind::Create(_) => {
-                            if !wacher_events.paths.is_empty() {
-                                if let Err(send_error) = EVENTS_SENDER
-                                    .get()
-                                    .unwrap()
-                                    .send(wacher_events.paths.clone())
-                                {
-                                    let error_data = ErrorData::new(
-                                        format!("Failed to send paths: {}", send_error),
-                                        format!(
-                                            "Error occur when sending path {:?}",
-                                            wacher_events.paths
-                                        ),
-                                        None,
-                                        None,
-                                        Location::caller(),
-                                        None,
-                                    );
-                                    handle_error(error_data);
-                                }
-                            }
-                        }
-                        EventKind::Modify(_) => {
-                            // Avoid modifying files within the folder to prevent a full rescan of the entire folder
-                            let filtered_paths: Vec<PathBuf> = wacher_events
-                                .paths
-                                .into_iter()
-                                .filter(|path| path.is_file())
-                                .collect();
-
-                            if !filtered_paths.is_empty() {
-                                EVENTS_SENDER
-                                    .get()
-                                    .unwrap()
-                                    .send(filtered_paths)
-                                    .expect("events_sender send error");
-                            }
-                        }
-                        _ => (),
-                    }
-                }
-                Err(e) => error!("watch error: {:?}", e),
-            }
-        })
-        .unwrap();
-    {
-        for path in sync_path_list.iter() {
-            watcher.watch(&path, RecursiveMode::Recursive).unwrap();
-        }
-    }
-    loop {
-        tokio::time::sleep(Duration::from_secs(1)).await;
-    }
 }
