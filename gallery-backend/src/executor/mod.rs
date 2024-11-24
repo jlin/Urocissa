@@ -1,4 +1,4 @@
-use std::{path::PathBuf, sync::atomic::Ordering};
+use std::path::PathBuf;
 mod batcher;
 pub mod compressor;
 mod databaser;
@@ -15,7 +15,7 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
         info!("Processing batch {}/{}", current_batch + 1, total_batches); // Show the current batch being processed
         let batch: Vec<PathBuf> = batch.to_vec();
         processor(batch);
-        SHOULD_RESET.store(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
     }
 }
 

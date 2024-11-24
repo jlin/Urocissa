@@ -8,7 +8,6 @@ use crate::public::tree::TREE;
 use arrayvec::ArrayString;
 use std::collections::HashSet;
 use std::panic::Location;
-use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
 use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
@@ -48,7 +47,7 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                             write_table.insert(&*database.hash, &database).unwrap();
                         }
                         write_txn.commit().unwrap();
-                        SHOULD_RESET.store(true, Ordering::SeqCst);
+                        SHOULD_RESET.notify_one();
                     }
                     Err(error) => {
                         handle_error(ErrorData::new(

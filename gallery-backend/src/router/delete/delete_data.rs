@@ -4,7 +4,6 @@ use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
-use std::sync::atomic::Ordering;
 #[derive(Debug, Deserialize)]
 pub struct DeleteList {
     #[serde(rename = "deleteList")]
@@ -68,7 +67,7 @@ pub async fn delete_data(json_data: Json<DeleteList>) {
         }
 
         txn.commit().unwrap();
-        SHOULD_RESET.store(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
     })
     .await
     .unwrap();

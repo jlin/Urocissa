@@ -1,8 +1,6 @@
-use std::collections::HashSet;
-use std::sync::atomic::Ordering;
-
 use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
+use std::collections::HashSet;
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
@@ -56,7 +54,7 @@ pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {
                 });
         }
         txn.commit().unwrap();
-        SHOULD_RESET.store(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
 
         let concact_result: Vec<ArrayString<64>> = json_data
             .add_albums_content
@@ -104,7 +102,7 @@ pub async fn set_album_cover(set_album_cover: Json<SetAlbumCover>) -> Result<(),
             album_table.insert(&*album_id, album).unwrap();
         }
         txn.commit().unwrap();
-        SHOULD_RESET.swap(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
 
         Ok(())
     })
@@ -135,7 +133,7 @@ pub async fn set_album_title(set_album_title: Json<SetAlbumTitle>) -> Result<(),
             album_table.insert(&*album_id, album).unwrap();
         }
         txn.commit().unwrap();
-        SHOULD_RESET.swap(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
 
         Ok(())
     })

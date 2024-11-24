@@ -11,8 +11,4 @@ pub struct Tree {
     pub in_memory: &'static Arc<RwLock<Vec<DataBaseTimestamp>>>,
 }
 
-pub static TREE: LazyLock<Tree> = LazyLock::new(|| {
-    let new = Tree::new();
-    new.start_loop();
-    new
-});
+pub static TREE: LazyLock<Tree> = LazyLock::new(|| Tree::new());

@@ -8,7 +8,6 @@ use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use std::collections::HashSet;
-use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
 use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
@@ -77,7 +76,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                         });
                     }
                     txn.commit().unwrap();
-                    SHOULD_RESET.store(true, Ordering::SeqCst);
+                    SHOULD_RESET.notify_one();
                     info!("Album self-updated")
                 }
             })

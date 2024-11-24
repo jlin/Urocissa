@@ -32,7 +32,6 @@ use router::{
         regenerate_preview::regenerate_preview,
     },
 };
-use std::sync::atomic::Ordering;
 use std::time::Instant;
 use std::{fs, thread};
 use std::{panic::Location, path::PathBuf};
@@ -73,7 +72,7 @@ async fn rocket() -> _ {
 
     txn.commit().unwrap();
 
-    SHOULD_RESET.store(true, Ordering::SeqCst);
+    SHOULD_RESET.notify_one();
 
     tokio::spawn(async move {
         start_watcher().await;

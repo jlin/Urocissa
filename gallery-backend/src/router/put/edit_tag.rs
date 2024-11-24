@@ -1,5 +1,3 @@
-use std::sync::atomic::Ordering;
-
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
@@ -73,7 +71,7 @@ pub async fn edit_tag(json_data: Json<EditTagsData>) -> Json<Vec<TagInfo>> {
         }
         txn.commit().unwrap();
         let vec_tags_info = TREE_SNAPSHOT.read_tags();
-        SHOULD_RESET.store(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
         Json(vec_tags_info)
     })
     .await

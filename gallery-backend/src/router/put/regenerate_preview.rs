@@ -1,5 +1,3 @@
-use std::sync::atomic::Ordering;
-
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
@@ -40,7 +38,7 @@ pub async fn regenerate_preview(json_data: Json<RegenerateData>) -> () {
             });
 
             executor::compressor::compressor(iterator);
-            SHOULD_RESET.store(true, Ordering::SeqCst);
+            SHOULD_RESET.notify_one();
         }
     })
     .await

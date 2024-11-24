@@ -1,4 +1,3 @@
-use std::sync::atomic::Ordering;
 use std::time::Instant;
 
 use arrayvec::ArrayString;
@@ -54,7 +53,7 @@ pub async fn create_album(create_album: Json<CreateAlbum>) -> Result<(), Status>
             });
         }
         txn.commit().unwrap();
-        SHOULD_RESET.swap(true, Ordering::SeqCst);
+        SHOULD_RESET.notify_one();
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
         Ok(())
     })
