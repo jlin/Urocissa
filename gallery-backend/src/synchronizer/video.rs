@@ -1,22 +1,15 @@
 use crate::executor::compressor::video_compressor::generate_compressed;
 
-use crate::public::abstract_data::AbstractData;
 use crate::public::error_data::{handle_error, ErrorData};
-use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::public::redb::DATA_TABLE;
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
-use log::info;
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use redb::ReadableTable;
+use std::collections::HashSet;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
 use std::sync::OnceLock;
-use std::{
-    collections::HashSet,
-    sync::{Arc, Mutex},
-};
 use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 

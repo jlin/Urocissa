@@ -2,7 +2,8 @@ use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::synchronizer::ALBUM_QUEUE_SENDER;
+use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
+
 use arrayvec::ArrayString;
 use log::info;
 use rayon::prelude::ParallelSliceMut;

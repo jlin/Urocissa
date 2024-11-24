@@ -1,5 +1,6 @@
 use crate::executor::executor;
 
+use log::info;
 use std::sync::OnceLock;
 use std::{collections::HashSet, path::PathBuf};
 use tokio;
@@ -35,8 +36,7 @@ pub fn start_event_channel() {
                     }
                 }
             }
-            let elapsed = start_time.elapsed();
-            println!("Batch collection took: {:?}", elapsed);
+            info!(duration = &*format!("{:?}", start_time.elapsed()); "received events");
 
             // Deduplicate the paths
             let unique_paths: HashSet<PathBuf> = batch.into_iter().collect();
