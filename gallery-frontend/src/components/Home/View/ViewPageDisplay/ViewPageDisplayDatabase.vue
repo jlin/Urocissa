@@ -29,6 +29,22 @@
       }"
       inline
     ></video>
+    <v-card
+      v-if="metadata.database.ext_type === 'video' && metadata.database.pending"
+      class="d-flex align-center justify-start"
+      outlined
+      style="padding: 16px"
+    >
+      <v-row align="center" no-gutters>
+        <v-col cols="auto" class="d-flex align-center">
+          <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
+        </v-col>
+        <v-col class="text-left pl-4">
+          <div>This video is currently being processed.</div>
+          <div>Please check back later.</div>
+        </v-col>
+      </v-row>
+    </v-card>
   </v-col>
 </template>
 
