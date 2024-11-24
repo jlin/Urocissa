@@ -19,6 +19,7 @@ pub fn start_event_channel() {
             batch.extend(list_of_sync_files);
 
             // Attempt to drain additional items without waiting
+            let start_time = std::time::Instant::now();
             while batch.len() < BATCH_SIZE {
                 match events_receiver.try_recv() {
                     Ok(mut more_files) => {
@@ -34,6 +35,8 @@ pub fn start_event_channel() {
                     }
                 }
             }
+            let elapsed = start_time.elapsed();
+            println!("Batch collection took: {:?}", elapsed);
 
             // Deduplicate the paths
             let unique_paths: HashSet<PathBuf> = batch.into_iter().collect();
