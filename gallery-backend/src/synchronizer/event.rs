@@ -9,7 +9,7 @@ use tokio::sync::mpsc::{self, unbounded_channel, UnboundedSender};
 pub const BATCH_SIZE: usize = 100;
 pub static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
 
-pub fn start_event_channel() {
+pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
     let (events_sender, mut events_receiver) = unbounded_channel::<Vec<PathBuf>>();
     EVENTS_SENDER.set(events_sender).unwrap();
 
@@ -50,5 +50,5 @@ pub fn start_event_channel() {
             .await
             .unwrap();
         }
-    });
+    })
 }

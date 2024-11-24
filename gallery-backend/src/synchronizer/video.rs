@@ -15,7 +15,7 @@ use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 pub static VIDEO_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
 
-pub fn start_video_channel() {
+pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
     let (video_queue_sender, mut video_queue_receiver) =
         unbounded_channel::<Vec<ArrayString<64>>>();
     VIDEO_QUEUE_SENDER.set(video_queue_sender).unwrap();
@@ -65,5 +65,5 @@ pub fn start_video_channel() {
             .await
             .unwrap();
         }
-    });
+    })
 }

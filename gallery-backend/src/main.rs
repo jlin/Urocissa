@@ -32,9 +32,9 @@ use router::{
         regenerate_preview::regenerate_preview,
     },
 };
-use std::fs;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
+use std::{fs, thread};
 use std::{panic::Location, path::PathBuf};
 use synchronizer::event::EVENTS_SENDER;
 use tokio::time::Duration;
@@ -78,16 +78,13 @@ async fn rocket() -> _ {
     tokio::spawn(async move {
         start_watcher().await;
     });
-    tokio::spawn(async move {
-        match synchronizer::start_sync().await {
-            Ok(_) => {
-                info!("Synchronizer start");
-            }
-            Err(_) => {
-                error!("Synchronizer failed to start")
-            }
-        }
+
+    // dedicated thread and tokio runtime for channel
+    thread::spawn(|| {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(synchronizer::start_sync())
     });
+
     rocket::build()
         .attach(cache_control_fairing())
         .attach(auth_request_fairing())

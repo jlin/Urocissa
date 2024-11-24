@@ -14,7 +14,7 @@ use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
 pub static ALBUM_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> = OnceLock::new();
-pub fn start_album_channel() {
+pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
     let (album_queue_sender, mut album_queue_receiver) =
         unbounded_channel::<Vec<ArrayString<64>>>();
     ALBUM_QUEUE_SENDER.set(album_queue_sender).unwrap();
@@ -84,5 +84,5 @@ pub fn start_album_channel() {
             .await
             .unwrap();
         }
-    });
+    })
 }
