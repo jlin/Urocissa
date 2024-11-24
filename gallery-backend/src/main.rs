@@ -1,4 +1,3 @@
-static BATCH_SIZE: usize = 100;
 #[macro_use]
 extern crate rocket;
 use crate::public::error_data::{handle_error, ErrorData};
@@ -37,7 +36,7 @@ use std::fs;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 use std::{panic::Location, path::PathBuf};
-use synchronizer::EVENTS_SENDER;
+use synchronizer::event::EVENTS_SENDER;
 use tokio::time::Duration;
 mod executor;
 mod initialization;

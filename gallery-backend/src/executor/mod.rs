@@ -4,7 +4,7 @@ pub mod compressor;
 mod databaser;
 mod filter;
 mod importer;
-use crate::{executor, public::tree::start_loop::SHOULD_RESET, BATCH_SIZE};
+use crate::{executor, public::tree::start_loop::SHOULD_RESET, synchronizer::event::BATCH_SIZE};
 use batcher::merge_file_paths;
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 
