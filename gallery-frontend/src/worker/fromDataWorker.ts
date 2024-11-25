@@ -119,7 +119,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       }
       modalStore.showEditTagsModal = false
       messageStore.showMessage = true
-      console.log('turn to true')
     },
     fetchScrollbarReturn: (payload) => {
       console.log('payload.scrollbarDataArray is ', payload.scrollbarDataArray)
