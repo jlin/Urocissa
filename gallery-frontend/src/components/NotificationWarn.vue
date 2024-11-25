@@ -4,6 +4,9 @@
       v-model="messageStore.showMessage"
       :color="messageStore.warn ? 'red-darken-1' : 'teal-darken-1'"
       timer="2000"
+      :style="{
+        zIndex: 3000
+      }"
     >
       {{ messageStore.message }}
       <template #actions> </template>

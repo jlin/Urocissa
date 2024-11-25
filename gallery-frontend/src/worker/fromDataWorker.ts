@@ -21,8 +21,9 @@ import { useOptimisticStore } from '@/store/optimisticUpateStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
+  const messageStore = useMessageStore('mainId')
+  const modalStore = useModalStore('mainId')
   const dataStore = useDataStore(isolationId)
-  const messageStore = useMessageStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
   const tagStore = useTagStore(isolationId)
   const initializedStore = useInitializedStore(isolationId)
@@ -30,7 +31,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
   const offsetStore = useOffsetStore(isolationId)
   const rowStore = useRowStore(isolationId)
   const locationStore = useLocationStore(isolationId)
-  const modalStore = useModalStore('mainId')
   const configStore = useConfigStore(isolationId)
   const albumStore = useAlbumStore(isolationId)
   const optimisticUpateStore = useOptimisticStore(isolationId)
@@ -119,6 +119,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       }
       modalStore.showEditTagsModal = false
       messageStore.showMessage = true
+      console.log('turn to true')
     },
     fetchScrollbarReturn: (payload) => {
       console.log('payload.scrollbarDataArray is ', payload.scrollbarDataArray)
