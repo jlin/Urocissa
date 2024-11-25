@@ -20,13 +20,7 @@ Make sure the following software is installed on your system:
 
 - **ffmpeg**: Download FFmpeg from the official [FFmpeg website](https://ffmpeg.org/download.html). Extract the downloaded folder, and add the `bin` directory to your system's PATH environment variable.
 
-- **Rust**: Install Rust using the official installer for Windows. Run the following command in PowerShell or Command Prompt:
-
-  ```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  ```
-
-  Follow the prompts to complete the installation.
+- **Rust**: Install Rust using the [official installer](https://www.rust-lang.org/tools/install) for Windows.
 
 - **Node.js (with npm)**: Download and install Node.js from the official [Node.js website](https://nodejs.org). Make sure npm is included in the installation.
 
