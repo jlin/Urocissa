@@ -5,6 +5,7 @@ use public::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::tree::start_loop::SHOULD_RESET;
 use public::tree::TREE;
 use redb::ReadableTableMetadata;
+use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 use router::fairing::{auth_request_fairing, cache_control_fairing};
 use router::{
@@ -68,15 +69,19 @@ async fn rocket() -> _ {
 
     SHOULD_RESET.notify_one();
 
-    // dedicated thread and tokio runtime for channel
-    thread::spawn(|| {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(synchronizer::start_sync())
-    });
-
     rocket::build()
         .attach(cache_control_fairing())
         .attach(auth_request_fairing())
+        .attach(AdHoc::on_liftoff("Shutdown", |rocket| {
+            Box::pin(async move {
+                let shutdown = rocket.shutdown();
+                // dedicated thread and tokio runtime for channel
+                thread::spawn(move || {
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    rt.block_on(synchronizer::start_sync(shutdown))
+                });
+            })
+        }))
         .mount("/object/imported", FileServer::from("./object/imported"))
         .mount(
             "/assets",
