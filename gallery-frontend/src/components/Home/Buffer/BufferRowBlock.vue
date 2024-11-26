@@ -214,6 +214,8 @@ import {
   getInjectValue,
   getMapValue
 } from '@/script/common/functions'
+import { useScrollTopStore } from '@/store/scrollTopStore'
+import { watchDebounced } from '@vueuse/core'
 
 const props = defineProps<{
   row: Row
@@ -230,6 +232,7 @@ const imgStore = useImgStore(props.isolationId)
 const configStore = useConfigStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
+const scorllTopStore = useScrollTopStore(props.isolationId)
 const timeInterval = ref(0)
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
@@ -247,6 +250,9 @@ const handleClickIcon = (event: MouseEvent, currentIndex: number) => {
 }
 
 const handlePointerdown = (event: MouseEvent, currentIndex: number) => {
+  if (isScrolling.value) {
+    return
+  }
   isLongPress.value = false // 初始為非長按
   pressTimer.value = window.setTimeout(() => {
     isLongPress.value = true // 設置為長按
@@ -255,6 +261,9 @@ const handlePointerdown = (event: MouseEvent, currentIndex: number) => {
 }
 
 const handlePointerUp = (event: MouseEvent, currentIndex: number) => {
+  if (isScrolling.value) {
+    return
+  }
   if (pressTimer.value !== null) {
     clearTimeout(pressTimer.value) // 清除定時器
     pressTimer.value = null
@@ -367,6 +376,25 @@ onBeforeUnmount(() => {
     queueStore.img.delete(abortIndex)
   }
 })
+
+const isScrolling = ref(false)
+
+// Watch the value and update the isChanging flag
+watchDebounced(
+  () => scorllTopStore.scrollTop,
+  () => {
+    // When value changes, set isChanging to true
+    isScrolling.value = true
+    console.log(isScrolling.value)
+
+    // Reset the isChanging flag after a short delay
+    setTimeout(() => {
+      isScrolling.value = false
+      console.log(isScrolling.value)
+    }, 100) // Adjust the delay as needed to fit your requirements
+  },
+  { debounce: 100 }
+)
 </script>
 <style scoped>
 .no-select {
