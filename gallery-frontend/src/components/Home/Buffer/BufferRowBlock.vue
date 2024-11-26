@@ -201,7 +201,7 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
 import { useImgStore } from '@/store/imgStore'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHandleClick } from '@/components/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/configStore'
@@ -215,7 +215,6 @@ import {
   getMapValue
 } from '@/script/common/functions'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { watchDebounced } from '@vueuse/core'
 
 const props = defineProps<{
   row: Row
@@ -236,6 +235,7 @@ const scorllTopStore = useScrollTopStore(props.isolationId)
 const timeInterval = ref(0)
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
+const scrollingTimer = ref<number | null>(null)
 
 const { handleClick } = useHandleClick(router, route, props.isolationId)
 
@@ -380,19 +380,29 @@ onBeforeUnmount(() => {
 const isScrolling = ref(false)
 
 // Watch the value and update the isChanging flag
-watchDebounced(
+watch(
   () => scorllTopStore.scrollTop,
   () => {
-    // When value changes, set isChanging to true
+    // 當值變化時，立即設定 isScrolling 為 true
     isScrolling.value = true
 
-    // Reset the isChanging flag after a short delay
-    setTimeout(() => {
+    // 如果有已存在的計時器，則清除它
+    if (scrollingTimer.value !== null) {
+      clearTimeout(scrollingTimer.value)
+    }
+
+    // 設定新的計時器，延遲清除 isScrolling
+    scrollingTimer.value = window.setTimeout(() => {
       isScrolling.value = false
-    }, 100) // Adjust the delay as needed to fit your requirements
-  },
-  { debounce: 100 }
+
+      scrollingTimer.value = null // 清空計時器引用
+    }, 200) // 延遲時間可根據需求調整
+  }
 )
+
+/* watchEffect(() => {
+  console.log('isScrolling.value is', isScrolling.value)
+}) */
 </script>
 <style scoped>
 .no-select {
