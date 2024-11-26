@@ -396,7 +396,7 @@ watch(
       isScrolling.value = false
 
       scrollingTimer.value = null // 清空計時器引用
-    }, 200) // 延遲時間可根據需求調整
+    }, 100) // 延遲時間可根據需求調整
   }
 )
 
