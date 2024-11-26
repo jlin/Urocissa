@@ -100,6 +100,10 @@ interface DeleteDataParams {
 interface FetchScrollBarParams {
   timestamp: string
 }
+interface SetAsAlbumParams {
+  albumId: string
+  coverHash: string
+}
 
 // Define actions for the worker to receive and execute tasks
 export const toDataWorker = createActionCreators({
@@ -109,7 +113,8 @@ export const toDataWorker = createActionCreators({
   editTags: (payload: EditTagsParams) => payload,
   editAlbums: (payload: EditAlbumsParams) => payload,
   deleteData: (payload: DeleteDataParams) => payload,
-  fetchScrollbar: (payload: FetchScrollBarParams) => payload
+  fetchScrollbar: (payload: FetchScrollBarParams) => payload,
+  setAsAlbum: (payload: SetAsAlbumParams) => payload
 })
 
 /* ================================================================================

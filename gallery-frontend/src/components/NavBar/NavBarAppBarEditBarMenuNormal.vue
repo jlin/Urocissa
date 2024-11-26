@@ -72,6 +72,7 @@ import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
 import { AbstractData } from '@/script/common/types'
+import { setAsCoverInWorker } from '@/script/inWorker/setAsCoverInWorker'
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const collectionStore = useCollectionStore(isolationId)
@@ -203,7 +204,7 @@ const downloadAllFiles = async () => {
   }
 }
 
-const setAsCover = async () => {
+const setAsCover = () => {
   if (collectionStore.editModeCollection.size !== 1) {
     console.warn('editModeCollection must contain exactly one item to set as cover.')
     return
@@ -219,26 +220,13 @@ const setAsCover = async () => {
     return
   }
 
-  const albumHash = route.params.hash
+  const albumId = route.params.hash
 
-  if (typeof albumHash !== 'string') {
+  if (typeof albumId !== 'string') {
     return
   }
 
-  const setAlbumCover = {
-    albumId: albumHash,
-    coverHash: coverHash
-  }
-  try {
-    const response = await axios.post('/post/set_album_cover', setAlbumCover, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    console.log('Response:', response.data)
-  } catch (error) {
-    console.error('Error:', error)
-  }
+  setAsCoverInWorker(albumId, coverHash, isolationId)
 }
 </script>
 
