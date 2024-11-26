@@ -5,6 +5,14 @@
       <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
     </template>
     <v-list>
+      <v-list-item
+        v-if="route.meta.isReadPage && collectionStore.editModeCollection.size === 1"
+        prepend-icon="mdi-archive-arrow-down"
+        @click="setAsCover()"
+      >
+        <v-list-item-title class="wrap">Set as Cover</v-list-item-title>
+      </v-list-item>
+
       <v-list-item prepend-icon="mdi-archive-arrow-down" @click="handleQuickEdit('archive')">
         <v-list-item-title class="wrap">Archive</v-list-item-title>
       </v-list-item>
@@ -192,6 +200,44 @@ const downloadAllFiles = async () => {
     console.log('All files downloaded successfully')
   } catch (error) {
     console.error('Error downloading files:', error)
+  }
+}
+
+const setAsCover = async () => {
+  if (collectionStore.editModeCollection.size !== 1) {
+    console.warn('editModeCollection must contain exactly one item to set as cover.')
+    return
+  }
+
+  const coverIndex = Array.from(collectionStore.editModeCollection)[0]
+  if (coverIndex === undefined) {
+    return
+  }
+
+  const coverHash = dataStore.data.get(coverIndex)?.database?.hash
+  if (coverHash === undefined) {
+    return
+  }
+
+  const albumHash = route.params.hash
+
+  if (typeof albumHash !== 'string') {
+    return
+  }
+
+  const setAlbumCover = {
+    albumId: albumHash,
+    coverHash: coverHash
+  }
+  try {
+    const response = await axios.post('/post/set_album_cover', setAlbumCover, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    console.log('Response:', response.data)
+  } catch (error) {
+    console.error('Error:', error)
   }
 }
 </script>
