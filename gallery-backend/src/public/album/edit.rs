@@ -72,7 +72,13 @@ impl Album {
 
         // Set the end_time using the last (latest) timestamp
         if let Some((last_database, last_timestamp)) = data_in_album.last() {
-            if self.cover.is_none() {
+            if self.cover.is_none() || {
+                // check whether the cover is a member of this album
+                let cover = self.cover.as_ref();
+                !data_in_album
+                    .iter()
+                    .any(|(database, _)| cover == Some(&database.hash))
+            } {
                 self.set_cover(last_database);
             }
             self.end_time = Some(*last_timestamp);

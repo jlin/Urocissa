@@ -4,7 +4,7 @@ use arrayvec::ArrayString;
 use bitcode::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
-pub mod edit_cover;
+pub mod edit;
 pub mod new;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq)]
