@@ -385,12 +385,10 @@ watchDebounced(
   () => {
     // When value changes, set isChanging to true
     isScrolling.value = true
-    console.log(isScrolling.value)
 
     // Reset the isChanging flag after a short delay
     setTimeout(() => {
       isScrolling.value = false
-      console.log(isScrolling.value)
     }, 100) // Adjust the delay as needed to fit your requirements
   },
   { debounce: 100 }
