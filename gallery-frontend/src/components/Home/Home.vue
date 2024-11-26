@@ -1,10 +1,11 @@
 <template>
-  <!-- This router-view contains the ViewPage.vue -->
+  <!-- This bar is used inside album reading papge -->
   <HomeReadingBar
     v-if="!(props.isolationId === 'mainId') && route.meta.isReadPage && !route.meta.isViewPage"
     :isolation-id="isolationId"
     :title="title"
   />
+  <!-- This router-view contains the ViewPage.vue -->
   <router-view></router-view>
   <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
   <div
