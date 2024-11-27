@@ -8,6 +8,7 @@ use arrayvec::ArrayString;
 use log::info;
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::OnceLock;
 use tokio::sync::mpsc::{self, unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
@@ -16,6 +17,8 @@ pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<
     OnceLock::new();
 
 pub static SHOULD_RESET: Notify = Notify::const_new();
+
+pub static VERSION_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 impl Tree {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
@@ -79,6 +82,7 @@ impl Tree {
                 data_vec.extend(album_vec);
 
                 data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
                 *self.in_memory.write().unwrap() = data_vec;
                 info!("In-memory cache updated.");
 

@@ -100,6 +100,7 @@ pub async fn prefetch(
             .unwrap()
             .as_millis()
             .to_string();
+
         TREE_SNAPSHOT
             .in_memory
             .insert(timestamp.clone(), reduced_data);
