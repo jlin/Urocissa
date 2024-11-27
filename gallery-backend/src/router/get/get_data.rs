@@ -53,9 +53,13 @@ pub async fn prefetch(
 
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
+
+        let mut expression_opt = None;
+
         let reduced_data: Vec<ReducedData> = match query_data {
             Some(query) => {
                 let expression = query.into_inner();
+                expression_opt = Some(expression.clone());
                 let filter = expression.generate_filter();
                 ref_data
                     .par_iter()
@@ -104,6 +108,10 @@ pub async fn prefetch(
         TREE_SNAPSHOT
             .in_memory
             .insert(timestamp.clone(), reduced_data);
+
+        TREE_SNAPSHOT
+            .expression_timestamp_in_memory
+            .insert(expression_opt, timestamp.clone());
 
         info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 

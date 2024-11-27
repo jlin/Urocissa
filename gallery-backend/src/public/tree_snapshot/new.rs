@@ -11,7 +11,7 @@ static TREE_SNAPSHOT_IN_DISK: LazyLock<redb::Database> =
 static TREE_SNAPSHOT_IN_MEMORY: LazyLock<DashMap<String, Vec<ReducedData>>> =
     LazyLock::new(|| DashMap::new());
 
-static EXPRESSION_TIMESTAMP_IN_MEMORY: LazyLock<DashMap<Expression, String>> =
+static EXPRESSION_TIMESTAMP_IN_MEMORY: LazyLock<DashMap<Option<Expression>, String>> =
     LazyLock::new(|| DashMap::new());
 
 impl TreeSnapshot {

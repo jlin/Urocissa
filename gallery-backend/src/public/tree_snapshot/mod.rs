@@ -17,7 +17,7 @@ use super::expression::Expression;
 pub struct TreeSnapshot {
     pub in_disk: &'static redb::Database,
     pub in_memory: &'static DashMap<String, Vec<ReducedData>>,
-    pub expression_timestamp_in_memory: &'static DashMap<Expression, String>,
+    pub expression_timestamp_in_memory: &'static DashMap<Option<Expression>, String>,
 }
 
 pub static TREE_SNAPSHOT: LazyLock<TreeSnapshot> = LazyLock::new(|| {

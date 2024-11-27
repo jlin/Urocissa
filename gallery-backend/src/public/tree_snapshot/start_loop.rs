@@ -57,7 +57,7 @@ impl TreeSnapshot {
         });
         tokio::task::spawn_blocking(|| loop {
             if self.expression_timestamp_in_memory.len() > 0 {
-                let mut expression_opt = None;
+                let mut expression_opt: Option<Option<Expression>> = None;
                 let mut result_timestamp_opt = None;
                 {
                     if let Some(ref_data) = self.expression_timestamp_in_memory.iter().next() {
@@ -83,9 +83,9 @@ impl TreeSnapshot {
                             TableDefinition::new(&count_version);
                         {
                             let mut table = txn.open_table(table_definition).unwrap();
-                            table
-                                .insert(expression_opt.clone().unwrap(), result_timestamp)
-                                .unwrap();
+                            if let Some(Some(expression)) = expression_opt.clone() {
+                                table.insert(expression, result_timestamp).unwrap();
+                            }
                         }
                         txn.commit().unwrap();
                         info!(duration = &*format!("{:?}", timer_start.elapsed());
