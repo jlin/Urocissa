@@ -12,7 +12,9 @@
       >
         <v-list-item-title class="wrap">Set as Cover</v-list-item-title>
       </v-list-item>
-
+      <v-divider
+        v-if="route.meta.isReadPage && collectionStore.editModeCollection.size === 1"
+      ></v-divider>
       <v-list-item prepend-icon="mdi-archive-arrow-down" @click="handleQuickEdit('archive')">
         <v-list-item-title class="wrap">Archive</v-list-item-title>
       </v-list-item>
