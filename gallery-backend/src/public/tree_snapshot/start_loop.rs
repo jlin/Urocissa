@@ -1,5 +1,8 @@
 use super::TreeSnapshot;
-use crate::public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT};
+use crate::{
+    public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT},
+    router::get::get_data::Prefetch,
+};
 use chrono::Utc;
 use redb::{TableDefinition, TableHandle};
 use std::{
@@ -56,7 +59,7 @@ impl TreeSnapshot {
         tokio::task::spawn_blocking(|| loop {
             if self.expression_timestamp_in_memory.len() > 0 {
                 let mut expression_hashed_opt = None;
-                let mut result_timestamp_opt = None;
+                let mut result_prefetch_opt = None;
                 {
                     if let Some(ref_data) = self.expression_timestamp_in_memory.iter().next() {
                         expression_hashed_opt = Some(ref_data.key().clone());
@@ -69,22 +72,23 @@ impl TreeSnapshot {
                             .get_mut(expression)
                             .unwrap();
                         let ref_data = ref_mut.value_mut();
-                        result_timestamp_opt = Some(ref_data.clone());
+                        result_prefetch_opt = Some(ref_data.clone());
                     }
                 }
                 {
-                    if let Some(result_timestamp) = result_timestamp_opt {
+                    if let Some(result_prefetch) = result_prefetch_opt {
                         let timer_start = Instant::now();
                         let txn = self.in_disk.begin_write().unwrap();
                         let count_version = &VERSION_COUNT.load(Ordering::Relaxed).to_string();
-                        let table_definition: TableDefinition<u64, String> =
+                        let table_definition: TableDefinition<u64, Option<Prefetch>> =
                             TableDefinition::new(&count_version);
                         {
                             let mut table = txn.open_table(table_definition).unwrap();
                             if let Some(expression_hashed) = expression_hashed_opt.clone() {
-                                table.insert(expression_hashed, result_timestamp).unwrap();
+                                table.insert(expression_hashed, result_prefetch).unwrap();
                             }
                         }
+                        println!("count_version {} table created", count_version);
                         txn.commit().unwrap();
                         info!(duration = &*format!("{:?}", timer_start.elapsed());
                             "Write expression_timetsamp_in_memory cache into disk"
@@ -103,7 +107,7 @@ impl TreeSnapshot {
             }
             sleep(Duration::from_millis(500));
         });
-        tokio::task::spawn_blocking(|| loop {
+        /* tokio::task::spawn_blocking(|| loop {
             let txn = self.in_disk.begin_read().unwrap();
             txn.list_tables().unwrap().for_each(|table_handle| {
                 let timestamp = table_handle.name().parse::<u64>().unwrap();
@@ -124,6 +128,6 @@ impl TreeSnapshot {
                 }
             });
             sleep(Duration::from_millis(500));
-        });
+        }); */
     }
 }

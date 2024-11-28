@@ -8,6 +8,7 @@ use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
+use bitcode::{Decode, Encode};
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use rocket::http::Status;
@@ -18,7 +19,7 @@ use std::hash::{DefaultHasher, Hash};
 use std::time::UNIX_EPOCH;
 use std::time::{Instant, SystemTime};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Decode, Encode)]
 #[serde(rename_all = "camelCase")]
 pub struct Prefetch {
     pub timestamp: String,
@@ -42,6 +43,25 @@ pub async fn prefetch(
     locate: Option<String>,
 ) -> Json<Option<Prefetch>> {
     tokio::task::spawn_blocking(move || {
+        let find_cache_start_time = Instant::now();
+
+        let mut expression_opt = match query_data.clone() {
+            Some(query) => Some(query.into_inner()),
+            None => None,
+        };
+
+        let hasher = &mut DefaultHasher::new();
+        expression_opt.hash(hasher);
+        let expression_hashed = hasher.finish();
+        if let Ok(Some(prefetch_opt)) = TREE_SNAPSHOT.read_query_snapshot(expression_hashed) {
+            println!("reuse expression cache");
+
+            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Find cache done");
+            return Json(prefetch_opt);
+        } else {
+            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Find cache done");
+        }
+
         // Start timer
         let start_time = Instant::now();
 
@@ -55,8 +75,6 @@ pub async fn prefetch(
 
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
-
-        let mut expression_opt = None;
 
         let reduced_data: Vec<ReducedData> = match query_data {
             Some(query) => {
@@ -111,23 +129,19 @@ pub async fn prefetch(
             .in_memory
             .insert(timestamp.clone(), reduced_data);
 
-        let hasher = &mut DefaultHasher::new();
-        expression_opt.hash(hasher);
-        let expression_hashed = hasher.finish();
-
-        TREE_SNAPSHOT
-            .expression_timestamp_in_memory
-            .insert(expression_hashed, timestamp.clone());
-
         info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
-        let json = Json(Some(Prefetch::new(
-            timestamp.clone(),
-            locate_to,
-            data_length,
-        )));
+
+        let prefetch_opt = Some(Prefetch::new(timestamp.clone(), locate_to, data_length));
+
+        TREE_SNAPSHOT
+            .expression_timestamp_in_memory
+            .insert(expression_hashed, prefetch_opt.clone());
+
+        let json = Json(prefetch_opt);
+
         info!(duration = &*format!("{:?}", json_start_time.elapsed()); "Create JSON response");
 
         // Total elapsed time

@@ -1,7 +1,7 @@
 use dashmap::DashMap;
 use std::sync::LazyLock;
 
-use crate::public::reduced_data::ReducedData;
+use crate::{public::reduced_data::ReducedData, router::get::get_data::Prefetch};
 
 use super::TreeSnapshot;
 
@@ -11,7 +11,7 @@ static TREE_SNAPSHOT_IN_DISK: LazyLock<redb::Database> =
 static TREE_SNAPSHOT_IN_MEMORY: LazyLock<DashMap<String, Vec<ReducedData>>> =
     LazyLock::new(|| DashMap::new());
 
-static EXPRESSION_TIMESTAMP_IN_MEMORY: LazyLock<DashMap<u64, String>> =
+static EXPRESSION_TIMESTAMP_IN_MEMORY: LazyLock<DashMap<u64, Option<Prefetch>>> =
     LazyLock::new(|| DashMap::new());
 
 impl TreeSnapshot {
