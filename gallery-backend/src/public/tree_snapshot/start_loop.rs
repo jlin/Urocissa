@@ -3,8 +3,7 @@ use crate::{
     public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT},
     router::get::get_data::Prefetch,
 };
-use chrono::Utc;
-use redb::{TableDefinition, TableHandle};
+use redb::TableDefinition;
 use std::{
     sync::atomic::Ordering,
     thread::sleep,

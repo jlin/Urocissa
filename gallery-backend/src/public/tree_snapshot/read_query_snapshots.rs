@@ -1,14 +1,9 @@
 use std::sync::atomic::Ordering;
 
 use super::TreeSnapshot;
-use crate::{
-    public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT},
-    router::get::get_data::Prefetch,
-};
-use arrayvec::ArrayString;
-use dashmap::mapref::one::Ref;
+use crate::{public::tree::start_loop::VERSION_COUNT, router::get::get_data::Prefetch};
 
-use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition};
+use redb::TableDefinition;
 use rocket::http::Status;
 
 impl TreeSnapshot {
