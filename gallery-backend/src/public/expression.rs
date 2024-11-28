@@ -1,13 +1,9 @@
-use std::cmp::Ordering;
-
 use arrayvec::ArrayString;
-use bitcode::{Decode, Encode};
-use redb::Key;
 use serde::{Deserialize, Serialize};
 
 use super::abstract_data::AbstractData;
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Decode, Encode)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub enum Expression {
     Or(Vec<Expression>),
     And(Vec<Expression>),
@@ -127,11 +123,5 @@ impl Expression {
                 })
             }
         }
-    }
-}
-
-impl Key for Expression {
-    fn compare(data1: &[u8], data2: &[u8]) -> Ordering {
-        data1.cmp(data2)
     }
 }

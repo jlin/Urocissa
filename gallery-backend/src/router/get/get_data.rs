@@ -13,6 +13,8 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use rocket::http::Status;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
+use std::hash::Hasher;
+use std::hash::{DefaultHasher, Hash};
 use std::time::UNIX_EPOCH;
 use std::time::{Instant, SystemTime};
 
@@ -109,9 +111,13 @@ pub async fn prefetch(
             .in_memory
             .insert(timestamp.clone(), reduced_data);
 
+        let hasher = &mut DefaultHasher::new();
+        expression_opt.hash(hasher);
+        let expression_hashed = hasher.finish();
+
         TREE_SNAPSHOT
             .expression_timestamp_in_memory
-            .insert(expression_opt, timestamp.clone());
+            .insert(expression_hashed, timestamp.clone());
 
         info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 

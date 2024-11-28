@@ -11,13 +11,11 @@ use dashmap::DashMap;
 
 use crate::public::reduced_data::ReducedData;
 
-use super::expression::Expression;
-
 #[derive(Debug)]
 pub struct TreeSnapshot {
     pub in_disk: &'static redb::Database,
     pub in_memory: &'static DashMap<String, Vec<ReducedData>>,
-    pub expression_timestamp_in_memory: &'static DashMap<Option<Expression>, String>,
+    pub expression_timestamp_in_memory: &'static DashMap<u64, String>, // hash of Option<Expression> -> timestamp
 }
 
 pub static TREE_SNAPSHOT: LazyLock<TreeSnapshot> = LazyLock::new(|| {

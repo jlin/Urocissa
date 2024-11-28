@@ -8,7 +8,7 @@ use arrayvec::ArrayString;
 use log::info;
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::AtomicUsize;
 use std::sync::OnceLock;
 use tokio::sync::mpsc::{self, unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
