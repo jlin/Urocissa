@@ -38,14 +38,22 @@ const Comma: TokenType = createToken({ name: 'Comma', pattern: /,/ })
 
 const Identifier: TokenType = createToken({
   name: 'Identifier',
-  pattern: /[\u0030-\u0039\u0041-\u005A\u0061-\u007A\u4E00-\u9FFF_\u002D\u0020]+/
-  /*  \u0030-\u0039: Decimal digits 0 to 9.
-      \u0041-\u005A: Uppercase Latin letters A to Z.
-      \u0061-\u007A: Lowercase Latin letters a to z.
-      \u4E00-\u9FFF: Common CJK (Chinese-Japanese-Korean) ideographs. This range covers a significant portion of Chinese characters and some Japanese and Korean characters.
-      _: Underscore character.
-      \u002D: the hyphen character -
- */
+  pattern:
+    /[\u0030-\u0039\u0041-\u005A\u0061-\u007A\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u0370-\u03FF\u0400-\u04FF_\u002D\u0020]+/
+  /*
+  \u0030-\u0039: Decimal digits 0 to 9.
+  \u0041-\u005A: Uppercase Latin letters A to Z.
+  \u0061-\u007A: Lowercase Latin letters a to z.
+  \u4E00-\u9FFF: Common CJK (Chinese-Japanese-Korean) ideographs, including a significant portion of Chinese characters and some Japanese and Korean characters.
+  \u3040-\u309F: Hiragana characters (Japanese script).
+  \u30A0-\u30FF: Katakana characters (Japanese script).
+  \uAC00-\uD7AF: Hangul syllables (Korean script).
+  \u0370-\u03FF: Greek and Coptic characters.
+  \u0400-\u04FF: Cyrillic characters.
+  _: Underscore character.
+  \u002D: Hyphen character (-).
+  \u0020: Space character.
+*/
 })
 
 const allTokens: TokenType[] = [
