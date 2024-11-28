@@ -11,3 +11,4 @@ pub mod row;
 pub mod ser_de;
 pub mod tree;
 pub mod tree_snapshot;
+pub mod query_snapshot;

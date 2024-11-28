@@ -1,17 +1,17 @@
 use std::sync::atomic::Ordering;
 
-use super::TreeSnapshot;
+use super::QuerySnapshot;
 use crate::{public::tree::start_loop::VERSION_COUNT, router::get::get_data::Prefetch};
 
 use redb::TableDefinition;
 use rocket::http::Status;
 
-impl TreeSnapshot {
+impl QuerySnapshot {
     pub fn read_query_snapshot(
         &'static self,
         query_hash: u64,
     ) -> Result<Option<Option<Prefetch>>, Status> {
-        if let Some(data) = self.expression_timestamp_in_memory.get(&query_hash) {
+        if let Some(data) = self.in_memory.get(&query_hash) {
             return Ok(Some(data.value().clone()));
         }
 

@@ -2,6 +2,7 @@ use crate::public::abstract_data::AbstractData;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
+use crate::public::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::reduced_data::ReducedData;
 use crate::public::row::{Row, ScrollBarData};
@@ -53,7 +54,7 @@ pub async fn prefetch(
         let hasher = &mut DefaultHasher::new();
         expression_opt.hash(hasher);
         let expression_hashed = hasher.finish();
-        if let Ok(Some(prefetch_opt)) = TREE_SNAPSHOT.read_query_snapshot(expression_hashed) {
+        if let Ok(Some(prefetch_opt)) = QUERY_SNAPSHOT.read_query_snapshot(expression_hashed) {
             println!("reuse expression cache");
 
             info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Find cache done");
@@ -136,8 +137,8 @@ pub async fn prefetch(
 
         let prefetch_opt = Some(Prefetch::new(timestamp.clone(), locate_to, data_length));
 
-        TREE_SNAPSHOT
-            .expression_timestamp_in_memory
+        QUERY_SNAPSHOT
+            .in_memory
             .insert(expression_hashed, prefetch_opt.clone());
 
         let json = Json(prefetch_opt);
