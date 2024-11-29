@@ -44,30 +44,26 @@ pub async fn prefetch(
     locate: Option<String>,
 ) -> Json<Option<Prefetch>> {
     tokio::task::spawn_blocking(move || {
+        
+        // Start timer
+        let start_time = Instant::now();
+
+
+        // Step 0: 檢查是否有 query cache 可以使用
         let find_cache_start_time = Instant::now();
 
-        let mut expression_opt = match query_data.clone() {
-            Some(query) => Some(query.into_inner()),
-            None => None,
-        };
+        let expression_opt = query_data.map(|query| query.into_inner());
 
         let hasher = &mut DefaultHasher::new();
         expression_opt.hash(hasher);
         let expression_hashed = hasher.finish();
+        
         if let Ok(Some(prefetch_opt)) = QUERY_SNAPSHOT.read_query_snapshot(expression_hashed) {
-            println!("reuse expression cache");
-
-            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Find cache done");
+            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Qeury cache found");
             return Json(prefetch_opt);
         } else {
-            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Find cache done");
+            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Qeury cache not found. Generate a new one.");
         }
-
-        // Start timer
-        let start_time = Instant::now();
-
-        // Step 1: Generate filter from expression
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Generate filter");
 
         // Step 2: Filter items
         let filter_items_start_time = Instant::now();
@@ -77,10 +73,8 @@ pub async fn prefetch(
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
 
-        let reduced_data: Vec<ReducedData> = match query_data {
-            Some(query) => {
-                let expression = query.into_inner();
-                expression_opt = Some(expression.clone());
+        let reduced_data: Vec<ReducedData> = match expression_opt {
+            Some(expression) => {
                 let filter = expression.generate_filter();
                 ref_data
                     .par_iter()
