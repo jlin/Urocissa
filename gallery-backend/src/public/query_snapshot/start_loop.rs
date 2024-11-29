@@ -1,14 +1,12 @@
 use super::QuerySnapshot;
-use crate::{
-    public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT},
-    router::get::get_data::Prefetch,
-};
+use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT};
 use redb::TableDefinition;
 use std::{
     sync::atomic::Ordering,
     thread::sleep,
     time::{Duration, Instant},
 };
+
 impl QuerySnapshot {
     pub(super) fn start_loop(&self) {
         tokio::task::spawn_blocking(|| loop {
@@ -32,7 +30,7 @@ impl QuerySnapshot {
                         let timer_start = Instant::now();
                         let txn = self.in_disk.begin_write().unwrap();
                         let count_version = &VERSION_COUNT.load(Ordering::Relaxed).to_string();
-                        let table_definition: TableDefinition<u64, Option<Prefetch>> =
+                        let table_definition: TableDefinition<u64, PrefetchReturn> =
                             TableDefinition::new(&count_version);
                         {
                             let mut table = txn.open_table(table_definition).unwrap();

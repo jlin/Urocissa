@@ -1,7 +1,7 @@
 use std::sync::atomic::Ordering;
 
 use super::QuerySnapshot;
-use crate::{public::tree::start_loop::VERSION_COUNT, router::get::get_data::Prefetch};
+use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT};
 
 use redb::TableDefinition;
 use rocket::http::Status;
@@ -10,7 +10,7 @@ impl QuerySnapshot {
     pub fn read_query_snapshot(
         &'static self,
         query_hash: u64,
-    ) -> Result<Option<Option<Prefetch>>, Status> {
+    ) -> Result<Option<PrefetchReturn>, Status> {
         if let Some(data) = self.in_memory.get(&query_hash) {
             return Ok(Some(data.value().clone()));
         }
@@ -22,9 +22,7 @@ impl QuerySnapshot {
 
         let count_version = &VERSION_COUNT.load(Ordering::Relaxed).to_string();
 
-        print!("try to read count_version {}", count_version);
-
-        let table_definition: TableDefinition<u64, Option<Prefetch>> =
+        let table_definition: TableDefinition<u64, PrefetchReturn> =
             TableDefinition::new(&count_version);
 
         let table = read_txn.open_table(table_definition).map_err(|err| {
