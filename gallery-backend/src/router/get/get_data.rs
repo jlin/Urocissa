@@ -44,12 +44,10 @@ pub async fn prefetch(
     locate: Option<String>,
 ) -> Json<Option<Prefetch>> {
     tokio::task::spawn_blocking(move || {
-        
         // Start timer
         let start_time = Instant::now();
 
-
-        // Step 0: 檢查是否有 query cache 可以使用
+        // Step 1: Check if query cache is available
         let find_cache_start_time = Instant::now();
 
         let expression_opt = query_data.map(|query| query.into_inner());
@@ -139,7 +137,7 @@ pub async fn prefetch(
         info!(duration = &*format!("{:?}", json_start_time.elapsed()); "Create JSON response");
 
         // Total elapsed time
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "get_data_length complete");
+        info!(duration = &*format!("{:?}", start_time.elapsed()); "(total time) Get_data_length complete");
         json
     })
     .await
