@@ -11,7 +11,7 @@ impl TreeSnapshot {
         tokio::task::spawn_blocking(|| loop {
             if self.in_memory.len() > 0 {
                 let mut timestamp_opt = None;
-                let mut data_vec: Vec<ReducedData> = vec![];
+                let data_vec: Vec<ReducedData>;
                 {
                     if let Some(ref_data) = self.in_memory.iter().next() {
                         timestamp_opt = Some(ref_data.key().clone());
@@ -46,7 +46,7 @@ impl TreeSnapshot {
                     {
                         self.in_memory.remove(&timestamp_opt.unwrap());
                         info!(
-                            "{} items remaining in in-memory cache",
+                            "{} items remaining in in-memory tree cache",
                             self.in_memory.len()
                         );
                     }

@@ -30,8 +30,8 @@ use router::{
         regenerate_preview::regenerate_preview,
     },
 };
+use std::thread;
 use std::time::Instant;
-use std::{fs, thread};
 mod executor;
 mod initialization;
 mod public;
