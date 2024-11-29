@@ -7,7 +7,7 @@ use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition};
 use rocket::http::Status;
 
 impl TreeSnapshot {
-    pub fn read_tree_snapshot(&'static self, timestamp: &str) -> Result<MyCow, Status> {
+    pub fn read_tree_snapshot(&'static self, timestamp: &u128) -> Result<MyCow, Status> {
         if let Some(data) = self.in_memory.get(timestamp) {
             return Ok(MyCow::DashMap(data));
         }
@@ -17,7 +17,8 @@ impl TreeSnapshot {
             Status::InternalServerError
         })?;
 
-        let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&timestamp);
+        let binding = timestamp.to_string();
+        let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&binding);
 
         let table = read_txn.open_table(table_definition).map_err(|err| {
             error!("{:?}", err);
@@ -30,7 +31,7 @@ impl TreeSnapshot {
 
 #[derive(Debug)]
 pub enum MyCow {
-    DashMap(Ref<'static, String, Vec<ReducedData>>),
+    DashMap(Ref<'static, u128, Vec<ReducedData>>),
     Redb(ReadOnlyTable<u64, ReducedData>),
 }
 

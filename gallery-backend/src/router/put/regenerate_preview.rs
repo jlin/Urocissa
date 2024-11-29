@@ -11,7 +11,7 @@ use serde::Deserialize;
 pub struct RegenerateData {
     #[serde(rename = "indexArray")]
     index_array: Vec<usize>,
-    timestamp: String,
+    timestamp: u128,
 }
 #[post("/put/regenerate-preview", format = "json", data = "<json_data>")]
 pub async fn regenerate_preview(json_data: Json<RegenerateData>) -> () {
@@ -19,7 +19,7 @@ pub async fn regenerate_preview(json_data: Json<RegenerateData>) -> () {
         let table = TREE.read_tree_api();
 
         let reduced_data_vec = TREE_SNAPSHOT
-            .read_tree_snapshot(&*json_data.timestamp)
+            .read_tree_snapshot(&json_data.timestamp)
             .unwrap();
 
         let hash_vec: Vec<ArrayString<64>> = json_data

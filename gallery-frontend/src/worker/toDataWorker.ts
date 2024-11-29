@@ -186,7 +186,7 @@ async function prefetch(
  * @returns A promise that resolves to a Map of data entries keyed by their index,
  *          or an object containing an error message and a warning flag if an error occurs.
  */
-async function fetchData(batchIndex: number, timestamp: string) {
+async function fetchData(batchIndex: number, timestamp: number) {
   const fetchUrl = `/get/get-data?timestamp=${timestamp}&start=${batchIndex * batchNumber}&end=${
     (batchIndex + 1) * batchNumber
   }`
@@ -239,7 +239,7 @@ async function fetchData(batchIndex: number, timestamp: string) {
  */
 async function fetchRow(
   index: number,
-  timestamp: string,
+  timestamp: number,
   windowWidth: number,
   isLastRow: boolean
 ): Promise<RowWithOffset> {
@@ -446,7 +446,7 @@ const editTags = async (
   indexArray: number[],
   addTagsArray: string[],
   removeTagsArray: string[],
-  timestamp: string
+  timestamp: number
 ): Promise<{ returnedTagsArray?: TagInfo[] }> => {
   const axiosResponse = await axios.put<TagInfo[]>('/put/edit_tag', {
     indexArray,
@@ -468,7 +468,7 @@ const editAlbums = async (
   idArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
-  timestamp: string
+  timestamp: number
 ) => {
   await axios.put('/put/edit_album', {
     idArray,
@@ -489,7 +489,7 @@ const editAlbums = async (
  * @param timestamp - The timestamp associated with the data fetch.
  * @returns A promise that resolves to an object containing the result message and a warning flag.
  */
-async function deleteData(indexArray: number[], timestamp: string) {
+async function deleteData(indexArray: number[], timestamp: number) {
   await axios.delete('/delete/delete-data', {
     data: { deleteList: indexArray, timestamp }
   })
@@ -505,7 +505,7 @@ async function deleteData(indexArray: number[], timestamp: string) {
  * @returns A promise that resolves to an object containing an array of scrollbar data,
  *          or an empty array if an error occurs.
  */
-async function fetchScrollbar(timestamp: string) {
+async function fetchScrollbar(timestamp: number) {
   const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`)
   const scrollBarDataArray = z.array(scrollbarDataSchema).parse(response.data)
   return { scrollbarDataArray: scrollBarDataArray }

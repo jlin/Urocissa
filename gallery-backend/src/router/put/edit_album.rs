@@ -17,7 +17,7 @@ pub struct EditAlbumsData {
     add_albums_content: Vec<ArrayString<64>>,
     #[serde(rename = "removeAlbumsArray")]
     remove_albums_content: Vec<ArrayString<64>>,
-    timestamp: String,
+    timestamp: u128,
 }
 #[put("/put/edit_album", format = "json", data = "<json_data>")]
 pub async fn edit_album(json_data: Json<EditAlbumsData>) -> () {

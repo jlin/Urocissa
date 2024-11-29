@@ -6,7 +6,7 @@ export const usePrefetchStore = (isolationId: string ) =>
     id: 'prefetchStore' + isolationId,
     state: (): {
       windowWidth: number
-      timestamp: string | null
+      timestamp: number | null
       totalHeight: number
       totalHeightOriginal: number
       dataLength: number // length of all photos

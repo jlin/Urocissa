@@ -46,7 +46,7 @@ export const rowWithOffsetSchema = z.object({
  * Schema for prefetching data.
  */
 export const prefetchSchema = z.object({
-  timestamp: z.string(),
+  timestamp: z.number(),
   dataLength: z.number(),
   locateTo: z.number().nullable()
 })

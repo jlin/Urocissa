@@ -23,13 +23,13 @@ use std::time::{Instant, SystemTime};
 #[derive(Debug, Clone, Deserialize, Serialize, Decode, Encode)]
 #[serde(rename_all = "camelCase")]
 pub struct Prefetch {
-    pub timestamp: String,
+    pub timestamp: u128,
     pub locate_to: Option<usize>,
     pub data_length: usize,
 }
 
 impl Prefetch {
-    fn new(timestamp: String, locate_to: Option<usize>, data_length: usize) -> Self {
+    fn new(timestamp: u128, locate_to: Option<usize>, data_length: usize) -> Self {
         Self {
             timestamp,
             locate_to,
@@ -117,19 +117,18 @@ pub async fn prefetch(
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_millis()
-            .to_string();
+            .as_millis();
 
         TREE_SNAPSHOT
             .in_memory
-            .insert(timestamp.clone(), reduced_data);
+            .insert(timestamp, reduced_data);
 
         info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
 
-        let prefetch_opt = Some(Prefetch::new(timestamp.clone(), locate_to, data_length));
+        let prefetch_opt = Some(Prefetch::new(timestamp, locate_to, data_length));
 
         QUERY_SNAPSHOT
             .in_memory
@@ -149,7 +148,7 @@ pub async fn prefetch(
 
 #[get("/get/get-data?<timestamp>&<start>&<end>")]
 pub async fn get_data(
-    timestamp: String,
+    timestamp: u128,
     start: usize,
     end: usize,
 ) -> Result<Json<Vec<DataBaseTimestamp>>, Status> {
@@ -237,7 +236,7 @@ pub async fn get_albums() -> Json<Vec<AlbumInfo>> {
 }
 
 #[get("/get/get-rows?<index>&<timestamp>")]
-pub async fn get_rows(index: usize, timestamp: String) -> Result<Json<Row>, Status> {
+pub async fn get_rows(index: usize, timestamp: u128) -> Result<Json<Row>, Status> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;
@@ -249,7 +248,7 @@ pub async fn get_rows(index: usize, timestamp: String) -> Result<Json<Row>, Stat
 }
 
 #[get("/get/get-scroll-bar?<timestamp>")]
-pub async fn get_scroll_bar(timestamp: String) -> Result<Json<Vec<ScrollBarData>>, Status> {
+pub async fn get_scroll_bar(timestamp: u128) -> Result<Json<Vec<ScrollBarData>>, Status> {
     let scrollbar_data = TREE_SNAPSHOT.read_scrollbar(timestamp);
     Ok(Json(scrollbar_data))
 }

@@ -8,7 +8,7 @@ use rocket::serde::{json::Json, Deserialize};
 pub struct DeleteList {
     #[serde(rename = "deleteList")]
     delete_list: Vec<usize>, // Keep this field private as it does not need to be accessed outside this struct
-    timestamp: String,
+    timestamp: u128,
 }
 #[delete("/delete/delete-data", format = "json", data = "<json_data>")]
 pub async fn delete_data(json_data: Json<DeleteList>) {

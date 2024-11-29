@@ -14,7 +14,7 @@ pub struct EditTagsData {
     add_tags_content: Vec<String>,
     #[serde(rename = "removeTagsArray")]
     remove_tags_content: Vec<String>,
-    timestamp: String,
+    timestamp: u128,
 }
 #[put("/put/edit_tag", format = "json", data = "<json_data>")]
 pub async fn edit_tag(json_data: Json<EditTagsData>) -> Json<Vec<TagInfo>> {

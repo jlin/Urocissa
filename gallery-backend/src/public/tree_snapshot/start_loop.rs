@@ -10,26 +10,27 @@ impl TreeSnapshot {
     pub(super) fn start_loop(&self) {
         tokio::task::spawn_blocking(|| loop {
             if self.in_memory.len() > 0 {
-                let mut timestamp = String::new();
+                let mut timestamp_opt = None;
                 let mut data_vec: Vec<ReducedData> = vec![];
                 {
                     if let Some(ref_data) = self.in_memory.iter().next() {
-                        timestamp = ref_data.key().clone()
+                        timestamp_opt = Some(ref_data.key().clone());
                     }
                 }
-                {
-                    if timestamp.len() != 0 {
+
+                if let Some(timestamp) = timestamp_opt {
+                    {
                         let mut ref_mut = self.in_memory.get_mut(&timestamp).unwrap();
                         let ref_data = ref_mut.value_mut();
                         data_vec = ref_data.clone();
                     }
-                }
-                {
+                    let timestamp_string = timestamp_opt.unwrap().to_string();
+
                     if data_vec.len() != 0 {
                         let timer_start = Instant::now();
                         let txn = self.in_disk.begin_write().unwrap();
                         let table_definition: TableDefinition<u64, ReducedData> =
-                            TableDefinition::new(&timestamp);
+                            TableDefinition::new(&timestamp_string);
                         {
                             let mut table = txn.open_table(table_definition).unwrap();
                             data_vec.iter().enumerate().for_each(|(index, data)| {
@@ -41,13 +42,14 @@ impl TreeSnapshot {
                             "Write in-memory cache into disk"
                         );
                     }
-                }
-                {
-                    self.in_memory.remove(&timestamp);
-                    info!(
-                        "{} items remaining in in-memory cache",
-                        self.in_memory.len()
-                    );
+
+                    {
+                        self.in_memory.remove(&timestamp_opt.unwrap());
+                        info!(
+                            "{} items remaining in in-memory cache",
+                            self.in_memory.len()
+                        );
+                    }
                 }
             }
             sleep(Duration::from_millis(500));

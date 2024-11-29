@@ -8,7 +8,7 @@ use super::TreeSnapshot;
 static TREE_SNAPSHOT_IN_DISK: LazyLock<redb::Database> =
     LazyLock::new(|| redb::Database::create("./db/temp_db.redb").unwrap());
 
-static TREE_SNAPSHOT_IN_MEMORY: LazyLock<DashMap<String, Vec<ReducedData>>> =
+static TREE_SNAPSHOT_IN_MEMORY: LazyLock<DashMap<u128, Vec<ReducedData>>> =
     LazyLock::new(|| DashMap::new());
 
 impl TreeSnapshot {

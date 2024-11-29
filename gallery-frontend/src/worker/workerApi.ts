@@ -67,11 +67,11 @@ export const fromImgWorker = createActionCreators({
 // Define the parameter types for different actions to manage data and UI state
 interface FetchDataParams {
   batch: number
-  timestamp: string
+  timestamp: number
 }
 interface FetchRowParams {
   index: number
-  timestamp: string
+  timestamp: number
   windowWidth: number
   isLastRow: boolean
 }
@@ -85,20 +85,20 @@ export interface EditTagsParams {
   indexSet: Set<number>
   addTagsArray: string[]
   removeTagsArray: string[]
-  timestamp: string
+  timestamp: number
 }
 export interface EditAlbumsParams {
   indexSet: Set<number>
   addAlbumsArray: string[]
   removeAlbumsArray: string[]
-  timestamp: string
+  timestamp: number
 }
 interface DeleteDataParams {
   indexArray: number[]
-  timestamp: string
+  timestamp: number
 }
 interface FetchScrollBarParams {
-  timestamp: string
+  timestamp: number
 }
 interface SetAsAlbumParams {
   albumId: string
@@ -130,7 +130,7 @@ interface ReturnDataParams {
 }
 interface FetchRowReturnParams {
   rowWithOffset: RowWithOffset
-  timestamp: string
+  timestamp: number
 }
 interface PrefetchReturnParams {
   result: Prefetch
