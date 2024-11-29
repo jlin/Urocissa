@@ -14,7 +14,7 @@ impl TreeSnapshot {
                 let data_vec: Vec<ReducedData>;
                 {
                     if let Some(ref_data) = self.in_memory.iter().next() {
-                        timestamp_opt = Some(ref_data.key().clone());
+                        timestamp_opt = Some(*ref_data.key());
                     }
                 }
 
