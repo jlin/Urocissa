@@ -1,12 +1,8 @@
 use super::TreeSnapshot;
-use crate::{
-    public::{reduced_data::ReducedData, tree::start_loop::VERSION_COUNT},
-    router::get::get_data::Prefetch,
-};
+use crate::public::reduced_data::ReducedData;
 use chrono::Utc;
 use redb::{TableDefinition, TableHandle};
 use std::{
-    sync::atomic::Ordering,
     thread::sleep,
     time::{Duration, Instant},
 };
