@@ -29,7 +29,7 @@ const token = ref<string>('') // To store the JWT token
 const router = useRouter()
 const handleLogin = async () => {
   try {
-    const response = await axios.post('/post/authenticate', password.value, {
+    const response = await axios.post('/post/authenticate', JSON.stringify(password.value), {
       headers: {
         'Content-Type': 'application/json'
       }
