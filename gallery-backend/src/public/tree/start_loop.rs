@@ -32,9 +32,11 @@ impl Tree {
             loop {
                 SHOULD_RESET.notified().await;
                 let mut buffer = Vec::new();
-                album_waiting_for_update_receiver
-                    .recv_many(&mut buffer, usize::MAX)
-                    .await;
+                if !album_waiting_for_update_receiver.is_empty() {
+                    album_waiting_for_update_receiver
+                        .recv_many(&mut buffer, usize::MAX)
+                        .await;
+                }
                 tokio::task::spawn_blocking(|| {
                     let table = self
                         .in_disk
