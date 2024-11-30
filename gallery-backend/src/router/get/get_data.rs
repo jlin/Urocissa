@@ -8,6 +8,7 @@ use crate::public::reduced_data::ReducedData;
 use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::TREE;
+use crate::public::tree_snapshot::start_loop::SHOULD_FLUSH_TREE_SNAPSHOT;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use bitcode::{Decode, Encode};
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -120,6 +121,7 @@ pub async fn prefetch(
         TREE_SNAPSHOT
             .in_memory
             .insert(timestamp, reduced_data);
+        SHOULD_FLUSH_TREE_SNAPSHOT.notify_one();
 
         info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
 
