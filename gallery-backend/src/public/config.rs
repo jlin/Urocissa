@@ -41,6 +41,14 @@ pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
     dotenv().ok();
 
     // Deserialize environment variables into PrivateConfig
-    envy::from_env::<PrivateConfig>()
-        .expect("Failed to load configuration from environment variables")
+    let mut result = envy::from_env::<PrivateConfig>()
+        .expect("Failed to load configuration from environment variables");
+
+    if let Some(ref url) = result.discord_hook_url {
+        if url.trim().is_empty() {
+            result.discord_hook_url = None;
+        }
+    };
+
+    result
 });
