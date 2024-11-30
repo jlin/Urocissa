@@ -7,6 +7,7 @@ use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::reduced_data::ReducedData;
 use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
+use crate::public::tree::start_loop::VERSION_COUNT;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::start_loop::SHOULD_FLUSH_TREE_SNAPSHOT;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -18,6 +19,7 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use std::hash::{DefaultHasher, Hash};
+use std::sync::atomic::Ordering;
 use std::time::UNIX_EPOCH;
 use std::time::{Instant, SystemTime};
 
@@ -54,7 +56,10 @@ pub async fn prefetch(
         let expression_opt = query_data.map(|query| query.into_inner());
 
         let hasher = &mut DefaultHasher::new();
+
         expression_opt.hash(hasher);
+        VERSION_COUNT.load(Ordering::Relaxed).hash(hasher);
+        
         let expression_hashed = hasher.finish();
         
         if let Ok(Some(prefetch_opt)) = QUERY_SNAPSHOT.read_query_snapshot(expression_hashed) {
