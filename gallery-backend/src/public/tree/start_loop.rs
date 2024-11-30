@@ -78,7 +78,10 @@ impl Tree {
                     *self.in_memory.write().unwrap() = data_vec;
 
                     VERSION_COUNT.fetch_add(1, Ordering::SeqCst);
-                    info!("In-memory cache updated.");
+                    info!(
+                        "In-memory cache updated ({}).",
+                        VERSION_COUNT.load(Ordering::SeqCst)
+                    );
 
                     if !buffer.is_empty() {
                         ALBUM_QUEUE_SENDER
