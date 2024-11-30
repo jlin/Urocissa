@@ -20,7 +20,7 @@ use std::hash::{DefaultHasher, Hash};
 use std::time::UNIX_EPOCH;
 use std::time::{Instant, SystemTime};
 
-#[derive(Debug, Clone, Deserialize, Serialize, Decode, Encode)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, Decode, Encode)]
 #[serde(rename_all = "camelCase")]
 pub struct Prefetch {
     pub timestamp: u128,
@@ -130,7 +130,7 @@ pub async fn prefetch(
 
         QUERY_SNAPSHOT
             .in_memory
-            .insert(expression_hashed, prefetch_opt.clone());
+            .insert(expression_hashed, prefetch_opt);
 
         let json = Json(prefetch_opt);
 
