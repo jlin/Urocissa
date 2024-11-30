@@ -10,7 +10,7 @@ pub type PrefetchReturn = Option<Prefetch>;
 #[derive(Debug)]
 pub struct QuerySnapshot {
     pub in_disk: &'static redb::Database,
-    pub in_memory: &'static DashMap<u64, PrefetchReturn>,
+    pub in_memory: &'static DashMap<u64, PrefetchReturn>, // query_hash -> prefetch
 }
 
 pub static QUERY_SNAPSHOT: LazyLock<QuerySnapshot> = LazyLock::new(|| {
