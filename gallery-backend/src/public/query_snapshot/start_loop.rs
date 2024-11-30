@@ -7,7 +7,7 @@ use tokio::sync::Notify;
 pub static SHOULD_FLUSH_QUERY_SNAPSHOT: Notify = Notify::const_new();
 
 impl QuerySnapshot {
-    pub(super) fn start_loop(&self) -> tokio::task::JoinHandle<()> {
+    pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn(async {
             loop {
                 SHOULD_FLUSH_QUERY_SNAPSHOT.notified().await;

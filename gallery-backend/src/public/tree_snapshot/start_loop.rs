@@ -11,7 +11,7 @@ use tokio::sync::Notify;
 pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
 
 impl TreeSnapshot {
-    pub(super) fn start_loop(&self) -> tokio::task::JoinHandle<()> {
+    pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn_blocking(|| loop {
             let txn = self.in_disk.begin_read().unwrap();
             txn.list_tables().unwrap().for_each(|table_handle| {

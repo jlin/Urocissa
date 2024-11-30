@@ -13,8 +13,4 @@ pub struct QuerySnapshot {
     pub in_memory: &'static DashMap<u64, PrefetchReturn>, // hash of query and VERSION_COUNT -> prefetch
 }
 
-pub static QUERY_SNAPSHOT: LazyLock<QuerySnapshot> = LazyLock::new(|| {
-    let new = QuerySnapshot::new();
-    new.start_loop();
-    new
-});
+pub static QUERY_SNAPSHOT: LazyLock<QuerySnapshot> = LazyLock::new(|| QuerySnapshot::new());

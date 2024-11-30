@@ -17,8 +17,4 @@ pub struct TreeSnapshot {
     pub in_memory: &'static DashMap<u128, Vec<ReducedData>>,
 }
 
-pub static TREE_SNAPSHOT: LazyLock<TreeSnapshot> = LazyLock::new(|| {
-    let new = TreeSnapshot::new();
-    new.start_loop();
-    new
-});
+pub static TREE_SNAPSHOT: LazyLock<TreeSnapshot> = LazyLock::new(|| TreeSnapshot::new());
