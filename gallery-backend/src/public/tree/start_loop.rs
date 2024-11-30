@@ -10,7 +10,8 @@ use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::OnceLock;
-use tokio::sync::mpsc::{self, unbounded_channel, UnboundedSender};
+use std::usize;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
 
 pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> =
@@ -30,22 +31,10 @@ impl Tree {
                 .unwrap();
             loop {
                 SHOULD_RESET.notified().await;
-                let mut list_of_waiting_for_update_album_id = Vec::new();
-                loop {
-                    match album_waiting_for_update_receiver.try_recv() {
-                        Ok(mut more_files) => {
-                            list_of_waiting_for_update_album_id.append(&mut more_files);
-                        }
-                        Err(mpsc::error::TryRecvError::Empty) => {
-                            // No more items are immediately available
-                            break;
-                        }
-                        Err(mpsc::error::TryRecvError::Disconnected) => {
-                            // Sender has been dropped; stop collecting
-                            break;
-                        }
-                    }
-                }
+                let mut buffer = Vec::new();
+                album_waiting_for_update_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
                 tokio::task::spawn_blocking(|| {
                     let table = self
                         .in_disk
@@ -89,15 +78,17 @@ impl Tree {
                     VERSION_COUNT.fetch_add(1, Ordering::SeqCst);
                     info!("In-memory cache updated.");
 
-                    if !list_of_waiting_for_update_album_id.is_empty() {
+                    if !buffer.is_empty() {
                         ALBUM_QUEUE_SENDER
                             .get()
                             .unwrap()
-                            .send(list_of_waiting_for_update_album_id)
+                            .send(buffer.into_iter().flatten().collect())
                             .unwrap();
                         info!("Send queue albums.");
                     }
-                });
+                })
+                .await
+                .unwrap();
             }
         })
     }
