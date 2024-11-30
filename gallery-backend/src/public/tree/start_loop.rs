@@ -46,56 +46,58 @@ impl Tree {
                         }
                     }
                 }
-
-                let table = self
-                    .in_disk
-                    .begin_read()
-                    .unwrap()
-                    .open_table(DATA_TABLE)
-                    .unwrap();
-                let priority_list = vec!["DateTimeOriginal", "filename", "modified", "scan_time"];
-                let mut data_vec: Vec<DataBaseTimestamp> = table
-                    .iter()
-                    .unwrap()
-                    .map(|guard| {
-                        let (_key, value) = guard.unwrap();
-                        let database = value.value();
-                        DataBaseTimestamp::new(AbstractData::DataBase(database), &priority_list)
-                    })
-                    .collect();
-                let album_table = self
-                    .in_disk
-                    .begin_read()
-                    .unwrap()
-                    .open_table(ALBUM_TABLE)
-                    .unwrap();
-
-                let album_vec: Vec<DataBaseTimestamp> = album_table
-                    .iter()
-                    .unwrap()
-                    .map(|guard| {
-                        let (_key, value) = guard.unwrap();
-                        let album = value.value();
-                        DataBaseTimestamp::new(AbstractData::Album(album), &priority_list)
-                    })
-                    .collect();
-                data_vec.extend(album_vec);
-
-                data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
-
-                *self.in_memory.write().unwrap() = data_vec;
-
-                VERSION_COUNT.fetch_add(1, Ordering::SeqCst);
-                info!("In-memory cache updated.");
-
-                if !list_of_waiting_for_update_album_id.is_empty() {
-                    ALBUM_QUEUE_SENDER
-                        .get()
+                tokio::task::spawn_blocking(|| {
+                    let table = self
+                        .in_disk
+                        .begin_read()
                         .unwrap()
-                        .send(list_of_waiting_for_update_album_id)
+                        .open_table(DATA_TABLE)
                         .unwrap();
-                    info!("Send queue albums.");
-                }
+                    let priority_list =
+                        vec!["DateTimeOriginal", "filename", "modified", "scan_time"];
+                    let mut data_vec: Vec<DataBaseTimestamp> = table
+                        .iter()
+                        .unwrap()
+                        .map(|guard| {
+                            let (_key, value) = guard.unwrap();
+                            let database = value.value();
+                            DataBaseTimestamp::new(AbstractData::DataBase(database), &priority_list)
+                        })
+                        .collect();
+                    let album_table = self
+                        .in_disk
+                        .begin_read()
+                        .unwrap()
+                        .open_table(ALBUM_TABLE)
+                        .unwrap();
+
+                    let album_vec: Vec<DataBaseTimestamp> = album_table
+                        .iter()
+                        .unwrap()
+                        .map(|guard| {
+                            let (_key, value) = guard.unwrap();
+                            let album = value.value();
+                            DataBaseTimestamp::new(AbstractData::Album(album), &priority_list)
+                        })
+                        .collect();
+                    data_vec.extend(album_vec);
+
+                    data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
+                    *self.in_memory.write().unwrap() = data_vec;
+
+                    VERSION_COUNT.fetch_add(1, Ordering::SeqCst);
+                    info!("In-memory cache updated.");
+
+                    if !list_of_waiting_for_update_album_id.is_empty() {
+                        ALBUM_QUEUE_SENDER
+                            .get()
+                            .unwrap()
+                            .send(list_of_waiting_for_update_album_id)
+                            .unwrap();
+                        info!("Send queue albums.");
+                    }
+                });
             }
         })
     }
