@@ -30,7 +30,7 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                 let database_vec = hash_vec.into_iter().filter_map(|hash| {
                     match read_table.get(&*hash).unwrap() {
                         Some(guard) => {
-                            // If this file is already in database
+                            // If this file is in database
                             let database = guard.value();
                             Some(database)
                         }
