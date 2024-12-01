@@ -21,7 +21,7 @@
   <EditAlbumsModal v-if="modalStore.showEditAlbumsModal" />
   <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
   <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
-  <UploadModal v-if="modalStore.showUploadModal && uploadStore.uploading" />
+  <UploadModal v-if="uploadStore.uploading" />
   <CreateAlbumsModal v-if="modalStore.showCreateAlbumsModal" />
 </template>
 
