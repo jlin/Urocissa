@@ -2,6 +2,7 @@ use crate::public::abstract_data::AbstractData;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expression::Expression;
+use crate::public::query_snapshot::start_loop::SHOULD_FLUSH_QUERY_SNAPSHOT;
 use crate::public::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::reduced_data::ReducedData;
@@ -138,7 +139,7 @@ pub async fn prefetch(
         QUERY_SNAPSHOT
             .in_memory
             .insert(expression_hashed, prefetch_opt);
-
+        SHOULD_FLUSH_QUERY_SNAPSHOT.notify_one();
         let json = Json(prefetch_opt);
 
         info!(duration = &*format!("{:?}", json_start_time.elapsed()); "Create JSON response");

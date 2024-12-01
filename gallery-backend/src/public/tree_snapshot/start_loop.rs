@@ -4,15 +4,57 @@ use chrono::Utc;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{TableDefinition, TableHandle};
 use std::{
+    sync::OnceLock,
     thread::sleep,
     time::{Duration, Instant},
 };
-use tokio::sync::Notify;
+use tokio::sync::{
+    mpsc::{unbounded_channel, UnboundedSender},
+    Notify,
+};
 
 pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
 
+pub static TREE_SNAPSHOT_DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<u128>>> =
+    OnceLock::new();
+
 impl TreeSnapshot {
-    pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
+    pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
+        tokio::task::spawn(async move {
+            let (tree_snapshot_delete_queue_sender, mut tree_snapshot_delete_queue_receiver) =
+                unbounded_channel::<Vec<u128>>();
+            TREE_SNAPSHOT_DELETE_QUEUE_SENDER
+                .set(tree_snapshot_delete_queue_sender)
+                .unwrap();
+            while let Some(tree_snapshot_delete_queue) =
+                tree_snapshot_delete_queue_receiver.recv().await
+            {
+                tokio::task::spawn_blocking(move || {
+                    tree_snapshot_delete_queue
+                        .iter()
+                        .for_each(|timestamp_delete| {
+                            let write_txn = self.in_disk.begin_write().unwrap();
+                            let binding = timestamp_delete.to_string();
+                            let table_definition: TableDefinition<u64, ReducedData> =
+                                TableDefinition::new(&binding);
+                            match write_txn.delete_table(table_definition) {
+                                Ok(true) => info!("Delete table: {:?}", timestamp_delete),
+                                Ok(false) => {
+                                    error!("Failed to delete table: {:?}", timestamp_delete)
+                                }
+                                Err(e) => {
+                                    error!(
+                                        "Failed to delete table: {:?}, error: {:?}",
+                                        timestamp_delete, e
+                                    )
+                                }
+                            }
+                        });
+                })
+                .await
+                .unwrap();
+            }
+        });
         /* tokio::task::spawn_blocking(|| loop {
             sleep(Duration::from_millis(500));
             let write_txn = self.in_disk.begin_write().unwrap();
