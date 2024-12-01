@@ -1,6 +1,7 @@
 use super::TreeSnapshot;
 use crate::public::reduced_data::ReducedData;
 use chrono::Utc;
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{TableDefinition, TableHandle};
 use std::{
     thread::sleep,
@@ -13,26 +14,29 @@ pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
 impl TreeSnapshot {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn_blocking(|| loop {
-            let txn = self.in_disk.begin_read().unwrap();
-            txn.list_tables().unwrap().for_each(|table_handle| {
-                let timestamp = table_handle.name().parse::<u128>().unwrap();
-                let current_time_millis = Utc::now().timestamp_millis() as u128;
-                let duration_since = current_time_millis - timestamp;
-                if duration_since > 1 * 60 * 60 * 1000 {
-                    // 1 hours in milliseconds
-                    let write_txn = self.in_disk.begin_write().unwrap();
+            sleep(Duration::from_millis(500));
+            let write_txn = self.in_disk.begin_write().unwrap();
+            write_txn
+                .list_tables()
+                .unwrap()
+                .par_bridge()
+                .for_each(|table_handle| {
+                    let timestamp = table_handle.name().parse::<u128>().unwrap();
+                    let current_time_millis = Utc::now().timestamp_millis() as u128;
+                    let duration_since = current_time_millis - timestamp;
+                    if duration_since > 1 * 60 * 60 * 1000 {
+                        // 1 hours in milliseconds
 
-                    match write_txn.delete_table(table_handle) {
-                        Ok(true) => info!("Delete table: {:?}", timestamp),
-                        Ok(false) => error!("Failed to delete table: {:?}", timestamp),
-                        Err(e) => {
-                            error!("Failed to delete table: {:?}, error: {:?}", timestamp, e)
+                        match write_txn.delete_table(table_handle) {
+                            Ok(true) => info!("Delete table: {:?}", timestamp),
+                            Ok(false) => error!("Failed to delete table: {:?}", timestamp),
+                            Err(e) => {
+                                error!("Failed to delete table: {:?}, error: {:?}", timestamp, e)
+                            }
                         }
                     }
-                    write_txn.commit().unwrap();
-                }
-            });
-            sleep(Duration::from_millis(500));
+                });
+            write_txn.commit().unwrap();
         });
         tokio::task::spawn(async {
             loop {
