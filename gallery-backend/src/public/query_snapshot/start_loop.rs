@@ -28,7 +28,6 @@ impl QuerySnapshot {
                 .for_each(|table_handle| {
                     if let Ok(timestamp) = table_handle.name().parse::<u64>() {
                         if VERSION_COUNT.load(Ordering::Relaxed) > timestamp && expired(timestamp) {
-                            // 1 hours in milliseconds
                             let binding = timestamp.to_string();
                             let table_definition: TableDefinition<u64, PrefetchReturn> =
                                 TableDefinition::new(&binding);

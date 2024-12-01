@@ -86,14 +86,17 @@ impl Tree {
 
                     let expire_write_txn = EXPIRE.in_disk.begin_write().unwrap();
 
-                    {
+                    if last_timestamp > 0 {
                         let mut expire_table = expire_write_txn
                             .open_table(EXPIRE_TABLE_DEFINITIONF)
                             .unwrap();
                         expire_table
                             .insert(
                                 last_timestamp,
-                                Some(current_timestamp + Duration::from_secs(5).as_millis() as u64),
+                                Some(
+                                    current_timestamp
+                                        + Duration::from_secs(60 * 60).as_millis() as u64,
+                                ),
                             )
                             .unwrap();
 

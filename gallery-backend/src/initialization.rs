@@ -102,4 +102,17 @@ pub fn initialize_file() {
             }
         }
     }
+    {
+        let db_path = "./db/expire_db.redb";
+        if fs::metadata(db_path).is_ok() {
+            match fs::remove_file(db_path) {
+                Ok(_) => {
+                    info!("Clear expire table");
+                }
+                Err(_) => {
+                    error!("Fail to delete expire table ./db/expire_db.redb")
+                }
+            }
+        }
+    }
 }
