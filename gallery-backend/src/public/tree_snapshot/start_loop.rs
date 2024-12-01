@@ -13,7 +13,7 @@ pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
 
 impl TreeSnapshot {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn_blocking(|| loop {
+        /* tokio::task::spawn_blocking(|| loop {
             sleep(Duration::from_millis(500));
             let write_txn = self.in_disk.begin_write().unwrap();
             write_txn
@@ -37,7 +37,7 @@ impl TreeSnapshot {
                     }
                 });
             write_txn.commit().unwrap();
-        });
+        }); */
         tokio::task::spawn(async {
             loop {
                 SHOULD_FLUSH_TREE_SNAPSHOT.notified().await;

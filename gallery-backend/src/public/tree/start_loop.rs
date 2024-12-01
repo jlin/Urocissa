@@ -2,13 +2,14 @@ use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::public::utils::get_current_timestamp_u64;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
 
 use arrayvec::ArrayString;
 use log::info;
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::OnceLock;
 use std::usize;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
@@ -19,7 +20,7 @@ pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<
 
 pub static SHOULD_RESET: Notify = Notify::const_new();
 
-pub static VERSION_COUNT: AtomicUsize = AtomicUsize::new(0);
+pub static VERSION_COUNT: AtomicU64 = AtomicU64::new(0);
 
 impl Tree {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
@@ -77,7 +78,7 @@ impl Tree {
 
                     *self.in_memory.write().unwrap() = data_vec;
 
-                    VERSION_COUNT.fetch_add(1, Ordering::SeqCst);
+                    VERSION_COUNT.store(get_current_timestamp_u64(), Ordering::SeqCst);
                     info!(
                         "In-memory cache updated ({}).",
                         VERSION_COUNT.load(Ordering::SeqCst)
