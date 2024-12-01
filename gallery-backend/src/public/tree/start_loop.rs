@@ -1,7 +1,7 @@
 use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
-use crate::public::query_snapshot::{EXPIRE_TABLE_DEFINITIONF, QUERY_SNAPSHOT};
+use crate::public::expire::{EXPIRE, EXPIRE_TABLE_DEFINITIONF};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::utils::get_current_timestamp_u64;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
@@ -84,26 +84,23 @@ impl Tree {
                     let last_timestamp = VERSION_COUNT.swap(current_timestamp, Ordering::SeqCst);
                     info!("In-memory cache updated ({}).", current_timestamp);
 
-                    let query_write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
+                    let expire_write_txn = EXPIRE.in_disk.begin_write().unwrap();
 
                     {
-                        let mut expire_table = query_write_txn
+                        let mut expire_table = expire_write_txn
                             .open_table(EXPIRE_TABLE_DEFINITIONF)
                             .unwrap();
                         expire_table
                             .insert(
                                 last_timestamp,
-                                Some(
-                                    current_timestamp
-                                        + Duration::from_secs(60 * 60).as_millis() as u64,
-                                ),
+                                Some(current_timestamp + Duration::from_secs(5).as_millis() as u64),
                             )
                             .unwrap();
 
                         expire_table.insert(current_timestamp, None).unwrap();
                         info!("Expire table updated");
                     }
-                    query_write_txn.commit().unwrap();
+                    expire_write_txn.commit().unwrap();
 
                     if !buffer.is_empty() {
                         ALBUM_QUEUE_SENDER
