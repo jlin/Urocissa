@@ -95,7 +95,7 @@ impl Tree {
                                 last_timestamp,
                                 Some(
                                     current_timestamp
-                                        + Duration::from_secs(5 * 60).as_millis() as u64,
+                                        + Duration::from_secs(60 * 60).as_millis() as u64,
                                 ),
                             )
                             .unwrap();
