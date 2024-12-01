@@ -94,7 +94,8 @@ impl Tree {
                             .insert(
                                 last_timestamp,
                                 Some(
-                                    current_timestamp + Duration::from_secs(10).as_millis() as u64,
+                                    current_timestamp
+                                        + Duration::from_secs(5 * 60).as_millis() as u64,
                                 ),
                             )
                             .unwrap();

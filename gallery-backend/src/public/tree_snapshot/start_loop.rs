@@ -50,7 +50,7 @@ impl TreeSnapshot {
                             }
                             info!(
                                 "{} items remaining in disk tree cache",
-                                write_txn.list_tables().unwrap().count()
+                                write_txn.list_tables().unwrap().count() - 1
                             );
                             write_txn.commit().unwrap();
                         });
