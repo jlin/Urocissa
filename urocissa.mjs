@@ -200,8 +200,8 @@ function installRust() {
       // Windows installation
       const rustInstallerUrl =
         process.arch === "x64"
-          ? "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-gnu/rustup-init.exe"
-          : "https://static.rust-lang.org/rustup/dist/i686-pc-windows-gnu/rustup-init.exe";
+          ? "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe"
+          : "https://static.rust-lang.org/rustup/dist/i686-pc-windows-msvc/rustup-init.exe";
       const installerPath = "rustup-init.exe";
       console.log(`Downloading Rust installer from ${rustInstallerUrl}...`);
 
