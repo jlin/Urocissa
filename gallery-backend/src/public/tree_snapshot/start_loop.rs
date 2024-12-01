@@ -15,8 +15,8 @@ impl TreeSnapshot {
         tokio::task::spawn_blocking(|| loop {
             let txn = self.in_disk.begin_read().unwrap();
             txn.list_tables().unwrap().for_each(|table_handle| {
-                let timestamp = table_handle.name().parse::<u64>().unwrap();
-                let current_time_millis = Utc::now().timestamp_millis() as u64;
+                let timestamp = table_handle.name().parse::<u128>().unwrap();
+                let current_time_millis = Utc::now().timestamp_millis() as u128;
                 let duration_since = current_time_millis - timestamp;
                 if duration_since > 1 * 60 * 60 * 1000 {
                     // 1 hours in milliseconds
