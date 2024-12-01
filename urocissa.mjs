@@ -4,18 +4,31 @@ import { existsSync, readdirSync, copyFileSync, rmSync } from "fs";
 import { resolve, join } from "path";
 import { chdir } from "process";
 
+// ====================
+// Parse Command-Line Arguments
+// ====================
 const args = process.argv.slice(2);
 const debug = args.includes("--debug");
 const update = args.includes("--update");
 const install = args.includes("--install");
 const run = args.includes("--run");
 
-// Define project directories
+// ====================
+// Define Project Directories
+// ====================
 const projectRoot = resolve();
 const backendDir = join(projectRoot, "gallery-backend");
 const frontendDir = join(projectRoot, "gallery-frontend");
 
-// Helper function to execute shell commands
+// ====================
+// Helper Functions
+// ====================
+
+/**
+ * Executes a shell command synchronously.
+ * @param {string} command - The command to execute.
+ * @param {object} options - Options for execSync.
+ */
 function runCommand(command, options = {}) {
   try {
     execSync(command, { stdio: "inherit", ...options });
@@ -25,7 +38,11 @@ function runCommand(command, options = {}) {
   }
 }
 
-// Helper function to check if a command exists
+/**
+ * Checks if a command exists in the system.
+ * @param {string} command - The command to check.
+ * @returns {boolean} - True if the command exists, false otherwise.
+ */
 function commandExists(command) {
   try {
     execSync(`${command}`, { stdio: "pipe" });
@@ -35,29 +52,85 @@ function commandExists(command) {
   }
 }
 
-// Perform update tasks
-if (update) {
-  console.log("Update mode enabled. Performing update tasks...");
-
-  // Step 1: Pull the latest changes
-  console.log("Pulling the latest changes from the repository...");
-  runCommand("git pull", { cwd: projectRoot });
-
-  // Step 2: Rebuild the backend
-  console.log("Rebuilding the backend...");
-  const buildCommand = debug ? "cargo build" : "cargo build --release";
-  runCommand(buildCommand, { cwd: backendDir });
-
-  // Step 3: Rebuild the frontend
-  console.log("Rebuilding the frontend...");
-  runCommand("npm run build", { cwd: frontendDir });
-
-  console.log("Update completed successfully!");
-  process.exit(0);
+/**
+ * Handles errors by logging a message, returning to the root directory, and exiting.
+ * @param {string} message - The error message to display.
+ */
+function handleError(message) {
+  console.error(message);
+  chdir(projectRoot);
+  console.log(`Returned to the root directory: ${projectRoot}`);
+  process.exit(1);
 }
 
-if (install) {
-  // Install FFmpeg
+/**
+ * Cleans up temporary FFmpeg installation files.
+ * @param {string} archiveName - The name of the FFmpeg archive.
+ * @param {string} extractedDir - The directory where FFmpeg was extracted.
+ */
+function cleanupFFmpegFiles(archiveName, extractedDir) {
+  console.log("Cleaning up temporary files...");
+  try {
+    if (existsSync(archiveName)) {
+      rmSync(archiveName); // Delete the zip file
+      console.log(`${archiveName} removed.`);
+    }
+    if (extractedDir && existsSync(extractedDir)) {
+      rmSync(extractedDir, { recursive: true, force: true }); // Delete the extracted folder
+      console.log(`${extractedDir} removed.`);
+    }
+  } catch (cleanupError) {
+    console.error(`Cleanup failed: ${cleanupError.message}`);
+  }
+}
+
+/**
+ * Checks if all necessary components are installed and configured.
+ * @returns {boolean} - True if all checks pass, false otherwise.
+ */
+function runCheck() {
+  let checkPassed = true;
+
+  if (!commandExists("ffmpeg -version")) {
+    console.log("FFmpeg is not installed.");
+    checkPassed = false;
+  }
+
+  if (!commandExists("rustup --version")) {
+    console.log("Rust is not installed.");
+    checkPassed = false;
+  }
+
+  if (!existsSync(join(backendDir, ".env"))) {
+    console.log(".env is not found.");
+    checkPassed = false;
+  }
+
+  if (!existsSync(join(backendDir, "Rocket.toml"))) {
+    console.log("Rocket.toml is not found.");
+    checkPassed = false;
+  }
+
+  if (!existsSync(join(frontendDir, "config.ts"))) {
+    console.log("config.ts is not found.");
+    checkPassed = false;
+  }
+
+  if (!checkPassed) {
+    console.log("Please run `node urocissa.mjs --install` first.");
+  }
+
+  return checkPassed;
+}
+
+// ====================
+// Installation Functions
+// ====================
+
+/**
+ * Installs FFmpeg based on the operating system.
+ */
+function installFFmpeg() {
   if (!commandExists("ffmpeg -version")) {
     console.log("FFmpeg is not installed. Installing FFmpeg...");
 
@@ -99,19 +172,7 @@ if (install) {
           process.exit(1);
         }
       } finally {
-        console.log("Cleaning up temporary files...");
-        try {
-          if (existsSync(ffmpegArchiveName)) {
-            rmSync(ffmpegArchiveName); // Delete the zip file
-            console.log(`${ffmpegArchiveName} removed.`);
-          }
-          if (extractedDir && existsSync(extractedDir)) {
-            rmSync(extractedDir, { recursive: true, force: true }); // Delete the extracted folder
-            console.log(`${extractedDir} removed.`);
-          }
-        } catch (cleanupError) {
-          console.error(`Cleanup failed: ${cleanupError.message}`);
-        }
+        cleanupFFmpegFiles(ffmpegArchiveName, extractedDir);
       }
     } else if (os.platform() === "linux") {
       // Linux installation: Use apt
@@ -126,9 +187,13 @@ if (install) {
   } else {
     console.log("FFmpeg is already installed.");
   }
+}
 
-  // Install Rust
-  if (install && !commandExists("rustup --version")) {
+/**
+ * Installs Rust based on the operating system.
+ */
+function installRust() {
+  if (!commandExists("rustup --version")) {
     console.log("Rust is not installed. Installing Rust...");
 
     if (os.platform() === "win32") {
@@ -171,84 +236,100 @@ if (install) {
   } else {
     console.log("Rust is already installed.");
   }
+}
 
-  // Configure and build the backend
-
+/**
+ * Configures and builds the backend.
+ */
+function configureBackend() {
   console.log("Configuring backend settings...");
-  if (!existsSync(join(backendDir, ".env"))) {
-    copyFileSync(join(backendDir, ".env.default"), join(backendDir, ".env"));
-  }
-  if (!existsSync(join(backendDir, "Rocket.toml"))) {
-    copyFileSync(
-      join(backendDir, "Rocket.default.toml"),
-      join(backendDir, "Rocket.toml")
-    );
-  }
-  runCommand(debug ? "cargo build" : "cargo build --release", {
-    cwd: backendDir,
-  });
 
-  // Configure and build the frontend
-  console.log("Configuring frontend settings...");
-  if (!existsSync(join(frontendDir, "config.ts"))) {
-    copyFileSync(
-      join(frontendDir, "config.default.ts"),
-      join(frontendDir, "config.ts")
-    );
+  const envPath = join(backendDir, ".env");
+  const envDefaultPath = join(backendDir, ".env.default");
+  if (!existsSync(envPath)) {
+    copyFileSync(envDefaultPath, envPath);
   }
+
+  const rocketTomlPath = join(backendDir, "Rocket.toml");
+  const rocketTomlDefaultPath = join(backendDir, "Rocket.default.toml");
+  if (!existsSync(rocketTomlPath)) {
+    copyFileSync(rocketTomlDefaultPath, rocketTomlPath);
+  }
+
+  console.log("Rebuilding the backend...");
+  const buildCommand = debug ? "cargo build" : "cargo build --release";
+  runCommand(buildCommand, { cwd: backendDir });
+}
+
+/**
+ * Configures and builds the frontend.
+ */
+function configureFrontend() {
+  console.log("Configuring frontend settings...");
+
+  const configPath = join(frontendDir, "config.ts");
+  const configDefaultPath = join(frontendDir, "config.default.ts");
+  if (!existsSync(configPath)) {
+    copyFileSync(configDefaultPath, configPath);
+  }
+
+  console.log("Rebuilding the frontend...");
   runCommand("npm run build", { cwd: frontendDir });
+}
+
+/**
+ * Performs the installation process.
+ */
+function performInstall() {
+  installFFmpeg();
+  installRust();
+  configureBackend();
+  configureFrontend();
 
   console.log("Setup complete. Your project is ready for use!");
 }
 
-// Helper function to gracefully handle errors
-function handleError(message) {
-  console.error(message);
-  chdir(projectRoot);
-  console.log(`Returned to the root directory: ${projectRoot}`);
-  process.exit(1);
+// ====================
+// Update Function
+// ====================
+
+/**
+ * Performs update tasks such as pulling latest changes and rebuilding.
+ */
+function performUpdate() {
+  console.log("Update mode enabled. Performing update tasks...");
+
+  // Step 1: Pull the latest changes
+  console.log("Pulling the latest changes from the repository...");
+  runCommand("git pull", { cwd: projectRoot });
+
+  // Step 2: Rebuild the backend
+  console.log("Rebuilding the backend...");
+  const buildCommand = debug ? "cargo build" : "cargo build --release";
+  runCommand(buildCommand, { cwd: backendDir });
+
+  // Step 3: Rebuild the frontend
+  console.log("Rebuilding the frontend...");
+  runCommand("npm run build", { cwd: frontendDir });
+
+  console.log("Update completed successfully!");
+  process.exit(0);
 }
 
-function runCheck() {
-  let checkPassed = true;
+// ====================
+// Run Function
+// ====================
 
-  if (!commandExists("ffmpeg -version")) {
-    console.log("FFmpeg is not installed.");
-    checkPassed = false;
-  }
-
-  if (!commandExists("rustup --version")) {
-    console.log("Rust is not installed.");
-    checkPassed = false;
-  }
-
-  if (!existsSync(join(backendDir, ".env"))) {
-    console.log(".env is not found.");
-    checkPassed = false;
-  }
-
-  if (!existsSync(join(backendDir, "Rocket.toml"))) {
-    console.log("Rocket.toml is not found.");
-    checkPassed = false;
-  }
-
-  if (!existsSync(join(frontendDir, "config.ts"))) {
-    console.log("config.ts is not found.");
-    checkPassed = false;
-  }
-
-  if (!checkPassed) {
-    console.log("Please run `node urocissa.mjs --install` first.");
-  }
-  return checkPassed;
-}
-
-if (run) {
-  // Navigate to the backend directory
+/**
+ * Executes the backend application.
+ */
+function performRun() {
+  // Check prerequisites
   if (!runCheck()) {
     process.exit(1);
   }
 
+  // Navigate to the backend directory
   try {
     console.log(`Navigating to the backend directory: ${backendDir}`);
     chdir(backendDir);
@@ -258,13 +339,8 @@ if (run) {
 
   // Execute the backend
   try {
-    // Determine the command based on the debug flag
     const command = debug ? "cargo run" : "cargo run --release";
-
-    // Log the exact command that's about to run
     console.log(`Starting the backend using '${command}'...`);
-
-    // Execute the determined command
     execSync(command, { stdio: "inherit" });
     console.log("Backend is running successfully.");
   } catch (error) {
@@ -279,4 +355,19 @@ if (run) {
     console.error("Failed to return to the root directory.");
     process.exit(1);
   }
+}
+
+// ====================
+// Main Execution Logic
+// ====================
+if (update) {
+  performUpdate();
+}
+
+if (install) {
+  performInstall();
+}
+
+if (run) {
+  performRun();
 }
