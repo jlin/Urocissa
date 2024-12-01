@@ -43,7 +43,6 @@ pub async fn delete_data(json_data: Json<DeleteList>) {
                 };
                 if found_data {
                     table.remove(hash.as_str()).unwrap();
-                    return;
                 }
 
                 let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
