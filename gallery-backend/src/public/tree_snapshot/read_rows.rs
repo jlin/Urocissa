@@ -7,7 +7,7 @@ use rocket::http::Status;
 
 impl TreeSnapshot {
     pub fn read_row(&'static self, row_index: usize, timestamp: u128) -> Result<Row, Status> {
-        let tree_snapshot = self.read_tree_snapshot(&timestamp).unwrap();
+        let tree_snapshot = self.read_tree_snapshot(&timestamp)?;
 
         let data_length = tree_snapshot.len();
         let chunk_count = (data_length + BATCH_NUMBER - 1) / BATCH_NUMBER; // Calculate total chunks

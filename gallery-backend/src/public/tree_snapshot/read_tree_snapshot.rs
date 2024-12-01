@@ -3,7 +3,7 @@ use crate::public::reduced_data::ReducedData;
 use arrayvec::ArrayString;
 use dashmap::mapref::one::Ref;
 
-use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition};
+use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition, TableError};
 use rocket::http::Status;
 
 impl TreeSnapshot {
@@ -20,11 +20,18 @@ impl TreeSnapshot {
         let binding = timestamp.to_string();
         let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&binding);
 
-        let table = read_txn.open_table(table_definition).map_err(|err| {
-            error!("{:?}", err);
-            Status::InternalServerError
-        })?;
-
+        let table = read_txn
+            .open_table(table_definition)
+            .map_err(|err| match err {
+                TableError::TableDoesNotExist(_) => {
+                    warn!("Table does not exist. Return unauthorized");
+                    Status::Unauthorized
+                }
+                _ => {
+                    error!("{:?}", err);
+                    Status::InternalServerError
+                }
+            })?;
         Ok(MyCow::Redb(table))
     }
 }
