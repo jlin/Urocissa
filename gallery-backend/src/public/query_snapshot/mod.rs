@@ -3,9 +3,13 @@ pub mod read_query_snapshots;
 pub mod start_loop;
 use crate::router::get::get_data::Prefetch;
 use dashmap::DashMap;
+use redb::TableDefinition;
 use std::sync::LazyLock;
 
 pub type PrefetchReturn = Option<Prefetch>;
+
+pub static EXPIRE_TABLE_DEFINITIONF: TableDefinition<u64, Option<u64>> =
+    TableDefinition::new("expire_table");
 
 #[derive(Debug)]
 pub struct QuerySnapshot {

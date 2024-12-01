@@ -1,6 +1,7 @@
 use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
+use crate::public::query_snapshot::{EXPIRE_TABLE_DEFINITIONF, QUERY_SNAPSHOT};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::utils::get_current_timestamp_u64;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
@@ -9,8 +10,9 @@ use arrayvec::ArrayString;
 use log::info;
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::OnceLock;
+use std::time::Duration;
 use std::usize;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
@@ -78,11 +80,29 @@ impl Tree {
 
                     *self.in_memory.write().unwrap() = data_vec;
 
-                    VERSION_COUNT.store(get_current_timestamp_u64(), Ordering::SeqCst);
-                    info!(
-                        "In-memory cache updated ({}).",
-                        VERSION_COUNT.load(Ordering::SeqCst)
-                    );
+                    let current_timestamp = get_current_timestamp_u64();
+                    let last_timestamp = VERSION_COUNT.swap(current_timestamp, Ordering::SeqCst);
+                    info!("In-memory cache updated ({}).", current_timestamp);
+
+                    let query_write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
+
+                    {
+                        let mut expire_table = query_write_txn
+                            .open_table(EXPIRE_TABLE_DEFINITIONF)
+                            .unwrap();
+                        expire_table
+                            .insert(
+                                last_timestamp,
+                                Some(
+                                    current_timestamp + Duration::from_secs(60).as_millis() as u64,
+                                ),
+                            )
+                            .unwrap();
+
+                        expire_table.insert(current_timestamp, None).unwrap();
+                        info!("Expire table updated");
+                    }
+                    query_write_txn.commit().unwrap();
 
                     if !buffer.is_empty() {
                         ALBUM_QUEUE_SENDER

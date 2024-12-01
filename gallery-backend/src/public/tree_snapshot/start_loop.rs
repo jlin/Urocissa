@@ -1,13 +1,7 @@
 use super::TreeSnapshot;
 use crate::public::reduced_data::ReducedData;
-use chrono::Utc;
-use rayon::iter::{ParallelBridge, ParallelIterator};
-use redb::{TableDefinition, TableHandle};
-use std::{
-    sync::OnceLock,
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use redb::TableDefinition;
+use std::{sync::OnceLock, time::Instant};
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedSender},
     Notify,
@@ -38,13 +32,18 @@ impl TreeSnapshot {
                             let table_definition: TableDefinition<u64, ReducedData> =
                                 TableDefinition::new(&binding);
                             match write_txn.delete_table(table_definition) {
-                                Ok(true) => info!("Delete table: {:?}", timestamp_delete),
+                                Ok(true) => {
+                                    info!("Delete tree cache table: {:?}", timestamp_delete)
+                                }
                                 Ok(false) => {
-                                    error!("Failed to delete table: {:?}", timestamp_delete)
+                                    error!(
+                                        "Failed to delete tree cache table: {:?}",
+                                        timestamp_delete
+                                    )
                                 }
                                 Err(e) => {
                                     error!(
-                                        "Failed to delete table: {:?}, error: {:?}",
+                                        "Failed to delete tree cache table: {:?}, error: {:?}",
                                         timestamp_delete, e
                                     )
                                 }
@@ -55,31 +54,6 @@ impl TreeSnapshot {
                 .unwrap();
             }
         });
-        /* tokio::task::spawn_blocking(|| loop {
-            sleep(Duration::from_millis(500));
-            let write_txn = self.in_disk.begin_write().unwrap();
-            write_txn
-                .list_tables()
-                .unwrap()
-                .par_bridge()
-                .for_each(|table_handle| {
-                    let timestamp = table_handle.name().parse::<u128>().unwrap();
-                    let current_time_millis = Utc::now().timestamp_millis() as u128;
-                    let duration_since = current_time_millis - timestamp;
-                    if duration_since > 1 * 60 * 60 * 1000 {
-                        // 1 hours in milliseconds
-
-                        match write_txn.delete_table(table_handle) {
-                            Ok(true) => info!("Delete table: {:?}", timestamp),
-                            Ok(false) => error!("Failed to delete table: {:?}", timestamp),
-                            Err(e) => {
-                                error!("Failed to delete table: {:?}, error: {:?}", timestamp, e)
-                            }
-                        }
-                    }
-                });
-            write_txn.commit().unwrap();
-        }); */
         tokio::task::spawn(async {
             loop {
                 SHOULD_FLUSH_TREE_SNAPSHOT.notified().await;
