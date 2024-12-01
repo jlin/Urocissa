@@ -63,6 +63,10 @@ impl QuerySnapshot {
                                     )
                                 }
                             }
+                            info!(
+                                "{} items remaining in disk query cache",
+                                write_txn.list_tables().unwrap().count()
+                            );
                         }
                     }
                 });
