@@ -117,9 +117,7 @@ impl Tree {
 
                         // Update the atomic variable with the new expire time
                         NEXT_EXPIRE_TIME.store(new_expire_time, Ordering::SeqCst);
-                        println!("NEXT_EXPIRE_TIME update to {}", new_expire_time);
                         SHOULD_CHECK_QUERY_EXPIRE.notify_one();
-                        println!("QUERY_EXPIRE loop notify");
                     }
 
                     if !buffer.is_empty() {

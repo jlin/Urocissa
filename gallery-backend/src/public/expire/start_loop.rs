@@ -21,7 +21,6 @@ impl Expire {
         tokio::task::spawn(async {
             loop {
                 tokio::task::spawn_blocking(|| {
-                    println!("expire task perform");
                     let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
 
                     write_txn
@@ -84,14 +83,12 @@ impl Expire {
                 let expire_time = NEXT_EXPIRE_TIME.load(Ordering::Relaxed);
                 let current_time = get_current_timestamp_u64();
                 if expire_time > current_time {
-                    println!("expire_time is {}", expire_time);
-                    println!("current_time is {}", current_time);
                     let sleep_duration = expire_time - current_time;
                     let duration = Duration::from_millis(sleep_duration);
-                    println!("wait {} ms", sleep_duration);
+                    info!("Expire thread sleep {:?}", duration);
                     sleep(duration).await;
                 } else {
-                    println!("wait until expired notify");
+                    info!("Expire thread sleep until notified.");
                     SHOULD_CHECK_QUERY_EXPIRE.notified().await
                 }
             }

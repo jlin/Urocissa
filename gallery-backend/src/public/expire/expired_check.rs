@@ -17,7 +17,6 @@ impl Expire {
                         let mut expire_write_table = expire_write_txn
                             .open_table(EXPIRE_TABLE_DEFINITION)
                             .unwrap();
-                        println!("{:?}", expire_write_table);
                         expire_table.iter().unwrap().for_each(|result| {
                             let (key, _) = result.unwrap();
                             let timestamp_in_table = key.value();
