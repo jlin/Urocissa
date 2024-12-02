@@ -11,11 +11,11 @@ RUN apt update && apt install -y \
     nodejs \
     && apt clean
 
-# Set working directory
-WORKDIR /Urocissa
-
 # Clone the repository
 RUN git clone https://github.com/hsa00000/Urocissa /Urocissa
+
+# Set working directory
+WORKDIR /Urocissa
 
 # Install Rust using rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
