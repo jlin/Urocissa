@@ -72,7 +72,7 @@ export function useFetchRows(
         const startIndex = Math.floor(startHeightOffseted / fixedHeight)
         const endIndex = Math.ceil(endHeightOffseted / fixedHeight)
 
-        for (let i = startIndex; i < endIndex; i++) {
+        for (let i = startIndex; i <= endIndex; i++) {
           fetchRowInWorker(i, isolationId)
         }
 
