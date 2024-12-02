@@ -90,7 +90,7 @@ impl Tree {
                     if last_timestamp > 0 {
                         // Calculate the new expire time (current_timestamp + 1 hour in milliseconds)
                         let new_expire_time = current_timestamp
-                            .saturating_add(Duration::from_secs(5).as_millis() as u64);
+                            .saturating_add(Duration::from_secs(60 * 60).as_millis() as u64);
                         {
                             // Open the expire table
                             let mut expire_table = expire_write_txn
