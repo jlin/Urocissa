@@ -107,8 +107,7 @@ Make sure the following software is installed on your system:
 - **npm (Node.js)**: Install Node.js (with npm) from NodeSource:
 
   ```bash
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-  sudo apt install -y nodejs
+  sudo apt install -y nodejs npm
   ```
 
 ---
