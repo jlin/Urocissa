@@ -14,161 +14,181 @@ const frontendDir = join(projectRoot, "gallery-frontend");
 
 // Helper function to execute shell commands
 function runCommand(command, options = {}) {
-    try {
-        execSync(command, { stdio: "inherit", ...options });
-    } catch (error) {
-        console.error(`Error executing command: ${command}`);
-        process.exit(1);
-    }
+  try {
+    execSync(command, { stdio: "inherit", ...options });
+  } catch (error) {
+    console.error(`Error executing command: ${command}`);
+    process.exit(1);
+  }
 }
 
 // Helper function to check if a command exists
 function commandExists(command) {
-    try {
-        execSync(`${command}`, { stdio: "pipe" });
-        return true;
-    } catch {
-        return false;
-    }
+  try {
+    execSync(`${command}`, { stdio: "pipe" });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // Perform update tasks
 if (update) {
-    console.log("Update mode enabled. Performing update tasks...");
+  console.log("Update mode enabled. Performing update tasks...");
 
-    // Step 1: Pull the latest changes
-    console.log("Pulling the latest changes from the repository...");
-    runCommand("git pull", { cwd: projectRoot });
+  // Step 1: Pull the latest changes
+  console.log("Pulling the latest changes from the repository...");
+  runCommand("git pull", { cwd: projectRoot });
 
-    // Step 2: Rebuild the backend
-    console.log("Rebuilding the backend...");
-    const buildCommand = debug ? "cargo build" : "cargo build --release";
-    runCommand(buildCommand, { cwd: backendDir });
+  // Step 2: Rebuild the backend
+  console.log("Rebuilding the backend...");
+  const buildCommand = debug
+    ? "cargo build"
+    : "cargo build --profile dev-release";
+  runCommand(buildCommand, { cwd: backendDir });
 
-    // Step 3: Rebuild the frontend
-    console.log("Rebuilding the frontend...");
-    runCommand("npm run build", { cwd: frontendDir });
+  // Step 3: Rebuild the frontend
+  console.log("Rebuilding the frontend...");
+  runCommand("npm run build", { cwd: frontendDir });
 
-    console.log("Update completed successfully!");
-    process.exit(0);
+  console.log("Update completed successfully!");
+  process.exit(0);
 }
 
 // Install FFmpeg
 if (!commandExists("ffmpeg -version")) {
-    console.log("FFmpeg is not installed. Installing FFmpeg...");
+  console.log("FFmpeg is not installed. Installing FFmpeg...");
 
-    if (os.platform() === "win32") {
-        // Windows installation: Download and extract FFmpeg
-        const ffmpegUrl = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
-        const ffmpegArchiveName = "ffmpeg.zip";
-        let extractedDir;
+  if (os.platform() === "win32") {
+    // Windows installation: Download and extract FFmpeg
+    const ffmpegUrl =
+      "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
+    const ffmpegArchiveName = "ffmpeg.zip";
+    let extractedDir;
 
-        try {
-            console.log(`Downloading FFmpeg from ${ffmpegUrl}...`);
-            runCommand(`curl -L -o ${ffmpegArchiveName} ${ffmpegUrl}`);
+    try {
+      console.log(`Downloading FFmpeg from ${ffmpegUrl}...`);
+      runCommand(`curl -L -o ${ffmpegArchiveName} ${ffmpegUrl}`);
 
-            console.log("Extracting FFmpeg...");
-            runCommand(`tar -xf ${ffmpegArchiveName}`);
+      console.log("Extracting FFmpeg...");
+      runCommand(`tar -xf ${ffmpegArchiveName}`);
 
-            // Locate the extracted directory
-            extractedDir = readdirSync(".").find(dir => dir.startsWith("ffmpeg-") && dir.endsWith("-essentials_build"));
+      // Locate the extracted directory
+      extractedDir = readdirSync(".").find(
+        (dir) => dir.startsWith("ffmpeg-") && dir.endsWith("-essentials_build")
+      );
 
-            if (extractedDir) {
-                const ffmpegPath = resolve(join(extractedDir, "bin", "ffmpeg.exe"));
-                if (existsSync(ffmpegPath)) {
-                    copyFileSync(ffmpegPath, "ffmpeg.exe");
-                    console.log("FFmpeg setup complete!");
-                } else {
-                    console.error("Failed to locate FFmpeg binary in the extracted directory.");
-                    process.exit(1);
-                }
-            } else {
-                console.error("Failed to locate the extracted FFmpeg directory. Ensure the archive was extracted properly.");
-                process.exit(1);
-            }
-        } finally {
-            console.log("Cleaning up temporary files...");
-            try {
-                if (existsSync(ffmpegArchiveName)) {
-                    rmSync(ffmpegArchiveName); // Delete the zip file
-                    console.log(`${ffmpegArchiveName} removed.`);
-                }
-                if (extractedDir && existsSync(extractedDir)) {
-                    rmSync(extractedDir, { recursive: true, force: true }); // Delete the extracted folder
-                    console.log(`${extractedDir} removed.`);
-                }
-            } catch (cleanupError) {
-                console.error(`Cleanup failed: ${cleanupError.message}`);
-            }
+      if (extractedDir) {
+        const ffmpegPath = resolve(join(extractedDir, "bin", "ffmpeg.exe"));
+        if (existsSync(ffmpegPath)) {
+          copyFileSync(ffmpegPath, "ffmpeg.exe");
+          console.log("FFmpeg setup complete!");
+        } else {
+          console.error(
+            "Failed to locate FFmpeg binary in the extracted directory."
+          );
+          process.exit(1);
         }
-    } else if (os.platform() === "linux") {
-        // Linux installation: Use apt
-        console.log("Installing FFmpeg using apt...");
-        runCommand("sudo apt update");
-        runCommand("sudo apt install -y ffmpeg");
-        console.log("FFmpeg installed successfully.");
-    } else {
-        console.error(`Unsupported operating system: ${os.platform()}`);
+      } else {
+        console.error(
+          "Failed to locate the extracted FFmpeg directory. Ensure the archive was extracted properly."
+        );
         process.exit(1);
+      }
+    } finally {
+      console.log("Cleaning up temporary files...");
+      try {
+        if (existsSync(ffmpegArchiveName)) {
+          rmSync(ffmpegArchiveName); // Delete the zip file
+          console.log(`${ffmpegArchiveName} removed.`);
+        }
+        if (extractedDir && existsSync(extractedDir)) {
+          rmSync(extractedDir, { recursive: true, force: true }); // Delete the extracted folder
+          console.log(`${extractedDir} removed.`);
+        }
+      } catch (cleanupError) {
+        console.error(`Cleanup failed: ${cleanupError.message}`);
+      }
     }
+  } else if (os.platform() === "linux") {
+    // Linux installation: Use apt
+    console.log("Installing FFmpeg using apt...");
+    runCommand("sudo apt update");
+    runCommand("sudo apt install -y ffmpeg");
+    console.log("FFmpeg installed successfully.");
+  } else {
+    console.error(`Unsupported operating system: ${os.platform()}`);
+    process.exit(1);
+  }
 } else {
-    console.log("FFmpeg is already installed.");
+  console.log("FFmpeg is already installed.");
 }
-
 
 // Install Rust
 if (!commandExists("rustup --version")) {
-    console.log("Rust is not installed. Installing Rust...");
+  console.log("Rust is not installed. Installing Rust...");
 
-    if (os.platform() === "win32") {
-        // Windows installation
-        const rustInstallerUrl = process.arch === "x64"
-            ? "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe"
-            : "https://static.rust-lang.org/rustup/dist/i686-pc-windows-msvc/rustup-init.exe";
-        const installerPath = "rustup-init.exe";
-        console.log(`Downloading Rust installer from ${rustInstallerUrl}...`);
+  if (os.platform() === "win32") {
+    // Windows installation
+    const rustInstallerUrl =
+      process.arch === "x64"
+        ? "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe"
+        : "https://static.rust-lang.org/rustup/dist/i686-pc-windows-msvc/rustup-init.exe";
+    const installerPath = "rustup-init.exe";
+    console.log(`Downloading Rust installer from ${rustInstallerUrl}...`);
 
-        try {
-            runCommand(`curl -L -o ${installerPath} ${rustInstallerUrl}`);
-            console.log("Running Rust installer...");
-            runCommand(installerPath);
-        } finally {
-            console.log("Cleaning up the installer file...");
-            try {
-                rmSync(installerPath);
-                console.log("Installer file removed.");
-            } catch (error) {
-                console.error(`Failed to remove the installer file: ${error.message}`);
-            }
-        }
-    } else if (os.platform() === "linux") {
-        // Linux installation
-        console.log("Installing Rust using rustup script...");
-        runCommand(`curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`);
-        console.log("Rust installed successfully. You may need to restart your terminal to use Rust.");
-    } else {
-        console.error(`Unsupported operating system: ${os.platform()}`);
-        process.exit(1);
+    try {
+      runCommand(`curl -L -o ${installerPath} ${rustInstallerUrl}`);
+      console.log("Running Rust installer...");
+      runCommand(installerPath);
+    } finally {
+      console.log("Cleaning up the installer file...");
+      try {
+        rmSync(installerPath);
+        console.log("Installer file removed.");
+      } catch (error) {
+        console.error(`Failed to remove the installer file: ${error.message}`);
+      }
     }
+  } else if (os.platform() === "linux") {
+    // Linux installation
+    console.log("Installing Rust using rustup script...");
+    runCommand(
+      `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+    );
+    console.log(
+      "Rust installed successfully. You may need to restart your terminal to use Rust."
+    );
+  } else {
+    console.error(`Unsupported operating system: ${os.platform()}`);
+    process.exit(1);
+  }
 } else {
-    console.log("Rust is already installed.");
+  console.log("Rust is already installed.");
 }
-
 
 // Configure and build the backend
 console.log("Configuring backend settings...");
 if (!existsSync(join(backendDir, ".env"))) {
-    copyFileSync(join(backendDir, ".env.default"), join(backendDir, ".env"));
+  copyFileSync(join(backendDir, ".env.default"), join(backendDir, ".env"));
 }
 if (!existsSync(join(backendDir, "Rocket.toml"))) {
-    copyFileSync(join(backendDir, "Rocket.default.toml"), join(backendDir, "Rocket.toml"));
+  copyFileSync(
+    join(backendDir, "Rocket.default.toml"),
+    join(backendDir, "Rocket.toml")
+  );
 }
-runCommand(debug ? "cargo build" : "cargo build --release", { cwd: backendDir });
+runCommand(debug ? "cargo build" : "cargo build --profile dev-release", {
+  cwd: backendDir,
+});
 
 // Configure and build the frontend
 console.log("Configuring frontend settings...");
 if (!existsSync(join(frontendDir, "config.ts"))) {
-    copyFileSync(join(frontendDir, "config.default.ts"), join(frontendDir, "config.ts"));
+  copyFileSync(
+    join(frontendDir, "config.default.ts"),
+    join(frontendDir, "config.ts")
+  );
 }
 runCommand("npm run build", { cwd: frontendDir });
 
