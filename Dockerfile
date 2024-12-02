@@ -12,10 +12,10 @@ RUN apt update && apt install -y \
     && apt clean
 
 # Set working directory
-WORKDIR /urocissa
+WORKDIR /Urocissa
 
-# Copy your project files into the container
-COPY . /urocissa
+# Clone the repository
+RUN git clone https://github.com/hsa00000/Urocissa /Urocissa
 
 # Install Rust using rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
