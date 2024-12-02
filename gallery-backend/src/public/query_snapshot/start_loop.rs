@@ -1,7 +1,7 @@
 use super::QuerySnapshot;
 use crate::public::{
-    query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT,
-    tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER, utils::expired,
+    expire::EXPIRE, query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT,
+    tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER,
 };
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};
@@ -13,6 +13,8 @@ use std::{
 use tokio::sync::Notify;
 
 pub static SHOULD_FLUSH_QUERY_SNAPSHOT: Notify = Notify::const_new();
+
+pub static SHOULD_CHECK_QUERY_EXPIRE: Notify = Notify::const_new();
 
 impl QuerySnapshot {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
@@ -27,7 +29,9 @@ impl QuerySnapshot {
                 .par_bridge()
                 .for_each(|table_handle| {
                     if let Ok(timestamp) = table_handle.name().parse::<u64>() {
-                        if VERSION_COUNT.load(Ordering::Relaxed) > timestamp && expired(timestamp) {
+                        if VERSION_COUNT.load(Ordering::Relaxed) > timestamp
+                            && EXPIRE.expired_check(timestamp)
+                        {
                             let binding = timestamp.to_string();
                             let table_definition: TableDefinition<u64, PrefetchReturn> =
                                 TableDefinition::new(&binding);
