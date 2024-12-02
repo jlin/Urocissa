@@ -4,7 +4,9 @@ use rocket::Shutdown;
 use video::start_video_channel;
 use watch::start_watcher;
 
-use crate::public::{query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT};
+use crate::public::{
+    expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
+};
 
 pub mod album;
 pub mod event;
@@ -12,14 +14,15 @@ pub mod video;
 pub mod watch;
 
 pub async fn start_sync(shutdown: Shutdown) {
-    // Start all tasks
+    // Start all tasks with sequential numbering
     let task1 = start_event_channel();
     let task2 = start_video_channel();
     let task3 = start_album_channel();
     let task4 = TREE.start_loop();
-    let task5 = QUERY_SNAPSHOT.start_loop();
-    let task6 = TREE_SNAPSHOT.start_loop();
-    let task7 = start_watcher();
+    let task5 = EXPIRE.start_loop();
+    let task6 = QUERY_SNAPSHOT.start_loop();
+    let task7 = TREE_SNAPSHOT.start_loop();
+    let task8 = start_watcher();
 
     info!("All channels started.");
 
@@ -72,7 +75,19 @@ pub async fn start_sync(shutdown: Shutdown) {
                 },
             }
         },
-        res = task5 => {
+        res = task5 => { // EXPIRE.start_loop()
+            match res {
+                Ok(_) => {
+                    error!("Expire loop closed unexpectedly.");
+                    shutdown.notify();
+                },
+                Err(e) => {
+                    error!("Expire loop task failed: {:?}", e);
+                    shutdown.notify();
+                },
+            }
+        },
+        res = task6 => { // QUERY_SNAPSHOT.start_loop()
             match res {
                 Ok(_) => {
                     error!("Query snapshot loop closed unexpectedly.");
@@ -84,7 +99,7 @@ pub async fn start_sync(shutdown: Shutdown) {
                 },
             }
         },
-        res = task6 => {
+        res = task7 => { // TREE_SNAPSHOT.start_loop()
             match res {
                 Ok(_) => {
                     error!("Tree snapshot loop closed unexpectedly.");
@@ -96,7 +111,7 @@ pub async fn start_sync(shutdown: Shutdown) {
                 },
             }
         },
-        res = task7 => {
+        res = task8 => { // start_watcher()
             match res {
                 Ok(_) => {
                     error!("Watcher closed unexpectedly.");
@@ -107,6 +122,6 @@ pub async fn start_sync(shutdown: Shutdown) {
                     shutdown.notify();
                 },
             }
-        }
+        },
     }
 }

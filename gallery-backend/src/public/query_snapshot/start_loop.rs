@@ -1,80 +1,13 @@
 use super::QuerySnapshot;
-use crate::public::{
-    expire::EXPIRE, query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT,
-    tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER,
-};
-use rayon::iter::{ParallelBridge, ParallelIterator};
-use redb::{ReadableTable, TableDefinition, TableHandle};
-use std::{
-    sync::atomic::Ordering,
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT};
+use redb::TableDefinition;
+use std::{sync::atomic::Ordering, time::Instant};
 use tokio::sync::Notify;
 
 pub static SHOULD_FLUSH_QUERY_SNAPSHOT: Notify = Notify::const_new();
 
-pub static SHOULD_CHECK_QUERY_EXPIRE: Notify = Notify::const_new();
-
 impl QuerySnapshot {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn_blocking(|| loop {
-            sleep(Duration::from_millis(500));
-
-            let write_txn = self.in_disk.begin_write().unwrap();
-
-            write_txn
-                .list_tables()
-                .unwrap()
-                .par_bridge()
-                .for_each(|table_handle| {
-                    if let Ok(timestamp) = table_handle.name().parse::<u64>() {
-                        if VERSION_COUNT.load(Ordering::Relaxed) > timestamp
-                            && EXPIRE.expired_check(timestamp)
-                        {
-                            let binding = timestamp.to_string();
-                            let table_definition: TableDefinition<u64, PrefetchReturn> =
-                                TableDefinition::new(&binding);
-                            let read_txn = self.in_disk.begin_read().unwrap();
-                            let table = read_txn.open_table(table_definition).unwrap();
-                            let tree_snapshot_delete_queue: Vec<_> = table
-                                .iter()
-                                .unwrap()
-                                .filter_map(|result| {
-                                    let (_, value) = result.unwrap();
-                                    let prefetch_return = value.value();
-                                    prefetch_return.map(|prefetch| prefetch.timestamp)
-                                })
-                                .collect();
-
-                            match write_txn.delete_table(table_handle) {
-                                Ok(true) => {
-                                    info!("Delete query cache table: {:?}", timestamp);
-                                    TREE_SNAPSHOT_DELETE_QUEUE_SENDER
-                                        .get()
-                                        .unwrap()
-                                        .send(tree_snapshot_delete_queue)
-                                        .unwrap();
-                                }
-                                Ok(false) => {
-                                    error!("Failed to delete query cache table: {:?}", timestamp)
-                                }
-                                Err(e) => {
-                                    error!(
-                                        "Failed to delete query cache table: {:?}, error: {:?}",
-                                        timestamp, e
-                                    )
-                                }
-                            }
-                            info!(
-                                "{} items remaining in disk query cache",
-                                write_txn.list_tables().unwrap().count()
-                            );
-                        }
-                    }
-                });
-            write_txn.commit().unwrap();
-        });
         tokio::task::spawn(async {
             loop {
                 SHOULD_FLUSH_QUERY_SNAPSHOT.notified().await;

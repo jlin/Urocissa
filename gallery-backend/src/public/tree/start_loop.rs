@@ -1,7 +1,8 @@
 use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
-use crate::public::expire::{EXPIRE, EXPIRE_TABLE_DEFINITIONF};
+use crate::public::expire::start_loop::{NEXT_EXPIRE_TIME, SHOULD_CHECK_QUERY_EXPIRE};
+use crate::public::expire::{EXPIRE, EXPIRE_TABLE_DEFINITION};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::utils::get_current_timestamp_u64;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
@@ -87,23 +88,39 @@ impl Tree {
                     let expire_write_txn = EXPIRE.in_disk.begin_write().unwrap();
 
                     if last_timestamp > 0 {
-                        let mut expire_table = expire_write_txn
-                            .open_table(EXPIRE_TABLE_DEFINITIONF)
-                            .unwrap();
-                        expire_table
-                            .insert(
-                                last_timestamp,
-                                Some(
-                                    current_timestamp
-                                        + Duration::from_secs(60 * 60).as_millis() as u64,
-                                ),
-                            )
-                            .unwrap();
+                        // Calculate the new expire time (current_timestamp + 1 hour in milliseconds)
+                        let new_expire_time = current_timestamp
+                            .saturating_add(Duration::from_secs(5).as_millis() as u64);
+                        {
+                            // Open the expire table
+                            let mut expire_table = expire_write_txn
+                                .open_table(EXPIRE_TABLE_DEFINITION)
+                                .expect("Failed to open expire table");
 
-                        expire_table.insert(current_timestamp, None).unwrap();
-                        info!("Expire table updated");
+                            // Insert the last_timestamp with the new expire time into the expire table
+                            expire_table
+                                .insert(last_timestamp, Some(new_expire_time))
+                                .expect("Failed to insert into expire table");
+
+                            // Insert the current_timestamp with `None` to indicate no expiration
+                            expire_table
+                                .insert(current_timestamp, None)
+                                .expect("Failed to insert into expire table");
+
+                            info!(
+                                "Expire table updated. Next expire time set to {}",
+                                new_expire_time
+                            );
+                        }
+
+                        expire_write_txn.commit().unwrap();
+
+                        // Update the atomic variable with the new expire time
+                        NEXT_EXPIRE_TIME.store(new_expire_time, Ordering::SeqCst);
+                        println!("NEXT_EXPIRE_TIME update to {}", new_expire_time);
+                        SHOULD_CHECK_QUERY_EXPIRE.notify_one();
+                        println!("QUERY_EXPIRE loop notify");
                     }
-                    expire_write_txn.commit().unwrap();
 
                     if !buffer.is_empty() {
                         ALBUM_QUEUE_SENDER
