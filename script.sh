@@ -81,17 +81,22 @@ fi
 # Prepare formatted predefined volume mount output
 PREDEFINED_VOLUME_OUTPUT=""
 for vol in "${PREDEFINED_VOLUMES[@]}"; do
-    PREDEFINED_VOLUME_OUTPUT+=" -v \"$vol\""
+    PREDEFINED_VOLUME_OUTPUT+=" \\
+    -v \"$vol\""
 done
 
 # Prepare formatted dynamic volume mount output
 DYNAMIC_VOLUME_OUTPUT=""
 for vol in "${DYNAMIC_VOLUMES[@]}"; do
-    DYNAMIC_VOLUME_OUTPUT+=" -v \"$vol\""
+    DYNAMIC_VOLUME_OUTPUT+=" \\
+    -v \"$vol\""
 done
 
 # Final Docker Run command
-DOCKER_RUN_COMMAND="docker run -it --rm${PREDEFINED_VOLUME_OUTPUT}${DYNAMIC_VOLUME_OUTPUT} -p 4000:4000 urocissa"
+DOCKER_RUN_COMMAND="docker run -it --rm \\
+${PREDEFINED_VOLUME_OUTPUT} \\
+${DYNAMIC_VOLUME_OUTPUT} \\
+    -p 4000:4000 urocissa"
 
 # Output the final Docker Run command
 echo -e "\nGenerated Docker Run command:\n"
