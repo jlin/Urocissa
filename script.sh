@@ -29,6 +29,9 @@ IFS=',' read -ra PATHS <<< "$SYNC_PATH"
 
 ABS_PATHS=()
 
+# 獲取 .env 文件所在的目錄
+ENV_DIR=$(dirname "$ENV_FILE")
+
 for path in "${PATHS[@]}"; do
     # 去除前後空格
     path=$(echo "$path" | xargs)
@@ -37,15 +40,15 @@ for path in "${PATHS[@]}"; do
     if [[ "$path" = /* ]]; then
         abs_path="$path"
     else
-        # 使用 realpath 將相對路徑轉為絕對路徑
+        # 使用 realpath 將相對路徑轉為絕對路徑，基於 ENV_DIR
         if command -v realpath &> /dev/null; then
-            abs_path=$(realpath "$path")
+            abs_path=$(realpath -m "$ENV_DIR/$path")
         else
             # 如果 realpath 不存在，使用其他方法
-            abs_path="$(cd "$path" 2>/dev/null && pwd)"
+            abs_path="$(cd "$ENV_DIR/$path" 2>/dev/null && pwd)"
             if [[ -z "$abs_path" ]]; then
                 echo "警告: 無法解析路徑 $path"
-                abs_path="$path"
+                abs_path="$ENV_DIR/$path"
             fi
         fi
     fi
