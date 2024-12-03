@@ -1,15 +1,28 @@
-# Ignore everything
-**
+# Use a base Linux image
+FROM ubuntu:latest
 
-# Include the parent directories
-!gallery-frontend/
-!gallery-backend/
+# Install necessary dependencies
+RUN apt update && apt install -y \
+    git \
+    curl \
+    ffmpeg \
+    npm \
+    pkg-config \
+    nodejs \
+    && apt clean
 
-# Ignore everything inside the included directories
-gallery-frontend/**
-gallery-backend/**
+# Clone the repository
+RUN git clone https://github.com/hsa00000/Urocissa /Urocissa
 
-# Include specific files
-!gallery-frontend/config.ts
-!gallery-backend/config.json
-!gallery-backend/Rocket.toml
+# Set working directory
+WORKDIR /Urocissa
+
+# Install Rust using rustup
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Set environment variable for Rust manually and run the script
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN node install-urocissa.mjs
+
+# Default command
+CMD ["node", "./gallery-backend/run-urocissa.mjs"]
