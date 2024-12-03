@@ -11,9 +11,7 @@ gallery-backend/config.json
 gallery-backend/Rocket.toml
 .env
 .vscode/
-
 ffmpeg.exe
-
 ffmpeg.zip
 ffmpeg-*/
 rustup-init.exe
