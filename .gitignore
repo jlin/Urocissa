@@ -10,6 +10,7 @@ node_modules
 gallery-backend/config.json
 gallery-backend/Rocket.toml
 .env
+temp.env
 .vscode/
 ffmpeg.exe
 ffmpeg.zip

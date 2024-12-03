@@ -2,6 +2,7 @@
 
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
+TEMP_ENV_FILE="./gallery-backend/temp.env"
 
 # Initialize variables
 PREDEFINED_VOLUMES=(
@@ -71,6 +72,10 @@ if [[ -f "$ENV_FILE" ]]; then
             DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
         done
 
+        # Create a temporary .env file with the updated SYNC_PATH
+        cp "$ENV_FILE" "$TEMP_ENV_FILE"
+        sed -i "s|^SYNC_PATH\s*=.*|SYNC_PATH=$ABS_SYNC_PATH|" "$TEMP_ENV_FILE"
+        PREDEFINED_VOLUMES+=("$TEMP_ENV_FILE:/Urocissa/gallery-backend/.env")
     else
         echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
     fi
