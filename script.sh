@@ -74,8 +74,6 @@ if [[ -f "$ENV_FILE" ]]; then
     else
         echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
     fi
-    # Add the .env file to predefined volumes if it exists
-    PREDEFINED_VOLUMES+=("$ENV_FILE:/Urocissa/gallery-backend/.env")
 else
     echo "Warning: File $ENV_FILE not found. Proceeding without dynamic volume mounts."
 fi
