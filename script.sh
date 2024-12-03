@@ -96,11 +96,6 @@ DOCKER_RUN_COMMAND="docker run -it --rm${PREDEFINED_VOLUME_OUTPUT}${DYNAMIC_VOLU
 echo -e "\n生成的 Docker Run 命令:\n"
 echo "$DOCKER_RUN_COMMAND"
 
-# 將 Docker Run 命令寫入文件（可選）
-echo "$DOCKER_RUN_COMMAND" > docker_run_command.sh
-chmod +x docker_run_command.sh
-echo "Docker Run 命令已保存到 docker_run_command.sh"
-
 # 提示用戶確認是否執行
 read -p "是否立即執行此 Docker Run 命令？(y/n): " confirm
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
