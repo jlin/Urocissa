@@ -65,24 +65,15 @@ if [[ -f "$ENV_FILE" ]]; then
 
         echo "Absolute SYNC_PATH is: $ABS_SYNC_PATH"
 
-        # Define the base path inside the container
-        CONTAINER_BASE_PATH="/Urocissa/gallery-backend"
-
         # Prepare formatted dynamic volume mount output
         for abs_path in "${ABS_PATHS[@]}"; do
-            # Extract the basename of the path as the target path inside the container
-            basename=$(basename "$abs_path")
-            container_path="$CONTAINER_BASE_PATH/$basename"
-
-            DYNAMIC_VOLUMES+=("$abs_path:$container_path")
+            # Use the original path as both the host and container path if it is absolute
+            DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
         done
 
     else
         echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
     fi
-
-    # Optionally, add the .env file to predefined volumes if it exists
-    PREDEFINED_VOLUMES+=("$ENV_FILE:/Urocissa/gallery-backend/.env")
 else
     echo "Warning: File $ENV_FILE not found. Proceeding without dynamic volume mounts."
 fi
