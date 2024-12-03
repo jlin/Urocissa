@@ -17,6 +17,9 @@ RUN git clone -b feat/docker https://github.com/hsa00000/Urocissa /Urocissa
 # Set working directory
 WORKDIR /Urocissa
 
+# Copy your project files into the container
+COPY . /Urocissa
+
 # Install Rust using rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
