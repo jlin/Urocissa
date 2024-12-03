@@ -30,4 +30,4 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN node install-urocissa.mjs
 
 # Default command
-CMD ["node", "./gallery-backend/run-urocissa.mjs"]
+CMD ["node", "./run-urocissa.mjs"]
