@@ -129,19 +129,14 @@ ${DYNAMIC_VOLUME_OUTPUT} \\
 echo -e "\nGenerated Docker Run command:\n"
 echo "$DOCKER_RUN_COMMAND"
 
-# Prompt the user to confirm whether to execute
-read -p "Do you want to execute this Docker Run command immediately? (y/n): " confirm
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    echo -e "\nExecuting Docker Run command...\n"
-    eval "$DOCKER_RUN_COMMAND"
+# Execute the Docker Run command immediately
+echo -e "\nExecuting Docker Run command...\n"
+eval "$DOCKER_RUN_COMMAND"
 
-    # Check if the Docker Run command was successful
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Docker Run command failed to execute"
-        exit 1
-    else
-        echo "Docker container has been successfully started"
-    fi
+# Check if the Docker Run command was successful
+if [[ $? -ne 0 ]]; then
+    echo "Error: Docker Run command failed to execute"
+    exit 1
 else
-    echo "Docker Run command execution has been canceled."
+    echo "Docker container has been successfully started"
 fi
