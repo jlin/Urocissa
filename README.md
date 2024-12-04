@@ -1,5 +1,3 @@
-![螢幕擷取畫面 2024-10-17 213036](https://github.com/user-attachments/assets/b8de7937-1916-4b73-9c31-667c7eb1a23d)
-
 # Urocissa
 
 Urocissa is a self-hosted gallery designed to serve massive collections, capable of handling millions of images and videos. It is built using Rust and Vue.
@@ -23,14 +21,14 @@ You can explore the features of Urocissa through the following demos:
 
 ### Standard Demo
 
-[https://demo.photoserver.tw](https://demo.photoserver.tw)  
+[https://demo.photoserver.tw](https://demo.photoserver.tw)\
 **Password:** `password`
 
 This demo showcases the typical usage of Urocissa, allowing you to experience its core features and user interface.
 
 ### One-Million-Photo Demo
 
-[https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)  
+[https://demo-million.photoserver.tw](https://demo-million.photoserver.tw)\
 **Password:** `password`
 
 This demo demonstrates Urocissa's ability to manage 1,000,000 photos, showcasing the power and scalability of Urocissa. Since I don't have access to a million unique images, the photos in this demo are replaced with placeholders.
@@ -75,125 +73,42 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Steps to Set Up and Use the App
 
-Follow these steps to set up and run the Urocissa app on Linux-based systems. For instructions on setting up the app on Windows, please refer to [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
+To set up the app, please follow the appropriate guide for your operating system:
 
-### 1. Clone the Repository
+- **Linux Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
+- **Windows Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
 
-```bash
-git clone https://github.com/hsa00000/Urocissa.git
-```
+> **Note**: Docker provides a quick setup, but building from source is recommended for better performance and efficiency.
 
-This will create a folder called `./Urocissa`.
+### Quick Setup with Docker
 
----
+To quickly set up and try Urocissa using Docker, follow these steps:
 
-### 2. Install Dependencies
+1. **Clone the Repository**
 
-Make sure the following software is installed on your system:
-
-- **ffmpeg**: Install via APT on Ubuntu:
-
-  ```bash
-  sudo apt update && sudo apt install -y ffmpeg
-  ```
-
-- **Rust**: Install Rust using the official installer:
-
-  ```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  source $HOME/.cargo/env
-  ```
-
-- **npm (Node.js)**: Install Node.js (with npm) from NodeSource:
-
-  ```bash
-  sudo apt install -y nodejs npm
-  ```
-
----
-
-### 3. Configure Backend Settings
-
-1. Navigate to the backend directory:
+   First, clone the Urocissa repository from GitHub:
 
    ```bash
-   cd ./Urocissa/gallery-backend
+   git clone https://github.com/hsa00000/Urocissa.git
    ```
 
-2. Copy the default config file and fill in the necessary settings:
+2. **Navigate to the Project Directory**
+
+   Move into the `Urocissa` directory that was just created:
 
    ```bash
-   cp .env.default .env
-   cp Rocket.default.toml Rocket.toml
+   cd Urocissa
    ```
 
-   **.env:**
+3. **Run the Setup Script**
 
-   ```env
-   PASSWORD=password
-   SYNC_PATH=./upload
-   DISCORD_HOOK_URL=
-   ```
-
-   _Explanation:_
-
-   - `PASSWORD`: Your password for the app.
-   - `SYNC_PATH`: List of directories that the app will watch for new or modified photos.
-   - `DISCORD_HOOK_URL`: (Optional) Fill in your Discord webhook URL to receive error notifications.
-
-   **Rocket.toml:**
-
-   - `port`: Default is `4000`. You can change this to your desired port number.
-
----
-
-### 4. Build the Backend
-
-Navigate to `gallery-backend` and build the backend using Cargo:
-
-```bash
-cargo build --release
-```
-
----
-
-### 5. Configure Frontend Settings
-
-1. Navigate to the `gallery-frontend` directory:
+   Run the `script.sh` file to install and start Urocissa:
 
    ```bash
-   cd ./Urocissa/gallery-frontend
+   bash script.sh
    ```
 
-2. Copy the default frontend config file:
-
-   ```bash
-   cp config.default.ts config.ts
-   ```
-
-   **Note:** The `config.ts` file contains advanced settings. You can leave it unchanged unless you need to customize it.
-
----
-
-### 6. Build the Frontend
-
-In the `gallery-frontend` directory, run:
-
-```bash
-npm run build
-```
-
----
-
-### 7. Run the Application
-
-Navigate to the `gallery-backend` directory and run the following command to start the app:
-
-```bash
-cargo run --release
-```
-
-You can now access the app via http://127.0.0.1:4000 or http://127.0.0.1:<your_port> if you configured a custom port in Rocket.toml.
+   This script will handle all necessary installations and start the application, allowing you to get Urocissa up and running in one step.
 
 ## Update
 
@@ -203,7 +118,16 @@ Navigate to the project directory and pull the latest updates:
 
 ```bash
 git pull
+
 ```
+
+If using Docker, simply run the script
+
+```bash
+bash script.sh
+```
+
+Otherwise, follow these manual steps to update:
 
 ---
 
