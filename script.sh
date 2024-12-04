@@ -25,7 +25,7 @@ if [[ -f "$ENV_FILE" ]]; then
     echo "Found $ENV_FILE. Processing SYNC_PATH for dynamic volume mounts."
 
     # Read SYNC_PATH from the .env file
-    SYNC_PATH=$(grep -E '^SYNC_PATH\s*=' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
+    SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
 
     # Check if SYNC_PATH was read
     if [[ -n "$SYNC_PATH" ]]; then
@@ -107,11 +107,14 @@ for vol in "${DYNAMIC_VOLUMES[@]}"; do
     -v \"$vol\""
 done
 
+# Read port from Rocket.toml
+ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed 's/^port\s*=\s*//')
+
 # Final Docker Run command
 DOCKER_RUN_COMMAND="docker run -it --rm \\
 ${PREDEFINED_VOLUME_OUTPUT} \\
 ${DYNAMIC_VOLUME_OUTPUT} \\
-    -p 4000:4000 urocissa"
+    -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
 
 # Output the final Docker Run command
 echo -e "\nGenerated Docker Run command:\n"
