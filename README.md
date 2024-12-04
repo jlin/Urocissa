@@ -80,9 +80,10 @@ To set up the app, please follow the appropriate guide for your operating system
 
 > **Note**: Docker provides a quick and convenient setup but is still in an early development stage, resulting in lower efficiency. It is best suited for testing or trial purposes. For optimal performance, building from source is recommended.
 
-### Quick Setup with Docker
-
 To quickly set up and try Urocissa using Docker, follow these steps:
+
+
+### Quick Setup with Docker
 
 1. **Clone the Repository**
 
