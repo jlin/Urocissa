@@ -15,8 +15,11 @@ PREDEFINED_VOLUMES=(
     "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
     "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
     "./gallery-backend/Rocket.toml:${UROCISSA_PATH}/gallery-backend/Rocket.toml"
-    "./gallery-frontend/config.ts:${UROCISSA_PATH}/gallery-frontend/config.ts"
 )
+
+if [[ -f "./gallery-frontend/config.ts" ]]; then
+    PREDEFINED_VOLUMES+=("./gallery-frontend/config.ts:${UROCISSA_PATH}/gallery-frontend/config.ts")
+fi
 
 DYNAMIC_VOLUMES=()
 
