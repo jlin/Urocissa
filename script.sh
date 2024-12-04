@@ -91,7 +91,7 @@ fi
 
 # Build the Docker image with UROCISSA_PATH as a build argument
 echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
-docker build --build-arg UROCISSA_PATH=$UROCISSA_PATH -t urocissa .
+sudo docker build --build-arg UROCISSA_PATH=$UROCISSA_PATH -t urocissa .
 
 # Prepare formatted predefined volume mount output
 PREDEFINED_VOLUME_OUTPUT=""
@@ -111,7 +111,7 @@ done
 ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed 's/^port\s*=\s*//')
 
 # Final Docker Run command
-DOCKER_RUN_COMMAND="docker run -it --rm \\
+DOCKER_RUN_COMMAND="sudo docker run -it --rm \\
 ${PREDEFINED_VOLUME_OUTPUT} \\
 ${DYNAMIC_VOLUME_OUTPUT} \\
     -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
