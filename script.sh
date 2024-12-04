@@ -1,15 +1,21 @@
 #!/bin/bash
 
+# Get the absolute path of this script
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+
+# Set the UROCISSA_PATH to the script's absolute path
+UROCISSA_PATH="$SCRIPT_DIR"
+
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
 TEMP_ENV_FILE="./gallery-backend/temp.env"
 
 # Initialize variables
 PREDEFINED_VOLUMES=(
-    "./gallery-backend/db:/Urocissa/gallery-backend/db"
-    "./gallery-backend/object:/Urocissa/gallery-backend/object"
-    "./gallery-backend/Rocket.toml:/Urocissa/gallery-backend/Rocket.toml"
-    "./gallery-frontend/config.ts:/Urocissa/gallery-frontend/config.ts"
+    "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
+    "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
+    "./gallery-backend/Rocket.toml:${UROCISSA_PATH}/gallery-backend/Rocket.toml"
+    "./gallery-frontend/config.ts:${UROCISSA_PATH}/gallery-frontend/config.ts"
 )
 
 DYNAMIC_VOLUMES=()
@@ -75,13 +81,17 @@ if [[ -f "$ENV_FILE" ]]; then
         # Create a temporary .env file with the updated SYNC_PATH
         cp "$ENV_FILE" "$TEMP_ENV_FILE"
         sed -i "s|^SYNC_PATH\s*=.*|SYNC_PATH=$ABS_SYNC_PATH|" "$TEMP_ENV_FILE"
-        PREDEFINED_VOLUMES+=("$TEMP_ENV_FILE:/Urocissa/gallery-backend/.env")
+        PREDEFINED_VOLUMES+=("$TEMP_ENV_FILE:${UROCISSA_PATH}/gallery-backend/.env")
     else
         echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
     fi
 else
     echo "Warning: File $ENV_FILE not found. Proceeding without dynamic volume mounts."
 fi
+
+# Build the Docker image with UROCISSA_PATH as a build argument
+echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
+docker build --build-arg UROCISSA_PATH=$UROCISSA_PATH -t urocissa .
 
 # Prepare formatted predefined volume mount output
 PREDEFINED_VOLUME_OUTPUT=""
