@@ -78,10 +78,9 @@ To set up the app, please follow the appropriate guide for your operating system
 - **Linux Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
 - **Windows Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
 
-> **Note**: Docker provides a quick and convenient setup but is still in an early development stage, resulting in lower efficiency. It is best suited for testing or trial purposes. For optimal performance, building from source is recommended.
-
 To quickly set up and try Urocissa using Docker, follow these steps:
 
+> **Note**: Docker provides a quick and convenient setup but is still in an early development stage, resulting in lower efficiency. It is best suited for testing or trial purposes. For optimal performance, building from source is recommended.
 
 ### Quick Setup with Docker
 
