@@ -19,7 +19,7 @@ ENV UROCISSA_PATH=${UROCISSA_PATH}
 RUN if [ -z "${UROCISSA_PATH}" ]; then echo "UROCISSA_PATH is not set! Build failed." && exit 1; fi
 
 # Clone the 'feat/docker' branch of the repository into the dynamic path
-RUN git clone -b feat/docker-2 https://github.com/hsa00000/Urocissa ${UROCISSA_PATH}
+RUN git clone https://github.com/hsa00000/Urocissa ${UROCISSA_PATH}
 
 # Set working directory
 WORKDIR ${UROCISSA_PATH}
