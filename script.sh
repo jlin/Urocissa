@@ -110,6 +110,12 @@ done
 # Read port from Rocket.toml
 ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed 's/^port\s*=\s*//')
 
+# If port not found, use default port 4000
+if [[ -z "$ROCKET_PORT" ]]; then
+    ROCKET_PORT=4000
+    echo "Port not found in Rocket.toml. Using default port 4000."
+fi
+
 # Final Docker Run command
 DOCKER_RUN_COMMAND="sudo docker run -it --rm \\
 ${PREDEFINED_VOLUME_OUTPUT} \\
