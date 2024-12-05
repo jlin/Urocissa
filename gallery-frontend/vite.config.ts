@@ -28,59 +28,59 @@ export default defineConfig({
   server: {
     proxy: {
       '/json': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/assets': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/put': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/delete': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/edit_album': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/edit_sync_path': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/edit_priority_list': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/import_path': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/upload': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/create_album': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/query': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/get': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/post': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       },
       '/object': {
-        target: 'http://127.0.0.1:4000',
+        target: 'http://127.0.0.1:5673',
         changeOrigin: true
       }
     }
