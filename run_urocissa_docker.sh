@@ -6,6 +6,30 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Set the UROCISSA_PATH to the script's absolute path
 UROCISSA_PATH="$SCRIPT_DIR"
 
+# Retrieve the branch name and last commit hash of optimize/use-cargo-chef
+BRANCH="optimize/use-cargo-chef"
+LAST_COMMIT_HASH=$(git rev-parse "$BRANCH")
+
+if [[ -z "$LAST_COMMIT_HASH" ]]; then
+    echo "Error: Unable to retrieve the last commit hash for branch $BRANCH."
+    exit 1
+fi
+
+# Print the branch and commit hash for verification
+echo "Branch: $BRANCH"
+echo "Last Commit Hash: $LAST_COMMIT_HASH"
+
+# Update the Docker build command to include the new build arguments
+DOCKER_BUILD_COMMAND="sudo docker build \
+    --build-arg UROCISSA_PATH=${UROCISSA_PATH} \
+    --build-arg LAST_COMMIT_HASH=${LAST_COMMIT_HASH} \
+    --build-arg BRANCH=${BRANCH} \
+    -t urocissa ."
+
+# Execute the Docker build command
+echo "Executing Docker Build command..."
+eval "$DOCKER_BUILD_COMMAND"
+
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
 TEMP_ENV_FILE="./gallery-backend/temp.env"
@@ -22,8 +46,7 @@ ensure_config_file() {
 
     if [[ ! -f "$target_file" ]]; then
         echo "$target_file not found. Copying from ${source_file}."
-        mv "$source_file" "$target_file"
-        cp "$target_file" "$source_file"
+        cp "$source_file" "$target_file"
     fi
 
     # Add to predefined volumes if a volume path is provided
@@ -37,43 +60,26 @@ ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Ro
 ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts" "${UROCISSA_PATH}/gallery-frontend/config.ts"
 ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
 
-# Convert CRLF to LF in the .env file
-sed -i 's/\r$//' "$ENV_FILE"
-
 # Process SYNC_PATH for dynamic volume mounts
 SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
 
-# Process SYNC_PATH if it's not empty
 if [[ -n "$SYNC_PATH" ]]; then
-    # If the value has quotes, remove them
     SYNC_PATH="${SYNC_PATH%\"}"
     SYNC_PATH="${SYNC_PATH#\"}"
-
     echo "Original SYNC_PATH is: $SYNC_PATH"
 
-    # Split SYNC_PATH by commas and convert to an array
     IFS=',' read -ra PATHS <<< "$SYNC_PATH"
-
     ABS_PATHS=()
-
-    # Get the directory where the .env file is located
     ENV_DIR=$(dirname "$ENV_FILE")
 
     for path in "${PATHS[@]}"; do
-        # Remove leading and trailing spaces
         trimmed_path=$(echo "$path" | xargs)
-
-        # Determine the absolute path
         if [[ "$trimmed_path" = /* ]]; then
             abs_path="$trimmed_path"
         else
             abs_path=$(realpath -m "$ENV_DIR/$trimmed_path")
         fi
-
-        # Append to ABS_PATHS (if needed elsewhere)
         ABS_PATHS+=("$abs_path")
-
-        # Prepare and append the dynamic volume mount
         DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
     done
 else
@@ -81,63 +87,35 @@ else
 fi
 
 # Additional predefined volumes
-PREDEFINED_VOLUMES+=(
-    "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
-    "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
-)
-
-# Build the Docker image with UROCISSA_PATH as a build argument
-echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
-
-
-DOCKER_BUILD_COMMAND="sudo docker build --build-arg UROCISSA_PATH=${UROCISSA_PATH} -t urocissa ."
-
-eval "$DOCKER_BUILD_COMMAND"
+PREDEFINED_VOLUMES+=( "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db" "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object" )
 
 # Prepare formatted predefined volume mount output
 PREDEFINED_VOLUME_OUTPUT=""
 for vol in "${PREDEFINED_VOLUMES[@]}"; do
-    PREDEFINED_VOLUME_OUTPUT+=" \\
-    -v \"$vol\""
+    PREDEFINED_VOLUME_OUTPUT+=" \\ -v \"$vol\""
 done
 
 # Prepare formatted dynamic volume mount output
 DYNAMIC_VOLUME_OUTPUT=""
 for vol in "${DYNAMIC_VOLUMES[@]}"; do
-    DYNAMIC_VOLUME_OUTPUT+=" \\
-    -v \"$vol\""
+    DYNAMIC_VOLUME_OUTPUT+=" \\ -v \"$vol\""
 done
 
-# Extract port from Rocket.toml
-ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed -E 's/^port\s*=\s*"?([0-9]+)"?/\1/' | tr -d '[:space:]')
-
-# If port not found, use default port 4000
+# Read port from Rocket.toml
+ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed 's/^port\s*=\s*//')
 if [[ -z "$ROCKET_PORT" ]]; then
     ROCKET_PORT=4000
     echo "Port not found in Rocket.toml. Using default port 4000."
 fi
 
-# Check if ROCKET_PORT is numeric and valid
-if [[ ! "${ROCKET_PORT}" =~ ^[0-9]+$ ]]; then
-    echo "Error: ROCKET_PORT is not set or is invalid"
-    exit 1
-else
-    echo "Using port: ${ROCKET_PORT}"
-fi
+# Final Docker Run command
+DOCKER_RUN_COMMAND="sudo docker run -it --rm \\ ${PREDEFINED_VOLUME_OUTPUT} \\ ${DYNAMIC_VOLUME_OUTPUT} \\ -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
 
-
-# Generate the Docker Run command
-DOCKER_RUN_COMMAND="docker run -it --rm \\
-${PREDEFINED_VOLUME_OUTPUT} \\
-${DYNAMIC_VOLUME_OUTPUT} \\
-    -p ${ROCKET_PORT}:${ROCKET_PORT} \\
-    urocissa"
-
-# Output the final Docker Run command for debugging
+# Output the final Docker Run command
 echo -e "\nGenerated Docker Run command:\n"
 echo "$DOCKER_RUN_COMMAND"
 
-# Validate and execute the Docker Run command
+# Execute the Docker Run command immediately
 echo -e "\nExecuting Docker Run command...\n"
 eval "$DOCKER_RUN_COMMAND"
 

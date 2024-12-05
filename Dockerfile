@@ -1,74 +1,79 @@
-# Use the Alpine variant of cargo-chef
-FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
 
-# Define the build type as a build argument
-ARG BUILD_TYPE=release
-ENV BUILD_TYPE=${BUILD_TYPE}
 
-WORKDIR /app/gallery-backend
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+
+# Install necessary dependencies
+RUN apt update && apt install -y \
+    ffmpeg \
+    npm \
+    pkg-config \
+    nodejs \
+    && apt clean
+
+# Define arguments for branch and commit hash
+ARG BRANCH=${BRANCH}
+ARG LAST_COMMIT_HASH=${LAST_COMMIT_HASH}
+ARG REPO_URL=https://github.com/hsa00000/Urocissa
+
+# Define a stable build directory for Rust cache
+ENV CARGO_TARGET_DIR=/usr/local/cargo-target
+
+# Clone the repository and check out the specific commit
+RUN mkdir -p /repo && \
+    git clone --branch ${BRANCH} ${REPO_URL} /repo && \
+    cd /repo && \
+    git checkout ${LAST_COMMIT_HASH}
+
+WORKDIR /repo/gallery-backend
 
 FROM chef AS planner
-COPY ./gallery-backend /app/gallery-backend
-
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
-# Install dependencies needed for building
-RUN apk add --no-cache \
-    openssl-dev \
-    openssl-libs-static
+COPY --from=planner /repo/gallery-backend/recipe.json recipe.json
+RUN cargo chef cook --profile dev-release --recipe-path recipe.json
+COPY . .
 
-COPY --from=planner /app/gallery-backend/recipe.json /app/gallery-backend/recipe.json
+# Build the Rust project (cached)
+RUN cargo build --profile dev-release
 
-# Use the build argument in the chef cook step
-RUN if [ "${BUILD_TYPE}" = "release" ]; then \
-        cargo chef cook --release --recipe-path recipe.json; \
-    else \
-        cargo chef cook --recipe-path recipe.json; \
+COPY --from=builder /usr/local/cargo-target/release/urocissa ${UROCISSA_PATH}/gallery-backend
+
+# Define a dynamic repository path
+ARG UROCISSA_PATH
+ENV UROCISSA_PATH=${UROCISSA_PATH}
+
+# Validate if UROCISSA_PATH is set
+RUN if [ -z "${UROCISSA_PATH}" ]; then \
+    echo "UROCISSA_PATH is not set! Build failed." && exit 1; \
     fi
 
-COPY ./gallery-backend /app/gallery-backend
+# Move the cloned repository to the dynamic path
+RUN mkdir -p "${UROCISSA_PATH}" && mv /repo/* "${UROCISSA_PATH}"
 
-# Use the build argument in the cargo build step
-RUN if [ "${BUILD_TYPE}" = "release" ]; then \
-        cargo build --release --bin Urocissa; \
-    else \
-        cargo build --bin Urocissa; \
+WORKDIR ${UROCISSA_PATH}/gallery-backend
+# Ensure required backend and frontend files exist and copy defaults if missing
+RUN if [ ! -f ".env" ]; then \
+        cp .env.default .env; \
+    fi && \
+    if [ ! -f "Rocket.toml" ]; then \
+        cp Rocket.default.toml Rocket.toml; \
     fi
 
-# Copy the final binary to a consistent directory
-RUN mkdir -p /app/gallery-backend/bin && \
-    cp /app/gallery-backend/target/${BUILD_TYPE}/Urocissa /app/gallery-backend/bin/Urocissa
+# Switch to the frontend directory
+WORKDIR ${UROCISSA_PATH}/gallery-frontend
 
-FROM node:lts-alpine AS frontend-builder
+# Copy existing config file into the container if it exists on the host
+COPY ./gallery-frontend/config.ts  ${UROCISSA_PATH}/gallery-frontend/config.ts
 
-WORKDIR /app/gallery-frontend
-
-COPY ./gallery-frontend /app/gallery-frontend
 # Build the frontend
 RUN npm run build
 
-FROM alpine:latest AS runtime
+# Print success message
+RUN echo "Docker image built successfully! All required steps were executed."
 
-RUN apk add --no-cache ffmpeg
-
-# Define a dynamic repository path
-ARG UROCISSA_PATH=/app
-ENV UROCISSA_PATH=${UROCISSA_PATH}
-
-# Ensure the target directory exists
+# Set the working directory to backend for running the application
 WORKDIR ${UROCISSA_PATH}/gallery-backend
 
-# Copy the backend build artifacts to the appropriate location
-COPY --from=builder /app/gallery-backend/bin/Urocissa ${UROCISSA_PATH}/gallery-backend
-
-# Copy built frontend files from frontend-builder stage
-COPY --from=frontend-builder /app/gallery-frontend/dist ${UROCISSA_PATH}/gallery-frontend/dist
-COPY --from=frontend-builder /app/gallery-frontend/public ${UROCISSA_PATH}/gallery-frontend/public
-
-COPY ./gallery-frontend/config.ts ${UROCISSA_PATH}/gallery-frontend
-COPY ./gallery-backend/.env ${UROCISSA_PATH}/gallery-backend
-COPY ./gallery-backend/Rocket.toml ${UROCISSA_PATH}/gallery-backend
-
 # Define the command to run the application
-ENTRYPOINT [ "./Urocissa" ]
+CMD ["./urocissa"]
