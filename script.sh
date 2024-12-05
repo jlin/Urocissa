@@ -6,91 +6,85 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Set the UROCISSA_PATH to the script's absolute path
 UROCISSA_PATH="$SCRIPT_DIR"
 
+DOCKER_BUILD_COMMAND="sudo docker build --build-arg UROCISSA_PATH=${UROCISSA_PATH} -t test ."
+
+eval "$DOCKER_BUILD_COMMAND"
+
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
 TEMP_ENV_FILE="./gallery-backend/temp.env"
 
-# Initialize variables
-PREDEFINED_VOLUMES=(
-    "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
-    "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
-    "./gallery-backend/Rocket.toml:${UROCISSA_PATH}/gallery-backend/Rocket.toml"
-)
-
-if [[ -f "./gallery-frontend/config.ts" ]]; then
-    PREDEFINED_VOLUMES+=("./gallery-frontend/config.ts:${UROCISSA_PATH}/gallery-frontend/config.ts")
-fi
-
+# Initialize volumes array
+PREDEFINED_VOLUMES=()
 DYNAMIC_VOLUMES=()
 
-# Check if the .env file exists
-if [[ -f "$ENV_FILE" ]]; then
-    echo "Found $ENV_FILE. Processing SYNC_PATH for dynamic volume mounts."
+# Function to ensure config files exist and add to volume mounts
+ensure_config_file() {
+    local source_file="$1"
+    local target_file="$2"
+    local volume_path="${3:-$target_file}"
 
-    # Read SYNC_PATH from the .env file
-    SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
-
-    # Check if SYNC_PATH was read
-    if [[ -n "$SYNC_PATH" ]]; then
-        # If the value has quotes, remove them
-        SYNC_PATH="${SYNC_PATH%\"}"
-        SYNC_PATH="${SYNC_PATH#\"}"
-
-        echo "Original SYNC_PATH is: $SYNC_PATH"
-
-        # Split SYNC_PATH by commas and convert to an array
-        IFS=',' read -ra PATHS <<< "$SYNC_PATH"
-
-        ABS_PATHS=()
-
-        # Get the directory where the .env file is located
-        ENV_DIR=$(dirname "$ENV_FILE")
-
-        for path in "${PATHS[@]}"; do
-            # Remove leading and trailing spaces
-            path=$(echo "$path" | xargs)
-
-            # Check if the path is an absolute path
-            if [[ "$path" = /* ]]; then
-                abs_path="$path"
-            else
-                # Use realpath to convert relative path to absolute path based on ENV_DIR
-                if command -v realpath &> /dev/null; then
-                    abs_path=$(realpath -m "$ENV_DIR/$path")
-                else
-                    # If realpath does not exist, use another method
-                    abs_path="$(cd "$ENV_DIR/$path" 2>/dev/null && pwd)"
-                    if [[ -z "$abs_path" ]]; then
-                        echo "Warning: Unable to resolve path $path"
-                        abs_path="$ENV_DIR/$path"
-                    fi
-                fi
-            fi
-
-            ABS_PATHS+=("$abs_path")
-        done
-
-        # Convert the absolute path array to a comma-separated string
-        ABS_SYNC_PATH=$(IFS=, ; echo "${ABS_PATHS[*]}")
-
-        echo "Absolute SYNC_PATH is: $ABS_SYNC_PATH"
-
-        # Prepare formatted dynamic volume mount output
-        for abs_path in "${ABS_PATHS[@]}"; do
-            # Use the original path as both the host and container path if it is absolute
-            DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
-        done
-
-        # Create a temporary .env file with the updated SYNC_PATH
-        cp "$ENV_FILE" "$TEMP_ENV_FILE"
-        sed -i "s|^SYNC_PATH\s*=.*|SYNC_PATH=$ABS_SYNC_PATH|" "$TEMP_ENV_FILE"
-        PREDEFINED_VOLUMES+=("$TEMP_ENV_FILE:${UROCISSA_PATH}/gallery-backend/.env")
-    else
-        echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
+    if [[ ! -f "$target_file" ]]; then
+        echo "$target_file not found. Copying from ${source_file}."
+        cp "$source_file" "$target_file"
     fi
+
+    # Add to predefined volumes if a volume path is provided
+    if [[ -n "$volume_path" ]]; then
+        PREDEFINED_VOLUMES+=("$target_file:$volume_path")
+    fi
+}
+
+# Ensure necessary config files exist and set up volume mounts
+ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Rocket.toml" "${UROCISSA_PATH}/gallery-backend/Rocket.toml"
+ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts" "${UROCISSA_PATH}/gallery-frontend/config.ts"
+ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
+
+# Process SYNC_PATH for dynamic volume mounts
+SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
+
+# Process SYNC_PATH if it's not empty
+if [[ -n "$SYNC_PATH" ]]; then
+    # If the value has quotes, remove them
+    SYNC_PATH="${SYNC_PATH%\"}"
+    SYNC_PATH="${SYNC_PATH#\"}"
+
+    echo "Original SYNC_PATH is: $SYNC_PATH"
+
+    # Split SYNC_PATH by commas and convert to an array
+    IFS=',' read -ra PATHS <<< "$SYNC_PATH"
+
+    ABS_PATHS=()
+
+    # Get the directory where the .env file is located
+    ENV_DIR=$(dirname "$ENV_FILE")
+
+    for path in "${PATHS[@]}"; do
+        # Remove leading and trailing spaces
+        trimmed_path=$(echo "$path" | xargs)
+
+        # Determine the absolute path
+        if [[ "$trimmed_path" = /* ]]; then
+            abs_path="$trimmed_path"
+        else
+            abs_path=$(realpath -m "$ENV_DIR/$trimmed_path")
+        fi
+
+        # Append to ABS_PATHS (if needed elsewhere)
+        ABS_PATHS+=("$abs_path")
+
+        # Prepare and append the dynamic volume mount
+        DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
+    done
 else
-    echo "Warning: File $ENV_FILE not found. Proceeding without dynamic volume mounts."
+    echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
 fi
+
+# Additional predefined volumes
+PREDEFINED_VOLUMES+=(
+    "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
+    "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
+)
 
 # Build the Docker image with UROCISSA_PATH as a build argument
 echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
