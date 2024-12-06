@@ -6,10 +6,6 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Set the UROCISSA_PATH to the script's absolute path
 UROCISSA_PATH="$SCRIPT_DIR"
 
-DOCKER_BUILD_COMMAND="sudo docker build --build-arg UROCISSA_PATH=${UROCISSA_PATH} -t test ."
-
-eval "$DOCKER_BUILD_COMMAND"
-
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
 TEMP_ENV_FILE="./gallery-backend/temp.env"
@@ -88,7 +84,10 @@ PREDEFINED_VOLUMES+=(
 
 # Build the Docker image with UROCISSA_PATH as a build argument
 echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
-sudo docker build --build-arg UROCISSA_PATH=$UROCISSA_PATH -t urocissa .
+
+DOCKER_BUILD_COMMAND="sudo docker build --build-arg UROCISSA_PATH=${UROCISSA_PATH} -t test ."
+
+eval "$DOCKER_BUILD_COMMAND"
 
 # Prepare formatted predefined volume mount output
 PREDEFINED_VOLUME_OUTPUT=""
