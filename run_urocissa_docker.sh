@@ -1,10 +1,56 @@
 #!/bin/bash
 
+# Default settings
+DEBUG=false
+LOG_FILE=""
+BUILD_TYPE="release"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --debug)
+            DEBUG=true
+            shift
+            ;;
+        --log-file)
+            LOG_FILE="$2"
+            shift 2
+            ;;
+        --build-type)
+            BUILD_TYPE="$2"
+            if [[ "$BUILD_TYPE" != "release" && "$BUILD_TYPE" != "debug" ]]; then
+                echo "Error: Invalid build type. Use 'release' or 'debug'."
+                exit 1
+            fi
+            shift 2
+            ;;
+        *)
+            echo "Error: Unknown option $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Function to output debug information
+debug_log() {
+    local message="$1"
+    if [[ "$DEBUG" == true ]]; then
+        if [[ -n "$LOG_FILE" ]]; then
+            echo "$message" >> "$LOG_FILE"
+        else
+            echo "$message"
+        fi
+    fi
+}
+
 # Get the absolute path of this script
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 # Set the UROCISSA_PATH to the script's absolute path
 UROCISSA_PATH="$SCRIPT_DIR"
+
+debug_log "Script directory set to $SCRIPT_DIR"
+debug_log "Build type is set to $BUILD_TYPE"
 
 # Set the path of the .env file
 ENV_FILE="./gallery-backend/.env"
@@ -21,7 +67,7 @@ ensure_config_file() {
     local volume_path="${3:-$target_file}"
 
     if [[ ! -f "$target_file" ]]; then
-        echo "$target_file not found. Copying from ${source_file}."
+        debug_log "$target_file not found. Copying from $source_file."
         mv "$source_file" "$target_file"
         cp "$target_file" "$source_file"
     fi
@@ -43,108 +89,61 @@ sed -i 's/\r$//' "$ENV_FILE"
 # Process SYNC_PATH for dynamic volume mounts
 SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
 
-# Process SYNC_PATH if it's not empty
 if [[ -n "$SYNC_PATH" ]]; then
-    # If the value has quotes, remove them
     SYNC_PATH="${SYNC_PATH%\"}"
     SYNC_PATH="${SYNC_PATH#\"}"
+    debug_log "Original SYNC_PATH is: $SYNC_PATH"
 
-    echo "Original SYNC_PATH is: $SYNC_PATH"
-
-    # Split SYNC_PATH by commas and convert to an array
     IFS=',' read -ra PATHS <<< "$SYNC_PATH"
 
-    ABS_PATHS=()
-
-    # Get the directory where the .env file is located
-    ENV_DIR=$(dirname "$ENV_FILE")
-
     for path in "${PATHS[@]}"; do
-        # Remove leading and trailing spaces
         trimmed_path=$(echo "$path" | xargs)
-
-        # Determine the absolute path
-        if [[ "$trimmed_path" = /* ]]; then
-            abs_path="$trimmed_path"
-        else
-            abs_path=$(realpath -m "$ENV_DIR/$trimmed_path")
-        fi
-
-        # Append to ABS_PATHS (if needed elsewhere)
-        ABS_PATHS+=("$abs_path")
-
-        # Prepare and append the dynamic volume mount
+        abs_path=$(realpath -m "$(dirname "$ENV_FILE")/$trimmed_path")
         DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
     done
 else
-    echo "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
+    debug_log "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
 fi
 
-# Additional predefined volumes
 PREDEFINED_VOLUMES+=(
     "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
     "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
 )
 
-# Build the Docker image with UROCISSA_PATH as a build argument
-echo "Building Docker image with UROCISSA_PATH set to $UROCISSA_PATH"
+debug_log "Predefined volumes: ${PREDEFINED_VOLUMES[*]}"
+debug_log "Dynamic volumes: ${DYNAMIC_VOLUMES[*]}"
 
-
-DOCKER_BUILD_COMMAND="sudo docker build --build-arg UROCISSA_PATH=${UROCISSA_PATH} -t urocissa ."
-
+# Build the Docker image with UROCISSA_PATH and build type as build arguments
+debug_log "Building Docker image with UROCISSA_PATH=$UROCISSA_PATH and BUILD_TYPE=$BUILD_TYPE"
+DOCKER_BUILD_COMMAND="sudo docker build \
+    --build-arg UROCISSA_PATH=${UROCISSA_PATH} \
+    --build-arg BUILD_TYPE=${BUILD_TYPE} \
+    -t urocissa ."
 eval "$DOCKER_BUILD_COMMAND"
-
-# Prepare formatted predefined volume mount output
-PREDEFINED_VOLUME_OUTPUT=""
-for vol in "${PREDEFINED_VOLUMES[@]}"; do
-    PREDEFINED_VOLUME_OUTPUT+=" \\
-    -v \"$vol\""
-done
-
-# Prepare formatted dynamic volume mount output
-DYNAMIC_VOLUME_OUTPUT=""
-for vol in "${DYNAMIC_VOLUMES[@]}"; do
-    DYNAMIC_VOLUME_OUTPUT+=" \\
-    -v \"$vol\""
-done
 
 # Extract port from Rocket.toml
 ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed -E 's/^port\s*=\s*"?([0-9]+)"?/\1/' | tr -d '[:space:]')
+ROCKET_PORT=${ROCKET_PORT:-4000}
+debug_log "Using port: $ROCKET_PORT"
 
-# If port not found, use default port 4000
-if [[ -z "$ROCKET_PORT" ]]; then
-    ROCKET_PORT=4000
-    echo "Port not found in Rocket.toml. Using default port 4000."
-fi
+# Generate Docker Run command
+DOCKER_RUN_COMMAND="docker run -it --rm"
+for vol in "${PREDEFINED_VOLUMES[@]}"; do
+    DOCKER_RUN_COMMAND+=" -v $vol"
+done
+for vol in "${DYNAMIC_VOLUMES[@]}"; do
+    DOCKER_RUN_COMMAND+=" -v $vol"
+done
+DOCKER_RUN_COMMAND+=" -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
 
-# Check if ROCKET_PORT is numeric and valid
-if [[ ! "${ROCKET_PORT}" =~ ^[0-9]+$ ]]; then
-    echo "Error: ROCKET_PORT is not set or is invalid"
-    exit 1
-else
-    echo "Using port: ${ROCKET_PORT}"
-fi
-
-
-# Generate the Docker Run command
-DOCKER_RUN_COMMAND="docker run -it --rm \\
-${PREDEFINED_VOLUME_OUTPUT} \\
-${DYNAMIC_VOLUME_OUTPUT} \\
-    -p ${ROCKET_PORT}:${ROCKET_PORT} \\
-    urocissa"
-
-# Output the final Docker Run command for debugging
-echo -e "\nGenerated Docker Run command:\n"
-echo "$DOCKER_RUN_COMMAND"
-
-# Validate and execute the Docker Run command
-echo -e "\nExecuting Docker Run command...\n"
+# Output and execute the Docker Run command
+debug_log "Generated Docker Run command: $DOCKER_RUN_COMMAND"
 eval "$DOCKER_RUN_COMMAND"
 
-# Check if the Docker Run command was successful
+# Check if Docker Run succeeded
 if [[ $? -ne 0 ]]; then
-    echo "Error: Docker Run command failed to execute"
+    debug_log "Error: Docker Run command failed to execute"
     exit 1
 else
-    echo "Docker container has been successfully started"
+    debug_log "Docker container has been successfully started"
 fi
