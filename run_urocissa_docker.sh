@@ -192,7 +192,6 @@ fi
 
 # Check if Docker Build succeeded
 if [[ $? -ne 0 ]]; then
-    echo "Error: Docker build failed. Exiting..."
     debug_log "Error: Docker build failed. Exiting..."
     exit 1
 fi
