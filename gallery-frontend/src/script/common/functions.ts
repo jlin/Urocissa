@@ -166,23 +166,23 @@ export async function searchByTag(tag: string, router: Router) {
 }
 
 export function escapeAndWrap(str: string): string {
-  // 先將字串中的反斜線及雙引號進行轉譯
+  // First, escape backslashes and double quotes in the string
   const escaped = str
-    .replace(/\\/g, '\\\\') // 將 \ 轉為 \\
-    .replace(/"/g, '\\"') // 將 " 轉為 \"
+    .replace(/\\/g, '\\\\') // Convert \ to \\
+    .replace(/"/g, '\\"') // Convert " to \"
 
-  // 將處理後的字串用 " 包起來
+  // Wrap the processed string in double quotes
   return `"${escaped}"`
 }
 
 export function unescapeAndUnwrap(str: string): string {
-  // 若字串是以 " 開頭並以 " 結尾，則去除這對引號
+  // If the string starts and ends with double quotes, remove them
   if (str.startsWith('"') && str.endsWith('"')) {
     str = str.slice(1, -1)
   }
 
-  // 將轉譯字元復原
+  // Restore escaped characters
   return str
-    .replace(/\\"/g, '"') // 將 \" 還原成 "
-    .replace(/\\\\/g, '\\') // 將 \\ 還原成 \
+    .replace(/\\"/g, '"') // Convert \" back to "
+    .replace(/\\\\/g, '\\') // Convert \\ back to \
 }
