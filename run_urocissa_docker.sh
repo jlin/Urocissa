@@ -1,61 +1,63 @@
 #!/bin/bash
 
-# Script Name: run_urocissa_docker.sh
-#
-# Description:
-#   This script is designed to simplify the process of running a Docker image for the Urocissa project.
-#   It supports options for debugging, logging, specifying build types (release, debug, or custom profiles),
-#   and controlling Docker caching behavior.
-#
-# Usage:
-#   ./run_urocissa_docker.sh [OPTIONS]
-#
-# Options:
-#   --debug             Enable debug mode to display additional information during execution.
-#   --log-file <file>   Specify a log file for debug output. The file will be created if it does not exist,
-#                       or cleared if it already exists.
-#   --build-type <type> Specify the build type for the Docker image. Valid values are:
-#                       - release (default)
-#                       - debug
-#                       - Any valid custom profile defined in Cargo.toml (e.g., dev-release)
-#   --no-cache          Disable Docker build cache. Forces a fresh build of all layers.
-#
-# Examples:
-#   1. Run with default settings (release build):
-#      ./run_urocissa_docker.sh
-#
-#   2. Enable debug mode and specify a log file:
-#      ./run_urocissa_docker.sh --debug --log-file build.log
-#
-#   3. Build with debug configuration:
-#      ./run_urocissa_docker.sh --build-type debug
-#
-#   4. Build with a custom profile (e.g., dev-release):
-#      ./run_urocissa_docker.sh --build-type dev-release
-#
-#   5. Disable Docker cache during build:
-#      ./run_urocissa_docker.sh --no-cache
-#
-#   6. Combine debug mode, log file, custom build type, and disable cache:
-#      ./run_urocissa_docker.sh --debug --log-file debug.log --build-type dev-release --no-cache
-#
-# Notes:
-#   - The log file specified with --log-file will be initialized (cleared or created) at the start of the script.
-#   - Debug mode outputs information to the terminal by default unless a log file is specified.
-#   - If --build-type is not specified, the script defaults to "release".
-#   - The --build-type option supports custom profiles as defined in the Cargo.toml file of the project.
-#     Use profiles like "dev-release" or any other valid profile name.
-#   - The --no-cache option ensures that no intermediate layers are used from previous builds.
-#
-# Exit Codes:
-#   0  Success
-#   1  Error occurred during execution
-
 # Default settings
 DEBUG=false
 LOG_FILE=""
 BUILD_TYPE="release"
 NO_CACHE=false
+
+# Display script usage
+show_help() {
+    cat <<EOF
+Usage: ./run_urocissa_docker.sh [OPTIONS]
+
+Description:
+  This script simplifies the process of running a Docker image for the Urocissa project.
+  It supports options for debugging, logging, specifying build types (release, debug, or custom profiles),
+  and controlling Docker caching behavior.
+
+Options:
+  --help              Show this help message and exit.
+  --debug             Enable debug mode to display additional information during execution.
+  --log-file <file>   Specify a log file for debug output. The file will be created if it does not exist,
+                      or cleared if it already exists.
+  --build-type <type> Specify the build type for the Docker image. Valid values are:
+                      - release (default)
+                      - debug
+                      - Any valid custom profile defined in Cargo.toml (e.g., dev-release)
+  --no-cache          Disable Docker build cache. Forces a fresh build of all layers.
+
+Examples:
+  1. Run with default settings (release build):
+     ./run_urocissa_docker.sh
+
+  2. Enable debug mode and specify a log file:
+     ./run_urocissa_docker.sh --debug --log-file build.log
+
+  3. Build with debug configuration:
+     ./run_urocissa_docker.sh --build-type debug
+
+  4. Build with a custom profile (e.g., dev-release):
+     ./run_urocissa_docker.sh --build-type dev-release
+
+  5. Disable Docker cache during build:
+     ./run_urocissa_docker.sh --no-cache
+
+  6. Combine debug mode, log file, custom build type, and disable cache:
+     ./run_urocissa_docker.sh --debug --log-file debug.log --build-type dev-release --no-cache
+
+Notes:
+  - The log file specified with --log-file will be initialized (cleared or created) at the start of the script.
+  - Debug mode outputs information to the terminal by default unless a log file is specified.
+  - If --build-type is not specified, the script defaults to "release".
+  - The --build-type option supports custom profiles as defined in the Cargo.toml file of the project.
+  - The --no-cache option ensures that no intermediate layers are used from previous builds.
+
+Exit Codes:
+  0  Success
+  1  Error occurred during execution
+EOF
+}
 
 # Function to output debug information
 debug_log() {
@@ -105,6 +107,10 @@ validateBuildType() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
+    --help)
+        show_help
+        exit 0
+        ;;
     --debug)
         DEBUG=true
         shift
