@@ -22,7 +22,12 @@ jobs:
 
       - name: Fetch main branch
         run: |
-          git fetch origin main  # Ensure the main branch is available locally
+          git fetch origin main
+
+      - name: Set Git user identity
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
 
       - name: Remove dev-exclusive files in pull requests
         if: github.event_name == 'pull_request'
@@ -37,8 +42,10 @@ jobs:
             fi
           done
           if [ "$FOUND_FILES" -eq 1 ]; then
-            git commit -m "Remove dev-exclusive files from PR" || echo "No changes to commit"
-            git push || echo "No changes to push"
+            git commit -m "Remove dev-exclusive files from PR"
+            git push origin HEAD:$(echo $GITHUB_HEAD_REF)  # Push changes back to the PR branch
+          else
+            echo "No changes to push"
           fi
 
       - name: Block dev-exclusive files on push to main
