@@ -3,10 +3,11 @@ name: Manage Dev-Exclusive Files
 on:
   push:
     branches:
-      - main
+      - 'main'
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read  # Only requires read permissions
