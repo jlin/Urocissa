@@ -23,7 +23,7 @@ export const useWorkerStore = (isolationId: string) =>
       imgWorker: Worker[]
       postToWorkerList: postToWorkerType[] | undefined
     } => ({
-      concurrencyNumber: Math.max(0, Math.floor(navigator.hardwareConcurrency / 2)),
+      concurrencyNumber: Math.min(navigator.hardwareConcurrency, 1),
       worker: null,
       imgWorker: [],
       postToWorkerList: undefined
@@ -46,9 +46,9 @@ export const useWorkerStore = (isolationId: string) =>
               type: 'module'
             })
             this.imgWorker.push(worker)
-            const postToWorker = bindActionDispatch(toImgWorker, (action) =>
-              { worker.postMessage(action); }
-            )
+            const postToWorker = bindActionDispatch(toImgWorker, (action) => {
+              worker.postMessage(action)
+            })
             this.postToWorkerList.push(postToWorker)
           }
           this.imgWorker.forEach((worker) => {
