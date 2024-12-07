@@ -64,7 +64,7 @@ Make sure the following software is installed on your system:
    DISCORD_HOOK_URL=
    ```
 
-   *Explanation:*
+   _Explanation:_
 
    - `PASSWORD`: Your password for the app.
    - `SYNC_PATH`: A comma-separated list of directories that the app will monitor for new or modified photos. For example: `SYNC_PATH=./upload,./some/relative/path,/some/absolute/path`. Note: `./upload` should not be removed as it is used to monitor uploaded photos and videos.
@@ -72,7 +72,7 @@ Make sure the following software is installed on your system:
 
    **Rocket.toml:**
 
-   - `port`: Default is `4000`. You can change this to your desired port number.
+   - `port`: Default is `5673`. You can change this to your desired port number.
 
 ---
 
@@ -122,5 +122,4 @@ Navigate to the `gallery-backend` directory and run the following command to sta
 cargo run --release
 ```
 
-You can now access the app via [http://127.0.0.1:4000](http://127.0.0.1:4000) or [http://127.0.0.1](http://127.0.0.1):\<your\_port> if you configured a custom port in Rocket.toml.
-
+You can now access the app via [http://127.0.0.1:5673](http://127.0.0.1:5673) or [http://127.0.0.1](http://127.0.0.1):\<your_port> if you configured a custom port in Rocket.toml.

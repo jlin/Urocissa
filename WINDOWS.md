@@ -57,7 +57,7 @@ Make sure the following software is installed on your system:
 
    **Rocket.toml:**
 
-   - `port`: Default is `4000`. You can change this to your desired port number.
+   - `port`: Default is `5673`. You can change this to your desired port number.
 
 ---
 
@@ -107,4 +107,4 @@ Navigate to the `gallery-backend` directory and run the following command to sta
 cargo run --release
 ```
 
-You can now access the app via [http://127.0.0.1:4000](http://127.0.0.1:4000) or [http://127.0.0.1:<your_port>](http://127.0.0.1:<your_port>) if you configured a custom port in `Rocket.toml`.
+You can now access the app via [http://127.0.0.1:5673](http://127.0.0.1:5673) or [http://127.0.0.1:<your_port>](http://127.0.0.1:<your_port>) if you configured a custom port in `Rocket.toml`.
