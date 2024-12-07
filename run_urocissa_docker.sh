@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# Default settings
-DEBUG=false
-LOG_FILE=""
-BUILD_TYPE="release"
-NO_CACHE=false
+# ============================================================
+# Function Definitions
+# ============================================================
 
-# Display script usage
 show_help() {
     cat <<EOF
 Usage: ./run_urocissa_docker.sh [OPTIONS]
@@ -47,11 +44,11 @@ Examples:
      ./run_urocissa_docker.sh --debug --log-file debug.log --build-type dev-release --no-cache
 
 Notes:
-  - The log file specified with --log-file will be initialized (cleared or created) at the start of the script.
-  - Debug mode outputs information to the terminal by default unless a log file is specified.
-  - If --build-type is not specified, the script defaults to "release".
-  - The --build-type option supports custom profiles as defined in the Cargo.toml file of the project.
-  - The --no-cache option ensures that no intermediate layers are used from previous builds.
+  - The log file specified with --log-file will be initialized at the start.
+  - Debug mode outputs information to the terminal unless a log file is specified.
+  - If --build-type is not specified, the default is "release".
+  - The --build-type option supports custom profiles as defined in Cargo.toml.
+  - The --no-cache option ensures no intermediate layers are used from previous builds.
 
 Exit Codes:
   0  Success
@@ -59,7 +56,6 @@ Exit Codes:
 EOF
 }
 
-# Function to output debug information
 debug_log() {
     local message="$1"
     if [[ "$DEBUG" == true ]]; then
@@ -71,205 +67,202 @@ debug_log() {
     fi
 }
 
-# Function to extract Rust build profiles from Cargo.toml
-getRustBuildProfiles() {
+get_rust_build_profiles() {
     local cargo_toml="./gallery-backend/Cargo.toml"
-
     if [[ ! -f "$cargo_toml" ]]; then
         echo "Cargo.toml not found at $cargo_toml"
         return 1
     fi
-
-    # Extract and print profiles
     grep -Eo "^\[profile\.[a-zA-Z0-9_-]+\]" "$cargo_toml" | awk -F '.' '{print $2}' | tr -d '[]'
 }
 
-# Function to validate build type
-validateBuildType() {
+validate_build_type() {
     local build_type="$1"
     local profiles
-    profiles=$(getRustBuildProfiles)
-
+    profiles=$(get_rust_build_profiles)
     if [[ $? -ne 0 ]]; then
         echo "Error: Unable to validate build type due to missing or invalid Cargo.toml."
         exit 1
     fi
-
-    # Check if the build type matches any extracted profile
-    valid_profiles=$(echo -e "release\ndebug\n$profiles" | sort -u) # Ensure unique entries
-
+    valid_profiles=$(echo -e "release\ndebug\n$profiles" | sort -u)
     if ! echo "$valid_profiles" | grep -qw "$build_type"; then
         echo "Error: Invalid build type '$build_type'. Valid build types are: $(echo "$valid_profiles" | tr '\n' ' ')"
         exit 1
     fi
 }
 
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-    --help)
-        show_help
-        exit 0
-        ;;
-    --debug)
-        DEBUG=true
-        shift
-        ;;
-    --no-cache)
-        NO_CACHE=true
-        shift
-        ;;
-    --log-file)
-        LOG_FILE="$2"
-        # Initialize the log file: create if it doesn't exist, clear if it does
-        >"$LOG_FILE"
-        if [[ $? -ne 0 ]]; then
-            echo "Error: Failed to initialize log file at $LOG_FILE"
-            exit 1
-        fi
-        shift 2
-        ;;
-    --build-type)
-        BUILD_TYPE="$2"
-        if [[ -z "$BUILD_TYPE" ]]; then
-            echo "Error: Build type is required."
-            exit 1
-        fi
-
-        # Validate the build type against Cargo.toml profiles
-        validateBuildType "$BUILD_TYPE"
-        shift 2
-        ;;
-    *)
-        echo "Error: Unknown option $1"
-        exit 1
-        ;;
-    esac
-done
-
-# Function to ensure config files exist and add to volume mounts
 ensure_config_file() {
     local source_file="$1"
     local target_file="$2"
     local volume_path="${3:-$target_file}"
-
     if [[ ! -f "$target_file" ]]; then
         debug_log "$target_file not found. Copying from $source_file."
-        # Due to an unknown issue in WSL, `cp "$source_file" "$target_file"`
-        # sometimes does not work as expected. To ensure reliability, we use `mv`
-        # to rename the source file first, followed by `cp` to create a new copy.
         mv "$source_file" "$target_file"
         cp "$target_file" "$source_file"
     fi
-
-    # Add to predefined volumes if a volume path is provided
     if [[ -n "$volume_path" ]]; then
         PREDEFINED_VOLUMES+=("$target_file:$volume_path")
     fi
 }
 
-# Get the absolute path of this script
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
-
-# Set the UROCISSA_PATH to the script's absolute path
-UROCISSA_PATH="$SCRIPT_DIR"
-
-debug_log "Script directory set to $SCRIPT_DIR"
-debug_log "Build type is set to $BUILD_TYPE"
-
-# Set the path of the .env file
-ENV_FILE="./gallery-backend/.env"
-TEMP_ENV_FILE="./gallery-backend/temp.env"
-
-# Initialize volumes array
-PREDEFINED_VOLUMES=()
-DYNAMIC_VOLUMES=()
-
-# Ensure necessary config files exist and set up volume mounts
-ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Rocket.toml" "${UROCISSA_PATH}/gallery-backend/Rocket.toml"
-ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts" "${UROCISSA_PATH}/gallery-frontend/config.ts"
-ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
-
-# Convert CRLF to LF in the .env file
-sed -i 's/\r$//' "$ENV_FILE"
-
-# Process SYNC_PATH for dynamic volume mounts
-SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
-
-if [[ -n "$SYNC_PATH" ]]; then
-    SYNC_PATH="${SYNC_PATH%\"}"
-    SYNC_PATH="${SYNC_PATH#\"}"
-    debug_log "Original SYNC_PATH is: $SYNC_PATH"
-
-    IFS=',' read -ra PATHS <<<"$SYNC_PATH"
-
-    for path in "${PATHS[@]}"; do
-        trimmed_path=$(echo "$path" | xargs)
-        abs_path=$(realpath -m "$(dirname "$ENV_FILE")/$trimmed_path")
-        DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+        --help)
+            show_help
+            exit 0
+            ;;
+        --debug)
+            DEBUG=true
+            shift
+            ;;
+        --no-cache)
+            NO_CACHE=true
+            shift
+            ;;
+        --log-file)
+            LOG_FILE="$2"
+            >"$LOG_FILE"
+            if [[ $? -ne 0 ]]; then
+                echo "Error: Failed to initialize log file at $LOG_FILE"
+                exit 1
+            fi
+            shift 2
+            ;;
+        --build-type)
+            BUILD_TYPE="$2"
+            if [[ -z "$BUILD_TYPE" ]]; then
+                echo "Error: Build type is required."
+                exit 1
+            fi
+            validate_build_type "$BUILD_TYPE"
+            shift 2
+            ;;
+        *)
+            echo "Error: Unknown option $1"
+            exit 1
+            ;;
+        esac
     done
-else
-    debug_log "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
-fi
+}
 
-PREDEFINED_VOLUMES+=(
-    "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
-    "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
-)
+setup_environment() {
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
+    UROCISSA_PATH="$SCRIPT_DIR"
 
-debug_log "Predefined volumes: ${PREDEFINED_VOLUMES[*]}"
-debug_log "Dynamic volumes: ${DYNAMIC_VOLUMES[*]}"
+    debug_log "Script directory set to $SCRIPT_DIR"
+    debug_log "Build type is set to $BUILD_TYPE"
 
-# Build the Docker image with UROCISSA_PATH and build type as build arguments
-debug_log "Building Docker image with UROCISSA_PATH=$UROCISSA_PATH and BUILD_TYPE=$BUILD_TYPE"
+    ENV_FILE="./gallery-backend/.env"
+    TEMP_ENV_FILE="./gallery-backend/temp.env"
 
-DOCKER_BUILD_COMMAND="docker build \
-    --build-arg UROCISSA_PATH=${UROCISSA_PATH} \
-    --build-arg BUILD_TYPE=${BUILD_TYPE}"
+    # Initialize arrays
+    PREDEFINED_VOLUMES=()
+    DYNAMIC_VOLUMES=()
 
-if [ "${NO_CACHE}" = true ]; then
-    DOCKER_BUILD_COMMAND+=" --no-cache"
-fi
+    # Ensure config files
+    ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Rocket.toml" "${UROCISSA_PATH}/gallery-backend/Rocket.toml"
+    ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts" "${UROCISSA_PATH}/gallery-frontend/config.ts"
+    ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
 
-DOCKER_BUILD_COMMAND+=" -t urocissa ."
+    # Convert CRLF to LF
+    sed -i 's/\r$//' "$ENV_FILE"
+}
 
-if [[ -n "$LOG_FILE" ]]; then
-    # Redirect output to the log file
-    eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
-else
-    # Output to standard output
-    eval "$DOCKER_BUILD_COMMAND"
-fi
+prepare_volumes() {
+    # Process SYNC_PATH for dynamic volume mounts
+    SYNC_PATH=$(grep -E '^SYNC_PATH\s*=\s*' "$ENV_FILE" | sed 's/^SYNC_PATH\s*=\s*//')
+    if [[ -n "$SYNC_PATH" ]]; then
+        SYNC_PATH="${SYNC_PATH%\"}"
+        SYNC_PATH="${SYNC_PATH#\"}"
+        debug_log "Original SYNC_PATH is: $SYNC_PATH"
 
-# Check if Docker Build succeeded
-if [[ $? -ne 0 ]]; then
-    echo "Error: Docker build failed. Exiting..."
-    exit 1
-fi
+        IFS=',' read -ra PATHS <<<"$SYNC_PATH"
+        for path in "${PATHS[@]}"; do
+            trimmed_path=$(echo "$path" | xargs)
+            abs_path=$(realpath -m "$(dirname "$ENV_FILE")/$trimmed_path")
+            DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
+        done
+    else
+        debug_log "Warning: SYNC_PATH variable not found or is empty in $ENV_FILE. Skipping dynamic volume mounts."
+    fi
 
-# Extract port from Rocket.toml
-ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed -E 's/^port\s*=\s*"?([0-9]+)"?/\1/' | tr -d '[:space:]')
-ROCKET_PORT=${ROCKET_PORT:-4000}
-debug_log "Using port: $ROCKET_PORT"
+    PREDEFINED_VOLUMES+=(
+        "./gallery-backend/db:${UROCISSA_PATH}/gallery-backend/db"
+        "./gallery-backend/object:${UROCISSA_PATH}/gallery-backend/object"
+    )
 
-# Generate Docker Run command
-DOCKER_RUN_COMMAND="docker run -it --rm"
-for vol in "${PREDEFINED_VOLUMES[@]}"; do
-    DOCKER_RUN_COMMAND+=" -v $vol"
-done
-for vol in "${DYNAMIC_VOLUMES[@]}"; do
-    DOCKER_RUN_COMMAND+=" -v $vol"
-done
-DOCKER_RUN_COMMAND+=" -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
+    debug_log "Predefined volumes: ${PREDEFINED_VOLUMES[*]}"
+    debug_log "Dynamic volumes: ${DYNAMIC_VOLUMES[*]}"
+}
 
-# Output and execute the Docker Run command
-debug_log "Generated Docker Run command: $DOCKER_RUN_COMMAND"
-eval "$DOCKER_RUN_COMMAND"
+build_docker_image() {
+    debug_log "Building Docker image with UROCISSA_PATH=$UROCISSA_PATH and BUILD_TYPE=$BUILD_TYPE"
 
-# Check if Docker Run succeeded
-if [[ $? -ne 0 ]]; then
-    echo "Error: Docker Run command failed to execute"
-    exit 1
-else
-    debug_log "Docker container has been successfully started"
-fi
+    DOCKER_BUILD_COMMAND="docker build \
+        --build-arg UROCISSA_PATH=${UROCISSA_PATH} \
+        --build-arg BUILD_TYPE=${BUILD_TYPE}"
+
+    if [ "${NO_CACHE}" = true ]; then
+        DOCKER_BUILD_COMMAND+=" --no-cache"
+    fi
+
+    DOCKER_BUILD_COMMAND+=" -t urocissa ."
+
+    if [[ -n "$LOG_FILE" ]]; then
+        eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
+    else
+        eval "$DOCKER_BUILD_COMMAND"
+    fi
+
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Docker build failed. Exiting..."
+        exit 1
+    fi
+}
+
+run_container() {
+    # Extract port from Rocket.toml
+    ROCKET_PORT=$(grep -E '^port\s*=\s*' ./gallery-backend/Rocket.toml | sed -E 's/^port\s*=\s*"?([0-9]+)"?/\1/' | tr -d '[:space:]')
+    ROCKET_PORT=${ROCKET_PORT:-4000}
+    debug_log "Using port: $ROCKET_PORT"
+
+    # Generate Docker Run command
+    DOCKER_RUN_COMMAND="docker run -it --rm"
+    for vol in "${PREDEFINED_VOLUMES[@]}"; do
+        DOCKER_RUN_COMMAND+=" -v $vol"
+    done
+    for vol in "${DYNAMIC_VOLUMES[@]}"; do
+        DOCKER_RUN_COMMAND+=" -v $vol"
+    done
+    DOCKER_RUN_COMMAND+=" -p ${ROCKET_PORT}:${ROCKET_PORT} urocissa"
+
+    debug_log "Generated Docker Run command: $DOCKER_RUN_COMMAND"
+    eval "$DOCKER_RUN_COMMAND"
+
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Docker Run command failed to execute"
+        exit 1
+    else
+        debug_log "Docker container has been successfully started"
+    fi
+}
+
+main() {
+    # Default settings
+    DEBUG=false
+    LOG_FILE=""
+    BUILD_TYPE="release"
+    NO_CACHE=false
+
+    parse_arguments "$@"
+    setup_environment
+    prepare_volumes
+    build_docker_image
+    run_container
+}
+
+# ============================================================
+# Execute main with all passed arguments
+# ============================================================
+main "$@"
