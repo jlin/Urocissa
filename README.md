@@ -120,6 +120,9 @@ Navigate to the project directory and pull the latest updates:
 git pull
 
 ```
+---
+
+### 2. Rebuild
 
 If using Docker, simply run the script
 
@@ -129,9 +132,7 @@ bash run_urocissa_docker.sh
 
 Otherwise, follow these manual steps to update:
 
----
-
-### 2. Rebuild the Frontend
+### Rebuild the Frontend
 
 1. Navigate to the `gallery-frontend` directory:
 
@@ -147,7 +148,7 @@ Otherwise, follow these manual steps to update:
 
 ---
 
-### 3. Rebuild the Backend
+### Rebuild the Backend
 
 1. Navigate to the `gallery-backend` directory:
 
