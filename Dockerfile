@@ -71,8 +71,11 @@ FROM alpine:latest AS runtime
 RUN apk add --no-cache ffmpeg
 
 # Define a dynamic repository path using an argument and environment variable
-ARG UROCISSA_PATH=/app
+ARG UROCISSA_PATH
 ENV UROCISSA_PATH=${UROCISSA_PATH}
+
+# Validate if UROCISSA_PATH is set
+RUN if [ -z "${UROCISSA_PATH}" ]; then echo "UROCISSA_PATH is not set! Build failed." && exit 1; fi
 
 # Ensure the working directory exists for the backend
 WORKDIR ${UROCISSA_PATH}/gallery-backend
