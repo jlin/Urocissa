@@ -124,6 +124,9 @@ ensure_config_file() {
 
     if [[ ! -f "$target_file" ]]; then
         debug_log "$target_file not found. Copying from $source_file."
+        # Due to an unknown issue in WSL, `cp "$source_file" "$target_file"`
+        # sometimes does not work as expected. To ensure reliability, we use `mv`
+        # to rename the source file first, followed by `cp` to create a new copy.
         mv "$source_file" "$target_file"
         cp "$target_file" "$source_file"
     fi
