@@ -73,20 +73,13 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 
 ## Steps to Set Up and Use the App
 
-To set up the app, please follow the appropriate guide for your operating system:
-
-- **Linux Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
-- **Windows Users**: Follow the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
-
-To quickly set up and try Urocissa using Docker, follow these steps:
-
-> **Note**: Docker provides a quick and convenient setup but is still in an early development stage, resulting in lower efficiency. It is best suited for testing or trial purposes. For optimal performance, building from source is recommended.
+To quickly set up and try Urocissa using Docker on Linux, follow these steps:
 
 ### Quick Setup with Docker
 
 1. **Clone the Repository**
 
-   First, clone the Urocissa repository from GitHub:
+   Start by cloning the Urocissa repository from GitHub:
 
    ```bash
    git clone https://github.com/hsa00000/Urocissa.git
@@ -94,7 +87,7 @@ To quickly set up and try Urocissa using Docker, follow these steps:
 
 2. **Navigate to the Project Directory**
 
-   Move into the `Urocissa` directory that was just created:
+   Enter the newly created `Urocissa` directory:
 
    ```bash
    cd Urocissa
@@ -102,13 +95,20 @@ To quickly set up and try Urocissa using Docker, follow these steps:
 
 3. **Run the Setup Script**
 
-   Run the `bash run_urocissa_docker.sh` file to install and start Urocissa:
+   Execute the `run_urocissa_docker.sh` script to install and launch Urocissa:
 
    ```bash
    bash run_urocissa_docker.sh
    ```
 
-   This script will handle all necessary installations and start the application, allowing you to get Urocissa up and running in one step.
+   This script takes care of all the required installations and starts the application, enabling you to get Urocissa running with minimal effort.
+   
+### Build from Source
+
+If you prefer to build and install Urocissa from source, follow the relevant guide for your operating system:
+
+- **Linux Users**: Refer to the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
+- **Windows Users**: Check out the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
 
 ## Update
 
