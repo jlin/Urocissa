@@ -323,7 +323,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useInfoStore } from '@/store/infoStore'
 import { useModalStore } from '@/store/modalStore'
@@ -456,6 +456,12 @@ function timer(timestamp: number): string {
     timeZoneName: 'short'
   }).format(timestamp)
 }
+watch(
+  () => props.hash,
+  () => {
+    console.log(props.metadata)
+  }
+)
 </script>
 <style scoped>
 .metadata-css {
