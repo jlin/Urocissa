@@ -68,12 +68,11 @@ impl DataBase {
                     }
                 }
                 "modified" => {
-                    let latest_modified = self.alias.iter().map(|alias| alias.modified).max();
-                    if let Some(latest_time) = latest_modified {
-                        let time_u64 = latest_time;
-                        if time_u64 != 0 {
-                            return time_u64;
-                        }
+                    // Find the alias with the maximum `scan_time`
+                    if let Some(max_scan_alias) =
+                        self.alias.iter().max_by_key(|alias| alias.scan_time)
+                    {
+                        return max_scan_alias.modified;
                     }
                 }
                 "random" => {
