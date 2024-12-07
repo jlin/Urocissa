@@ -1,0 +1,42 @@
+name: Manage Dev-Exclusive Files
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-and-remove-dev-files:
+    runs-on: ubuntu-latest
+    env:
+      DEV_EXCLUSIVE_FILES: "cleanup.sh"
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+
+      - name: Check for dev-exclusive files
+        run: |
+          FOUND_FILES=0
+          for file in $DEV_EXCLUSIVE_FILES; do
+            if git diff --name-only origin/main...HEAD | grep -q "$file"; then
+              echo "Warning: $file found in PR. It will be removed."
+              git restore --staged "$file" || true
+              git checkout "$file" || true
+              FOUND_FILES=1
+            fi
+          done
+
+          if [ "$FOUND_FILES" -eq 1 ]; then
+            git commit -m "Remove dev-exclusive files from PR" || echo "No changes to commit"
+            git push || echo "No changes to push"
+          fi
+
+      - name: Ensure dev-exclusive files are removed
+        run: |
+          for file in $DEV_EXCLUSIVE_FILES; do
+            if git diff --name-only origin/main...HEAD | grep -q "$file"; then
+              echo "Error: $file cannot be merged into main."
+              exit 1
+            fi
+          done
