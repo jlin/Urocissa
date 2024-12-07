@@ -27,11 +27,13 @@ RUN apk add --no-cache \
 # Copy the generated recipe from the planner stage
 COPY --from=planner /app/gallery-backend/recipe.json /app/gallery-backend/recipe.json
 
-# Use the build argument to determine whether to build in release mode or debug mode
+# Use the build argument to determine the build mode and handle profiles dynamically
 RUN if [ "${BUILD_TYPE}" = "release" ]; then \
         cargo chef cook --release --recipe-path recipe.json; \
-    else \
+    elif [ "${BUILD_TYPE}" = "debug" ]; then \
         cargo chef cook --recipe-path recipe.json; \
+    else \
+        cargo chef cook --profile "${BUILD_TYPE}" --recipe-path recipe.json; \
     fi
 
 # Copy the backend source code to the container
@@ -40,10 +42,12 @@ COPY ./gallery-backend /app/gallery-backend
 # Build the backend binary based on the build type
 RUN if [ "${BUILD_TYPE}" = "release" ]; then \
         cargo build --release --bin Urocissa; \
-    else \
+    elif [ "${BUILD_TYPE}" = "debug" ]; then \
         cargo build --bin Urocissa; \
+    else \
+        cargo build --profile "${BUILD_TYPE}" --bin Urocissa; \
     fi
-
+    
 # Copy the built binary to a consistent directory for easier access
 RUN mkdir -p /app/gallery-backend/bin && \
     cp /app/gallery-backend/target/${BUILD_TYPE}/Urocissa /app/gallery-backend/bin/Urocissa

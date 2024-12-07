@@ -4,8 +4,8 @@
 #
 # Description:
 #   This script is designed to simplify the process of running a Docker image for the Urocissa project.
-#   It supports options for debugging, logging, specifying build types (release or debug), and controlling
-#   Docker caching behavior.
+#   It supports options for debugging, logging, specifying build types (release, debug, or custom profiles),
+#   and controlling Docker caching behavior.
 #
 # Usage:
 #   ./run_urocissa_docker.sh [OPTIONS]
@@ -17,6 +17,7 @@
 #   --build-type <type> Specify the build type for the Docker image. Valid values are:
 #                       - release (default)
 #                       - debug
+#                       - Any valid custom profile defined in Cargo.toml (e.g., dev-release)
 #   --no-cache          Disable Docker build cache. Forces a fresh build of all layers.
 #
 # Examples:
@@ -29,16 +30,21 @@
 #   3. Build with debug configuration:
 #      ./run_urocissa_docker.sh --build-type debug
 #
-#   4. Disable Docker cache during build:
+#   4. Build with a custom profile (e.g., dev-release):
+#      ./run_urocissa_docker.sh --build-type dev-release
+#
+#   5. Disable Docker cache during build:
 #      ./run_urocissa_docker.sh --no-cache
 #
-#   5. Combine debug mode, log file, debug build type, and disable cache:
-#      ./run_urocissa_docker.sh --debug --log-file debug.log --build-type debug --no-cache
+#   6. Combine debug mode, log file, custom build type, and disable cache:
+#      ./run_urocissa_docker.sh --debug --log-file debug.log --build-type dev-release --no-cache
 #
 # Notes:
 #   - The log file specified with --log-file will be initialized (cleared or created) at the start of the script.
 #   - Debug mode outputs information to the terminal by default unless a log file is specified.
 #   - If --build-type is not specified, the script defaults to "release".
+#   - The --build-type option supports custom profiles as defined in the Cargo.toml file of the project.
+#     Use profiles like "dev-release" or any other valid profile name.
 #   - The --no-cache option ensures that no intermediate layers are used from previous builds.
 #
 # Exit Codes:
@@ -50,6 +56,51 @@ DEBUG=false
 LOG_FILE=""
 BUILD_TYPE="release"
 NO_CACHE=false
+
+# Function to output debug information
+debug_log() {
+    local message="$1"
+    if [[ "$DEBUG" == true ]]; then
+        if [[ -n "$LOG_FILE" ]]; then
+            echo "$message" >>"$LOG_FILE"
+        else
+            echo "$message"
+        fi
+    fi
+}
+
+# Function to extract Rust build profiles from Cargo.toml
+getRustBuildProfiles() {
+    local cargo_toml="./gallery-backend/Cargo.toml"
+
+    if [[ ! -f "$cargo_toml" ]]; then
+        echo "Cargo.toml not found at $cargo_toml"
+        return 1
+    fi
+
+    # Extract and print profiles
+    grep -Eo "^\[profile\.[a-zA-Z0-9_-]+\]" "$cargo_toml" | awk -F '.' '{print $2}' | tr -d '[]'
+}
+
+# Function to validate build type
+validateBuildType() {
+    local build_type="$1"
+    local profiles
+    profiles=$(getRustBuildProfiles)
+
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Unable to validate build type due to missing or invalid Cargo.toml."
+        exit 1
+    fi
+
+    # Check if the build type matches any extracted profile
+    valid_profiles=$(echo -e "release\ndebug\n$profiles" | sort -u) # Ensure unique entries
+
+    if ! echo "$valid_profiles" | grep -qw "$build_type"; then
+        echo "Error: Invalid build type '$build_type'. Valid build types are: $(echo "$valid_profiles" | tr '\n' ' ')"
+        exit 1
+    fi
+}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -74,10 +125,13 @@ while [[ $# -gt 0 ]]; do
         ;;
     --build-type)
         BUILD_TYPE="$2"
-        if [[ "$BUILD_TYPE" != "release" && "$BUILD_TYPE" != "debug" ]]; then
-            echo "Error: Invalid build type. Use 'release' or 'debug'."
+        if [[ -z "$BUILD_TYPE" ]]; then
+            echo "Error: Build type is required."
             exit 1
         fi
+
+        # Validate the build type against Cargo.toml profiles
+        validateBuildType "$BUILD_TYPE"
         shift 2
         ;;
     *)
@@ -86,35 +140,6 @@ while [[ $# -gt 0 ]]; do
         ;;
     esac
 done
-
-# Function to output debug information
-debug_log() {
-    local message="$1"
-    if [[ "$DEBUG" == true ]]; then
-        if [[ -n "$LOG_FILE" ]]; then
-            echo "$message" >>"$LOG_FILE"
-        else
-            echo "$message"
-        fi
-    fi
-}
-
-# Get the absolute path of this script
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
-
-# Set the UROCISSA_PATH to the script's absolute path
-UROCISSA_PATH="$SCRIPT_DIR"
-
-debug_log "Script directory set to $SCRIPT_DIR"
-debug_log "Build type is set to $BUILD_TYPE"
-
-# Set the path of the .env file
-ENV_FILE="./gallery-backend/.env"
-TEMP_ENV_FILE="./gallery-backend/temp.env"
-
-# Initialize volumes array
-PREDEFINED_VOLUMES=()
-DYNAMIC_VOLUMES=()
 
 # Function to ensure config files exist and add to volume mounts
 ensure_config_file() {
@@ -136,6 +161,23 @@ ensure_config_file() {
         PREDEFINED_VOLUMES+=("$target_file:$volume_path")
     fi
 }
+
+# Get the absolute path of this script
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+
+# Set the UROCISSA_PATH to the script's absolute path
+UROCISSA_PATH="$SCRIPT_DIR"
+
+debug_log "Script directory set to $SCRIPT_DIR"
+debug_log "Build type is set to $BUILD_TYPE"
+
+# Set the path of the .env file
+ENV_FILE="./gallery-backend/.env"
+TEMP_ENV_FILE="./gallery-backend/temp.env"
+
+# Initialize volumes array
+PREDEFINED_VOLUMES=()
+DYNAMIC_VOLUMES=()
 
 # Ensure necessary config files exist and set up volume mounts
 ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Rocket.toml" "${UROCISSA_PATH}/gallery-backend/Rocket.toml"
@@ -195,7 +237,7 @@ fi
 
 # Check if Docker Build succeeded
 if [[ $? -ne 0 ]]; then
-    debug_log "Error: Docker build failed. Exiting..."
+    echo "Error: Docker build failed. Exiting..."
     exit 1
 fi
 
@@ -220,7 +262,7 @@ eval "$DOCKER_RUN_COMMAND"
 
 # Check if Docker Run succeeded
 if [[ $? -ne 0 ]]; then
-    debug_log "Error: Docker Run command failed to execute"
+    echo "Error: Docker Run command failed to execute"
     exit 1
 else
     debug_log "Docker container has been successfully started"
