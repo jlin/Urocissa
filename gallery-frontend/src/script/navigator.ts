@@ -26,10 +26,21 @@ export function intoViewPage(route: RouteLocationNormalizedLoadedGeneric, hashOr
   }
 }
 
-export function leaveViewPage(route: RouteLocationNormalizedLoadedGeneric) {
-  if (!route.meta.isReadPage) {
+export function leavePage(route: RouteLocationNormalizedLoadedGeneric) {
+  console.log('trigger')
+
+  if (!route.meta.isViewPage && route.meta.isReadPage) {
+    return {
+      name: `${route.meta.baseName}ViewPage`,
+      params: {
+        hash: route.params.hash
+      },
+      query: route.query
+    }
+  }
+  if (route.meta.isViewPage && !route.meta.isReadPage) {
     return { name: route.meta.baseName, query: route.query }
-  } else {
+  } else if (route.meta.isViewPage && route.meta.isReadPage) {
     return {
       name: `${route.meta.baseName}ReadPage`,
       params: {

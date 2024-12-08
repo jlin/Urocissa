@@ -126,7 +126,7 @@ watchEffect(() => {
 
 const handleSearch = async () => {
   filterStore.filterString = searchQuery.value
-  await router.replace({
+  await router.push({
     path: route.path,
     query: { search: searchQuery.value }
   })

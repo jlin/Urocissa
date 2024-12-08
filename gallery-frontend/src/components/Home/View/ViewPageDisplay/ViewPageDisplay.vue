@@ -75,7 +75,7 @@ import { AbstractData } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
 import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayDatabase.vue'
 import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
-import { leaveViewPage } from '@/script/navigator'
+
 import delay from 'delay'
 import { getCookiesJwt } from '@/script/common/functions'
 import { useConfigStore } from '@/store/configStore'
@@ -261,15 +261,6 @@ watch(
   { immediate: true }
 )
 
-const handlePopState = () => {
-  router
-    .push(leaveViewPage(route))
-    .then(() => ({}))
-    .catch((error: unknown) => {
-      console.error('Navigation Error:', error)
-    })
-}
-
 const handleKeyDown = (event: KeyboardEvent) => {
   if (
     (!route.meta.isReadPage && props.isolationId === 'mainId') ||
@@ -297,12 +288,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-window.addEventListener('popstate', handlePopState)
 window.addEventListener('keydown', handleKeyDown)
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
-  window.removeEventListener('popstate', handlePopState)
 })
 </script>
 
