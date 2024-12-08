@@ -1,5 +1,8 @@
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 use rocket::http::uri::Origin;
+use rocket::http::{CookieJar, Status};
+use rocket::request::{FromRequest, Outcome};
+use rocket::Request;
 use rocket::{fairing::AdHoc, http::Method};
 
 use crate::public::config::PUBLIC_CONFIG;
@@ -93,4 +96,34 @@ pub fn auth_request_fairing() -> AdHoc {
             }
         })
     })
+}
+
+pub struct AuthGuard;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for AuthGuard {
+    type Error = ();
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        // Check for JWT cookie
+        let cookies: &CookieJar = req.cookies();
+        if let Some(jwt_cookie) = cookies.get("jwt") {
+            let token = jwt_cookie.value();
+            let validation = Validation::new(Algorithm::HS256);
+
+            if decode::<Claims>(
+                token,
+                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+                &validation,
+            )
+            .is_ok()
+            {
+                return Outcome::Success(AuthGuard);
+            } else {
+                warn!("JWT validation failed.");
+            }
+        }
+
+        Outcome::Forward(Status::Unauthorized)
+    }
 }
