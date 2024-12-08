@@ -82,7 +82,6 @@
                 id="album-chip"
                 density="comfortable"
                 size="small"
-                prepend-icon="mdi-image-album"
                 v-if="
                   dataStore.data.has(row.start + subIndex) &&
                   dataStore.data.get(row.start + subIndex)?.album
@@ -99,7 +98,7 @@
                 <span
                   class="text-truncate"
                   :style="{
-                    maxWidth: `${data.displayWidth * 0.8}px`
+                    maxWidth: `${(data.displayWidth - 8) * 0.75}px`
                   }"
                 >
                   {{ dataStore.data.get(row.start + subIndex)?.album?.title }}
