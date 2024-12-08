@@ -6,8 +6,8 @@
     :width="'100%'"
     class="d-flex"
     id="view-page"
-    persistent
     transition="false"
+    :close-on-back="false"
   >
     <v-container
       fluid

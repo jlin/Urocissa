@@ -5,8 +5,8 @@
     :width="'100%'"
     class="d-flex"
     id="view-page"
-    persistent
     transition="false"
+    :close-on-back="false"
   >
     <Home isolation-id="subId" :title="props.title" />
   </v-overlay>
