@@ -1,6 +1,10 @@
 <template>
   <v-toolbar class="position-absolute my-toolbar">
-    <v-btn v-if="route.meta.isViewPage" icon="mdi mdi-arrow-left" :to="leavePage(route)"></v-btn>
+    <v-btn
+      v-if="route.meta.isViewPage"
+      icon="mdi mdi-arrow-left"
+      :to="leaveViewPage(route)"
+    ></v-btn>
     <v-spacer></v-spacer>
     <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
     <v-btn
@@ -46,7 +50,7 @@ import { useRoute } from 'vue-router'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { AbstractData } from '@/script/common/types'
 import { useInfoStore } from '@/store/infoStore'
-import { leavePage } from '@/script/navigator'
+import { leaveViewPage } from '@/script/navigator'
 import ViewPageToolBarDatabase from './ViewPageToolBarDatabase.vue'
 import ViewPageToolBarAlbum from './ViewPageToolBarAlbum.vue'
 

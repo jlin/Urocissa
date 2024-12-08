@@ -16,18 +16,17 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { computed, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import NavBar from '@/components/NavBar/NavBar.vue'
-import { leavePage } from '@/script/navigator'
 
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 
 const route = useRoute()
-const router = useRouter()
+
 const currentPage = computed(() => {
   if (route.path.startsWith('/favorite')) {
     return 'favorite'
@@ -49,24 +48,6 @@ const routeKey = computed(() => {
   const reverse = typeof route.query.reverse === 'string' ? route.query.reverse : ''
 
   return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}`
-})
-
-const handlePopState = () => {
-  const targetResult = leavePage(route)
-  if (targetResult) {
-    router
-      .push(targetResult)
-      .then(() => ({}))
-      .catch((error: unknown) => {
-        console.error('Navigation Error:', error)
-      })
-  }
-}
-
-window.addEventListener('popstate', handlePopState)
-
-onUnmounted(() => {
-  window.removeEventListener('popstate', handlePopState)
 })
 </script>
 
