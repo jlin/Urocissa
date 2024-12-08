@@ -18,11 +18,13 @@ import { useConfigStore } from '@/store/configStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { PublicConfigSchema } from '@/script/common/schemas'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
+import { useRedirectionStore } from '@/store/redirectionStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
 export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
   const messageStore = useMessageStore('mainId')
   const modalStore = useModalStore('mainId')
+  const redirectionStore = useRedirectionStore('mainId')
   const dataStore = useDataStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
   const tagStore = useTagStore(isolationId)
@@ -130,6 +132,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) 
       messageStore.showMessage = true
     },
     unauthorized: async () => {
+      redirectionStore.redirection = router.currentRoute.value.fullPath
       await router.push('/login')
     }
   })

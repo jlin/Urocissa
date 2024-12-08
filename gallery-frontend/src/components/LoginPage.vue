@@ -24,9 +24,11 @@ import Cookies from 'js-cookie'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
+import { useRedirectionStore } from '@/store/redirectionStore'
 const password = ref('')
 const token = ref<string>('') // To store the JWT token
 const router = useRouter()
+const redirectionStore = useRedirectionStore('mainId')
 const handleLogin = async () => {
   try {
     const response = await axios.post('/post/authenticate', JSON.stringify(password.value), {
@@ -47,8 +49,12 @@ const handleLogin = async () => {
       sameSite: 'Strict', // Prevent CSRF attacks
       expires: 1 // Optional: Expires in 1 day
     })
-
-    await router.push('/')
+    const redirection = redirectionStore.redirection
+    if (redirection !== null) {
+      await router.push(redirection)
+    } else {
+      await router.push('/')
+    }
   } catch (error) {
     console.error('Error during login:', error)
   }
