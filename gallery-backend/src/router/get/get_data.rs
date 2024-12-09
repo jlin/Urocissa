@@ -12,6 +12,8 @@ use crate::public::tree::start_loop::VERSION_COUNT;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::start_loop::SHOULD_FLUSH_TREE_SNAPSHOT;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
+use crate::public::utils::{info_wrap, warn_wrap};
+use crate::router::fairing::AuthGuard;
 use bitcode::{Decode, Encode};
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
@@ -41,9 +43,9 @@ impl Prefetch {
         }
     }
 }
-
 #[post("/get/prefetch?<locate>", format = "json", data = "<query_data>")]
 pub async fn prefetch(
+    _auth: AuthGuard,
     query_data: Option<Json<Expression>>,
     locate: Option<String>,
 ) -> Json<Option<Prefetch>> {
@@ -60,20 +62,23 @@ pub async fn prefetch(
 
         expression_opt.hash(hasher);
         VERSION_COUNT.load(Ordering::Relaxed).hash(hasher);
-        
+
         let expression_hashed = hasher.finish();
-        
+
         if let Ok(Some(prefetch_opt)) = QUERY_SNAPSHOT.read_query_snapshot(expression_hashed) {
-            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Qeury cache found");
+            info_wrap(Some(find_cache_start_time.elapsed()), "Query cache found");
             return Json(prefetch_opt);
         } else {
-            info!(duration = &*format!("{:?}", find_cache_start_time.elapsed()); "Qeury cache not found. Generate a new one.");
+            info_wrap(
+                Some(find_cache_start_time.elapsed()),
+                "Query cache not found. Generate a new one.",
+            );
         }
 
         // Step 2: Filter items
         let filter_items_start_time = Instant::now();
         let ref_data = TREE.in_memory.read().unwrap();
-        info!(duration = &*format!("{:?}", filter_items_start_time.elapsed()); "Filter items");
+        info_wrap(Some(filter_items_start_time.elapsed()), "Filter items");
 
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
@@ -104,7 +109,7 @@ pub async fn prefetch(
         };
 
         let data_length = reduced_data.len();
-        info!(duration = &*format!("{:?}", layout_start_time.elapsed()); "Compute layout");
+        info_wrap(Some(layout_start_time.elapsed()), "Compute layout");
 
         // Step 4: Locate hash
         let locate_start_time = Instant::now();
@@ -115,7 +120,7 @@ pub async fn prefetch(
         } else {
             None
         };
-        info!(duration = &*format!("{:?}", locate_start_time.elapsed()); "Locate data");
+        info_wrap(Some(locate_start_time.elapsed()), "Locate data");
 
         // Step 5: Insert data into TREE_SNAPSHOT
         let db_start_time = Instant::now();
@@ -124,12 +129,10 @@ pub async fn prefetch(
             .unwrap()
             .as_millis();
 
-        TREE_SNAPSHOT
-            .in_memory
-            .insert(timestamp, reduced_data);
+        TREE_SNAPSHOT.in_memory.insert(timestamp, reduced_data);
         SHOULD_FLUSH_TREE_SNAPSHOT.notify_one();
 
-        info!(duration = &*format!("{:?}", db_start_time.elapsed()); "Write cache into memory");
+        info_wrap(Some(db_start_time.elapsed()), "Write cache into memory");
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
@@ -142,10 +145,13 @@ pub async fn prefetch(
         SHOULD_FLUSH_QUERY_SNAPSHOT.notify_one();
         let json = Json(prefetch_opt);
 
-        info!(duration = &*format!("{:?}", json_start_time.elapsed()); "Create JSON response");
+        info_wrap(Some(json_start_time.elapsed()), "Create JSON response");
 
         // Total elapsed time
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "(total time) Get_data_length complete");
+        info_wrap(
+            Some(start_time.elapsed()),
+            "(total time) Get_data_length complete",
+        );
         json
     })
     .await
@@ -154,6 +160,7 @@ pub async fn prefetch(
 
 #[get("/get/get-data?<timestamp>&<start>&<end>")]
 pub async fn get_data(
+    _auth: AuthGuard,
     timestamp: u128,
     start: usize,
     end: usize,
@@ -189,7 +196,10 @@ pub async fn get_data(
 
             match data_vec {
                 Ok(vec) => {
-                    warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get data: {} ~ {}", start, end);
+                    warn_wrap(
+                        Some(start_time.elapsed()),
+                        &format!("Get data: {} ~ {}", start, end),
+                    );
                     Ok(Json(vec))
                 }
                 Err(e) => Err(e),
@@ -203,12 +213,12 @@ pub async fn get_data(
     .unwrap()
 }
 #[get("/get/get-config.json")]
-pub async fn get_config() -> Json<&'static PublicConfig> {
+pub async fn get_config(_auth: AuthGuard) -> Json<&'static PublicConfig> {
     Json(&*PUBLIC_CONFIG)
 }
 
 #[get("/get/get-tags")]
-pub async fn get_tags() -> Json<Vec<TagInfo>> {
+pub async fn get_tags(_auth: AuthGuard) -> Json<Vec<TagInfo>> {
     tokio::task::spawn_blocking(move || {
         let vec_tags_info = TREE.read_tags();
         Json(vec_tags_info)
@@ -225,7 +235,7 @@ pub struct AlbumInfo {
 }
 
 #[get("/get/get-albums")]
-pub async fn get_albums() -> Json<Vec<AlbumInfo>> {
+pub async fn get_albums(_auth: AuthGuard) -> Json<Vec<AlbumInfo>> {
     tokio::task::spawn_blocking(move || {
         let album_list = TREE.read_albums();
         let album_info_list = album_list
@@ -242,11 +252,18 @@ pub async fn get_albums() -> Json<Vec<AlbumInfo>> {
 }
 
 #[get("/get/get-rows?<index>&<timestamp>")]
-pub async fn get_rows(index: usize, timestamp: u128) -> Result<Json<Row>, Status> {
+pub async fn get_rows(
+    _auth: AuthGuard,
+    index: usize,
+    timestamp: u128,
+) -> Result<Json<Row>, Status> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Read rows: index = {}", index);
+        info_wrap(
+            Some(start_time.elapsed()),
+            &format!("Read rows: index = {}", index),
+        );
         return Ok(Json(filtered_rows));
     })
     .await
@@ -254,7 +271,10 @@ pub async fn get_rows(index: usize, timestamp: u128) -> Result<Json<Row>, Status
 }
 
 #[get("/get/get-scroll-bar?<timestamp>")]
-pub async fn get_scroll_bar(timestamp: u128) -> Result<Json<Vec<ScrollBarData>>, Status> {
+pub async fn get_scroll_bar(
+    _auth: AuthGuard,
+    timestamp: u128,
+) -> Result<Json<Vec<ScrollBarData>>, Status> {
     let scrollbar_data = TREE_SNAPSHOT.read_scrollbar(timestamp);
     Ok(Json(scrollbar_data))
 }

@@ -3,6 +3,8 @@ use rocket::http::Status;
 use rocket::response::Responder;
 use rocket_seek_stream::SeekStream;
 use std::path::{Path, PathBuf};
+
+use crate::router::fairing::AuthGuard;
 #[derive(Responder)]
 pub enum CompressedFileResponse<'a> {
     SeekStream(SeekStream<'a>),
@@ -11,6 +13,7 @@ pub enum CompressedFileResponse<'a> {
 
 #[get("/object/compressed/<file_path..>")]
 pub async fn compressed_file(
+    _auth: AuthGuard,
     file_path: PathBuf,
 ) -> Result<CompressedFileResponse<'static>, Status> {
     let compressed_file_path = Path::new("./object/compressed").join(&file_path);

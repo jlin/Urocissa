@@ -5,6 +5,7 @@ use crate::executor;
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
+use crate::router::fairing::AuthGuard;
 use rocket::serde::json::Json;
 use serde::Deserialize;
 #[derive(Debug, Deserialize)]
@@ -14,7 +15,7 @@ pub struct RegenerateData {
     timestamp: u128,
 }
 #[post("/put/regenerate-preview", format = "json", data = "<json_data>")]
-pub async fn regenerate_preview(json_data: Json<RegenerateData>) -> () {
+pub async fn regenerate_preview(_auth: AuthGuard, json_data: Json<RegenerateData>) -> () {
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 

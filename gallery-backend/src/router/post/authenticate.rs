@@ -24,7 +24,9 @@ pub struct Claims {
 }
 
 #[post("/post/authenticate", data = "<password>")]
-pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'static str> {
+pub async fn authenticate(
+    password: Json<String>,
+) -> Result<Json<String>, &'static str> {
     let input_password = password.into_inner();
 
     // Verify the password

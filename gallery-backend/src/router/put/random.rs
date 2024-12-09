@@ -1,10 +1,10 @@
-use crate::public::database_struct::database::definition::DataBase;
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
+use crate::{public::database_struct::database::definition::DataBase, router::fairing::AuthGuard};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[put("/put/generate_random_data?<number>")]
-pub async fn generate_random_data(number: usize) {
+pub async fn generate_random_data(_auth: AuthGuard, number: usize) {
     let data_vec: Vec<DataBase> = (0..number)
         .into_par_iter()
         .map(|_| DataBase::generate_random_data())
