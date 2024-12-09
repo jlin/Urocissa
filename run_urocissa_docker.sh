@@ -185,7 +185,12 @@ prepare_volumes() {
         IFS=',' read -ra PATHS <<<"$SYNC_PATH"
         for path in "${PATHS[@]}"; do
             trimmed_path=$(echo "$path" | xargs)
-            abs_path=$(realpath -m "$(dirname "$ENV_FILE")/$trimmed_path")
+            # Check if the path is absolute
+            if [[ "$trimmed_path" = /* ]]; then
+                abs_path=$(realpath -m "$trimmed_path")
+            else
+                abs_path=$(realpath -m "$(dirname "$ENV_FILE")/$trimmed_path")
+            fi
             DYNAMIC_VOLUMES+=("$abs_path:$abs_path")
         done
     else
