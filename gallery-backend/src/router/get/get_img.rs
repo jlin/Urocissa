@@ -38,3 +38,18 @@ pub async fn compressed_file(
             })
     }
 }
+
+#[get("/object/imported/<file_path..>")]
+pub async fn imported_file(
+    _auth: AuthGuard,
+    file_path: PathBuf,
+) -> Result<CompressedFileResponse<'static>, Status> {
+    let imported_file_path = Path::new("./object/compressed").join(&file_path);
+    NamedFile::open(imported_file_path)
+        .await
+        .map(CompressedFileResponse::NamedFile)
+        .map_err(|error| {
+            error!("Error opening imported file: {:?}", error);
+            Status::NotFound
+        })
+}

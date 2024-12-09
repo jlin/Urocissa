@@ -14,11 +14,6 @@ pub fn redirect_to_photo() -> content::RawHtml<String> {
     content::RawHtml(INDEX_HTML.to_string())
 }
 
-#[get("/share/<_path..>")]
-pub fn redirect_to_photo_2(_path: PathBuf) -> content::RawHtml<String> {
-    content::RawHtml(INDEX_HTML.to_string())
-}
-
 #[get("/login")]
 pub async fn login() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))

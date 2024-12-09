@@ -1,4 +1,4 @@
-use crate::router::get::get_data::Prefetch;
+use crate::router::get::get_prefetch::Prefetch;
 
 use super::{
     album::Album, database_struct::database::definition::DataBase, reduced_data::ReducedData,
@@ -7,8 +7,14 @@ use super::{
 use redb::{TypeName, Value};
 
 impl Value for DataBase {
-    type SelfType<'a> = Self where Self: 'a;
-    type AsBytes<'a> = Vec<u8> where Self: 'a;
+    type SelfType<'a>
+        = Self
+    where
+        Self: 'a;
+    type AsBytes<'a>
+        = Vec<u8>
+    where
+        Self: 'a;
 
     fn fixed_width() -> Option<usize> {
         None
@@ -30,8 +36,14 @@ impl Value for DataBase {
 }
 
 impl Value for ReducedData {
-    type SelfType<'a> = Self where Self: 'a;
-    type AsBytes<'a> = Vec<u8> where Self: 'a;
+    type SelfType<'a>
+        = Self
+    where
+        Self: 'a;
+    type AsBytes<'a>
+        = Vec<u8>
+    where
+        Self: 'a;
 
     fn fixed_width() -> Option<usize> {
         None
@@ -58,8 +70,14 @@ impl Value for ReducedData {
 }
 
 impl Value for Row {
-    type SelfType<'a> = Self where Self: 'a;
-    type AsBytes<'a> = Vec<u8> where Self: 'a;
+    type SelfType<'a>
+        = Self
+    where
+        Self: 'a;
+    type AsBytes<'a>
+        = Vec<u8>
+    where
+        Self: 'a;
 
     fn fixed_width() -> Option<usize> {
         None
@@ -81,8 +99,14 @@ impl Value for Row {
 }
 
 impl Value for Album {
-    type SelfType<'a> = Self where Self: 'a;
-    type AsBytes<'a> = Vec<u8> where Self: 'a;
+    type SelfType<'a>
+        = Self
+    where
+        Self: 'a;
+    type AsBytes<'a>
+        = Vec<u8>
+    where
+        Self: 'a;
 
     fn fixed_width() -> Option<usize> {
         None
@@ -103,10 +127,15 @@ impl Value for Album {
     }
 }
 
-
 impl Value for Prefetch {
-    type SelfType<'a> = Self where Self: 'a;
-    type AsBytes<'a> = Vec<u8> where Self: 'a;
+    type SelfType<'a>
+        = Self
+    where
+        Self: 'a;
+    type AsBytes<'a>
+        = Vec<u8>
+    where
+        Self: 'a;
 
     fn fixed_width() -> Option<usize> {
         None

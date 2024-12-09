@@ -9,28 +9,10 @@ use public::tree::TREE;
 use redb::ReadableTableMetadata;
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
-use router::fairing::{auth_request_fairing, cache_control_fairing};
+use router::fairing::cache_control_fairing;
 use router::{
-    delete::delete_data::delete_data,
-    get::get_data::{
-        get_albums, get_config, get_data, get_rows, get_scroll_bar, get_tags, prefetch,
-    },
-    get::get_img::compressed_file,
-    get::get_page::{
-        album_page, albums, albums_view, all, all_view, archived, archived_view, catch_view_routes,
-        favicon, favorite, favorite_view, login, redirect_to_login, redirect_to_photo,
-        redirect_to_photo_2, setting, tags, trashed, trashed_view, unauthorized,
-    },
-    post::{
-        authenticate::authenticate, authenticate::authenticate_share, create_album::create_album,
-        post_upload::upload,
-    },
-    put::{
-        edit_album::{edit_album, set_album_cover, set_album_title},
-        edit_tag::edit_tag,
-        random::generate_random_data,
-        regenerate_preview::regenerate_preview,
-    },
+    delete::generate_delete_routes, get::generate_get_routes, post::generate_post_routes,
+    put::generate_put_routes,
 };
 use std::thread;
 use std::time::Instant;
@@ -62,7 +44,7 @@ async fn rocket() -> _ {
 
     rocket::build()
         .attach(cache_control_fairing())
-        .attach(auth_request_fairing())
+        /* .attach(auth_request_fairing()) */
         .attach(AdHoc::on_liftoff("Shutdown", |rocket| {
             Box::pin(async move {
                 let shutdown = rocket.shutdown();
@@ -73,53 +55,12 @@ async fn rocket() -> _ {
                 });
             })
         }))
-        .mount("/object/imported", FileServer::from("./object/imported"))
         .mount(
             "/assets",
             FileServer::from("../gallery-frontend/dist/assets"),
         )
-        .mount(
-            "/",
-            routes![
-                redirect_to_photo,
-                redirect_to_photo_2,
-                favicon,
-                login,
-                compressed_file,
-                edit_tag,
-                tags,
-                favorite,
-                favorite_view,
-                archived,
-                archived_view,
-                all,
-                all_view,
-                setting,
-                upload,
-                get_data,
-                get_config,
-                get_tags,
-                catch_view_routes,
-                unauthorized,
-                prefetch,
-                generate_random_data,
-                get_rows,
-                delete_data,
-                trashed,
-                trashed_view,
-                get_scroll_bar,
-                regenerate_preview,
-                authenticate,
-                redirect_to_login,
-                create_album,
-                authenticate_share,
-                get_albums,
-                edit_album,
-                set_album_cover,
-                album_page,
-                albums,
-                albums_view,
-                set_album_title
-            ],
-        )
+        .mount("/", generate_get_routes())
+        .mount("/", generate_post_routes())
+        .mount("/", generate_put_routes())
+        .mount("/", generate_delete_routes())
 }

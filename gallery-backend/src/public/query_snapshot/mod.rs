@@ -1,9 +1,10 @@
 pub mod new;
 pub mod read_query_snapshots;
 pub mod start_loop;
-use crate::router::get::get_data::Prefetch;
 use dashmap::DashMap;
 use std::sync::LazyLock;
+
+use crate::router::get::get_prefetch::Prefetch;
 
 pub type PrefetchReturn = Option<Prefetch>;
 
