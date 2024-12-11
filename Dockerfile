@@ -23,7 +23,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 ######################
 FROM chef AS builder
 
-RUN apk add --no-cache openssl-dev openssl-libs-static build-base musl-dev
+RUN apk add --no-cache openssl-dev openssl-libs-static
 
 COPY --from=planner /app/gallery-backend/recipe.json /app/gallery-backend/recipe.json
 

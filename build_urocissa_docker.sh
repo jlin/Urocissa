@@ -141,18 +141,14 @@ ensure_config_file() {
 build_docker_image() {
     debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE"
 
-    DOCKER_BUILD_COMMAND="docker buildx build \
-    --build-arg BUILD_TYPE=${BUILD_TYPE} \
-    --platform linux/amd64,linux/arm64 \
-    -t urocissa:latest \
-    --push"
+    DOCKER_BUILD_COMMAND="docker build \
+        --build-arg BUILD_TYPE=${BUILD_TYPE}"
 
     if [ "${NO_CACHE}" = true ]; then
         DOCKER_BUILD_COMMAND+=" --no-cache"
     fi
 
-    # Add the build context as the last argument
-    DOCKER_BUILD_COMMAND+=" ."
+    DOCKER_BUILD_COMMAND+=" -t urocissa ."
 
     if [[ -n "$LOG_FILE" ]]; then
         eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
