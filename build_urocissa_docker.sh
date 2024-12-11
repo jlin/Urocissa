@@ -145,14 +145,14 @@ build_docker_image() {
     --build-arg BUILD_TYPE=${BUILD_TYPE} \
     --platform linux/amd64,linux/arm64 \
     -t urocissa:latest \
-    --push \
-    ."
+    --push"
 
     if [ "${NO_CACHE}" = true ]; then
         DOCKER_BUILD_COMMAND+=" --no-cache"
     fi
 
-    DOCKER_BUILD_COMMAND+=" -t urocissa ."
+    # Add the build context as the last argument
+    DOCKER_BUILD_COMMAND+=" ."
 
     if [[ -n "$LOG_FILE" ]]; then
         eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
