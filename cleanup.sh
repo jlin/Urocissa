@@ -40,9 +40,24 @@ for folder in "${folders[@]}"; do
     fi
 done
 
-# Remove all Docker containers and images
-echo "Removing Docker containers and images..."
-docker rm -f $(docker ps -aq) 2>/dev/null || echo "No containers to remove."
-docker rmi -f $(docker images -q) 2>/dev/null || echo "No images to remove."
+# Remove specific Docker containers (excluding multiarch builder)
+echo "Removing Docker containers (excluding multiarch builder)..."
+for container in $(docker ps -aq); do
+    if docker inspect "$container" 2>/dev/null | grep -q '"builder": "true"'; then
+        echo "Skipping builder container: $container"
+    else
+        docker rm -f "$container" 2>/dev/null && echo "Removed container: $container"
+    fi
+done
+
+# Remove specific Docker images (excluding multiarch builder images)
+echo "Removing Docker images (excluding multiarch builder images)..."
+for image in $(docker images -q); do
+    if docker inspect "$image" 2>/dev/null | grep -q 'multiarch-builder'; then
+        echo "Skipping builder image: $image"
+    else
+        docker rmi -f "$image" 2>/dev/null && echo "Removed image: $image"
+    fi
+done
 
 echo "Cleanup completed."
