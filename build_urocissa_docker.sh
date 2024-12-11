@@ -125,6 +125,19 @@ parse_arguments() {
     done
 }
 
+ensure_config_file() {
+    # This function ensures that certain config files exist before running.
+    # It's retained for logging purposes but here we assume the files already exist as they should be created before build.
+    local source_file="$1"
+    local target_file="$2"
+    if [[ ! -f "$target_file" ]]; then
+        debug_log "$target_file not found. Attempting to restore from $source_file."
+        mv "$source_file" "$target_file"
+        cp "$target_file" "$source_file"
+    fi
+}
+
+
 build_docker_image() {
     debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE"
 
@@ -157,6 +170,8 @@ main() {
     LOG_FILE=""
     BUILD_TYPE="release"
     NO_CACHE=false
+
+    ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts"
 
     parse_arguments "$@"
     build_docker_image

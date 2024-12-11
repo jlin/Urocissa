@@ -101,7 +101,6 @@ setup_environment() {
 
     # Ensure config files exist and mount them
     ensure_config_file "./gallery-backend/Rocket.default.toml" "./gallery-backend/Rocket.toml" "${UROCISSA_PATH}/gallery-backend/Rocket.toml"
-    ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts" "${UROCISSA_PATH}/gallery-frontend/config.ts"
     ensure_config_file "./gallery-backend/config.default.json" "./gallery-backend/config.json" "${UROCISSA_PATH}/gallery-backend/config.json"
     ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
 
