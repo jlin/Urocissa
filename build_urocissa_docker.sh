@@ -137,18 +137,37 @@ ensure_config_file() {
     fi
 }
 
-
 build_docker_image() {
+    debug_log "Setting up environment for multiarch builds..."
+
+    # Check if the builder exists
+    BUILDER_NAME="multiarch-builder"
+    EXISTING_BUILDER=$(docker buildx ls | grep "$BUILDER_NAME")
+
+    if [ -z "$EXISTING_BUILDER" ]; then
+        debug_log "Creating new multiarch builder: $BUILDER_NAME"
+        docker buildx create --use --name "$BUILDER_NAME"
+    else
+        debug_log "Multiarch builder '$BUILDER_NAME' already exists. Skipping creation."
+        docker buildx use "$BUILDER_NAME"
+    fi
+
+    # Bootstrap the builder
+    debug_log "Bootstrapping multiarch builder..."
+    docker buildx inspect --bootstrap
+
+    # Proceed to building the Docker image
     debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE"
 
-    DOCKER_BUILD_COMMAND="docker build \
-        --build-arg BUILD_TYPE=${BUILD_TYPE}"
+    DOCKER_BUILD_COMMAND="docker buildx build \
+        --build-arg BUILD_TYPE=${BUILD_TYPE} \
+        --platform linux/amd64,linux/arm64"
 
     if [ "${NO_CACHE}" = true ]; then
         DOCKER_BUILD_COMMAND+=" --no-cache"
     fi
 
-    DOCKER_BUILD_COMMAND+=" -t urocissa ."
+    DOCKER_BUILD_COMMAND+=" -t hsa00000/urocissa:latest --push ."
 
     if [[ -n "$LOG_FILE" ]]; then
         eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
