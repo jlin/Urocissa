@@ -40,21 +40,21 @@ for folder in "${folders[@]}"; do
     fi
 done
 
-# Remove specific Docker containers (excluding multiarch builder)
-echo "Removing Docker containers (excluding multiarch builder)..."
+# Remove specific Docker containers (excluding Buildx container)
+echo "Removing Docker containers (excluding Buildx container)..."
 for container in $(docker ps -aq); do
-    if docker inspect "$container" 2>/dev/null | grep -q '"builder": "true"'; then
-        echo "Skipping builder container: $container"
+    if docker inspect "$container" 2>/dev/null | grep -q 'buildx_buildkit_multiarch-builder0'; then
+        echo "Skipping Buildx container: $container"
     else
         docker rm -f "$container" 2>/dev/null && echo "Removed container: $container"
     fi
 done
 
-# Remove specific Docker images (excluding multiarch builder images)
-echo "Removing Docker images (excluding multiarch builder images)..."
+# Remove specific Docker images (excluding Buildx image)
+echo "Removing Docker images (excluding Buildx image)..."
 for image in $(docker images -q); do
-    if docker inspect "$image" 2>/dev/null | grep -q 'multiarch-builder'; then
-        echo "Skipping builder image: $image"
+    if docker inspect "$image" 2>/dev/null | grep -q 'moby/buildkit:buildx-stable-1'; then
+        echo "Skipping Buildx image: $image"
     else
         docker rmi -f "$image" 2>/dev/null && echo "Removed image: $image"
     fi
