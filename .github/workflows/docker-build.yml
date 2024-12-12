@@ -3,7 +3,7 @@ name: Build and Push Urocissa Docker Images
 on:
   push:
     branches:
-      - feat/docker-hub/KiringYJ  # Trigger on commits to the 'main' branch
+      - feat/docker-hub-4  # Trigger on commits to the 'main' branch
 
 jobs:
   build-and-push:
