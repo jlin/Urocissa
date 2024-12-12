@@ -9,8 +9,9 @@ show_help() {
 Usage: ./build_urocissa_docker.sh [OPTIONS]
 
 Description:
-  This script builds the Urocissa Docker image. It allows specifying a build type (release, debug, or custom profiles),
-  enabling debug mode, logging to a file, and disabling Docker cache.
+  This script builds the Urocissa Docker image for a specified architecture and pushes it.
+  It allows specifying a build type (release, debug, or custom profiles), enabling debug mode, 
+  logging to a file, and disabling Docker cache.
 
 Options:
   --help              Show this help message and exit.
@@ -22,22 +23,15 @@ Options:
                       - debug
                       - Any valid custom profile defined in Cargo.toml (e.g., dev-release)
   --no-cache          Disable Docker build cache. Forces a fresh build of all layers.
+  --arch <architecture> 
+                      Specify the target architecture (e.g., amd64 or arm64).
 
 Examples:
-  1. Build with default settings (release build):
-     ./build_urocissa_docker.sh
+  1. Build for amd64 with default settings (release build):
+     ./build_urocissa_docker.sh --arch amd64
 
-  2. Enable debug mode and specify a log file:
-     ./build_urocissa_docker.sh --debug --log-file build.log
-
-  3. Build with debug configuration:
-     ./build_urocissa_docker.sh --build-type debug
-
-  4. Build with a custom profile (e.g., dev-release):
-     ./build_urocissa_docker.sh --build-type dev-release
-
-  5. Disable Docker cache during build:
-     ./build_urocissa_docker.sh --no-cache
+  2. Build for arm64 with debug configuration:
+     ./build_urocissa_docker.sh --arch arm64 --build-type debug
 
 Notes:
   - The log file specified with --log-file will be initialized at the start.
@@ -45,7 +39,7 @@ Notes:
   - If --build-type is not specified, the default is "release".
   - The --build-type option supports custom profiles as defined in Cargo.toml.
   - The --no-cache option ensures no intermediate layers are used from previous builds.
-
+  - The --arch option is required. Valid values are typically "amd64" and "arm64".
 EOF
 }
 
@@ -84,6 +78,16 @@ validate_build_type() {
     fi
 }
 
+validate_arch() {
+    local arch="$1"
+    # We can validate that arch is one of the recognized architectures
+    # For this example, let's accept amd64 and arm64.
+    if [[ "$arch" != "amd64" && "$arch" != "arm64" ]]; then
+        echo "Error: Invalid architecture '$arch'. Valid values: amd64, arm64"
+        exit 1
+    fi
+}
+
 parse_arguments() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -117,6 +121,15 @@ parse_arguments() {
             validate_build_type "$BUILD_TYPE"
             shift 2
             ;;
+        --arch)
+            ARCH="$2"
+            if [[ -z "$ARCH" ]]; then
+                echo "Error: Architecture is required."
+                exit 1
+            fi
+            validate_arch "$ARCH"
+            shift 2
+            ;;
         *)
             echo "Error: Unknown option $1"
             exit 1
@@ -126,8 +139,6 @@ parse_arguments() {
 }
 
 ensure_config_file() {
-    # This function ensures that certain config files exist before running.
-    # It's retained for logging purposes but here we assume the files already exist as they should be created before build.
     local source_file="$1"
     local target_file="$2"
     if [[ ! -f "$target_file" ]]; then
@@ -139,25 +150,10 @@ ensure_config_file() {
 
 build_docker_image() {
     debug_log "Setting up environment for multiarch builds..."
+    debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE for ARCH=$ARCH"
 
-    # Check if the builder exists
-    # BUILDER_NAME="multiarch-builder"
-    # EXISTING_BUILDER=$(docker buildx ls | grep "$BUILDER_NAME")
-
-    # if [ -z "$EXISTING_BUILDER" ]; then
-    #     debug_log "Creating new multiarch builder: $BUILDER_NAME"
-    #     docker buildx create --use --name "$BUILDER_NAME"
-    # else
-    #     debug_log "Multiarch builder '$BUILDER_NAME' already exists. Skipping creation."
-    #     docker buildx use "$BUILDER_NAME"
-    # fi
-
-    # Bootstrap the builder
-    # debug_log "Bootstrapping multiarch builder..."
-    # docker buildx inspect --bootstrap
-
-    # Proceed to building the Docker image
-    debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE"
+    # Tag includes architecture suffix so we don't overwrite images
+    IMAGE_TAG="hsa00000/urocissa:latest-$ARCH"
 
     DOCKER_BUILD_COMMAND="docker build \
         --build-arg BUILD_TYPE=${BUILD_TYPE}"
@@ -166,7 +162,7 @@ build_docker_image() {
         DOCKER_BUILD_COMMAND+=" --no-cache"
     fi
 
-    DOCKER_BUILD_COMMAND+=" -t hsa00000/urocissa:latest --push ."
+    DOCKER_BUILD_COMMAND+=" -t ${IMAGE_TAG} ."
 
     if [[ -n "$LOG_FILE" ]]; then
         eval "$DOCKER_BUILD_COMMAND" >>"$LOG_FILE" 2>&1
@@ -179,7 +175,14 @@ build_docker_image() {
         exit 1
     fi
 
-    debug_log "Docker image built successfully."
+    debug_log "Docker image built successfully. Pushing image ${IMAGE_TAG}"
+    docker push ${IMAGE_TAG}
+    if [[ $? -ne 0 ]]; then
+        echo "Error: Docker push failed for ${IMAGE_TAG}. Exiting..."
+        exit 1
+    fi
+
+    debug_log "Docker image ${IMAGE_TAG} pushed successfully."
 }
 
 main() {
@@ -188,6 +191,7 @@ main() {
     LOG_FILE=""
     BUILD_TYPE="release"
     NO_CACHE=false
+    ARCH=""
 
     ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts"
 

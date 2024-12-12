@@ -1,33 +1,69 @@
-name: Build and Push Urocissa Docker Images
+name: Build and Push Urocissa Docker Images (Multi-arch)
 
 on:
   push:
     branches:
-      - feat/docker-hub-4  # Trigger on commits to the 'main' branch
+      - feat/docker-hub-4
 
 jobs:
-  build-and-push:
-    runs-on: self-hosted
-
+  # Job for building amd64 image on ubuntu-latest
+  build-amd64:
+    runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 3: Make the script executable
       - name: Make build script executable
         run: chmod +x ./build_urocissa_docker.sh
 
-      # Step 4: Run the build script
-      - name: Run build script
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: ./build_urocissa_docker.sh
+      - name: Build amd64 Image
+        run: ./build_urocissa_docker.sh --arch amd64
+
+      - name: Upload amd64 Image Tag info
+        run: echo "AMD64_IMAGE_TAG=hsa00000/urocissa:latest-amd64" >> $GITHUB_ENV
+
+  # Job for building arm64 image on self-hosted runner
+  build-arm64:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Make build script executable
+        run: chmod +x ./build_urocissa_docker.sh
+
+      - name: Build arm64 Image
+        run: ./build_urocissa_docker.sh --arch arm64
+
+      - name: Upload arm64 Image Tag info
+        run: echo "ARM64_IMAGE_TAG=hsa00000/urocissa:latest-arm64" >> $GITHUB_ENV
+
+  # Job to create and push the multi-arch manifest
+  create-manifest:
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create and Push Manifest
+        run: |
+          docker manifest create hsa00000/urocissa:latest \
+            --amend hsa00000/urocissa:latest-amd64 \
+            --amend hsa00000/urocissa:latest-arm64
+          docker manifest push hsa00000/urocissa:latest
