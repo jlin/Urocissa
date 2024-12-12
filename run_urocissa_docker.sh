@@ -104,9 +104,21 @@ setup_environment() {
     ensure_config_file "./gallery-backend/config.default.json" "./gallery-backend/config.json" "${UROCISSA_PATH}/gallery-backend/config.json"
     ensure_config_file "./gallery-backend/.env.default" "$ENV_FILE" "${UROCISSA_PATH}/gallery-backend/.env"
 
+    # Ensure the upload folder exists
+    UPLOAD_DIR="./gallery-backend/upload"
+    if [ ! -d "$UPLOAD_DIR" ]; then
+        mkdir -p "$UPLOAD_DIR"
+        debug_log "Created upload directory at $UPLOAD_DIR"
+    else
+        debug_log "Upload directory already exists at $UPLOAD_DIR"
+    fi
+
     # Convert CRLF to LF
     sed -i 's/\r$//' "$ENV_FILE"
+
+
 }
+
 
 prepare_volumes() {
     # Process SYNC_PATH for dynamic volume mounts
