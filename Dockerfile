@@ -82,15 +82,14 @@ COPY --from=frontend-builder /app/gallery-frontend/public /app/gallery-frontend/
 WORKDIR /app
 
 # Create the entrypoint script
-# Create the entrypoint script
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo 'set -e' >> /entrypoint.sh && \
     echo 'if [ -z "${UROCISSA_PATH}" ]; then' >> /entrypoint.sh && \
     echo '    echo "Error: UROCISSA_PATH is not set. Terminating."' >> /entrypoint.sh && \
     echo '    exit 1' >> /entrypoint.sh && \
     echo 'else' >> /entrypoint.sh && \
-    echo '    mkdir -p "${UROCISSA_PATH}"' >> /entrypoint.sh && \
-    echo '    ls -al /app/gallery-frontend' >> /entrypoint.sh && \
+    echo '    mkdir -p "${UROCISSA_PATH}/gallery-backend"' >> /entrypoint.sh && \
+    echo '    mkdir -p "${UROCISSA_PATH}/gallery-frontend"' >> /entrypoint.sh && \
     echo '    mv /app/gallery-backend/* "${UROCISSA_PATH}/gallery-backend"' >> /entrypoint.sh && \
     echo '    mv /app/gallery-frontend/* "${UROCISSA_PATH}/gallery-frontend"' >> /entrypoint.sh && \
     echo '    echo "Listing ${UROCISSA_PATH}/gallery-backend:"' >> /entrypoint.sh && \
