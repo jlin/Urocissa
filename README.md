@@ -72,10 +72,9 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 | Existing Folders           | ❌     |
 
 ## Steps to Set Up and Use the App
+To instantly set up and try Urocissa using Docker on Linux, follow these steps:
 
-To quickly set up and try Urocissa using Docker on Linux, follow these steps:
-
-### Quick Setup with Docker
+### Instant Setup with Docker
 
 1. **Clone the Repository**
 
@@ -101,7 +100,8 @@ To quickly set up and try Urocissa using Docker on Linux, follow these steps:
    bash run_urocissa_docker.sh
    ```
 
-   This script takes care of all the required installations and starts the application, enabling you to get Urocissa running with minimal effort.
+   This script installs everything and launches Urocissa in five seconds.
+
    
 ### Build from Source
 
@@ -124,13 +124,22 @@ git pull
 
 ### 2. Rebuild
 
-If using Docker, simply run the script
+If using Docker, follow these steps:
 
-```bash
-bash run_urocissa_docker.sh
-```
+1. Pull the latest Docker image:
 
-Otherwise, follow these manual steps to update:
+   ```bash
+   docker pull hsa00000/urocissa:latest
+   ```
+
+2. Run the Docker script:
+
+   ```bash
+   bash run_urocissa_docker.sh
+   ```
+This will update and start the updated app.
+
+If you are not using Docker and prefer to build from source, follow these manual steps to update:
 
 ### Rebuild the Frontend
 
