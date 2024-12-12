@@ -3,7 +3,7 @@ name: Build and Push Urocissa Docker Images (Multi-arch)
 on:
   push:
     branches:
-      - feat/docker-hub-4
+      - main
 
 jobs:
   # Job for building amd64 image on ubuntu-latest
