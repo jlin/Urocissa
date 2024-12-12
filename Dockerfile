@@ -90,6 +90,7 @@ RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo '    exit 1' >> /entrypoint.sh && \
     echo 'else' >> /entrypoint.sh && \
     echo '    mkdir -p "${UROCISSA_PATH}"' >> /entrypoint.sh && \
+    echo '    ls -al /app/gallery-frontend' >> /entrypoint.sh && \
     echo '    mv /app/gallery-backend/* "${UROCISSA_PATH}/gallery-backend"' >> /entrypoint.sh && \
     echo '    mv /app/gallery-frontend/* "${UROCISSA_PATH}/gallery-frontend"' >> /entrypoint.sh && \
     echo '    echo "Listing ${UROCISSA_PATH}/gallery-backend:"' >> /entrypoint.sh && \
