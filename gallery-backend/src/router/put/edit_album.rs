@@ -1,6 +1,6 @@
 use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
-use crate::router::fairing::AuthGuard;
+use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use std::collections::HashSet;
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
@@ -21,7 +21,11 @@ pub struct EditAlbumsData {
     timestamp: u128,
 }
 #[put("/put/edit_album", format = "json", data = "<json_data>")]
-pub async fn edit_album(_auth: AuthGuard, json_data: Json<EditAlbumsData>) -> () {
+pub async fn edit_album(
+    _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
+    json_data: Json<EditAlbumsData>,
+) -> () {
     tokio::task::spawn_blocking(move || {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
@@ -87,6 +91,7 @@ pub struct SetAlbumCover {
 #[post("/post/set_album_cover", data = "<set_album_cover>")]
 pub async fn set_album_cover(
     _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
     set_album_cover: Json<SetAlbumCover>,
 ) -> Result<(), Status> {
     tokio::task::spawn_blocking(move || {
@@ -124,6 +129,7 @@ pub struct SetAlbumTitle {
 #[post("/post/set_album_title", data = "<set_album_title>")]
 pub async fn set_album_title(
     _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
     set_album_title: Json<SetAlbumTitle>,
 ) -> Result<(), Status> {
     tokio::task::spawn_blocking(move || {

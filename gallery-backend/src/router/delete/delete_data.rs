@@ -2,7 +2,7 @@ use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::fairing::AuthGuard;
+use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
@@ -12,7 +12,11 @@ pub struct DeleteList {
     timestamp: u128,
 }
 #[delete("/delete/delete-data", format = "json", data = "<json_data>")]
-pub async fn delete_data(_auth: AuthGuard, json_data: Json<DeleteList>) {
+pub async fn delete_data(
+    _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
+    json_data: Json<DeleteList>,
+) {
     tokio::task::spawn_blocking(move || {
         let timestamp = &json_data.timestamp;
 

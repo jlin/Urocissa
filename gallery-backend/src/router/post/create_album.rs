@@ -13,7 +13,7 @@ use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
-use crate::router::fairing::AuthGuard;
+use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -23,7 +23,7 @@ pub struct CreateAlbum {
 }
 
 #[post("/post/create_album", data = "<create_album>")]
-pub async fn create_album(_auth: AuthGuard, create_album: Json<CreateAlbum>) -> Result<(), Status> {
+pub async fn create_album(_auth: AuthGuard, _read_only_mode: ReadOnlyModeGuard, create_album: Json<CreateAlbum>) -> Result<(), Status> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();

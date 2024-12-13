@@ -4,6 +4,8 @@ use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use rocket::Request;
 
+use crate::public::config::PUBLIC_CONFIG;
+
 use super::post::authenticate::{Claims, JSON_WEB_TOKEN_SECRET_KEY};
 
 pub fn cache_control_fairing() -> AdHoc {
@@ -50,5 +52,20 @@ impl<'r> FromRequest<'r> for AuthGuard {
         }
 
         Outcome::Forward(Status::Unauthorized)
+    }
+}
+
+pub struct ReadOnlyModeGuard;
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for ReadOnlyModeGuard {
+    type Error = ();
+
+    async fn from_request(_req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        if PUBLIC_CONFIG.read_only_mode {
+            return Outcome::Error((Status::InternalServerError, ()));
+        }
+
+        Outcome::Success(ReadOnlyModeGuard)
     }
 }
