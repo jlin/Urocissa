@@ -2,7 +2,10 @@
   <v-container
     v-if="tagStore.fetched"
     id="table-container"
-    class="fill-height pa-1 bg-grey-darken-3 d-flex align-start"
+    class="pa-1 bg-grey-darken-3 d-flex align-start"
+    :style = "{
+      height: `calc(100% - ${navBarHeight}px)`
+    }"
     fluid
   >
     <v-row justify="center" class="ma-0">
@@ -45,6 +48,7 @@ import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
 import { searchByTag } from '@/script/common/functions'
+import { navBarHeight } from '@/script/common/constants'
 const initializedStore = useInitializedStore('mainId')
 const tagStore = useTagStore('mainId')
 const router = useRouter()
