@@ -1,7 +1,7 @@
 use std::{error::Error, sync::atomic::Ordering};
 
 use super::QuerySnapshot;
-use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT};
+use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT_TIMESTAMP};
 
 use redb::TableDefinition;
 
@@ -16,7 +16,7 @@ impl QuerySnapshot {
 
         let read_txn = self.in_disk.begin_read().unwrap();
 
-        let count_version = &VERSION_COUNT.load(Ordering::Relaxed).to_string();
+        let count_version = &VERSION_COUNT_TIMESTAMP.load(Ordering::Relaxed).to_string();
 
         let table_definition: TableDefinition<u64, PrefetchReturn> =
             TableDefinition::new(&count_version);

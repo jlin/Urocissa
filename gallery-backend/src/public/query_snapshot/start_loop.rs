@@ -1,5 +1,5 @@
 use super::QuerySnapshot;
-use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT};
+use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT_TIMESTAMP};
 use redb::TableDefinition;
 use std::{sync::atomic::Ordering, time::Instant};
 use tokio::sync::Notify;
@@ -12,7 +12,7 @@ impl QuerySnapshot {
     ///
     /// This function spawns a Tokio task that continuously waits for a `SHOULD_FLUSH_QUERY_SNAPSHOT` notification.
     /// Upon receiving the notification, it spawns a blocking task to flush in-memory query snapshots to disk.
-    /// Each snapshot is written to a table named after the current `VERSION_COUNT`, and the in-memory cache is updated accordingly.
+    /// Each snapshot is written to a table named after the current `VERSION_COUNT_TIMESTAMP`, and the in-memory cache is updated accordingly.
     ///
     /// # Returns
     ///
@@ -52,8 +52,9 @@ impl QuerySnapshot {
                                     let txn = self.in_disk.begin_write().unwrap();
 
                                     // Load the current version count and convert it to a string for table naming
-                                    let count_version =
-                                        &VERSION_COUNT.load(Ordering::Relaxed).to_string();
+                                    let count_version = &VERSION_COUNT_TIMESTAMP
+                                        .load(Ordering::Relaxed)
+                                        .to_string();
 
                                     // Define the table structure using the current version count as the table name
                                     let table_definition: TableDefinition<u64, PrefetchReturn> =

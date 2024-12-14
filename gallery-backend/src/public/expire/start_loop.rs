@@ -1,7 +1,7 @@
 use super::Expire;
 use crate::public::{
     query_snapshot::{PrefetchReturn, QUERY_SNAPSHOT},
-    tree::start_loop::VERSION_COUNT,
+    tree::start_loop::VERSION_COUNT_TIMESTAMP,
     tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER,
     utils::get_current_timestamp_u64,
 };
@@ -47,9 +47,9 @@ impl Expire {
                         .for_each(|table_handle| {
                             // Attempt to parse the table name as a `u64` timestamp
                             if let Ok(timestamp) = table_handle.name().parse::<u64>() {
-                                // Check if the current `VERSION_COUNT` is greater than the table's timestamp
+                                // Check if the current `VERSION_COUNT_TIMESTAMP` is greater than the table's timestamp
                                 // and if the table is expired based on custom logic
-                                if VERSION_COUNT.load(Ordering::Relaxed) > timestamp
+                                if VERSION_COUNT_TIMESTAMP.load(Ordering::Relaxed) > timestamp
                                     && self.expired_check(timestamp)
                                 {
                                     // Convert the timestamp to a string to define the table name

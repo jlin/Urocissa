@@ -2,7 +2,7 @@ use crate::public::expression::Expression;
 use crate::public::query_snapshot::start_loop::SHOULD_FLUSH_QUERY_SNAPSHOT;
 use crate::public::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::reduced_data::ReducedData;
-use crate::public::tree::start_loop::VERSION_COUNT;
+use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::start_loop::SHOULD_FLUSH_TREE_SNAPSHOT;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -54,7 +54,7 @@ pub async fn prefetch(
         let hasher = &mut DefaultHasher::new();
 
         expression_opt.hash(hasher);
-        VERSION_COUNT.load(Ordering::Relaxed).hash(hasher);
+        VERSION_COUNT_TIMESTAMP.load(Ordering::Relaxed).hash(hasher);
 
         let expression_hashed = hasher.finish();
 

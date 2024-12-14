@@ -23,7 +23,7 @@ pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<
 
 pub static SHOULD_RESET: Notify = Notify::const_new();
 
-pub static VERSION_COUNT: AtomicU64 = AtomicU64::new(0);
+pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 impl Tree {
     /// Starts an asynchronous loop that listens for reset notifications and updates the in-memory cache.
     ///
@@ -119,8 +119,8 @@ impl Tree {
                     // Retrieve the current timestamp
                     let current_timestamp = get_current_timestamp_u64();
 
-                    // Atomically swap the `VERSION_COUNT` with the current timestamp and get the last timestamp
-                    let last_timestamp = VERSION_COUNT.swap(current_timestamp, Ordering::SeqCst);
+                    // Atomically swap the `VERSION_COUNT_TIMESTAMP` with the current timestamp and get the last timestamp
+                    let last_timestamp = VERSION_COUNT_TIMESTAMP.swap(current_timestamp, Ordering::SeqCst);
 
                     // Log that the in-memory cache has been updated
                     info!("In-memory cache updated ({}).", current_timestamp);

@@ -11,7 +11,7 @@ pub type PrefetchReturn = Option<Prefetch>;
 #[derive(Debug)]
 pub struct QuerySnapshot {
     pub in_disk: &'static redb::Database,
-    pub in_memory: &'static DashMap<u64, PrefetchReturn>, // hash of query and VERSION_COUNT -> prefetch
+    pub in_memory: &'static DashMap<u64, PrefetchReturn>, // hash of query and VERSION_COUNT_TIMESTAMP -> prefetch
 }
 
 pub static QUERY_SNAPSHOT: LazyLock<QuerySnapshot> = LazyLock::new(|| QuerySnapshot::new());
