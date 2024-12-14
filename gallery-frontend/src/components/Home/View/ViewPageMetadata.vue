@@ -108,7 +108,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_favorite', index, isolationId)"
+                @click="quickRemoveTags('_favorite', [index], isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -118,7 +118,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_favorite', index, isolationId)"
+                @click="quickAddTags('_favorite', [index], isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -128,7 +128,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_archived', index, isolationId)"
+                @click="quickRemoveTags('_archived', [index], isolationId)"
                 >archived</v-chip
               >
               <v-chip
@@ -138,7 +138,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_archived', index, isolationId)"
+                @click="quickAddTags('_archived', [index], isolationId)"
                 >archived</v-chip
               >
             </v-list-item-title>
@@ -257,7 +257,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_favorite', index, isolationId)"
+                @click="quickRemoveTags('_favorite', [index], isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -267,7 +267,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_favorite', index, isolationId)"
+                @click="quickAddTags('_favorite', [index], isolationId)"
                 >favorite</v-chip
               >
               <v-chip
@@ -277,7 +277,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickRemoveTags('_archived', index, isolationId)"
+                @click="quickRemoveTags('_archived', [index], isolationId)"
                 >archived</v-chip
               >
               <v-chip
@@ -287,7 +287,7 @@
                 variant="tonal"
                 class="ma-1"
                 link
-                @click="quickAddTags('_archived', index, isolationId)"
+                @click="quickAddTags('_archived', [index], isolationId)"
                 >archived</v-chip
               >
             </v-list-item-title>

@@ -12,8 +12,8 @@
       :icon="metadata.database.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
       @click="
         metadata.database.tag.includes('_favorite')
-          ? quickRemoveTags('_favorite', index, isolationId)
-          : quickAddTags('_favorite', index, isolationId)
+          ? quickRemoveTags('_favorite', [index], isolationId)
+          : quickAddTags('_favorite', [index], isolationId)
       "
     ></v-btn>
     <v-btn
@@ -25,8 +25,8 @@
       "
       @click="
         metadata.database.tag.includes('_archived')
-          ? quickRemoveTags('_archived', index, isolationId)
-          : quickAddTags('_archived', index, isolationId)
+          ? quickRemoveTags('_archived', [index], isolationId)
+          : quickAddTags('_archived', [index], isolationId)
       "
     ></v-btn>
     <ViewPageToolBarDatabase

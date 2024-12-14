@@ -1,6 +1,6 @@
 <template>
   <AppBar />
-  <NavBarProgessBar />
+  <ProgessBar />
   <v-navigation-drawer v-model="showDrawer" temporary touchless width="150" class="no-select">
     <v-list nav :key="route.fullPath">
       <v-list-item slim to="/" prepend-icon="mdi-home" title="Home"></v-list-item>
@@ -33,7 +33,7 @@ import UploadModal from '@/components/Modal/uploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
 import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
-import NavBarProgessBar from './ProgessBar.vue'
+import ProgessBar from './ProgessBar.vue'
 
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'

@@ -19,7 +19,7 @@
         v-if="!album.tag.includes('_trashed')"
         prepend-icon="mdi-trash-can-outline"
         value="delete-file"
-        @click="quickAddTags('_trashed', index, isolationId)"
+        @click="quickAddTags('_trashed', [index], isolationId)"
       >
         <v-list-item-title class="wrap">{{ 'Delete' }}</v-list-item-title>
       </v-list-item>
