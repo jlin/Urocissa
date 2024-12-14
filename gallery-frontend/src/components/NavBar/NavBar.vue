@@ -1,5 +1,5 @@
 <template>
-  <NavBarAppBar />
+  <AppBar />
   <NavBarProgessBar />
   <v-navigation-drawer v-model="showDrawer" temporary touchless width="150" class="no-select">
     <v-list nav :key="route.fullPath">
@@ -28,12 +28,12 @@
 <script setup lang="ts">
 import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
 import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
-import NavBarAppBar from '@/components//NavBar/NavBarAppBar.vue'
+import AppBar from '@/components/NavBar/AppBar.vue'
 import UploadModal from '@/components/Modal/uploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
 import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
-import NavBarProgessBar from './NavBarProgessBar.vue'
+import NavBarProgessBar from './ProgessBar.vue'
 
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'

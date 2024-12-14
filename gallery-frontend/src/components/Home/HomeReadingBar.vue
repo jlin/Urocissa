@@ -20,15 +20,15 @@
       <v-card-title> {{ props.title }}</v-card-title>
     </v-card>
   </v-toolbar>
-  <NavBarAppBarEditBar v-else />
-  <NavBarProgessBar />
+  <EditBar v-else />
+  <ProgessBar />
 </template>
 <script setup lang="ts">
 import { useCollectionStore } from '@/store/collectionStore'
 import { leaveRead } from '@/script/navigator'
 import { useRoute } from 'vue-router'
-import NavBarAppBarEditBar from '../NavBar/NavBarAppBarEditBar.vue'
-import NavBarProgessBar from '../NavBar/NavBarProgessBar.vue'
+import EditBar from '../NavBar/EditBar.vue'
+import ProgessBar from '../NavBar/ProgessBar.vue'
 
 const props = defineProps<{
   isolationId: string
