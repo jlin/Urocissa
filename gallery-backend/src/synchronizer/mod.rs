@@ -8,120 +8,64 @@ use crate::public::{
     expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
 };
 
+use futures::stream::{FuturesUnordered, StreamExt};
+use log::{error, info};
+use std::future::Future;
+use tokio::task::JoinError;
+use tokio::task::JoinHandle;
+
 pub mod album;
 pub mod event;
 pub mod video;
 pub mod watch;
 
+/// Define a type alias for better readability
+type TaskResult = Result<(), JoinError>;
+
+/// Helper function to associate a task with its name
+fn named_task(
+    name: &'static str,
+    handle: JoinHandle<()>,
+) -> impl Future<Output = (&'static str, TaskResult)> {
+    async move { (name, handle.await) }
+}
+
 pub async fn start_sync(shutdown: Shutdown) {
-    // Start all tasks with sequential numbering
-    let task1 = start_event_channel();
-    let task2 = start_video_channel();
-    let task3 = start_album_channel();
-    let task4 = TREE.start_loop();
-    let task5 = EXPIRE.start_loop();
-    let task6 = QUERY_SNAPSHOT.start_loop();
-    let task7 = TREE_SNAPSHOT.start_loop();
-    let task8 = start_watcher();
+    // Initialize a collection of tasks with their respective names
+    let mut tasks = FuturesUnordered::new();
+
+    tasks.push(named_task("Event channel", start_event_channel()));
+    tasks.push(named_task("Video channel", start_video_channel()));
+    tasks.push(named_task("Album channel", start_album_channel()));
+    tasks.push(named_task("Tree loop", TREE.start_loop()));
+    tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
+    tasks.push(named_task(
+        "Query snapshot loop",
+        QUERY_SNAPSHOT.start_loop(),
+    ));
+    tasks.push(named_task(
+        "Tree snapshot remove loop",
+        TREE_SNAPSHOT.start_loop_remove(),
+    ));
+    tasks.push(named_task(
+        "Tree snapshot flush loop",
+        TREE_SNAPSHOT.start_loop_flush(),
+    ));
+    tasks.push(named_task("Watcher", start_watcher()));
 
     info!("All channels started.");
 
-    tokio::select! {
-        res = task1 => {
-            match res {
-                Ok(_) => {
-                    error!("Event channel closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Event channel task failed: {:?}", e);
-                    shutdown.notify();
-                },
+    // Await the first task to complete
+    if let Some((name, result)) = tasks.next().await {
+        match result {
+            Ok(_) => {
+                error!("{} closed unexpectedly.", name);
             }
-        },
-        res = task2 => {
-            match res {
-                Ok(_) => {
-                    error!("Video channel closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Video channel task failed: {:?}", e);
-                    shutdown.notify();
-                },
+            Err(e) => {
+                error!("{} task failed: {:?}", name, e);
             }
-        },
-        res = task3 => {
-            match res {
-                Ok(_) => {
-                    error!("Album channel closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Album channel task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
-        res = task4 => {
-            match res {
-                Ok(_) => {
-                    error!("Tree loop closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Tree loop task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
-        res = task5 => { // EXPIRE.start_loop()
-            match res {
-                Ok(_) => {
-                    error!("Expire loop closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Expire loop task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
-        res = task6 => { // QUERY_SNAPSHOT.start_loop()
-            match res {
-                Ok(_) => {
-                    error!("Query snapshot loop closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Query snapshot loop task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
-        res = task7 => { // TREE_SNAPSHOT.start_loop()
-            match res {
-                Ok(_) => {
-                    error!("Tree snapshot loop closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Tree snapshot loop task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
-        res = task8 => { // start_watcher()
-            match res {
-                Ok(_) => {
-                    error!("Watcher closed unexpectedly.");
-                    shutdown.notify();
-                },
-                Err(e) => {
-                    error!("Watcher task failed: {:?}", e);
-                    shutdown.notify();
-                },
-            }
-        },
+        }
+        // Notify shutdown after any task completes
+        shutdown.notify();
     }
 }
