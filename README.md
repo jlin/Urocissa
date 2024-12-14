@@ -101,9 +101,16 @@ To instantly set up and try Urocissa using Docker on Linux, follow these steps:
    bash run_urocissa_docker.sh
    ```
 
-   This script installs everything and launches Urocissa in five seconds.
+This script will install all necessary components and launch **Urocissa** within five seconds. Once the installation is complete, you can access the app using the following link:
 
-   
+[http://127.0.0.1:5673](http://127.0.0.1:5673)
+
+The default login password is `password`.
+
+#### Custom Configuration
+
+If you want to change the default port or password, refer to the [Configuration Guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md#3-configure-backend-settings).
+
 ### Build from Source
 
 If you prefer to build and install Urocissa from source, follow the relevant guide for your operating system:
