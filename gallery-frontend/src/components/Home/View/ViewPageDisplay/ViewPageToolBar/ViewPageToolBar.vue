@@ -52,7 +52,7 @@ import { AbstractData } from '@/script/common/types'
 import { useInfoStore } from '@/store/infoStore'
 import { leaveViewPage } from '@/script/navigator'
 import ViewPageToolBarDatabase from './ViewPageToolBarDatabase.vue'
-import ViewPageToolBarAlbum from './ViewPageToolBarAlbum.vue'
+import ViewPageToolBarAlbum from '@/components/Menu/SingleMenu.vue'
 
 const props = defineProps<{
   isolationId: string
