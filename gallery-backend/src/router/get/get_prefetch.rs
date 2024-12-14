@@ -55,6 +55,7 @@ pub async fn prefetch(
 
         expression_opt.hash(hasher);
         VERSION_COUNT_TIMESTAMP.load(Ordering::Relaxed).hash(hasher);
+        locate.hash(hasher);
 
         let expression_hashed = hasher.finish();
 
