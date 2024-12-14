@@ -1,6 +1,6 @@
 <template>
   <v-list-item
-    prepend-icon="mdi-star-arrow-down"
+    prepend-icon="mdi-star"
     @click="quickAddTags('_favorite', props.indexList, isolationId)"
   >
     <v-list-item-title class="wrap">Favorite</v-list-item-title>
