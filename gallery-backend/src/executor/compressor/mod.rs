@@ -41,7 +41,7 @@ where
         .expect("Failed to set finished progress bar template");
 
     // Set the active style before starting processing
-    progress_bar.set_style(active_style.clone());
+    progress_bar.set_style(active_style);
 
     // Initialize DashSet for video hashes
     let video_hash_dashset = DashSet::new();

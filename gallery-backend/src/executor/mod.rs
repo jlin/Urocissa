@@ -20,7 +20,7 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
 
 fn processor(list_of_sync_files: Vec<PathBuf>) {
     let deduplicated_file_list = executor::filter::filter(list_of_sync_files);
-    importer::import(&deduplicated_file_list.clone()).unwrap();
+    importer::import(&deduplicated_file_list).unwrap();
     let database = executor::databaser::databaser(deduplicated_file_list);
     executor::compressor::compressor(database);
 }
