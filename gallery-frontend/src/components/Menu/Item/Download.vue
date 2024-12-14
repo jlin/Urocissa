@@ -5,7 +5,6 @@
 </template>
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
@@ -13,9 +12,13 @@ import { batchNumber, getSrc } from '@/../config'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
 import { AbstractData } from '@/script/common/types'
+
+const props = defineProps<{
+  indexList: number[]
+}>()
+
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const collectionStore = useCollectionStore(isolationId)
 const dataStore = useDataStore(isolationId)
 
 const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise<AbstractData> => {
@@ -42,7 +45,7 @@ const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise
 }
 
 const downloadAllFiles = async () => {
-  const indexArray = Array.from(collectionStore.editModeCollection)
+  const indexArray = props.indexList
   const concurrencyLimit = 8
   const delay = 1000
   const delayFunction = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))

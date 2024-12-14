@@ -6,16 +6,20 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import axios from 'axios'
 import { getIsolationIdByRoute } from '@/script/common/functions'
+
+const props = defineProps<{
+  indexList: number[]
+}>()
+
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const collectionStore = useCollectionStore(isolationId)
 const prefetchStore = usePrefetchStore(isolationId)
+
 const regeneratePreview = async () => {
-  const indexArray = Array.from(collectionStore.editModeCollection)
+  const indexArray = props.indexList
   const regenerateData = {
     indexArray: indexArray,
     timestamp: prefetchStore.timestamp

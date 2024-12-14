@@ -36,7 +36,7 @@
       :hash="hash"
       :isolation-id="isolationId"
     />
-    <ViewPageToolBarAlbum
+    <AlbumMenu
       v-if="metadata && metadata.album"
       :album="metadata.album"
       :index="index"
@@ -51,8 +51,8 @@ import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { AbstractData } from '@/script/common/types'
 import { useInfoStore } from '@/store/infoStore'
 import { leaveViewPage } from '@/script/navigator'
-import ViewPageToolBarDatabase from './ViewPageToolBarDatabase.vue'
-import ViewPageToolBarAlbum from '@/components/Menu/SingleMenu.vue'
+import ViewPageToolBarDatabase from '@/components/Menu/SingleMenu.vue'
+import AlbumMenu from '@/components/Menu/AlbumMenu.vue'
 
 const props = defineProps<{
   isolationId: string

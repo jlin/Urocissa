@@ -18,7 +18,7 @@
 
       <v-divider></v-divider>
 
-      <Download />
+      <Download :index-list="Array.from(collectionStore.editModeCollection)" />
 
       <v-divider></v-divider>
 
@@ -34,7 +34,7 @@
 
       <v-divider></v-divider>
 
-      <RegeneratePreview />
+      <RegeneratePreview :index-list="Array.from(collectionStore.editModeCollection)" />
     </v-list>
   </v-menu>
 </template>
