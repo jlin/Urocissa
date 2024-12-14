@@ -73,7 +73,7 @@ const filteredTagList = computed(() =>
 )
 
 const specialTag = (tag: string): boolean => {
-  return tag === '_archived' || tag === '_favorite'
+  return tag === '_archived' || tag === '_favorite' || tag === '_trashed'
 }
 
 onMounted(() => {
@@ -95,7 +95,7 @@ onMounted(() => {
       console.error("useSubmit Error: 'data.database' is undefined.")
       return undefined
     }
-    changedTagsArray.value = defaultTags
+    changedTagsArray.value = defaultTags.filter((tag) => !specialTag(tag))
 
     const innerSubmit = () => {
       const hashArray: number[] = [index]

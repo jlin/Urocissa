@@ -81,7 +81,7 @@ const tagList = computed(() => {
 })
 
 const specialTag = (tag: string): boolean => {
-  return tag == '_archived' || tag == '_favorite'
+  return tag === '_archived' || tag === '_favorite' || tag === '_trashed'
 }
 
 const addTagsRule = (inputArray: string[]) =>
