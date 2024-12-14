@@ -6,7 +6,6 @@ mod filter;
 mod importer;
 use crate::{executor, public::tree::start_loop::SHOULD_RESET, synchronizer::event::BATCH_SIZE};
 use batcher::merge_file_paths;
-use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 
 pub fn executor(list_of_sync_files: Vec<PathBuf>) {
     let all_paths = merge_file_paths(list_of_sync_files);
@@ -24,15 +23,4 @@ fn processor(list_of_sync_files: Vec<PathBuf>) {
     importer::import(&deduplicated_file_list.clone()).unwrap();
     let database = executor::databaser::databaser(deduplicated_file_list);
     executor::compressor::compressor(database);
-}
-
-pub fn prepare_progress_bar(len: u64) -> ProgressBar {
-    let progress_bar = ProgressBar::new(len);
-    progress_bar.set_draw_target(ProgressDrawTarget::stderr());
-    let style = ProgressStyle::default_bar()
-        .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} {msg}")
-        .unwrap()
-        .progress_chars("##-");
-    progress_bar.set_style(style);
-    progress_bar
 }

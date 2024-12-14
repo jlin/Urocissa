@@ -2,15 +2,13 @@ use self::image_compressor::image_compressor;
 use self::video_compressor::video_compressor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
-use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
-use crate::{
-    executor::prepare_progress_bar,
-    public::{
-        constant::VALID_IMAGE_EXTENSIONS, database_struct::database::definition::DataBase,
-        redb::DATA_TABLE,
-    },
+use crate::public::{
+    constant::VALID_IMAGE_EXTENSIONS, database_struct::database::definition::DataBase,
+    redb::DATA_TABLE,
 };
+use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use dashmap::DashSet;
+use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
@@ -27,7 +25,13 @@ where
     T: ParallelIterator<Item = DataBase>,
 {
     let processed_count = Arc::new(AtomicUsize::new(0));
-    let progress_bar = prepare_progress_bar(0); // Initialize the progress bar with an unknown length
+    let progress_bar = ProgressBar::new_spinner();
+    progress_bar.set_style(
+        ProgressStyle::default_spinner()
+            .template("{spinner:.green} {pos} files processed")
+            .expect("Failed to set progress bar template"),
+    );
+
     let video_hash_dashset = DashSet::new();
     let collect: Vec<DataBase> = databases
         .filter_map(|mut database| {
