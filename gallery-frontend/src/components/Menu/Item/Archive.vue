@@ -1,7 +1,7 @@
 <template>
   <v-list-item
     prepend-icon="mdi-archive-arrow-down"
-    @click="quickAddTags('_archive', props.indexList, isolationId)"
+    @click="quickAddTags('_archived', props.indexList, isolationId)"
   >
     <v-list-item-title class="wrap">Archive</v-list-item-title>
   </v-list-item>
