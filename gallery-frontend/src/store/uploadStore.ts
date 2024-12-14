@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useUploadStore = (isolationId: string) =>
-  defineStore({
-    id: 'uploadStore' + isolationId,
+  defineStore('uploadStore' + isolationId, {
     state: (): {
       uploading: boolean
       total: number | undefined

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useOffsetStore = (isolationId: string) =>
-  defineStore({
-    id: 'offsetStore' + isolationId,
+  defineStore('offsetStore' + isolationId, {
     state: (): {
       offset: Map<number, number> // Map<rowIndex, offset>
       accumulatedAll: number

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useInitializedStore = (isolationId: string) =>
-  defineStore({
-    id: 'initializedStore' + isolationId,
+  defineStore('initializedStore' + isolationId, {
     state: (): {
       login: boolean
       initialized: boolean

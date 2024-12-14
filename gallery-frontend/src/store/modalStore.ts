@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
-export const useModalStore = (isolationId: string ) =>
-  defineStore({
-    id: 'modalStore' + isolationId,
+export const useModalStore = (isolationId: string) =>
+  defineStore('modalStore' + isolationId, {
     state: (): {
       showEditTagsModal: boolean
       showBatchEditTagsModal: boolean

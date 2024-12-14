@@ -4,8 +4,7 @@ import { defineStore } from 'pinia'
 import { useDataStore } from './dataStore'
 
 export const useOptimisticStore = (isolationId: string) =>
-  defineStore({
-    id: 'optimisticUpdateStore' + isolationId,
+  defineStore('optimisticUpdateStore' + isolationId, {
     state: (): {
       backupData: Map<number, AbstractData> // dataIndex -> data
       queueTagsUpdate: EditTagsParams[]

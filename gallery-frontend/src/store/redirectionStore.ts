@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useRedirectionStore = (isolationId: string) =>
-  defineStore({
-    id: 'redirectionStore' + isolationId,
+  defineStore('redirectionStore' + isolationId, {
     state: (): {
       redirection: null | string
     } => ({

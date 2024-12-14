@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
-export const useImgStore = (isolationId: string ) =>
-  defineStore({
-    id: 'imgStore' + isolationId,
+export const useImgStore = (isolationId: string) =>
+  defineStore('imgStore' + isolationId, {
     state: (): {
       imgUrl: Map<number, string> // dataIndex -> blobUrl
       imgOriginal: Map<number, string> // dataIndex -> blobUrl

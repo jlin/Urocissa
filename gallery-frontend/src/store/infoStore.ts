@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
-export const useInfoStore = (isolationId: string ) =>
-  defineStore({
-    id: 'infoStore' + isolationId,
+export const useInfoStore = (isolationId: string) =>
+  defineStore('infoStore' + isolationId, {
     state: (): {
       showInfo: boolean
     } => ({

@@ -3,8 +3,7 @@ import { defineStore } from 'pinia'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 
 export const useFilterStore = (isolationId: string) =>
-  defineStore({
-    id: 'filterStore' + isolationId,
+  defineStore('filterStore' + isolationId, {
     state: (): {
       // Records the type of gallery area: default, favorite, archived, etc.
       basicString: string | null

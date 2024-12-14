@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 
-export const useCollectionStore = (isolationId: string ) =>
-  defineStore({
-    id: 'collectionStore' + isolationId,
+export const useCollectionStore = (isolationId: string) =>
+  defineStore('collectionStore' + isolationId, {
     state: (): {
       editModeOn: boolean
       editModeCollection: Set<number>

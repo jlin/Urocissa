@@ -15,8 +15,7 @@ interface postToWorkerType {
   processAbort: (payload: processAbortPayload) => void
 }
 export const useWorkerStore = (isolationId: string) =>
-  defineStore({
-    id: 'workerStore' + isolationId,
+  defineStore('workerStore' + isolationId, {
     state: (): {
       concurrencyNumber: number
       worker: null | Worker

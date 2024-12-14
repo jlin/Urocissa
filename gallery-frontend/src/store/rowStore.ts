@@ -1,9 +1,8 @@
 import type { Row } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useRowStore = (isolationId: string ) =>
-  defineStore({
-    id: 'rowStore' + isolationId,
+export const useRowStore = (isolationId: string) =>
+  defineStore('rowStore' + isolationId, {
     state: (): {
       rowData: Map<number, Row> //  Map<rowIndex, Row>
       lastVisibleRow: Map<number, Row>
