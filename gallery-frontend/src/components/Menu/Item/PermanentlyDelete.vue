@@ -6,15 +6,16 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { useCollectionStore } from '@/store/collectionStore'
 import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const collectionStore = useCollectionStore(isolationId)
+
+const props = defineProps<{
+  indexList: number[]
+}>()
 
 const deleteData = () => {
-  const indexArray = Array.from(collectionStore.editModeCollection)
-  deleteDataInWorker(indexArray, isolationId)
+  deleteDataInWorker(props.indexList, isolationId)
 }
 </script>

@@ -11,8 +11,8 @@
         v-if="route.meta.isReadPage && collectionStore.editModeCollection.size === 1"
       ></v-divider>
 
-      <Archive />
-      <Favorite />
+      <Archive :index-list="Array.from(collectionStore.editModeCollection)" />
+      <Favorite :index-list="Array.from(collectionStore.editModeCollection)" />
       <BatchEditTags />
       <BatchEditAlbums />
 
@@ -22,8 +22,15 @@
 
       <v-divider></v-divider>
 
-      <Delete v-if="!route.path.startsWith('/trashed')" />
-      <PermanentlyDelete v-else prepend-icon="mdi-trash-can-outline" />
+      <Delete
+        :index-list="Array.from(collectionStore.editModeCollection)"
+        v-if="!route.path.startsWith('/trashed')"
+      />
+      <PermanentlyDelete
+        :index-list="Array.from(collectionStore.editModeCollection)"
+        v-else
+        prepend-icon="mdi-trash-can-outline"
+      />
 
       <v-divider></v-divider>
 
@@ -45,6 +52,7 @@ import Download from './Item/Download.vue'
 import Delete from './Item/Delete.vue'
 import RegeneratePreview from './Item/RegeneratePreview.vue'
 import PermanentlyDelete from './Item/PermanentlyDelete.vue'
+
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const collectionStore = useCollectionStore(isolationId)

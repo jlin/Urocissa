@@ -1,7 +1,7 @@
 <template>
   <v-list-item
     prepend-icon="mdi-star-arrow-down"
-    @click="quickAddTags('_favorite', Array.from(collectionStore.editModeCollection), isolationId)"
+    @click="quickAddTags('_favorite', props.indexList, isolationId)"
   >
     <v-list-item-title class="wrap">Favorite</v-list-item-title>
   </v-list-item>
@@ -9,10 +9,13 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { useCollectionStore } from '@/store/collectionStore'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 import { quickAddTags } from '@/script/common/quickEditTags'
+
+const props = defineProps<{
+  indexList: number[]
+}>()
+
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const collectionStore = useCollectionStore(isolationId)
 </script>

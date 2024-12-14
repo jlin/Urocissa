@@ -21,14 +21,14 @@
     <v-btn v-else icon="mdi-select-remove" @click="selectRemove"></v-btn>
     <v-btn icon="mdi-select-inverse" @click="selectInverse"></v-btn>
     <!-- Use the new Menu Component -->
-    <EditMenu />
+    <BatchMenu />
   </v-toolbar>
 </template>
 
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import EditMenu from '@/components/Menu/EditMenu.vue'
+import BatchMenu from '@/components/Menu/BatchMenu.vue'
 import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 const route = useRoute()
