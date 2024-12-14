@@ -5,7 +5,7 @@ use crate::public::{
     tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER,
     utils::get_current_timestamp_u64,
 };
-use rayon::iter::{ParallelBridge, ParallelIterator};
+use rayon::iter::{ ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};
 use std::{
     sync::atomic::{AtomicU64, Ordering},
@@ -69,6 +69,7 @@ impl Expire {
                                     let tree_snapshot_delete_queue: Vec<_> = table
                                         .iter()
                                         .unwrap()
+                                        .par_bridge()
                                         .filter_map(|result| {
                                             let (_, value) = result.unwrap();
                                             let prefetch_return = value.value();

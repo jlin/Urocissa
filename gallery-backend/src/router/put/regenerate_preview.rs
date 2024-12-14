@@ -1,5 +1,5 @@
 use arrayvec::ArrayString;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use crate::executor;
 use crate::public::tree::start_loop::SHOULD_RESET;
@@ -29,7 +29,7 @@ pub async fn regenerate_preview(
 
         let hash_vec: Vec<ArrayString<64>> = json_data
             .index_array
-            .iter()
+            .par_iter()
             .map(|index| reduced_data_vec.get_hash(*index))
             .collect();
         let total_batches = (hash_vec.len() + 99) / 100;

@@ -9,6 +9,7 @@ use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
 
 use arrayvec::ArrayString;
 use log::info;
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -81,6 +82,7 @@ impl Tree {
                     let mut data_vec: Vec<DataBaseTimestamp> = table
                         .iter()
                         .unwrap()
+                        .par_bridge()
                         .map(|guard| {
                             let (_key, value) = guard.unwrap();
                             let database = value.value();
@@ -100,6 +102,7 @@ impl Tree {
                     let album_vec: Vec<DataBaseTimestamp> = album_table
                         .iter()
                         .unwrap()
+                        .par_bridge()
                         .map(|guard| {
                             let (_key, value) = guard.unwrap();
                             let album = value.value();
@@ -120,7 +123,8 @@ impl Tree {
                     let current_timestamp = get_current_timestamp_u64();
 
                     // Atomically swap the `VERSION_COUNT_TIMESTAMP` with the current timestamp and get the last timestamp
-                    let last_timestamp = VERSION_COUNT_TIMESTAMP.swap(current_timestamp, Ordering::SeqCst);
+                    let last_timestamp =
+                        VERSION_COUNT_TIMESTAMP.swap(current_timestamp, Ordering::SeqCst);
 
                     // Log that the in-memory cache has been updated
                     info!("In-memory cache updated ({}).", current_timestamp);

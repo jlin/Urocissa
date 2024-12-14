@@ -50,6 +50,7 @@ impl Tree {
         album_table
             .iter()
             .unwrap()
+            .par_bridge()
             .map(|result| {
                 let (_, access_guard) = result.unwrap();
                 let album = access_guard.value();

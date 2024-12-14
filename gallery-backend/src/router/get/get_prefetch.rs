@@ -10,7 +10,7 @@ use crate::public::utils::info_wrap;
 use crate::router::fairing::AuthGuard;
 
 use bitcode::{Decode, Encode};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
@@ -108,8 +108,8 @@ pub async fn prefetch(
         let locate_start_time = Instant::now();
         let locate_to = if let Some(ref locate_hash) = locate {
             reduced_data
-                .iter()
-                .position(|data| data.hash.as_str() == locate_hash)
+                .par_iter()
+                .position_first(|data| data.hash.as_str() == locate_hash)
         } else {
             None
         };

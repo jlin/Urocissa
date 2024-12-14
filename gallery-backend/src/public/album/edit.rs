@@ -57,7 +57,7 @@ impl Album {
 
         // Update item_count and item_size
         self.item_count = data_in_album.len();
-        self.item_size = data_in_album.iter().map(|(db, _)| db.size).sum();
+        self.item_size = data_in_album.par_iter().map(|(db, _)| db.size).sum();
 
         // Update the last modified time to the current time
         self.last_modified_time = SystemTime::now()
@@ -76,7 +76,7 @@ impl Album {
                 // check whether the cover is a member of this album
                 let cover = self.cover.as_ref();
                 !data_in_album
-                    .iter()
+                    .par_iter()
                     .any(|(database, _)| cover == Some(&database.hash))
             } {
                 self.set_cover(last_database);
