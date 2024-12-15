@@ -1,8 +1,8 @@
 <!-- NavBarAppBarEditBarMenuNormal.vue -->
 <template>
   <v-menu>
-    <template #activator="{ props }">
-      <v-btn v-bind="props" icon="mdi-dots-vertical"></v-btn>
+    <template #activator="{ props: MenuBtn }">
+      <v-btn v-bind="MenuBtn" icon="mdi-dots-vertical"></v-btn>
     </template>
     <v-list>
       <SetAsCover v-if="route.meta.isReadPage && collectionStore.editModeCollection.size === 1" />
