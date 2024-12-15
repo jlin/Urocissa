@@ -1,4 +1,5 @@
 use crate::executor::executor;
+use crate::public::constant::PROCESS_BATCH_NUMBER;
 
 use log::info;
 use std::mem;
@@ -7,7 +8,6 @@ use std::{collections::HashSet, path::PathBuf};
 use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 
-pub const BATCH_SIZE: usize = 100;
 pub static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
 
 pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
@@ -17,7 +17,11 @@ pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
     tokio::task::spawn(async move {
         let mut buffer = Vec::new();
 
-        while events_receiver.recv_many(&mut buffer, BATCH_SIZE).await > 0 {
+        while events_receiver
+            .recv_many(&mut buffer, PROCESS_BATCH_NUMBER)
+            .await
+            > 0
+        {
             let start_time = std::time::Instant::now();
 
             let list_of_sync_files = mem::take(&mut buffer);

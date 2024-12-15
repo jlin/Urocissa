@@ -15,8 +15,8 @@ pub struct RegenerateData {
     index_array: Vec<usize>,
     timestamp: u128,
 }
-#[post("/put/regenerate-preview", format = "json", data = "<json_data>")]
-pub async fn regenerate_preview(
+#[post("/put/regenerate-metadata", format = "json", data = "<json_data>")]
+pub async fn regenerate_metadata(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,

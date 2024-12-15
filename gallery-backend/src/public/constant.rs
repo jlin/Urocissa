@@ -1,4 +1,6 @@
-pub const BATCH_NUMBER: usize = 20;
+pub const ROW_BATCH_NUMBER: usize = 20;
+
+pub const PROCESS_BATCH_NUMBER: usize = 100;
 
 pub const SHOULD_SWAP_WIDTH_HEIGHT_ROTATION: [&str; 4] = ["90", "-90", "270", "-270"];
 

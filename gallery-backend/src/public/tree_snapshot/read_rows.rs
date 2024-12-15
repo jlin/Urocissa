@@ -1,6 +1,6 @@
 use super::TreeSnapshot;
 use crate::public::{
-    constant::BATCH_NUMBER,
+    constant::ROW_BATCH_NUMBER,
     row::{DisplayElement, Row},
 };
 use rocket::http::Status;
@@ -10,15 +10,15 @@ impl TreeSnapshot {
         let tree_snapshot = self.read_tree_snapshot(&timestamp)?;
 
         let data_length = tree_snapshot.len();
-        let chunk_count = (data_length + BATCH_NUMBER - 1) / BATCH_NUMBER; // Calculate total chunks
+        let chunk_count = (data_length + ROW_BATCH_NUMBER - 1) / ROW_BATCH_NUMBER; // Calculate total chunks
 
         if row_index > chunk_count {
             error!("read_rows out of bound");
             return Err(Status::NotFound);
         }
 
-        let number_vec =
-            (row_index * BATCH_NUMBER)..(row_index * BATCH_NUMBER + BATCH_NUMBER).min(data_length);
+        let number_vec = (row_index * ROW_BATCH_NUMBER)
+            ..(row_index * ROW_BATCH_NUMBER + ROW_BATCH_NUMBER).min(data_length);
 
         let display_elements: Vec<DisplayElement> = number_vec
             .map(|index| {
@@ -31,8 +31,8 @@ impl TreeSnapshot {
             .collect();
 
         Ok(Row {
-            start: row_index * BATCH_NUMBER,
-            end: row_index * BATCH_NUMBER + BATCH_NUMBER - 1,
+            start: row_index * ROW_BATCH_NUMBER,
+            end: row_index * ROW_BATCH_NUMBER + ROW_BATCH_NUMBER - 1,
             display_elements,
             row_index: row_index,
         })

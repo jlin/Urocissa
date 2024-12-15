@@ -4,13 +4,16 @@ pub mod compressor;
 mod databaser;
 mod filter;
 mod importer;
-use crate::{executor, public::tree::start_loop::SHOULD_RESET, synchronizer::event::BATCH_SIZE};
+use crate::{
+    executor,
+    public::{constant::PROCESS_BATCH_NUMBER, tree::start_loop::SHOULD_RESET},
+};
 use batcher::merge_file_paths;
 
 pub fn executor(list_of_sync_files: Vec<PathBuf>) {
     let all_paths = merge_file_paths(list_of_sync_files);
-    let total_batches = (all_paths.len() + BATCH_SIZE - 1) / BATCH_SIZE; // Calculate total number of batches
-    for (current_batch, batch) in all_paths.chunks(BATCH_SIZE).enumerate() {
+    let total_batches = (all_paths.len() + PROCESS_BATCH_NUMBER - 1) / PROCESS_BATCH_NUMBER; // Calculate total number of batches
+    for (current_batch, batch) in all_paths.chunks(PROCESS_BATCH_NUMBER).enumerate() {
         info!("Processing batch {}/{}", current_batch + 1, total_batches); // Show the current batch being processed
         let batch: Vec<PathBuf> = batch.to_vec();
         processor(batch);

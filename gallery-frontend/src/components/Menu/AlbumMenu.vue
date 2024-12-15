@@ -12,6 +12,7 @@
     </v-list>
   </v-menu>
 </template>
+
 <script setup lang="ts">
 import { Album } from '@/script/common/types'
 import FindInTimeline from './Item/FindInTimeline.vue'

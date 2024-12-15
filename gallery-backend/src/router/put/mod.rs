@@ -3,8 +3,8 @@ use rocket::Route;
 pub mod edit_album;
 pub mod edit_tag;
 pub mod random;
+pub mod regenerate_metadata;
 pub mod regenerate_preview;
-
 pub fn generate_put_routes() -> Vec<Route> {
     routes![
         edit_album::edit_album,
