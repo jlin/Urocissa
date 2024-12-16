@@ -1,7 +1,10 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Instant; // Import Instant for time measurement
 
-use crate::public::database_struct::hash_alias::HashAliasSize;
+use crate::public::database_struct::database::definition::DataBase;
+use arrayvec::ArrayString;
+use dashmap::DashMap;
 use futures::stream::{self, StreamExt};
 use futures::TryStreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -10,7 +13,9 @@ use tokio::fs;
 use tokio::io;
 
 /// Synchronous import function that internally uses Tokio's async capabilities
-pub fn import(deduplicated_file_list: &[HashAliasSize]) -> Result<(), Box<dyn std::error::Error>> {
+pub fn import(
+    deduplicated_file_list: &DashMap<ArrayString<64>, DataBase>,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Start time measurement
     let start_time = Instant::now();
 
@@ -58,7 +63,7 @@ pub fn import(deduplicated_file_list: &[HashAliasSize]) -> Result<(), Box<dyn st
 
 /// Asynchronous helper function to perform concurrent file copying
 async fn async_import(
-    deduplicated_file_list: &[HashAliasSize],
+    deduplicated_file_list: &DashMap<ArrayString<64>, DataBase>,
     progress_bar: Arc<ProgressBar>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Define the level of concurrency (number of simultaneous operations)
@@ -66,13 +71,13 @@ async fn async_import(
 
     // Create a stream of asynchronous tasks for each file to be copied
     let copy_tasks = stream::iter(deduplicated_file_list.iter())
-        .map(|hash_alias_size| {
+        .map(|entry| {
+            let database = entry.value();
             // Clone the Arc to share the progress bar across tasks
+            let source_path = PathBuf::from(&database.alias[0].file);
+            let dest_path = database.imported_path();
             let progress_bar = Arc::clone(&progress_bar);
             async move {
-                let source_path = hash_alias_size.hash_alias.source_path();
-                let dest_path = hash_alias_size.hash_alias.imported_path();
-
                 // Ensure the destination directory exists
                 if let Some(parent) = dest_path.parent() {
                     if let Err(err) = fs::create_dir_all(parent).await {

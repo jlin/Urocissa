@@ -4,24 +4,25 @@ use anyhow::Context;
 use regex::Regex;
 use std::collections::BTreeMap;
 use std::error::Error;
+use std::mem;
 use std::process::Command;
 use std::sync::LazyLock;
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
-pub fn process_video_info(hash_alias_size: &mut HashAliasSize) -> Result<DataBase, Box<dyn Error>> {
+pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn Error>> {
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")
         .arg("-v")
         .arg("error")
         .arg("-show_format")
         .arg("-show_streams")
-        .arg(&hash_alias_size.hash_alias.source_path())
+        .arg(&database.alias[0].file)
         .output()
         .with_context(|| {
             format!(
                 "process_video_info: spawn new command for ffprobe failed for {:?}",
-                hash_alias_size.hash_alias.source_path()
+                &database.alias[0].file
             )
         })?;
 
@@ -29,7 +30,7 @@ pub fn process_video_info(hash_alias_size: &mut HashAliasSize) -> Result<DataBas
         let line = String::from_utf8(output.stdout).with_context(|| {
             format!(
                 "process_video_info: Failed to from vec<u8> to String for {:?}",
-                hash_alias_size.hash_alias.source_path()
+                &database.alias[0].file
             )
         })?;
         for mat in RE_VIDEO_INFO.captures_iter(&line) {
@@ -38,8 +39,7 @@ pub fn process_video_info(hash_alias_size: &mut HashAliasSize) -> Result<DataBas
                 .with_context(|| {
                     format!(
                         "process_video_info: Failed to get(1) of match {:?} for {:?}",
-                        mat,
-                        hash_alias_size.hash_alias.source_path()
+                        mat, &database.alias[0].file
                     )
                 })?
                 .as_str()
@@ -49,21 +49,15 @@ pub fn process_video_info(hash_alias_size: &mut HashAliasSize) -> Result<DataBas
                 .with_context(|| {
                     format!(
                         "process_video_info: Failed to get(2) of match {:?} for {:?}",
-                        mat,
-                        hash_alias_size.hash_alias.source_path()
+                        mat, &database.alias[0].file
                     )
                 })?
                 .as_str()
                 .to_string();
             exif_tuple.insert(key, value);
         }
-        Ok(DataBase::new(
-            std::mem::take(&mut hash_alias_size.hash_alias.hash),
-            hash_alias_size.size,
-            hash_alias_size.hash_alias.ext(),
-            std::mem::take(&mut exif_tuple),
-            std::mem::take(&mut hash_alias_size.hash_alias.alias.alias),
-        ))
+        database.exif_vec = exif_tuple;
+        return Ok(mem::take(database));
     } else {
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,

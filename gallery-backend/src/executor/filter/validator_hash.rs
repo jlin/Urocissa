@@ -1,11 +1,9 @@
 use crate::public::database_struct::database::definition::DataBase;
-use crate::public::database_struct::file_modify::FileModifySize;
-use crate::public::database_struct::hash_alias::{Alias, AliasSize};
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
 use arrayvec::ArrayString;
 use blake3::Hasher;
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use rayon::prelude::*;
 use std::mem;
 use std::panic::Location;

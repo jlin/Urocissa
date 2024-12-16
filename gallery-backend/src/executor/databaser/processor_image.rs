@@ -1,12 +1,16 @@
-use std::{collections::BTreeMap, error::Error, io, path::Path};
+use std::{
+    collections::BTreeMap,
+    error::Error,
+    io,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Context;
 
 use crate::public::database_struct::{database::definition::DataBase, hash_alias::HashAliasSize};
 
-pub fn process_image_info(hash_alias_size: HashAliasSize) -> DataBase {
-    let mut hash_alias = hash_alias_size.hash_alias;
-    let source_path = hash_alias.source_path();
+pub fn process_image_info(mut database: DataBase) -> DataBase {
+    let source_path = PathBuf::from(&database.alias[0].file);
     let mut exif_tuple = BTreeMap::new();
     if let Ok(exif) = read_exif(&source_path) {
         for field in exif.fields() {
@@ -24,13 +28,8 @@ pub fn process_image_info(hash_alias_size: HashAliasSize) -> DataBase {
             }
         }
     }
-    return DataBase::new(
-        std::mem::take(&mut hash_alias.hash),
-        hash_alias_size.size,
-        hash_alias.ext(),
-        std::mem::take(&mut exif_tuple),
-        std::mem::take(&mut hash_alias.alias.alias),
-    );
+    database.exif_vec = exif_tuple;
+    return database;
 }
 
 fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {

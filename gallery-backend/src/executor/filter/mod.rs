@@ -6,10 +6,7 @@ use arrayvec::ArrayString;
 use dashmap::DashMap;
 use std::path::PathBuf;
 
-use crate::public::database_struct::{
-    database::definition::DataBase,
-    hash_alias::{AliasSize, HashAlias, HashAliasSize},
-};
+use crate::public::database_struct::database::definition::DataBase;
 
 pub fn filter(all_paths: Vec<PathBuf>) -> DashMap<ArrayString<64>, DataBase> {
     let valid_extension_paths = validator_extension::validator(all_paths);
