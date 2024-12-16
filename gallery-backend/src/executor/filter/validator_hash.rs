@@ -43,6 +43,7 @@ where
                             duplicated_files_number.fetch_add(1, Ordering::SeqCst);
                         } else {
                             // If this is indeed a new file
+                            database.hash = hash;
                             dashmap_of_database.insert(hash, database);
                         }
                     }
