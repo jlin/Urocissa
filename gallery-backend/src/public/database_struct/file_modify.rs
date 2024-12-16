@@ -2,7 +2,7 @@ use bitcode::{Decode, Encode};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default, Clone, Deserialize, Serialize, Decode, Encode, PartialEq, Eq, Hash)]
 pub struct FileModify {
@@ -23,6 +23,14 @@ impl FileModify {
             modified,
             scan_time: Utc::now().timestamp_millis() as u128,
         }
+    }
+    pub fn ext(&self) -> String {
+        Path::new(&self.file)
+            .extension()
+            .and_then(std::ffi::OsStr::to_str)
+            .unwrap_or("")
+            .to_string()
+            .to_lowercase()
     }
 }
 impl FileModifySize {

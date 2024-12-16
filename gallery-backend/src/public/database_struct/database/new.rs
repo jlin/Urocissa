@@ -6,14 +6,12 @@ use std::collections::{BTreeMap, HashSet};
 
 impl DataBase {
     pub fn new(
-        hash: ArrayString<64>,
         size: u64,
-        ext: String,
-        exif_vec: BTreeMap<String, String>,
-        alias: Vec<FileModify>,
+        hash_alias: FileModify,
     ) -> Self {
+        let ext =  hash_alias.ext();
         Self {
-            hash,
+            hash: ArrayString::<64>::default(),
             size,
             width: 0,
             height: 0,
@@ -21,10 +19,10 @@ impl DataBase {
             phash: Vec::<u8>::new(),
             ext_type: Self::determine_type(&ext),
             ext,
-            exif_vec,
+            exif_vec: BTreeMap::new(),
             tag: HashSet::<String>::new(),
             album: HashSet::new(),
-            alias,
+            alias: vec![hash_alias],
             pending: false,
         }
     }

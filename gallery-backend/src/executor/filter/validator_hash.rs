@@ -1,3 +1,4 @@
+use crate::public::database_struct::database::definition::DataBase;
 use crate::public::database_struct::file_modify::FileModifySize;
 use crate::public::database_struct::hash_alias::{Alias, AliasSize};
 use crate::public::error_data::{handle_error, ErrorData};
@@ -6,6 +7,7 @@ use arrayvec::ArrayString;
 use blake3::Hasher;
 use dashmap::{DashMap, DashSet};
 use rayon::prelude::*;
+use std::mem;
 use std::panic::Location;
 use std::{
     fs::File,
@@ -14,54 +16,46 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-pub fn validator(
-    vec_of_file_modify: DashSet<FileModifySize>,
-) -> DashMap<ArrayString<64>, AliasSize> {
+pub fn validator<I>(vec_of_database: I) -> DashMap<ArrayString<64>, DataBase>
+where
+    I: ParallelIterator<Item = DataBase>,
+{
     let duplicated_files_number = AtomicUsize::new(0);
-    let dashmap_of_hash_alias: DashMap<ArrayString<64>, AliasSize> =
-        DashMap::with_capacity(vec_of_file_modify.len());
+    let dashmap_of_database: DashMap<ArrayString<64>, DataBase> = DashMap::new();
     let scaned_number = AtomicUsize::new(0);
-    vec_of_file_modify
-        .into_par_iter()
-        .for_each(|file_modify_size| {
-            let file_modify = file_modify_size.file_modify;
-            match blake3_hasher(&PathBuf::from(&file_modify.file)) {
-                Ok(hash) => {
-                    let read_table = TREE.read_tree_api();
-                    match read_table.get(&*hash).unwrap() {
-                        Some(guard) => {
-                            // If this file is already in database
-                            let mut database = guard.value();
-                            database.alias.push(file_modify);
-                            TREE.insert_tree_api(&vec![database]).unwrap();
-                            scaned_number.fetch_add(1, Ordering::SeqCst);
-                        }
-                        None => {
-                            // If this file is not in database
-                            // but the is duplicated in this batch
-                            if let Some(mut duplicated_alias) = dashmap_of_hash_alias.get_mut(&hash)
-                            {
-                                duplicated_alias.alias.alias.push(file_modify);
-                                duplicated_files_number.fetch_add(1, Ordering::SeqCst);
-                            } else {
-                                // If this is indeed a new file
-                                dashmap_of_hash_alias.insert(
-                                    hash,
-                                    AliasSize::new(
-                                        Alias::new(vec![file_modify]),
-                                        file_modify_size.size,
-                                    ),
-                                );
-                            }
+    vec_of_database.for_each(|mut database| {
+        match blake3_hasher(&PathBuf::from(&database.alias[0].file)) {
+            Ok(hash) => {
+                let read_table = TREE.read_tree_api();
+                match read_table.get(&*hash).unwrap() {
+                    Some(guard) => {
+                        // If this file is already in database
+                        let mut database_exist = guard.value();
+                        let file_modify = mem::take(&mut database.alias[0]);
+                        database_exist.alias.push(file_modify);
+                        TREE.insert_tree_api(&vec![database_exist]).unwrap();
+                        scaned_number.fetch_add(1, Ordering::SeqCst);
+                    }
+                    None => {
+                        // If this file is not in database
+                        // but the is duplicated in this batch
+                        if let Some(mut duplicated_database) = dashmap_of_database.get_mut(&hash) {
+                            let file_modify = mem::take(&mut database.alias[0]);
+                            duplicated_database.alias.push(file_modify);
+                            duplicated_files_number.fetch_add(1, Ordering::SeqCst);
+                        } else {
+                            // If this is indeed a new file
+                            dashmap_of_database.insert(hash, database);
                         }
                     }
                 }
-                Err(err) => {
-                    handle_error(err);
-                }
             }
-        });
-    dashmap_of_hash_alias
+            Err(err) => {
+                handle_error(err);
+            }
+        }
+    });
+    dashmap_of_database
 }
 
 fn blake3_hasher(file_path: &Path) -> Result<ArrayString<64>, ErrorData> {
