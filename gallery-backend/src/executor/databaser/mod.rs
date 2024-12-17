@@ -20,6 +20,7 @@ pub mod processor_image;
 pub mod processor_video;
 pub mod video_compressor;
 pub mod video_ffprobe;
+pub mod fix_orientation;
 pub fn databaser(
     vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>,
 ) -> impl ParallelIterator<Item = DataBase> {
