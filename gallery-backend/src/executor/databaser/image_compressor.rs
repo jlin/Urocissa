@@ -1,5 +1,5 @@
 use crate::{
-    executor::databaser::generate_dynamic_image::generate_dynamic_image,
+    executor::databaser::{generate_dynamic_image::generate_dynamic_image, generate_exif::generate_exif},
     public::database_struct::database::definition::DataBase,
 };
 
@@ -23,9 +23,12 @@ pub fn image_compressor(
             database.compressed_path(),
         )?;
     } else {
+        let exif_vec = generate_exif(&database);
+        let dynamic_image = generate_dynamic_image(database)?;
+        fix_orientation(database, &mut dynamic_image);
         println!("case B");
         save_small_image(
-            &generate_dynamic_image(database)?,
+            &dynamic_image,
             compressed_width,
             compressed_height,
             database.compressed_path(),
