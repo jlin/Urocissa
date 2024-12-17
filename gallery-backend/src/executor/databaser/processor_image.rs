@@ -7,7 +7,7 @@ use std::{
 
 use anyhow::Context;
 
-use crate::public::database_struct::{database::definition::DataBase, hash_alias::HashAliasSize};
+use crate::public::database_struct::database::definition::DataBase;
 
 pub fn process_image_info(mut database: DataBase) -> DataBase {
     let source_path = PathBuf::from(&database.alias[0].file);

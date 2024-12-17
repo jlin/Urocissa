@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::panic::Location;
 use std::path::PathBuf;
 
@@ -6,7 +5,6 @@ use self::processor_image::process_image_info;
 use self::processor_video::process_video_info;
 use crate::public::constant::VALID_IMAGE_EXTENSIONS;
 use crate::public::database_struct::database::definition::DataBase;
-use crate::public::database_struct::hash_alias::HashAliasSize;
 use crate::public::error_data::{handle_error, ErrorData};
 use arrayvec::ArrayString;
 use dashmap::DashMap;

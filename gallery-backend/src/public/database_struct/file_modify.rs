@@ -33,8 +33,3 @@ impl FileModify {
             .to_lowercase()
     }
 }
-impl FileModifySize {
-    pub fn new(file_modify: FileModify, size: u64) -> Self {
-        Self { file_modify, size }
-    }
-}

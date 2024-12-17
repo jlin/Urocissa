@@ -1,5 +1,4 @@
 use crate::public::database_struct::database::definition::DataBase;
-use crate::public::database_struct::hash_alias::HashAliasSize;
 use anyhow::Context;
 use regex::Regex;
 use std::collections::BTreeMap;
