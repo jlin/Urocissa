@@ -10,7 +10,7 @@ use std::panic::Location;
 use std::{
     fs::File,
     io::Read,
-    path::{Path, PathBuf},
+    path::Path,
     sync::atomic::{AtomicUsize, Ordering},
 };
 

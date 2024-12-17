@@ -1,9 +1,4 @@
-use std::{
-    collections::BTreeMap,
-    error::Error,
-    io,
-    path::{Path, PathBuf},
-};
+use std::{collections::BTreeMap, error::Error, io, path::Path};
 
 use anyhow::Context;
 

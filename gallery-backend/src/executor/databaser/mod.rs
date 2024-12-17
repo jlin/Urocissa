@@ -1,5 +1,4 @@
 use std::panic::Location;
-use std::path::PathBuf;
 
 use self::processor_image::process_image_info;
 use self::processor_video::process_video_info;
