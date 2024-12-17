@@ -11,8 +11,6 @@ use super::{
     generate_width_height::{generate_img_width_height, generate_phash, generate_thumbhash},
 };
 
-
-
 pub fn fix_orientation(database: &mut DataBase, dynamic_image: &mut DynamicImage) -> () {
     if let Some(orientation) = database.exif_vec.get("Orientation") {
         match orientation.as_str() {

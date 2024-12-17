@@ -8,8 +8,6 @@ use crate::{
     public::{constant::PROCESS_BATCH_NUMBER, tree::start_loop::SHOULD_RESET},
 };
 use batcher::merge_file_paths;
-use databaser::compressor::compressor;
-
 
 pub fn executor(list_of_sync_files: Vec<PathBuf>) {
     let all_paths = merge_file_paths(list_of_sync_files);
@@ -25,6 +23,5 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
 fn processor(list_of_sync_files: Vec<PathBuf>) {
     let deduplicated_file_list = executor::filter::filter(list_of_sync_files);
     importer::import(&deduplicated_file_list).unwrap();
-    let database = executor::databaser::databaser(deduplicated_file_list);
-    compressor(database);
+    executor::databaser::databaser(deduplicated_file_list);
 }

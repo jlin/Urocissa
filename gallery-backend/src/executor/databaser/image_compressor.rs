@@ -7,16 +7,30 @@ use image::{DynamicImage, ImageFormat};
 use std::{error::Error, path::PathBuf};
 
 use super::small_width_height;
-pub fn image_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+pub fn image_compressor(
+    database: &mut DataBase,
+    dynamic_image_orientated: Option<DynamicImage>,
+) -> Result<(), Box<dyn Error>> {
     let file_path = &database.imported_path();
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
-    save_small_image(
-        &generate_dynamic_image(database)?,
-        compressed_width,
-        compressed_height,
-        database.compressed_path(),
-    )?;
+    if let Some(dynami_image) = dynamic_image_orientated {
+        println!("case A");
+        save_small_image(
+            &dynami_image,
+            compressed_width,
+            compressed_height,
+            database.compressed_path(),
+        )?;
+    } else {
+        println!("case B");
+        save_small_image(
+            &generate_dynamic_image(database)?,
+            compressed_width,
+            compressed_height,
+            database.compressed_path(),
+        )?;
+    }
     Ok(())
 }
 

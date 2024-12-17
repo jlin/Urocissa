@@ -2,7 +2,6 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use crate::executor;
-use crate::executor::databaser::compressor::compressor;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
@@ -22,6 +21,7 @@ pub async fn regenerate_metadata(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
 ) -> () {
+    todo!();
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 
@@ -44,7 +44,7 @@ pub async fn regenerate_metadata(
                 database
             });
 
-            compressor(iterator);
+            /* compressor(iterator); */
             SHOULD_RESET.notify_one();
         }
     })

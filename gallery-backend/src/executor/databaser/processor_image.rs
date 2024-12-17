@@ -19,6 +19,6 @@ pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
     fix_orientation(database, &mut dynamic_image);
     database.thumbhash = generate_thumbhash(&dynamic_image)?;
     database.phash = generate_phash(&dynamic_image);
-    image_compressor(database)?;
+    image_compressor(database, Some(dynamic_image))?;
     Ok(())
 }

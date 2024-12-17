@@ -53,7 +53,7 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
                 database.imported_path_string()
             );
             database.ext_type = "image".to_string();
-            return image_compressor(database);
+            return image_compressor(database, None);
         }
         Ok(d) => d, // If no error and the duration is not 0.1 seconds, continue using this value
         Err(e) => {
@@ -62,7 +62,7 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
             {
                 info!("This may not be a gif");
                 database.ext_type = "image".to_string();
-                return image_compressor(database);
+                return image_compressor(database, None);
             } else {
                 return Err(e);
             }
