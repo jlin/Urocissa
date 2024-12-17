@@ -16,12 +16,12 @@ pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn E
         .arg("error")
         .arg("-show_format")
         .arg("-show_streams")
-        .arg(&database.alias[0].file)
+        .arg(database.source_path_string())
         .output()
         .with_context(|| {
             format!(
                 "process_video_info: spawn new command for ffprobe failed for {:?}",
-                &database.alias[0].file
+                database.source_path_string()
             )
         })?;
 
@@ -29,7 +29,7 @@ pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn E
         let line = String::from_utf8(output.stdout).with_context(|| {
             format!(
                 "process_video_info: Failed to from vec<u8> to String for {:?}",
-                &database.alias[0].file
+                database.source_path_string()
             )
         })?;
         for mat in RE_VIDEO_INFO.captures_iter(&line) {
@@ -38,7 +38,7 @@ pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn E
                 .with_context(|| {
                     format!(
                         "process_video_info: Failed to get(1) of match {:?} for {:?}",
-                        mat, &database.alias[0].file
+                        mat, database.source_path_string()
                     )
                 })?
                 .as_str()
@@ -48,7 +48,7 @@ pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn E
                 .with_context(|| {
                     format!(
                         "process_video_info: Failed to get(2) of match {:?} for {:?}",
-                        mat, &database.alias[0].file
+                        mat, database.source_path_string()
                     )
                 })?
                 .as_str()

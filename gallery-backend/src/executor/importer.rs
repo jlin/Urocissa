@@ -74,7 +74,7 @@ async fn async_import(
         .map(|entry| {
             let database = entry.value();
             // Clone the Arc to share the progress bar across tasks
-            let source_path = PathBuf::from(&database.alias[0].file);
+            let source_path = database.source_path();
             let dest_path = database.imported_path();
             let progress_bar = Arc::clone(&progress_bar);
             async move {

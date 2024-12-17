@@ -2,6 +2,12 @@ use super::definition::DataBase;
 use std::path::PathBuf;
 
 impl DataBase {
+    pub fn source_path_string(&self) -> &str {
+        &self.alias[0].file
+    }
+    pub fn source_path(&self) -> PathBuf {
+        PathBuf::from(self.source_path_string())
+    }
     pub fn imported_path_string(&self) -> String {
         format!(
             "./object/imported/{}/{}.{}",

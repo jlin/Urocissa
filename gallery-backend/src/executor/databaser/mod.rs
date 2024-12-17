@@ -28,7 +28,7 @@ pub fn databaser(
                             e.to_string(),
                             format!("An error occurred while processing file",),
                             Some(database.hash),
-                            Some(PathBuf::from(&database.alias[0].file)),
+                            Some(database.source_path()),
                             Location::caller(),
                             Some(database),
                         ));

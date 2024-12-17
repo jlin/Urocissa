@@ -10,7 +10,7 @@ use anyhow::Context;
 use crate::public::database_struct::database::definition::DataBase;
 
 pub fn process_image_info(mut database: DataBase) -> DataBase {
-    let source_path = PathBuf::from(&database.alias[0].file);
+    let source_path = database.source_path();
     let mut exif_tuple = BTreeMap::new();
     if let Ok(exif) = read_exif(&source_path) {
         for field in exif.fields() {

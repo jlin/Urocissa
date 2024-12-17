@@ -22,7 +22,7 @@ where
     let dashmap_of_database: DashMap<ArrayString<64>, DataBase> = DashMap::new();
     let scaned_number = AtomicUsize::new(0);
     vec_of_database.for_each(|mut database| {
-        match blake3_hasher(&PathBuf::from(&database.alias[0].file)) {
+        match blake3_hasher(&database.source_path()) {
             Ok(hash) => {
                 let read_table = TREE.read_tree_api();
                 match read_table.get(&*hash).unwrap() {
