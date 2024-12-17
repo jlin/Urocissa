@@ -58,7 +58,7 @@
         <v-btn v-bind="props" icon="mdi-plus"></v-btn>
       </template>
       <v-list>
-        <v-list-item prepend-icon="mdi-upload" value="upload" @click="triggerFileInput">
+        <v-list-item prepend-icon="mdi-upload" value="upload" @click="uploadStore.triggerFileInput">
           <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
         </v-list-item>
         <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, type Ref, watchEffect } from 'vue'
+import { inject, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
@@ -85,17 +85,11 @@ const uploadStore = useUploadStore('mainId')
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
-const fileInput: Ref<HTMLInputElement | null> = ref(null)
 const filterStore = useFilterStore('mainId')
 
 const triggerModal = () => {
   modalStore.showCreateAlbumsModal = true
-  console.log('modalStore.showCreateAlbumsModal is', modalStore.showCreateAlbumsModal)
 }
-
-watchEffect(() => {
-  uploadStore.uploadButton = fileInput.value
-})
 
 const handleSearch = async () => {
   filterStore.filterString = searchQuery.value
@@ -108,10 +102,4 @@ const handleSearch = async () => {
 watchEffect(() => {
   searchQuery.value = route.query.search as string
 })
-
-function triggerFileInput(): void {
-  if (fileInput.value) {
-    fileInput.value.click()
-  }
-}
 </script>

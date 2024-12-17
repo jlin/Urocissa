@@ -13,15 +13,26 @@
     </v-main>
     <NotificationWarn />
   </v-app>
+  <input
+    v-if="!route.fullPath.includes('share')"
+    id="upload-input"
+    type="file"
+    @change="uploadStore.handleFileUpload"
+    ref="fileInput"
+    multiple
+    style="display: none"
+  />
 </template>
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, Ref, watchEffect, ref } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import NavBar from '@/components/NavBar/NavBar.vue'
+import { useUploadStore } from '@/store/uploadStore'
 
+const uploadStore = useUploadStore('mainId')
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 
@@ -37,6 +48,12 @@ const currentPage = computed(() => {
   } else {
     return 'default'
   }
+})
+
+const fileInput: Ref<HTMLInputElement | null> = ref(null)
+
+watchEffect(() => {
+  uploadStore.uploadButton = fileInput.value
 })
 
 // The routeKey is used to ensure that the router-view reloads the Home.vue component properly.
