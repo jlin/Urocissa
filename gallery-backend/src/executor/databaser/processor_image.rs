@@ -1,39 +1,39 @@
-use std::{collections::BTreeMap, error::Error, io, path::Path};
+use std::{collections::BTreeMap, error::Error, io, mem, path::Path};
 
 use anyhow::Context;
+use image::DynamicImage;
 
 use crate::public::database_struct::database::definition::DataBase;
 
-pub fn process_image_info(mut database: DataBase) -> DataBase {
-    let source_path = database.source_path();
-    let mut exif_tuple = BTreeMap::new();
-    if let Ok(exif) = read_exif(&source_path) {
-        for field in exif.fields() {
-            let tag = field.tag.to_string();
-            let value = field.display_value().with_unit(&exif).to_string();
-            let ifd_num = field.ifd_num;
-            if exif_tuple.get(&tag).is_some() {
-                // Only replace if the new field is from the PRIMARY IFD
-                if ifd_num == exif::In::PRIMARY {
-                    exif_tuple.insert(tag, value);
-                }
-            } else {
-                // If the key doesn't exist, insert it as usual
-                exif_tuple.insert(tag, value);
-            }
-        }
-    }
-    database.exif_vec = exif_tuple;
-    return database;
+use super::{
+    generate_dynamic_image::generate_dynamic_image,
+    generate_exif::generate_exif,
+    generate_width_height::{generate_img_width_height, generate_phash, generate_thumbhash},
+};
+
+pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+    database.exif_vec = generate_exif(&database);
+    let mut dynamic_image = generate_dynamic_image(&database)?;
+    (database.width, database.height) = generate_img_width_height(&dynamic_image);
+    fix_orientation(database, &mut dynamic_image);
+    database.thumbhash = generate_thumbhash(&dynamic_image)?;
+    database.phash = generate_phash(&dynamic_image);
+    Ok(())
 }
 
-fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
-    let exif_reader = exif::Reader::new();
-    let file = std::fs::File::open(file_path)
-        .with_context(|| format!("read_exif: Failed to open file {:?}", file_path))?;
-    let mut bufreader = io::BufReader::with_capacity(1024 * 1024, &file);
-    let exif = exif_reader
-        .read_from_container(&mut bufreader)
-        .with_context(|| format!("read_exif: Failed to read exif of file {:?}", file_path))?;
-    Ok(exif)
+fn fix_orientation(database: &mut DataBase, dynamic_image: &mut DynamicImage) -> () {
+    if let Some(orientation) = database.exif_vec.get("Orientation") {
+        match orientation.as_str() {
+            "row 0 at right and column 0 at top" => {
+                *dynamic_image = dynamic_image.rotate90();
+                std::mem::swap(&mut database.width, &mut database.height)
+            }
+            "row 0 at bottom and column 0 at right" => *dynamic_image = dynamic_image.rotate180(),
+            "row 0 at left and column 0 at bottom" => {
+                *dynamic_image = dynamic_image.rotate270();
+                std::mem::swap(&mut database.width, &mut database.height)
+            }
+            _ => (),
+        }
+    }
 }

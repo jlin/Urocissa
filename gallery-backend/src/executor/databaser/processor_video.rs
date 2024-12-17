@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
-pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn Error>> {
+pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")
         .arg("-v")
@@ -56,7 +56,7 @@ pub fn process_video_info(database: &mut DataBase) -> Result<DataBase, Box<dyn E
             exif_tuple.insert(key, value);
         }
         database.exif_vec = exif_tuple;
-        return Ok(mem::take(database));
+        return Ok(());
     } else {
         Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,

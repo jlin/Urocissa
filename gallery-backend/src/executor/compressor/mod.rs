@@ -15,11 +15,11 @@ use std::sync::atomic::Ordering;
 use std::sync::{atomic::AtomicUsize, Arc};
 pub mod image_compressor;
 pub mod image_decoder;
-mod image_thumbhash;
-mod utils;
+pub mod image_thumbhash;
+pub mod utils;
 pub mod video_compressor;
-mod video_ffprobe;
-mod video_preview;
+pub mod video_ffprobe;
+pub mod video_preview;
 pub fn compressor<T>(databases: T)
 where
     T: ParallelIterator<Item = DataBase>,
