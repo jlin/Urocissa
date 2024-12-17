@@ -2,6 +2,7 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 use crate::executor;
+use crate::executor::databaser::compressor::compressor;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
@@ -43,7 +44,7 @@ pub async fn regenerate_metadata(
                 database
             });
 
-            executor::compressor::compressor(iterator);
+            compressor(iterator);
             SHOULD_RESET.notify_one();
         }
     })

@@ -1,7 +1,8 @@
-use super::{image_thumbhash::generate_thumbhash, utils::small_width_height};
 use crate::public::database_struct::database::definition::DataBase;
 use anyhow::Context;
-use std::{error::Error, path::PathBuf, process::Command};
+use std::{cmp, error::Error, path::PathBuf, process::Command};
+
+use super::small_width_height;
 
 pub fn generate_preview(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let width = database.width;
@@ -12,7 +13,12 @@ pub fn generate_preview(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let preview_scale_args = format!("scale={}:{}", preview_width, preview_height);
 
     let preview_file_path_string = &database.preview_path();
-
+    std::fs::create_dir_all(database.compressed_path_parent()).with_context(|| {
+        format!(
+            "generate_preview: failed to create directory for {:?}",
+            database.imported_path_string()
+        )
+    })?;
     let status = Command::new("ffmpeg")
         .args(&[
             "-y",
@@ -40,6 +46,5 @@ pub fn generate_preview(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
             "ffmpeg failed to generate preview",
         )));
     }
-    generate_thumbhash(database, &PathBuf::from(database.preview_path()))?;
     Ok(())
 }

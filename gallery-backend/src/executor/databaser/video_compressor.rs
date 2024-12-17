@@ -1,5 +1,5 @@
 use crate::{
-    executor::compressor::{image_compressor::image_compressor, video_ffprobe::video_width_height},
+    executor::databaser::image_compressor::image_compressor,
     public::{
         constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION,
         database_struct::database::definition::DataBase,
@@ -14,7 +14,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use super::{video_ffprobe::video_duration, video_preview::generate_preview};
+use super::video_ffprobe::{video_duration, video_width_height};
 
 pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let mut width = video_width_height("width", &database.imported_path_string())?;
@@ -37,7 +37,6 @@ pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
             database.imported_path_string()
         )
     })?;
-    generate_preview(database)?; // Get preview image
     database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
 
     Ok(())

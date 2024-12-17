@@ -1,5 +1,3 @@
-use self::image_compressor::image_compressor;
-use self::video_compressor::video_compressor;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
 use crate::public::{
@@ -13,13 +11,9 @@ use rayon::prelude::*;
 use std::panic::Location;
 use std::sync::atomic::Ordering;
 use std::sync::{atomic::AtomicUsize, Arc};
-pub mod image_compressor;
-pub mod image_decoder;
-pub mod image_thumbhash;
-pub mod utils;
-pub mod video_compressor;
-pub mod video_ffprobe;
-pub mod video_preview;
+
+use super::image_compressor::image_compressor;
+use super::video_compressor::video_compressor;
 pub fn compressor<T>(databases: T)
 where
     T: ParallelIterator<Item = DataBase>,

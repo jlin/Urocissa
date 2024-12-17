@@ -1,5 +1,4 @@
-use crate::executor::compressor::video_compressor::generate_compressed;
-
+use crate::executor::databaser::video_compressor::generate_compressed;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::DATA_TABLE;
 use crate::public::tree::start_loop::SHOULD_RESET;

@@ -1,15 +1,18 @@
-use crate::public::database_struct::database::definition::DataBase;
-
-use super::{image_thumbhash::generate_thumbhash, utils::small_width_height};
+use crate::{
+    executor::databaser::generate_dynamic_image::generate_dynamic_image,
+    public::database_struct::database::definition::DataBase,
+};
 
 use image::{DynamicImage, ImageFormat};
 use std::{error::Error, path::PathBuf};
+
+use super::small_width_height;
 pub fn image_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let file_path = &database.imported_path();
-    let (width, height, dynamic_image) = generate_thumbhash(database, file_path)?;
-    let (compressed_width, compressed_height) = small_width_height(width, height, 1280);
+    let (compressed_width, compressed_height) =
+        small_width_height(database.width, database.height, 1280);
     save_small_image(
-        &dynamic_image,
+        &generate_dynamic_image(database)?,
         compressed_width,
         compressed_height,
         database.compressed_path(),

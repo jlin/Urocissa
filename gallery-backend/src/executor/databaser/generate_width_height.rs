@@ -1,5 +1,3 @@
-use crate::executor::compressor::image_decoder;
-use crate::executor::compressor::video_ffprobe::video_width_height;
 use crate::public::database_struct::database::definition::DataBase;
 
 use image::DynamicImage;
@@ -8,6 +6,7 @@ use std::error::Error;
 use std::path::PathBuf;
 
 use super::generate_dynamic_image::generate_dynamic_image;
+use super::video_ffprobe::video_width_height;
 
 pub fn generate_img_width_height(dynamic_image: &DynamicImage) -> (u32, u32) {
     let width = dynamic_image.width();
