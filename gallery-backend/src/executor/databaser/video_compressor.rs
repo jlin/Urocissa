@@ -1,5 +1,5 @@
 use crate::{
-    executor::databaser::image_compressor::image_compressor,
+    executor::databaser::generate_compressed_image::generate_compressed_image,
     public::{
         constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION,
         database_struct::database::definition::DataBase,
@@ -16,32 +16,6 @@ use std::{
 
 use super::video_ffprobe::{video_duration, video_width_height};
 
-pub fn video_compressor(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
-    let mut width = video_width_height("width", &database.imported_path_string())?;
-    let mut height = video_width_height("height", &database.imported_path_string())?;
-    let should_swap_video_width_height = {
-        if let Some(rotation) = database.exif_vec.get("rotation") {
-            SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())
-        } else {
-            false
-        }
-    };
-    if should_swap_video_width_height {
-        (width, height) = (height, width)
-    }
-    database.width = width;
-    database.height = height;
-    std::fs::create_dir_all(database.compressed_path_parent()).with_context(|| {
-        format!(
-            "video_compressor: failed to create directory for {:?}",
-            database.imported_path_string()
-        )
-    })?;
-    database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
-
-    Ok(())
-}
-
 pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
 
@@ -53,7 +27,7 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
                 database.imported_path_string()
             );
             database.ext_type = "image".to_string();
-            return image_compressor(database, None);
+            return generate_compressed_image(database, None);
         }
         Ok(d) => d, // If no error and the duration is not 0.1 seconds, continue using this value
         Err(e) => {
@@ -62,7 +36,7 @@ pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>
             {
                 info!("This may not be a gif");
                 database.ext_type = "image".to_string();
-                return image_compressor(database, None);
+                return generate_compressed_image(database, None);
             } else {
                 return Err(e);
             }

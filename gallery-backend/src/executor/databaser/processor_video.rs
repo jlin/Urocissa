@@ -1,3 +1,4 @@
+use crate::public::constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION;
 use crate::public::database_struct::database::definition::DataBase;
 use anyhow::Context;
 use regex::Regex;
@@ -10,6 +11,7 @@ use std::sync::LazyLock;
 use super::generate_dynamic_image::generate_dynamic_image;
 use super::generate_preview::generate_preview;
 use super::generate_width_height::generate_thumbhash;
+use super::video_ffprobe::video_width_height;
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
@@ -18,6 +20,23 @@ pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
     generate_preview(database)?;
     let dynamic_image = generate_dynamic_image(database)?;
     database.thumbhash = generate_thumbhash(&dynamic_image)?;
+    
+    let mut width = video_width_height("width", &database.imported_path_string())?;
+    let mut height = video_width_height("height", &database.imported_path_string())?;
+    let should_swap_video_width_height = {
+        if let Some(rotation) = database.exif_vec.get("rotation") {
+            SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())
+        } else {
+            false
+        }
+    };
+    if should_swap_video_width_height {
+        (width, height) = (height, width)
+    }
+    database.width = width;
+    database.height = height;
+
+    
     Ok(())
 }
 

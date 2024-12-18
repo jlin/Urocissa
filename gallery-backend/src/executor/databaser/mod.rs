@@ -18,11 +18,11 @@ use rayon::prelude::*;
 use std::sync::atomic::Ordering;
 use std::sync::{atomic::AtomicUsize, Arc};
 pub mod fix_orientation;
+pub mod generate_compressed_image;
 pub mod generate_dynamic_image;
 pub mod generate_exif;
 pub mod generate_preview;
 pub mod generate_width_height;
-pub mod image_compressor;
 pub mod image_decoder;
 pub mod processor_image;
 pub mod processor_video;
@@ -56,6 +56,7 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
                     match process_video_info(&mut database) {
                         Ok(_) => {
                             video_hash_dashset.insert(database.hash);
+                            database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
                             Some(database)
                         }
                         Err(e) => {
