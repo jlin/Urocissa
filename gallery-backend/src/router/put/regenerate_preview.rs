@@ -1,9 +1,8 @@
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use crate::executor;
+use crate::executor::databaser::generate_compressed_image::generate_compressed_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
@@ -21,7 +20,6 @@ pub async fn regenerate_preview(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
 ) -> () {
-    todo!();
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 
@@ -39,13 +37,11 @@ pub async fn regenerate_preview(
         for (i, batch) in hash_vec.chunks(PROCESS_BATCH_NUMBER).enumerate() {
             info!("Processing batch {}/{}", i + 1, total_batches);
 
-            let iterator = batch.into_par_iter().map(|string| {
-                let database = table.get(&**string).unwrap().unwrap().value();
-                database
-            });
+            batch.into_par_iter().for_each(|string| {
+                let mut database = table.get(&**string).unwrap().unwrap().value();
 
-            /* compressor(iterator); */
-            SHOULD_RESET.notify_one();
+                generate_compressed_image(&mut database, None).unwrap();
+            });
         }
     })
     .await
