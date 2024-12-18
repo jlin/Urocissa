@@ -1,6 +1,6 @@
 use crate::public::database_struct::database::definition::DataBase;
 use anyhow::Context;
-use std::{cmp, error::Error, path::PathBuf, process::Command};
+use std::{error::Error, process::Command};
 
 use super::small_width_height;
 

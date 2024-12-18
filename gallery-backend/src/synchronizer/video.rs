@@ -1,4 +1,4 @@
-use crate::executor::databaser::video_compressor::generate_compressed;
+use crate::executor::databaser::generate_compressed_video::generate_compressed_video;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::DATA_TABLE;
 use crate::public::tree::start_loop::SHOULD_RESET;
@@ -37,26 +37,28 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                     }
                 });
 
-                database_vec.for_each(|mut database| match generate_compressed(&mut database) {
-                    Ok(_) => {
-                        database.pending = false;
-                        let write_txn = TREE.in_disk.begin_write().unwrap();
-                        {
-                            let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-                            write_table.insert(&*database.hash, &database).unwrap();
+                database_vec.for_each(|mut database| {
+                    match generate_compressed_video(&mut database) {
+                        Ok(_) => {
+                            database.pending = false;
+                            let write_txn = TREE.in_disk.begin_write().unwrap();
+                            {
+                                let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
+                                write_table.insert(&*database.hash, &database).unwrap();
+                            }
+                            write_txn.commit().unwrap();
+                            SHOULD_RESET.notify_one();
                         }
-                        write_txn.commit().unwrap();
-                        SHOULD_RESET.notify_one();
-                    }
-                    Err(error) => {
-                        handle_error(ErrorData::new(
-                            error.to_string(),
-                            format!("An error occurred while processing file",),
-                            Some(database.hash),
-                            Some(database.imported_path()),
-                            Location::caller(),
-                            Some(database),
-                        ));
+                        Err(error) => {
+                            handle_error(ErrorData::new(
+                                error.to_string(),
+                                format!("An error occurred while processing file",),
+                                Some(database.hash),
+                                Some(database.imported_path()),
+                                Location::caller(),
+                                Some(database),
+                            ));
+                        }
                     }
                 })
             })

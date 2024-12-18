@@ -12,21 +12,18 @@ use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use dashmap::DashSet;
-use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
-use rayon::prelude::*;
-use std::sync::atomic::Ordering;
-use std::sync::{atomic::AtomicUsize, Arc};
 pub mod fix_orientation;
 pub mod generate_compressed_image;
+pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
 pub mod generate_exif;
+pub mod generate_image_hash;
 pub mod generate_preview;
 pub mod generate_width_height;
 pub mod image_decoder;
 pub mod processor_image;
 pub mod processor_video;
-pub mod video_compressor;
 pub mod video_ffprobe;
 pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
     let write_txn = TREE.in_disk.begin_write().unwrap();
@@ -86,6 +83,7 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
         .send(video_hash_dashset.into_iter().collect())
         .unwrap();
 }
+
 pub fn small_width_height(width: u32, height: u32, small_height: u32) -> (u32, u32) {
     let (nwidth, nheight) = if width >= cmp::max(height, small_height) {
         (small_height, height * small_height / width)

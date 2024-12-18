@@ -1,9 +1,6 @@
 use crate::{
     executor::databaser::generate_compressed_image::generate_compressed_image,
-    public::{
-        constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION,
-        database_struct::database::definition::DataBase,
-    },
+    public::database_struct::database::definition::DataBase,
 };
 use anyhow::{Context, Result};
 use regex::Regex;
@@ -14,9 +11,9 @@ use std::{
     process::{Command, Stdio},
 };
 
-use super::video_ffprobe::{video_duration, video_width_height};
+use super::video_ffprobe::video_duration;
 
-pub fn generate_compressed(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {

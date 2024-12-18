@@ -1,7 +1,7 @@
 use image::{DynamicImage, ImageBuffer, Rgb};
 use std::{error::Error, fs::read, path::PathBuf};
 use zune_jpeg::{zune_core::options::DecoderOptions, JpegDecoder};
-pub fn decoder_image(file_path: &PathBuf) -> Result<DynamicImage, Box<dyn Error>> {
+pub fn decode_image(file_path: &PathBuf) -> Result<DynamicImage, Box<dyn Error>> {
     let file_in_memory = read(file_path)?;
 
     let is_jpeg = file_path.extension().map_or(false, |ext| {

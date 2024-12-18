@@ -1,17 +1,10 @@
-use std::{collections::BTreeMap, error::Error, io, mem, path::Path};
-
-use anyhow::Context;
 use image::DynamicImage;
 
-use crate::public::database_struct::database::definition::DataBase;
-
-use super::{
-    generate_dynamic_image::generate_dynamic_image,
-    generate_exif::generate_exif,
-    generate_width_height::{generate_img_width_height, generate_phash, generate_thumbhash},
+use crate::public::{
+    constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION, database_struct::database::definition::DataBase,
 };
 
-pub fn fix_orientation(database: &mut DataBase, dynamic_image: &mut DynamicImage) -> () {
+pub fn fix_image_orientation(database: &mut DataBase, dynamic_image: &mut DynamicImage) -> () {
     if let Some(orientation) = database.exif_vec.get("Orientation") {
         match orientation.as_str() {
             "row 0 at right and column 0 at top" => {
@@ -25,5 +18,18 @@ pub fn fix_orientation(database: &mut DataBase, dynamic_image: &mut DynamicImage
             }
             _ => (),
         }
+    }
+}
+
+pub fn fix_video_orientation(database: &mut DataBase) -> () {
+    let should_swap_video_width_height = {
+        if let Some(rotation) = database.exif_vec.get("rotation") {
+            SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())
+        } else {
+            false
+        }
+    };
+    if should_swap_video_width_height {
+        (database.width, database.height) = (database.height, database.width)
     }
 }
