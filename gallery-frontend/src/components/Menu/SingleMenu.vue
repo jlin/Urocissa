@@ -16,6 +16,7 @@
       <PermanentlyDelete v-else :index-list="[props.index]"></PermanentlyDelete>
       <v-divider></v-divider>
       <RegeneratePreview :index-list="[props.index]" />
+      <RegenerateMetadata :index-list="[props.index]" />
     </v-list>
   </v-menu>
 </template>
@@ -31,6 +32,7 @@ import EditAlbums from './Item/EditAlbums.vue'
 import Delete from './Item/Delete.vue'
 import PermanentlyDelete from './Item/PermanentlyDelete.vue'
 import RegeneratePreview from './Item/RegeneratePreview.vue'
+import RegenerateMetadata from './Item/RegenerateMetadata.vue'
 
 const props = defineProps<{
   isolationId: string

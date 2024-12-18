@@ -12,6 +12,7 @@ pub fn generate_put_routes() -> Vec<Route> {
         edit_album::set_album_title,
         edit_tag::edit_tag,
         random::generate_random_data,
-        regenerate_preview::regenerate_preview
+        regenerate_preview::regenerate_preview,
+        regenerate_metadata::regenerate_metadata
     ]
 }

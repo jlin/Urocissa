@@ -27,7 +27,6 @@ pub async fn regenerate_metadata(
         let reduced_data_vec = TREE_SNAPSHOT
             .read_tree_snapshot(&json_data.timestamp)
             .unwrap();
-
         let hash_vec: Vec<ArrayString<64>> = json_data
             .index_array
             .par_iter()

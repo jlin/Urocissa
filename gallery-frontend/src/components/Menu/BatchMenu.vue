@@ -31,6 +31,7 @@
 
       <!-- Regenerate Preview Action -->
       <RegeneratePreview :index-list="editModeList" />
+      <RegenerateMetadata :index-list="editModeList" />
     </v-list>
   </v-menu>
 </template>
@@ -53,6 +54,7 @@ import PermanentlyDelete from './Item/PermanentlyDelete.vue'
 
 // Utility function to extract isolation ID from the route
 import { getIsolationIdByRoute } from '@/script/common/functions'
+import RegenerateMetadata from './Item/RegenerateMetadata.vue'
 
 // Initialize route and store
 const route = useRoute()
