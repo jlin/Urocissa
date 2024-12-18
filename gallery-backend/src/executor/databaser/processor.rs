@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, fs::metadata};
 
 use crate::public::database_struct::database::definition::DataBase;
 
@@ -25,6 +25,7 @@ pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
 }
 
 pub fn regenerate_metadata_for_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+    database.size = metadata(&database.imported_path()).unwrap().len();
     database.exif_vec = regenerate_image_exif(&database);
     let mut dynamic_image = generate_dynamic_image(&database)?;
     (database.width, database.height) = generate_image_width_height(&dynamic_image);
