@@ -1,8 +1,7 @@
 use std::cmp;
 use std::panic::Location;
 
-use self::processor_image::process_image_info;
-use self::processor_video::process_video_info;
+use self::processor_image::{process_image_info, process_video_info};
 use crate::public::constant::VALID_IMAGE_EXTENSIONS;
 use crate::public::database_struct::database::definition::DataBase;
 use crate::public::error_data::{handle_error, ErrorData};
@@ -23,7 +22,6 @@ pub mod generate_preview;
 pub mod generate_width_height;
 pub mod image_decoder;
 pub mod processor_image;
-pub mod processor_video;
 pub mod video_ffprobe;
 pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
     let write_txn = TREE.in_disk.begin_write().unwrap();
