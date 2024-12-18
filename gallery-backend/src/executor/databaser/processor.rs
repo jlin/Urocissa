@@ -24,6 +24,17 @@ pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
     Ok(())
 }
 
+pub fn regenerate_metadata_for_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+    database.exif_vec = generate_image_exif(&database);
+    let mut dynamic_image = generate_dynamic_image(&database)?;
+    (database.width, database.height) = generate_image_width_height(&dynamic_image);
+    fix_image_width_height(database);
+    fix_image_orientation(database, &mut dynamic_image);
+    database.thumbhash = generate_thumbhash(&dynamic_image)?;
+    database.phash = generate_phash(&dynamic_image);
+    Ok(())
+}
+
 pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     database.exif_vec = generate_video_exif(database.source_path_string())?;
     (database.width, database.height) = generate_video_width_height(&database)?;

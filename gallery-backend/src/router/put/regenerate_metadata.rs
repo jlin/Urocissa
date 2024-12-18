@@ -1,9 +1,9 @@
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
-use crate::executor;
+use crate::executor::databaser::generate_compressed_image::generate_compressed_image;
+use crate::executor::databaser::processor::regenerate_metadata_for_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
@@ -21,7 +21,6 @@ pub async fn regenerate_metadata(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
 ) -> () {
-    todo!();
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 
@@ -39,13 +38,17 @@ pub async fn regenerate_metadata(
         for (i, batch) in hash_vec.chunks(PROCESS_BATCH_NUMBER).enumerate() {
             info!("Processing batch {}/{}", i + 1, total_batches);
 
-            let iterator = batch.into_par_iter().map(|string| {
-                let database = table.get(&**string).unwrap().unwrap().value();
-                database
-            });
-
-            /* compressor(iterator); */
-            SHOULD_RESET.notify_one();
+            let list_of_database: Vec<_> = batch
+                .into_par_iter()
+                .filter_map(|string| {
+                    let mut database = table.get(&**string).unwrap().unwrap().value();
+                    match regenerate_metadata_for_image(&mut database) {
+                        Ok(_) => Some(database),
+                        Err(_) => None,
+                    }
+                })
+                .collect();
+            TREE.insert_tree_api(&list_of_database).unwrap();
         }
     })
     .await
