@@ -1,7 +1,7 @@
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rocket::http::Status;
 
-use crate::executor::databaser::generate_compressed_image::generate_compressed_image;
 use crate::executor::databaser::processor::regenerate_metadata_for_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
@@ -15,12 +15,17 @@ pub struct RegenerateData {
     index_array: Vec<usize>,
     timestamp: u128,
 }
+
 #[post("/put/regenerate-metadata", format = "json", data = "<json_data>")]
 pub async fn regenerate_metadata(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
-) -> () {
+) -> Status {
+    // Clone the data to move it into the spawned task
+    let json_data = json_data.into_inner();
+
+    // Spawn the blocking task without awaiting it
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 
@@ -49,7 +54,8 @@ pub async fn regenerate_metadata(
                 .collect();
             TREE.insert_tree_api(&list_of_database).unwrap();
         }
-    })
-    .await
-    .unwrap()
+    });
+
+    // Return 200 OK immediately
+    Status::Ok
 }

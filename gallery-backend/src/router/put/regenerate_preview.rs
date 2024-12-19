@@ -1,7 +1,8 @@
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+use rocket::http::Status;
 
-use crate::executor::databaser::generate_compressed_image::generate_compressed_image;
+use crate::executor::databaser::generate_compressed_image::regenerate_compressed_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -19,7 +20,7 @@ pub async fn regenerate_preview(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
-) -> () {
+) -> Status {
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 
@@ -40,10 +41,11 @@ pub async fn regenerate_preview(
             batch.into_par_iter().for_each(|string| {
                 let mut database = table.get(&**string).unwrap().unwrap().value();
 
-                generate_compressed_image(&mut database, None).unwrap();
+                regenerate_compressed_image(&mut database).unwrap();
             });
         }
-    })
-    .await
-    .unwrap()
+    });
+
+    // Return 200 OK immediately
+    Status::Ok
 }

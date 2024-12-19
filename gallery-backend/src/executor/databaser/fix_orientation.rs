@@ -10,7 +10,9 @@ pub fn fix_image_orientation(database: &DataBase, dynamic_image: &mut DynamicIma
             "row 0 at right and column 0 at top" => {
                 *dynamic_image = dynamic_image.rotate90();
             }
-            "row 0 at bottom and column 0 at right" => *dynamic_image = dynamic_image.rotate180(),
+            "row 0 at bottom and column 0 at right" => {
+                *dynamic_image = dynamic_image.rotate180();
+            }
             "row 0 at left and column 0 at bottom" => {
                 *dynamic_image = dynamic_image.rotate270();
             }
