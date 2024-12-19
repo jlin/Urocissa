@@ -13,7 +13,11 @@
       <EditTags />
       <EditAlbums />
       <Delete v-if="!database.tag.includes('_trashed')" :index-list="[props.index]" />
-      <PermanentlyDelete v-else :index-list="[props.index]"></PermanentlyDelete>
+      <Restore v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
+      <PermanentlyDelete
+        v-if="database.tag.includes('_trashed')"
+        :index-list="[props.index]"
+      ></PermanentlyDelete>
       <v-divider></v-divider>
       <RegeneratePreview :index-list="[props.index]" />
       <RegenerateMetadata :index-list="[props.index]" />
@@ -33,6 +37,7 @@ import Delete from './Item/Delete.vue'
 import PermanentlyDelete from './Item/PermanentlyDelete.vue'
 import RegeneratePreview from './Item/RegeneratePreview.vue'
 import RegenerateMetadata from './Item/RegenerateMetadata.vue'
+import Restore from './Item/Restore.vue'
 
 const props = defineProps<{
   isolationId: string

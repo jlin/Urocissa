@@ -8,7 +8,8 @@
       <v-divider></v-divider>
       <EditTags />
       <Delete v-if="!album.tag.includes('_trashed')" :index-list="[props.index]" />
-      <PermanentlyDelete v-else :index-list="[props.index]" />
+      <Restore v-if="album.tag.includes('_trashed')" :index-list="[props.index]" />
+      <PermanentlyDelete v-if="album.tag.includes('_trashed')" :index-list="[props.index]" />
     </v-list>
   </v-menu>
 </template>
@@ -19,6 +20,7 @@ import FindInTimeline from './Item/FindInTimeline.vue'
 import EditTags from './Item/EditTags.vue'
 import Delete from './Item/Delete.vue'
 import PermanentlyDelete from './Item/PermanentlyDelete.vue'
+import Restore from './Item/Restore.vue'
 
 const props = defineProps<{
   isolationId: string

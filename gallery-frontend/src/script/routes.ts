@@ -117,7 +117,7 @@ const homePageRoutes = createRoute(
   'and(not(tag:"_archived"), not(tag:"_trashed"))'
 )
 
-const allPageRoutes = createRoute('all', AllPage, 'AllPage', null)
+const allPageRoutes = createRoute('all', AllPage, 'AllPage', 'not(tag:"_trashed")')
 
 const favoritePageRoutes = createRoute(
   'favorite',

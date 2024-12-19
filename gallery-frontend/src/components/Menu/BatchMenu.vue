@@ -25,7 +25,8 @@
 
       <!-- Delete or Permanently Delete Actions -->
       <Delete :index-list="editModeList" v-if="!isInTrashedPath" />
-      <PermanentlyDelete :index-list="editModeList" v-else prepend-icon="mdi-trash-can-outline" />
+      <Restore :index-list="editModeList" v-if="isInTrashedPath" />
+      <PermanentlyDelete :index-list="editModeList" v-if="isInTrashedPath" />
 
       <v-divider></v-divider>
 
@@ -55,6 +56,7 @@ import PermanentlyDelete from './Item/PermanentlyDelete.vue'
 // Utility function to extract isolation ID from the route
 import { getIsolationIdByRoute } from '@/script/common/functions'
 import RegenerateMetadata from './Item/RegenerateMetadata.vue'
+import Restore from './Item/Restore.vue'
 
 // Initialize route and store
 const route = useRoute()
