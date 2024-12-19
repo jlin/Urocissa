@@ -6,49 +6,31 @@ use regex::Regex;
 use crate::public::database_struct::database::definition::DataBase;
 
 pub fn generate_image_exif(database: &DataBase) -> BTreeMap<String, String> {
-    let source_path = database.source_path();
-    let mut exif_tuple = BTreeMap::new();
-    if let Ok(exif) = read_exif(&source_path) {
-        for field in exif.fields() {
-            let tag = field.tag.to_string();
-            let value = field.display_value().with_unit(&exif).to_string();
-            let ifd_num = field.ifd_num;
-            if exif_tuple.get(&tag).is_some() {
-                // Only replace if the new field is from the PRIMARY IFD
-                if ifd_num == exif::In::PRIMARY {
-                    exif_tuple.insert(tag, value);
-                }
-            } else {
-                // If the key doesn't exist, insert it as usual
-                exif_tuple.insert(tag, value);
-            }
-        }
-    }
-    exif_tuple
+    extract_image_exif(&database.source_path())
 }
 
 pub fn regenerate_image_exif(database: &DataBase) -> BTreeMap<String, String> {
-    let source_path = database.imported_path();
+    extract_image_exif(&database.imported_path())
+}
+
+fn extract_image_exif(path: &Path) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();
-    if let Ok(exif) = read_exif(&source_path) {
+    if let Ok(exif) = read_exif(path) {
         for field in exif.fields() {
             let tag = field.tag.to_string();
             let value = field.display_value().with_unit(&exif).to_string();
             let ifd_num = field.ifd_num;
             if exif_tuple.get(&tag).is_some() {
-                // Only replace if the new field is from the PRIMARY IFD
                 if ifd_num == exif::In::PRIMARY {
                     exif_tuple.insert(tag, value);
                 }
             } else {
-                // If the key doesn't exist, insert it as usual
                 exif_tuple.insert(tag, value);
             }
         }
     }
     exif_tuple
 }
-
 
 fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
     let exif_reader = exif::Reader::new();
