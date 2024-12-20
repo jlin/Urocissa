@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import axios from 'axios'
 import { getIsolationIdByRoute } from '@/script/common/functions'
+import { useMessageStore } from '@/store/messageStore'
 
 const props = defineProps<{
   indexList: number[]
@@ -17,7 +18,7 @@ const props = defineProps<{
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const prefetchStore = usePrefetchStore(isolationId)
-
+const messageStore = useMessageStore('mainId')
 const regeneratePreview = async () => {
   const indexArray = props.indexList
   const regenerateData = {
@@ -31,6 +32,9 @@ const regeneratePreview = async () => {
       }
     })
     console.log('Response:', response.data)
+    messageStore.message = 'Regenerating preview...'
+    messageStore.warn = false
+    messageStore.showMessage = true
   } catch (error) {
     console.error('Error:', error)
   }
