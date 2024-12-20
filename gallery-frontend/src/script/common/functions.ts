@@ -159,10 +159,23 @@ export function getScrollUpperBound(totalHeight: number, windowHeight: number): 
 }
 
 export async function searchByTag(tag: string, router: Router) {
-  await router.replace({
-    path: '/all',
-    query: { search: `tag:${escapeAndWrap(tag)}` }
-  })
+  switch (tag) {
+    case '_favorite':
+      await router.replace({ path: '/favorite' })
+      break
+    case '_archived':
+      await router.replace({ path: '/archived' })
+      break
+    case '_trashed':
+      await router.replace({ path: '/trashed' })
+      break
+    default:
+      await router.replace({
+        path: '/all',
+        query: { search: `tag:${escapeAndWrap(tag)}` }
+      })
+      break
+  }
 }
 
 export function escapeAndWrap(str: string): string {
