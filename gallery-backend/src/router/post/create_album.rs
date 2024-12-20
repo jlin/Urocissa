@@ -23,7 +23,11 @@ pub struct CreateAlbum {
 }
 
 #[post("/post/create_album", data = "<create_album>")]
-pub async fn create_album(_auth: AuthGuard, _read_only_mode: ReadOnlyModeGuard, create_album: Json<CreateAlbum>) -> Result<(), Status> {
+pub async fn create_album(
+    _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
+    create_album: Json<CreateAlbum>,
+) -> Result<String, Status> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
@@ -56,7 +60,7 @@ pub async fn create_album(_auth: AuthGuard, _read_only_mode: ReadOnlyModeGuard, 
         txn.commit().unwrap();
         SHOULD_RESET.notify_one();
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
-        Ok(())
+        Ok(album_id.to_string())
     })
     .await
     .unwrap()
