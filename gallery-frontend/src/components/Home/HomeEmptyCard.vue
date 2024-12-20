@@ -107,14 +107,8 @@ const clickEmptyCard = () => {
 
   if (path.startsWith('/albums')) {
     modalStore.showCreateAlbumsModal = true
-  } else if (path.startsWith('/all')) {
-    if (uploadStore.uploadButton !== null) {
-      uploadStore.uploadButton.click()
-    }
   } else {
-    if (uploadStore.uploadButton !== null) {
-      uploadStore.uploadButton.click()
-    }
+    uploadStore.triggerFileInput()
   }
 }
 </script>
