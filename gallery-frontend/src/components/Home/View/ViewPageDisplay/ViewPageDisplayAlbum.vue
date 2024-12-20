@@ -12,14 +12,7 @@
           colWidth < colHeight ? 'flex-column' : 'flex-row'
         ]"
       >
-        <img
-          v-if="imgStore.imgOriginal.get(index)"
-          id="album-img"
-          :key="index"
-          rounded="xl"
-          aspect-ratio="1"
-          cover
-          :src="imgStore.imgOriginal.get(index)"
+        <v-card
           :style="{
             width: `${Math.round(
               Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
@@ -29,10 +22,30 @@
             )}px`,
             maxWidth: '500px',
             maxHeight: '500px',
-            objectFit: 'cover',
             border: '8px solid white'
           }"
-        />
+        >
+          <img
+            v-if="imgStore.imgOriginal.get(index)"
+            id="album-img"
+            :key="index"
+            rounded="xl"
+            aspect-ratio="1"
+            cover
+            :src="imgStore.imgOriginal.get(index)"
+            :style="{
+              width: `${Math.round(
+                Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+              )}px`,
+              height: `${Math.round(
+                Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
+              )}px`,
+              maxWidth: '500px',
+              maxHeight: '500px',
+              objectFit: 'cover'
+            }"
+          />
+        </v-card>
         <v-card
           :style="{
             width: `${Math.round(
@@ -141,4 +154,3 @@ onMounted(() => {
   letter-spacing: 0.0073529412em;
 }
 </style>
-
