@@ -5,7 +5,6 @@ use std::collections::HashSet;
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
-use log::info;
 use redb::ReadableTable;
 use rocket::http::Status;
 use rocket::serde::{json::Json, Deserialize};
@@ -59,7 +58,6 @@ pub async fn edit_album(
                 });
         }
         txn.commit().unwrap();
-        SHOULD_RESET.notify_one();
 
         let concact_result: Vec<ArrayString<64>> = json_data
             .add_albums_content
@@ -69,13 +67,12 @@ pub async fn edit_album(
             .collect::<HashSet<_>>()
             .into_iter()
             .collect();
-
         ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
             .get()
             .unwrap()
             .send(concact_result)
             .unwrap();
-        info!("Send concact_result")
+        SHOULD_RESET.notify_one();
     })
     .await
     .unwrap()
