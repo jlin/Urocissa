@@ -18,6 +18,28 @@ export const useUploadStore = (isolationId: string) =>
       uploadButton: null
     }),
     actions: {
+      createUploadButton() {
+        // Create the input element dynamically
+        const fileInput = document.createElement('input')
+        fileInput.type = 'file'
+        fileInput.id = 'upload-input'
+        fileInput.style.display = 'none'
+        fileInput.multiple = true
+
+        fileInput.addEventListener('change', (event) => {
+          this.handleFileUpload(event)
+            .then(() => ({}))
+            .catch((error: unknown) => {
+              console.error('Error:', error)
+            })
+        })
+
+        // Append the input to the body
+        document.body.appendChild(fileInput)
+
+        // Set the uploadButton in the store
+        this.uploadButton = fileInput
+      },
       percentComplete() {
         if (this.total !== undefined && this.loaded !== undefined) {
           return Math.floor((this.loaded / this.total) * 100)
@@ -45,6 +67,10 @@ export const useUploadStore = (isolationId: string) =>
         return 0
       },
       triggerFileInput(): void {
+        if (!this.uploadButton) {
+          this.createUploadButton()
+        }
+
         if (this.uploadButton) {
           this.uploadButton.click()
         }
