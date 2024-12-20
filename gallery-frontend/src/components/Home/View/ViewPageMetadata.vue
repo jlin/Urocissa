@@ -183,7 +183,7 @@
                 :key="albumId"
                 link
                 class="ma-1"
-                @click="navigateToAlbum(albumId)"
+                @click="navigateToAlbum(albumId, router)"
               >
                 {{ albumStore.albumMap.get(albumId)! }}
               </v-chip>
@@ -332,6 +332,7 @@ import { filesize } from 'filesize'
 import { AbstractData } from '@/script/common/types'
 import { dater, searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
+import { navigateToAlbum } from '@/script/navigator'
 
 const props = defineProps<{
   isolationId: string
@@ -383,11 +384,6 @@ function toggleInfo() {
 
 function openEditTagsModal() {
   modalStore.showEditTagsModal = true
-}
-
-async function navigateToAlbum(albumId: string) {
-  const albumPath = `/albums/view/${albumId}/read` // Adjust the path as necessary
-  await router.push({ path: albumPath })
 }
 
 function openEditAlbumsModal() {

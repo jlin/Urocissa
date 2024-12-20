@@ -1,4 +1,4 @@
-import { RouteLocationNormalizedLoadedGeneric } from 'vue-router'
+import { RouteLocationNormalizedLoadedGeneric, Router } from 'vue-router'
 
 export function leaveRead(route: RouteLocationNormalizedLoadedGeneric) {
   return {
@@ -38,4 +38,9 @@ export function leaveViewPage(route: RouteLocationNormalizedLoadedGeneric) {
       query: route.query
     }
   }
+}
+
+export async function navigateToAlbum(albumId: string, router: Router) {
+  const albumPath = `/albums/view/${albumId}/read` // Adjust the path as necessary
+  await router.push({ path: albumPath })
 }
