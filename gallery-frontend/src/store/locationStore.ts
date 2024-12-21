@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useLocationStore = (isolationId: string) =>
+export const useLocationStore = (isolationId: IsolationId) =>
   defineStore('locateStore' + isolationId, {
     state: (): {
       /**

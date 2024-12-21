@@ -1,5 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import { Prefetch, SlicedDataItem } from '@/script/common/types'
+import { IsolationId, Prefetch, SlicedDataItem } from '@/script/common/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useInitializedStore } from '@/store/initializedStore'
@@ -21,7 +21,7 @@ import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { useRedirectionStore } from '@/store/redirectionStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
-export function handleDataWorkerReturn(dataWorker: Worker, isolationId: string) {
+export function handleDataWorkerReturn(dataWorker: Worker, isolationId: IsolationId) {
   const messageStore = useMessageStore('mainId')
   const modalStore = useModalStore('mainId')
   const redirectionStore = useRedirectionStore('mainId')

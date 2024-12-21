@@ -39,9 +39,10 @@ import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/Home/View/ViewPageDisplay/ViewPageDisplay.vue'
 import MetadataCol from '@/components/Home/View/ViewPageMetadata.vue'
+import { IsolationId } from '@/script/common/types'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
 }>()
 
 const dataStore = useDataStore(props.isolationId)

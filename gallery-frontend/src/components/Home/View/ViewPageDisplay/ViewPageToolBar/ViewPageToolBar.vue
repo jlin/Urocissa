@@ -48,14 +48,14 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@/script/common/types'
 import { useInfoStore } from '@/store/infoStore'
 import { leaveViewPage } from '@/script/navigator'
 import ViewPageToolBarDatabase from '@/components/Menu/SingleMenu.vue'
 import AlbumMenu from '@/components/Menu/AlbumMenu.vue'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   metadata: AbstractData | undefined

@@ -71,7 +71,7 @@ import { useQueueStore } from '@/store/queueStore'
 import { batchNumber } from '@/script/common/constants'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@/script/common/types'
 import { useElementSize } from '@vueuse/core'
 import ViewPageDisplayDatabase from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayDatabase.vue'
 import ViewPageDisplayAlbum from '@/components/Home/View/ViewPageDisplay/ViewPageDisplayAlbum.vue'
@@ -83,7 +83,7 @@ const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   metadata: AbstractData | undefined
@@ -203,7 +203,7 @@ const checkAndFetch = (index: number): boolean => {
   return false
 }
 
-async function prefetch(index: number, isolationId: string) {
+async function prefetch(index: number, isolationId: IsolationId) {
   if (configStore.disableImg) {
     return
   }

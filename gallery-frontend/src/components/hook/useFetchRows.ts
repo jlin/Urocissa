@@ -7,6 +7,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import { IsolationId } from '@/script/common/types'
 
 /**
  * Computes the sum of offsets for rows above the given scroll position.
@@ -14,7 +15,7 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
  * @param scrollTop - The given scroll position in pixels.
  * @returns The sum of offsets for all rows above the given scroll position.
  */
-function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string) {
+function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: IsolationId) {
   const aboveRowsIndex: number[] = []
   const rowStore = useRowStore(isolationId)
 
@@ -51,7 +52,7 @@ function computeOffSetSumOfAboveRowsIndex(scrollTop: number, isolationId: string
 export function useFetchRows(
   startHeight: Ref<number>,
   endHeight: Ref<number>,
-  isolationId: string,
+  isolationId: IsolationId,
   debounceTime = 50,
   maxWait = 100
 ) {

@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useOffsetStore = (isolationId: string) =>
+export const useOffsetStore = (isolationId: IsolationId) =>
   defineStore('offsetStore' + isolationId, {
     state: (): {
       offset: Map<number, number> // Map<rowIndex, offset>

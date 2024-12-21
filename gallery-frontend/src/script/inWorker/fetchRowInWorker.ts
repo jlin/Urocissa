@@ -5,13 +5,14 @@ import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { clamp } from 'lodash'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { IsolationId } from '../common/types'
 
 /**
  * Fetches a row of data using a web worker if it isn't already queued.
  *
  * @param {number} index - The index of the row to fetch.
  */
-export function fetchRowInWorker(index: number, isolationId: string) {
+export function fetchRowInWorker(index: number, isolationId: IsolationId) {
   const prefetchStore = usePrefetchStore(isolationId)
   const locationStore = useLocationStore(isolationId)
   const queueStore = useQueueStore(isolationId)

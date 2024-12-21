@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useImgStore = (isolationId: string) =>
+export const useImgStore = (isolationId: IsolationId) =>
   defineStore('imgStore' + isolationId, {
     state: (): {
       imgUrl: Map<number, string> // dataIndex -> blobUrl

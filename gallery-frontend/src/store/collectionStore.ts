@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useCollectionStore = (isolationId: string) =>
+export const useCollectionStore = (isolationId: IsolationId) =>
   defineStore('collectionStore' + isolationId, {
     state: (): {
       editModeOn: boolean

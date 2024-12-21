@@ -1,10 +1,10 @@
-import { AlbumInfo } from '@/script/common/types'
+import { AlbumInfo, IsolationId } from '@/script/common/types'
 import { albumInfoSchema } from '@/script/common/schemas'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'
 
-export const useAlbumStore = (isolationId: string) =>
+export const useAlbumStore = (isolationId: IsolationId) =>
   defineStore('albumStore' + isolationId, {
     state: (): {
       albums: AlbumInfo[]

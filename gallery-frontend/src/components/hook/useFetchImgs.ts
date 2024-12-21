@@ -3,6 +3,7 @@ import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { useDataStore } from '@/store/dataStore'
 import debounce from 'lodash/debounce'
 import { getArrayValue } from '@/script/common/functions'
+import { IsolationId } from '@/script/common/types'
 /**
  * Hook to fetch image batches for visible rows in a virtual scroll.
  *
@@ -16,7 +17,7 @@ export function useFetchImgs(
   visibleRows: Ref<{ start: number; end: number }[]>,
   visibleRowsLength: Ref<number>,
   batchNumber: number,
-  isolationId: string,
+  isolationId: IsolationId,
   debounceTime = 75,
   maxWait = 1000
 ) {

@@ -1,7 +1,7 @@
-import type { Row } from '@/script/common/types'
+import type { IsolationId, Row } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useRowStore = (isolationId: string) =>
+export const useRowStore = (isolationId: IsolationId) =>
   defineStore('rowStore' + isolationId, {
     state: (): {
       rowData: Map<number, Row> //  Map<rowIndex, Row>

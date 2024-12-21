@@ -195,7 +195,7 @@
 
 <script setup lang="ts">
 import { layoutBatchNumber } from '@/script/common/constants'
-import { Row } from '@/script/common/types'
+import { IsolationId, Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
@@ -217,7 +217,7 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
 
 const props = defineProps<{
   row: Row
-  isolationId: string
+  isolationId: IsolationId
 }>()
 
 const router = useRouter()

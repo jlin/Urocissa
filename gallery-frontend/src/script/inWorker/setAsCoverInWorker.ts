@@ -1,8 +1,9 @@
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { IsolationId } from '../common/types'
 
-export function setAsCoverInWorker(albumId: string, coverHash: string, isolationId: string) {
+export function setAsCoverInWorker(albumId: string, coverHash: string, isolationId: IsolationId) {
   const workerStore = useWorkerStore(isolationId)
 
   if (workerStore.worker === null) {

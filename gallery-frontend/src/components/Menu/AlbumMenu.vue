@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { Album } from '@/script/common/types'
+import { Album, IsolationId } from '@/script/common/types'
 import FindInTimeline from './Item/FindInTimeline.vue'
 import EditTags from './Item/EditTags.vue'
 import Delete from './Item/Delete.vue'
@@ -23,7 +23,7 @@ import PermanentlyDelete from './Item/PermanentlyDelete.vue'
 import Restore from './Item/Restore.vue'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   album: Album

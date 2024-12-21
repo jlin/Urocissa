@@ -1,7 +1,7 @@
-import type { AbstractData } from '@/script/common/types'
+import type { AbstractData, IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useDataStore = (isolationId: string) =>
+export const useDataStore = (isolationId: IsolationId) =>
   defineStore('DataStore' + isolationId, {
     state: (): {
       data: Map<number, AbstractData> // dataIndex -> data

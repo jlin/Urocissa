@@ -3,12 +3,13 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { IsolationId } from '../common/types'
 
 export function editTagsInWorker(
   indexArray: number[],
   addTagsArray: string[],
   removeTagsArray: string[],
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const workerStore = useWorkerStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)

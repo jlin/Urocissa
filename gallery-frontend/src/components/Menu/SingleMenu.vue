@@ -25,7 +25,7 @@
   </v-menu>
 </template>
 <script setup lang="ts">
-import { DataBase } from '@/script/common/types'
+import { DataBase, IsolationId } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import Cookies from 'js-cookie'
 import ViewOriginalFile from './Item/ViewOriginalFile.vue'
@@ -40,7 +40,7 @@ import RegenerateMetadata from './Item/RegenerateMetadata.vue'
 import Restore from './Item/Restore.vue'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   database: DataBase

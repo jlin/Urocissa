@@ -29,9 +29,10 @@ import { leaveRead } from '@/script/navigator'
 import { useRoute } from 'vue-router'
 import EditBar from '../NavBar/EditBar.vue'
 import ProgessBar from '../NavBar/ProgessBar.vue'
+import { IsolationId } from '@/script/common/types'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   title: string | null
 }>()
 const route = useRoute()

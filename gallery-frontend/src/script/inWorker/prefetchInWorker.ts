@@ -1,13 +1,14 @@
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { IsolationId } from '../common/types'
 
 export function prefetchInWorker(
   filterJsonString: string | null,
   priorityId: string | undefined = 'default',
   reverse: string | undefined,
   locate: string | null = null,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const workerStore = useWorkerStore(isolationId)
 

@@ -1,4 +1,5 @@
 import { getScrollUpperBound } from '@/script/common/functions'
+import { IsolationId } from '@/script/common/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { throttle } from 'lodash'
@@ -24,7 +25,7 @@ export function handleScroll(
   mobile: string | null,
   stopScroll: Ref<boolean>,
   windowHeight: Ref<number>,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const throttledHandleScroll = throttle(
     () => {

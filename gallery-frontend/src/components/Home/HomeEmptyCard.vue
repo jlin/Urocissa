@@ -46,13 +46,14 @@
   </v-container>
 </template>
 <script setup lang="ts">
+import { IsolationId } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
 }>()
 
 const route = useRoute()

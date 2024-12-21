@@ -1,8 +1,9 @@
+import { IsolationId } from '@/script/common/types'
 import { generateJsonString } from '@/script/lexer/generateJson'
 import { defineStore } from 'pinia'
 import { RouteLocationNormalizedLoaded } from 'vue-router'
 
-export const useFilterStore = (isolationId: string) =>
+export const useFilterStore = (isolationId: IsolationId) =>
   defineStore('filterStore' + isolationId, {
     state: (): {
       // Records the type of gallery area: default, favorite, archived, etc.
@@ -31,7 +32,7 @@ export const useFilterStore = (isolationId: string) =>
         const searchString = route.query.search as string
         this.filterString = searchString ? searchString : null
       },
-      handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: string) {
+      handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: IsolationId) {
         if (route.meta.isReadPage) {
           if (isolationId === 'mainId') {
             this.basicString = route.meta.basicString

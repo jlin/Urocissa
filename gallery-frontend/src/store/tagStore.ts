@@ -1,10 +1,10 @@
-import { TagInfo } from '@/script/common/types'
+import { IsolationId, TagInfo } from '@/script/common/types'
 import { tagInfoSchema } from '@/script/common/schemas'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'
 
-export const useTagStore = (isolationId: string) =>
+export const useTagStore = (isolationId: IsolationId) =>
   defineStore('tagStore' + isolationId, {
     state: (): {
       tags: TagInfo[]

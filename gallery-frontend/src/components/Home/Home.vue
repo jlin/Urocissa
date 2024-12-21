@@ -75,9 +75,10 @@ import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
+import { IsolationId } from '@/script/common/types'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   title: string | null
 }>()
 

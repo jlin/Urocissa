@@ -329,13 +329,13 @@ import { useInfoStore } from '@/store/infoStore'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { filesize } from 'filesize'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@/script/common/types'
 import { dater, searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { navigateToAlbum } from '@/script/navigator'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   metadata: AbstractData

@@ -52,11 +52,11 @@
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 import { getSrc } from '@/../config.ts'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@/script/common/types'
 import Cookies from 'js-cookie'
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
   hash: string
   index: number
   metadata: AbstractData

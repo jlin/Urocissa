@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useQueueStore = (isolationId: string) =>
+export const useQueueStore = (isolationId: IsolationId) =>
   defineStore('queueStore' + isolationId, {
     state: (): {
       // Set to keep track of image IDs that have been fetched and will be sent to canva

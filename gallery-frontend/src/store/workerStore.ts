@@ -1,3 +1,4 @@
+import { IsolationId } from '@/script/common/types'
 import { handleDataWorkerReturn, removeHandleDataWorkerReturn } from '@/worker/fromDataWorker'
 import { handleImgWorker, removeHandleImgWorkerReturn } from '@/worker/fromImgWorker'
 import {
@@ -14,7 +15,7 @@ interface postToWorkerType {
   processImage: (payload: processImagePayload) => void
   processAbort: (payload: processAbortPayload) => void
 }
-export const useWorkerStore = (isolationId: string) =>
+export const useWorkerStore = (isolationId: IsolationId) =>
   defineStore('workerStore' + isolationId, {
     state: (): {
       concurrencyNumber: number
@@ -28,7 +29,7 @@ export const useWorkerStore = (isolationId: string) =>
       postToWorkerList: undefined
     }),
     actions: {
-      initializeWorker(isolationId: string) {
+      initializeWorker(isolationId: IsolationId) {
         if (this.worker === null) {
           this.worker = new Worker(new URL('../worker/toDataWorker.ts', import.meta.url), {
             type: 'module'

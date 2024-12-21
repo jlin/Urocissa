@@ -94,7 +94,7 @@ import { useOffsetStore } from '@/store/offsetStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
-import { ScrollbarData } from '@/script/common/types'
+import { IsolationId, ScrollbarData } from '@/script/common/types'
 import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getInjectValue, getScrollUpperBound } from '@/script/common/functions'
@@ -104,7 +104,7 @@ const currentDateChipIndex = ref(0)
 const chipSize = 25
 
 const props = defineProps<{
-  isolationId: string
+  isolationId: IsolationId
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)

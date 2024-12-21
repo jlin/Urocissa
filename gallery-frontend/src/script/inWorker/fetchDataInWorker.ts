@@ -2,8 +2,9 @@ import { useWorkerStore } from '@/store/workerStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { toDataWorker } from '@/worker/workerApi'
+import { IsolationId } from '../common/types'
 
-export function fetchDataInWorker(batch: number, isolationId: string) {
+export function fetchDataInWorker(batch: number, isolationId: IsolationId) {
   const workerStore = useWorkerStore(isolationId)
 
   if (workerStore.worker === null) {

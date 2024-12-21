@@ -2,12 +2,13 @@ import { prefetchInWorker } from '@/script/inWorker/prefetchInWorker'
 import { RouteLocationNormalizedLoadedGeneric } from 'vue-router'
 import { watchDebounced } from '@vueuse/core'
 import { Ref } from 'vue'
+import { IsolationId } from '@/script/common/types'
 
 export function prefetch(
   filterJsonString: string | null,
   windowWidth: Ref<number>,
   route: RouteLocationNormalizedLoadedGeneric,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const stopWatcher = watchDebounced(
     windowWidth,

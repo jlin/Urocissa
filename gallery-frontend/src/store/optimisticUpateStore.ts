@@ -1,9 +1,9 @@
-import { AbstractData } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@/script/common/types'
 import { EditAlbumsParams, EditTagsParams } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { useDataStore } from './dataStore'
 
-export const useOptimisticStore = (isolationId: string) =>
+export const useOptimisticStore = (isolationId: IsolationId) =>
   defineStore('optimisticUpdateStore' + isolationId, {
     state: (): {
       backupData: Map<number, AbstractData> // dataIndex -> data

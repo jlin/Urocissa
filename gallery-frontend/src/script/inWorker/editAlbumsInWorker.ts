@@ -4,12 +4,13 @@ import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
+import { IsolationId } from '../common/types'
 
 export function editAlbumsInWorker(
   indexArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const prefetchStore = usePrefetchStore(isolationId)
   const workerStore = useWorkerStore(isolationId)

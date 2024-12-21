@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { useMessageStore } from './messageStore'
 import axios from 'axios'
+import { IsolationId } from '@/script/common/types'
 
-export const useUploadStore = (isolationId: string) =>
+export const useUploadStore = (isolationId: IsolationId) =>
   defineStore('uploadStore' + isolationId, {
     state: (): {
       uploading: boolean

@@ -1,6 +1,7 @@
+import { IsolationId } from '@/script/common/types'
 import { defineStore } from 'pinia'
 
-export const useModalStore = (isolationId: string) =>
+export const useModalStore = (isolationId: IsolationId) =>
   defineStore('modalStore' + isolationId, {
     state: (): {
       showEditTagsModal: boolean

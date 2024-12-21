@@ -2,8 +2,9 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { IsolationId } from '../common/types'
 
-export function fetchScrollbarInWorker(isolationId: string) {
+export function fetchScrollbarInWorker(isolationId: IsolationId) {
   const workerStore = useWorkerStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
 

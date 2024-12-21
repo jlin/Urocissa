@@ -1,4 +1,4 @@
-import { Row } from '@/script/common/types'
+import { IsolationId, Row } from '@/script/common/types'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'
@@ -48,7 +48,7 @@ function getCurrentVisibleRows(
   lastVisibleRow: Map<number, Row>,
   startHeight: number,
   endHeight: number,
-  isolationId: string
+  isolationId: IsolationId
 ): Row[] {
   const rowStore = useRowStore(isolationId)
   let extraShift = 0
@@ -97,7 +97,7 @@ function getCurrentVisibleRows(
  * @param visibleRows - Array of currently visible rows.
  * @param rowData - Map of all rows by index.
  */
-function appendAndPrependRow(visibleRows: Ref<Row[]>, isolationId: string) {
+function appendAndPrependRow(visibleRows: Ref<Row[]>, isolationId: IsolationId) {
   // assume visibleRows.value.length > 0
   const rowStore = useRowStore(isolationId)
 
@@ -122,7 +122,7 @@ function appendAndPrependRow(visibleRows: Ref<Row[]>, isolationId: string) {
  *
  * @param visibleRows - Array of currently visible rows.
  */
-function filterRowForLocation(visibleRows: Ref<Row[]>, isolationId: string) {
+function filterRowForLocation(visibleRows: Ref<Row[]>, isolationId: IsolationId) {
   const locationStore = useLocationStore(isolationId)
   if (locationStore.anchor !== null) {
     visibleRows.value = visibleRows.value.filter((rowData) => {
@@ -143,7 +143,11 @@ function filterRowForLocation(visibleRows: Ref<Row[]>, isolationId: string) {
  * @param scrollTop - Current scroll position.
  * @param scrollingBound - Maximum allowed scroll position.
  */
-function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number, isolationId: string) {
+function scrollTopOffsetFix(
+  visibleRows: Ref<Row[]>,
+  scrollingBound: number,
+  isolationId: IsolationId
+) {
   const rowStore = useRowStore(isolationId)
   const scrollTopStore = useScrollTopStore(isolationId)
 
@@ -166,7 +170,7 @@ function scrollTopOffsetFix(visibleRows: Ref<Row[]>, scrollingBound: number, iso
  *
  * @param visibleRows - Array of currently visible rows.
  */
-function updateLastVisibleRow(visibleRows: Ref<Row[]>, isolationId: string) {
+function updateLastVisibleRow(visibleRows: Ref<Row[]>, isolationId: IsolationId) {
   const rowStore = useRowStore(isolationId)
   rowStore.lastVisibleRow.clear()
   visibleRows.value.forEach((row) => {
@@ -180,7 +184,7 @@ function updateLastVisibleRow(visibleRows: Ref<Row[]>, isolationId: string) {
  * @param visibleRows - Array of currently visible rows.
  * @param scrollTop - Current scroll position.
  */
-function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number, isolationId: string) {
+function updateLocationIndex(visibleRows: Ref<Row[]>, scrollTop: number, isolationId: IsolationId) {
   const locationStore = useLocationStore(isolationId)
   for (const row of visibleRows.value) {
     if (row.topPixelAccumulated + row.rowHeight + row.offset >= scrollTop) {
@@ -213,7 +217,7 @@ function updateLastRowBottom(
   visibleRows: Ref<Row[]>,
   lastRowBottom: Ref<number>,
   endHeight: number,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const prefetchStore = usePrefetchStore(isolationId)
   const lastRow = visibleRows.value[visibleRows.value.length - 1]
@@ -248,7 +252,7 @@ export function useUpdateVisibleRows(
   endHeight: Ref<number>,
   lastRowBottom: Ref<number>,
   windowHeight: Ref<number>,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const visibleRows: Ref<Row[]> = ref<Row[]>([])
   const prefetchStore = usePrefetchStore(isolationId)

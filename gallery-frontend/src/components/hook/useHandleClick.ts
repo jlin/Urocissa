@@ -2,11 +2,12 @@ import { Router, RouteLocationNormalizedLoaded } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
 import { intoViewPage } from '@/script/navigator'
+import { IsolationId } from '@/script/common/types'
 
 export function useHandleClick(
   router: Router,
   route: RouteLocationNormalizedLoaded,
-  isolationId: string
+  isolationId: IsolationId
 ) {
   const handleClick = (event: MouseEvent, currentIndex: number) => {
     const collectionStore = useCollectionStore(isolationId)
