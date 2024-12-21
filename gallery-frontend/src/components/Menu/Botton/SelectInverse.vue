@@ -1,5 +1,5 @@
 <template>
-  <v-btn icon="mdi-select-inverse" @click="selectInverse"></v-btn>
+  <v-btn icon="mdi-checkbox-intermediate-variant" @click="selectInverse"></v-btn>
 </template>
 
 <script lang="ts" setup>

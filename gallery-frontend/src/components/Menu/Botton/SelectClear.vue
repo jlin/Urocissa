@@ -1,5 +1,5 @@
 <template>
-  <v-btn icon="mdi-select-remove" @click="selectClear"></v-btn>
+  <v-btn icon="mdi-checkbox-blank-outline" @click="selectClear"></v-btn>
 </template>
 
 <script lang="ts" setup>

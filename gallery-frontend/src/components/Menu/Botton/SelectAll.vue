@@ -1,5 +1,5 @@
 <template>
-  <v-btn icon="mdi-select-all" @click="selectAll"></v-btn>
+  <v-btn icon="mdi-checkbox-intermediate" @click="selectAll"></v-btn>
 </template>
 
 <script lang="ts" setup>

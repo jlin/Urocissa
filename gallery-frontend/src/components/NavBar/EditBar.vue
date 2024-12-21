@@ -13,9 +13,9 @@
     >
     </v-card>
     <v-spacer></v-spacer>
+    <SelectInverse />
     <SelectAll v-if="prefetchStore.dataLength !== collectionStore.editModeCollection.size" />
     <SelectClear v-else />
-    <SelectInverse />
     <BatchMenu />
   </v-toolbar>
 </template>
