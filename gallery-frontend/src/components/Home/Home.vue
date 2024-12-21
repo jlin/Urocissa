@@ -1,6 +1,6 @@
 <template>
   <!-- This bar is used inside album reading papge -->
-  <HomeReadingBar
+  <ReadingBar
     v-if="!(props.isolationId === 'mainId') && route.meta.isReadPage && !route.meta.isViewPage"
     :isolation-id="isolationId"
     :title="title"
@@ -64,7 +64,7 @@ import { useImgStore } from '@/store/imgStore'
 import MobileDetect from 'mobile-detect'
 import Buffer from '@/components/Home/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/HomeScrollBar.vue'
-import HomeReadingBar from './HomeReadingBar.vue'
+import ReadingBar from '../NavBar/ReadingBar.vue'
 import '@/style/HomePage.css'
 import { layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
 import { useOffsetStore } from '@/store/offsetStore'

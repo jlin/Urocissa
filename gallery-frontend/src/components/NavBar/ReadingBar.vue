@@ -27,8 +27,8 @@
 import { useCollectionStore } from '@/store/collectionStore'
 import { leaveRead } from '@/script/navigator'
 import { useRoute } from 'vue-router'
-import EditBar from '../NavBar/EditBar.vue'
-import ProgessBar from '../NavBar/ProgessBar.vue'
+import EditBar from './EditBar.vue'
+import ProgessBar from './ProgessBar.vue'
 import { IsolationId } from '@/script/common/types'
 
 const props = defineProps<{

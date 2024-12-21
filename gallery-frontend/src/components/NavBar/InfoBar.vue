@@ -24,7 +24,7 @@
     <v-card
       elevation="0"
       :style="{
-        width: `${route.meta.isInsideAlbum ? '50%' : '100%'}`
+        width: `${route.meta.isReadPage ? '50%' : '100%'}`
       }"
     >
       <v-card-text class="pa-0">
@@ -53,7 +53,7 @@
       </v-card-text>
     </v-card>
 
-    <v-menu v-if="!route.meta.isInsideAlbum">
+    <v-menu v-if="!route.meta.isReadPage">
       <template #activator="{ props }">
         <v-btn v-bind="props" icon="mdi-plus"></v-btn>
       </template>
