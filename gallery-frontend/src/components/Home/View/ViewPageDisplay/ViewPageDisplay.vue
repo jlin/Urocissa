@@ -7,12 +7,7 @@
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
-      <ViewPageToolBar
-        :metadata="metadata"
-        :index="index"
-        :hash="hash"
-        :isolation-id="isolationId"
-      />
+      <ViewBar :metadata="metadata" :index="index" :hash="hash" :isolation-id="isolationId" />
       <ViewPageDisplayDatabase
         v-if="metadata && !configStore.disableImg"
         :index="index"
@@ -59,7 +54,7 @@ import { ref, onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { VCol } from 'vuetify/components'
-import ViewPageToolBar from '@/components/Home/View/ViewPageDisplay/ViewPageToolBar/ViewPageToolBar.vue'
+import ViewBar from '@/components/NavBar/ViewBar.vue'
 import { useInfoStore } from '@/store/infoStore'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
@@ -96,7 +91,7 @@ const queueStore = useQueueStore(props.isolationId)
 const imgStore = useImgStore(props.isolationId)
 const initializedStore = useInitializedStore(props.isolationId)
 const modalStore = useModalStore('mainId')
-const infoStore = useInfoStore(props.isolationId)
+const infoStore = useInfoStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()

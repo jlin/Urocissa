@@ -343,7 +343,7 @@ const props = defineProps<{
 
 // Stores
 
-const infoStore = useInfoStore(props.isolationId)
+const infoStore = useInfoStore('mainId')
 
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')

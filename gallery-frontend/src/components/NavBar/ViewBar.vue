@@ -1,8 +1,8 @@
 <template>
   <v-toolbar class="position-absolute my-toolbar">
-    <v-btn icon="mdi mdi-arrow-left" :to="leaveViewPage(route)"></v-btn>
+    <LeaveView />
     <v-spacer></v-spacer>
-    <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
+    <ShowInfo />
     <v-btn
       v-if="metadata && metadata.database"
       :icon="metadata.database.tag.includes('_favorite') ? 'mdi-star' : 'mdi-star-outline'"
@@ -42,13 +42,12 @@
   </v-toolbar>
 </template>
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { AbstractData, IsolationId } from '@/script/common/types'
-import { useInfoStore } from '@/store/infoStore'
-import { leaveViewPage } from '@/script/navigator'
 import ViewPageToolBarDatabase from '@/components/Menu/SingleMenu.vue'
 import AlbumMenu from '@/components/Menu/AlbumMenu.vue'
+import LeaveView from '../Menu/Botton/LeaveView.vue'
+import ShowInfo from '../Menu/Botton/ShowInfo.vue'
 
 defineProps<{
   isolationId: IsolationId
@@ -56,7 +55,4 @@ defineProps<{
   index: number
   metadata: AbstractData | undefined
 }>()
-const infoStore = useInfoStore('mainId')
-
-const route = useRoute()
 </script>
