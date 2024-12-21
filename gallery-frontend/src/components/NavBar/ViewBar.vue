@@ -46,8 +46,8 @@ import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { AbstractData, IsolationId } from '@/script/common/types'
 import ViewPageToolBarDatabase from '@/components/Menu/SingleMenu.vue'
 import AlbumMenu from '@/components/Menu/AlbumMenu.vue'
-import LeaveView from '../Menu/Botton/LeaveView.vue'
-import ShowInfo from '../Menu/Botton/ShowInfo.vue'
+import LeaveView from '../Menu/Botton/BtnLeaveView.vue'
+import ShowInfo from '../Menu/Botton/BtnShowInfo.vue'
 
 defineProps<{
   isolationId: IsolationId

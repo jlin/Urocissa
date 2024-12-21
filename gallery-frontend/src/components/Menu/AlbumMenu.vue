@@ -16,11 +16,11 @@
 
 <script setup lang="ts">
 import { Album, IsolationId } from '@/script/common/types'
-import FindInTimeline from './Item/FindInTimeline.vue'
-import EditTags from './Item/EditTags.vue'
-import Delete from './Item/Delete.vue'
-import PermanentlyDelete from './Item/PermanentlyDelete.vue'
-import Restore from './Item/Restore.vue'
+import FindInTimeline from './Item/ItemFindInTimeline.vue'
+import EditTags from './Item/ItemEditTags.vue'
+import Delete from './Item/ItemDelete.vue'
+import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
+import Restore from './Item/ItemRestore.vue'
 
 const props = defineProps<{
   isolationId: IsolationId

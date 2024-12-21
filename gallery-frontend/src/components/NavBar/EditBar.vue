@@ -26,10 +26,10 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import BatchMenu from '@/components/Menu/BatchMenu.vue'
 import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@/script/common/functions'
-import LeaveEdit from '../Menu/Botton/LeaveEdit.vue'
-import SelectAll from '../Menu/Botton/SelectAll.vue'
-import SelectClear from '../Menu/Botton/SelectClear.vue'
-import SelectInverse from '../Menu/Botton/SelectInverse.vue'
+import LeaveEdit from '../Menu/Botton/BtnLeaveEdit.vue'
+import SelectAll from '../Menu/Botton/BtnSelectAll.vue'
+import SelectClear from '../Menu/Botton/BtnSelectClear.vue'
+import SelectInverse from '../Menu/Botton/BtnSelectInverse.vue'
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 

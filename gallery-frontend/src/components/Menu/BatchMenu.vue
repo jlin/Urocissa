@@ -43,20 +43,20 @@ import { useRoute } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 
 // Importing menu item components
-import SetAsCover from './Item/SetAsCover.vue'
-import Archive from './Item/Archive.vue'
-import Favorite from './Item/Favorite.vue'
-import BatchEditTags from './Item/BatchEditTags.vue'
-import BatchEditAlbums from './Item/BatchEditAlbums.vue'
-import Download from './Item/Download.vue'
-import Delete from './Item/Delete.vue'
-import RegeneratePreview from './Item/RegeneratePreview.vue'
-import PermanentlyDelete from './Item/PermanentlyDelete.vue'
+import SetAsCover from './Item/ItemSetAsCover.vue'
+import Archive from './Item/ItemArchive.vue'
+import Favorite from './Item/ItemFavorite.vue'
+import BatchEditTags from './Item/ItemBatchEditTags.vue'
+import BatchEditAlbums from './Item/ItemBatchEditAlbums.vue'
+import Download from './Item/ItemDownload.vue'
+import Delete from './Item/ItemDelete.vue'
+import RegeneratePreview from './Item/ItemRegeneratePreview.vue'
+import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 
 // Utility function to extract isolation ID from the route
 import { getIsolationIdByRoute } from '@/script/common/functions'
-import RegenerateMetadata from './Item/RegenerateMetadata.vue'
-import Restore from './Item/Restore.vue'
+import RegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
+import Restore from './Item/ItemRestore.vue'
 
 // Initialize route and store
 const route = useRoute()
