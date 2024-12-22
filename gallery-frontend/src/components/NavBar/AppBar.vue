@@ -9,7 +9,6 @@
   >
   </v-toolbar>
   <InfoBar v-if="!collectionStore.editModeOn" />
-  <!-- If collectionStore.editModeOn === true then show the Editbar -->
   <EditBar v-else />
 </template>
 
