@@ -4,7 +4,7 @@ use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expire::start_loop::{NEXT_EXPIRE_TIME, SHOULD_CHECK_QUERY_EXPIRE};
 use crate::public::expire::{EXPIRE, EXPIRE_TABLE_DEFINITION};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::utils::get_current_timestamp_u64;
+use crate::public::utils::{get_current_timestamp_u64, info_wrap};
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
 
 use arrayvec::ArrayString;
@@ -15,7 +15,7 @@ use redb::ReadableTable;
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{LazyLock, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use std::usize;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
@@ -84,6 +84,7 @@ impl Tree {
 
                 // Spawn a blocking task to handle the reset and update operations
                 tokio::task::spawn_blocking(|| {
+                    let start_time = Instant::now();
                     // Begin a read transaction on the in-disk data store
                     let table = self
                         .in_disk
@@ -148,7 +149,10 @@ impl Tree {
                         VERSION_COUNT_TIMESTAMP.swap(current_timestamp, Ordering::SeqCst);
 
                     // Log that the in-memory cache has been updated
-                    info!("In-memory cache updated ({}).", current_timestamp);
+                    info_wrap(
+                        Some(start_time.elapsed()),
+                        &format!("In-memory cache updated ({}).", current_timestamp),
+                    );
 
                     // Begin a write transaction on the EXPIRE table in the in-disk data store
                     let expire_write_txn = EXPIRE.in_disk.begin_write().unwrap();
