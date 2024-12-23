@@ -12,12 +12,29 @@ use log::info;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
+use std::collections::HashSet;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::OnceLock;
+use std::sync::{LazyLock, OnceLock};
 use std::time::Duration;
 use std::usize;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use tokio::sync::Notify;
+
+static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    [
+        "Model",
+        "FNumber",
+        "ExposureTime",
+        "FocalLength",
+        "PhotographicSensitivity",
+        "DateTimeOriginal",
+        "duration",
+        "rotation",
+    ]
+    .iter()
+    .cloned()
+    .collect()
+});
 
 pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> =
     OnceLock::new();
@@ -85,7 +102,10 @@ impl Tree {
                         .par_bridge()
                         .map(|guard| {
                             let (_key, value) = guard.unwrap();
-                            let database = value.value();
+                            let mut database = value.value();
+                            database
+                                .exif_vec
+                                .retain(|k, _| ALLOWED_KEYS.contains(&k.as_str()));
                             DataBaseTimestamp::new(AbstractData::DataBase(database), &priority_list)
                         })
                         .collect();
