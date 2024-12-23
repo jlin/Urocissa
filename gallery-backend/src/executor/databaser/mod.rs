@@ -23,10 +23,10 @@ pub mod generate_width_height;
 pub mod image_decoder;
 pub mod processor;
 pub mod video_ffprobe;
-pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
+pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize {
     let write_txn = TREE.in_disk.begin_write().unwrap();
     let video_hash_dashset = DashSet::new();
-    {
+    let successfully_handled_length = {
         let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
 
         let vec: Vec<_> = vec_of_hash_alias
@@ -72,7 +72,8 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
         vec.iter().for_each(|database| {
             write_table.insert(&*database.hash, database).unwrap();
         });
-    }
+        vec.len()
+    };
     write_txn.commit().unwrap();
     // Send video hashes to the worker thread
     VIDEO_QUEUE_SENDER
@@ -80,6 +81,7 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> () {
         .unwrap()
         .send(video_hash_dashset.into_iter().collect())
         .unwrap();
+    successfully_handled_length
 }
 
 pub fn small_width_height(width: u32, height: u32, small_height: u32) -> (u32, u32) {
