@@ -22,6 +22,7 @@ use tokio::sync::Notify;
 
 static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     [
+        "Make",
         "Model",
         "FNumber",
         "ExposureTime",
