@@ -11,11 +11,11 @@ export function editTagsInWorker(
   removeTagsArray: string[],
   isolationId: IsolationId
 ) {
-  const workerStore = useWorkerStore(isolationId)
+  const workerStore = useWorkerStore('mainId')
   const prefetchStore = usePrefetchStore(isolationId)
   const optimisticUpdateTags = useOptimisticStore(isolationId)
   if (workerStore.worker === null) {
-    workerStore.initializeWorker(isolationId)
+    workerStore.initializeWorker('mainId')
   }
 
   const dataWorker = workerStore.worker
