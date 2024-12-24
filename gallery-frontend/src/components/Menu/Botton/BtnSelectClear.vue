@@ -4,12 +4,13 @@
 
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
-import { useRoute } from 'vue-router'
-import { getIsolationIdByRoute } from '@/script/common/functions'
-const route = useRoute()
-const isolationId = getIsolationIdByRoute(route)
+import { IsolationId } from '@/script/common/types'
 
-const collectionStore = useCollectionStore(isolationId)
+const props = defineProps<{
+  isolationId: IsolationId
+}>()
+
+const collectionStore = useCollectionStore(props.isolationId)
 
 const selectClear = () => {
   collectionStore.editModeCollection.clear()
