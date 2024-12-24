@@ -13,14 +13,14 @@ export function editAlbumsInWorker(
   isolationId: IsolationId
 ) {
   const prefetchStore = usePrefetchStore(isolationId)
-  const workerStore = useWorkerStore(isolationId)
+  const workerStore = useWorkerStore('mainId')
   const albumStore = useAlbumStore('mainId')
   const optimisticUpateStore = useOptimisticStore(isolationId)
 
   albumStore.fetched = false
 
   if (workerStore.worker === null) {
-    workerStore.initializeWorker(isolationId)
+    workerStore.initializeWorker('mainId')
   }
 
   const dataWorker = workerStore.worker
