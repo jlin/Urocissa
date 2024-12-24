@@ -8,14 +8,18 @@
     transition="false"
     :close-on-back="false"
   >
-    <Home isolation-id="tempId" :temp-mode="generateJsonString(basicString)" :title="null" />
+    <Home isolation-id="tempId" :temp-mode="generateJsonString(basicString)" :title="null">
+      <template #reading-bar>
+        <SelectionBar :album="album" />
+      </template>
+    </Home>
   </v-overlay>
 </template>
 <script setup lang="ts">
 import { Album } from '@/script/common/types'
 import Home from './Home.vue'
 import { generateJsonString } from '@/script/lexer/generateJson'
-
+import SelectionBar from '../NavBar/SelectionBar.vue'
 const props = defineProps<{
   album: Album
 }>()
