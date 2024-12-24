@@ -11,6 +11,7 @@ export const useModalStore = (isolationId: IsolationId) =>
       showCreateAlbumsModal: boolean
       showUploadModal: boolean
       showIsolatedHomeModal: boolean
+      showHomeTempModal: boolean
     } => ({
       showEditTagsModal: false,
       showBatchEditTagsModal: false,
@@ -18,7 +19,8 @@ export const useModalStore = (isolationId: IsolationId) =>
       showBatchEditAlbumsModal: false,
       showCreateAlbumsModal: false,
       showUploadModal: false,
-      showIsolatedHomeModal: false
+      showIsolatedHomeModal: false,
+      showHomeTempModal: false
     }),
     actions: {}
   })()

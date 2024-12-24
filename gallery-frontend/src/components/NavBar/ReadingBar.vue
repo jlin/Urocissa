@@ -20,22 +20,22 @@
       <v-card-title> {{ props.album.title }}</v-card-title>
     </v-card>
     <v-spacer></v-spacer>
-    <v-btn icon="mdi-plus" @click="showHomeTemp = !showHomeTemp"> </v-btn>
+    <v-btn icon="mdi-plus" @click="modalStore.showHomeTempModal = true"> </v-btn>
   </v-toolbar>
   <EditBar v-else />
   <ProgessBar isolation-id="subId" />
-  <HomeTemp v-if="showHomeTemp" :album="props.album"> </HomeTemp>
+  <HomeTemp v-if="modalStore.showHomeTempModal" :album="props.album"> </HomeTemp>
 </template>
 <script setup lang="ts">
 import { useCollectionStore } from '@/store/collectionStore'
 import { leaveRead } from '@/script/navigator'
 import { useRoute } from 'vue-router'
-import { ref } from 'vue'
 import EditBar from './EditBar.vue'
 import ProgessBar from './ProgessBar.vue'
 import HomeTemp from '../Home/HomeTemp.vue'
 import { Album } from '@/script/common/types'
-const showHomeTemp = ref(false)
+import { useModalStore } from '@/store/modalStore'
+const modalStore = useModalStore('mainId')
 
 const props = defineProps<{
   album: Album
