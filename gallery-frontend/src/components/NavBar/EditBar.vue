@@ -1,4 +1,3 @@
-<!-- NavBarAppBarEditBar.vue -->
 <template>
   <v-toolbar
     :style="{
