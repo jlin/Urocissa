@@ -8,9 +8,9 @@
     transition="false"
     :close-on-back="false"
   >
-    <Home isolation-id="subId" :temp-mode="null" :title="props.title">
+    <Home v-if="album !== undefined" isolation-id="subId" :temp-mode="null" :title="album.title">
       <template #reading-bar>
-        <ReadingBar :title="title" />
+        <ReadingBar :album="album" />
       </template>
     </Home>
   </v-overlay>
@@ -18,7 +18,22 @@
 <script setup lang="ts">
 import Home from './Home.vue'
 import ReadingBar from '../NavBar/ReadingBar.vue'
-const props = defineProps<{
-  title: string
-}>()
+import { Album } from '@/script/common/types'
+import { onMounted, Ref, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { useDataStore } from '@/store/dataStore'
+
+const route = useRoute()
+const dataStore = useDataStore('mainId')
+const album: Ref<Album | undefined> = ref(undefined)
+
+onMounted(() => {
+  const hash = route.params.hash
+  if (typeof hash === 'string') {
+    const index = dataStore.hashMapData.get(hash)
+    if (index !== undefined) {
+      album.value = dataStore.data.get(index)?.album
+    }
+  }
+})
 </script>

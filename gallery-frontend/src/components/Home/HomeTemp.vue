@@ -12,8 +12,13 @@
   </v-overlay>
 </template>
 <script setup lang="ts">
+import { Album } from '@/script/common/types'
 import Home from './Home.vue'
 import { generateJsonString } from '@/script/lexer/generateJson'
 
-const basicString = 'and(not(type:"album"), not(tag:"_trashed"))'
+const props = defineProps<{
+  album: Album
+}>()
+
+const basicString = `and(not(type:"album"), not(tag:"_trashed"), not(album:"${props.album.id}"))`
 </script>
