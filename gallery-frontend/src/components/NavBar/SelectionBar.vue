@@ -8,13 +8,16 @@ import { useCollectionStore } from '@/store/collectionStore'
 import AddingBar from './AddingBar.vue'
 import ProgessBar from './ProgessBar.vue'
 import { Album } from '@/script/common/types'
-import { onMounted } from 'vue'
+import { watchEffect } from 'vue'
 
 defineProps<{
   album: Album
 }>()
 const collectionStore = useCollectionStore('tempId')
-onMounted(() => {
-  collectionStore.editModeOn = true
+watchEffect(() => {
+  // persist to edit mode
+  if (!collectionStore.editModeOn) {
+    collectionStore.editModeOn = true
+  }
 })
 </script>
