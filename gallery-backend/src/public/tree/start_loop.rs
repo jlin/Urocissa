@@ -8,7 +8,6 @@ use crate::public::utils::{get_current_timestamp_u64, info_wrap};
 use crate::router::put::edit_album::AlbumQueue;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
 
-use arrayvec::ArrayString;
 use log::info;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
