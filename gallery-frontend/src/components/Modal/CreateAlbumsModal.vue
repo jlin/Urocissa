@@ -26,6 +26,7 @@
             Cancel
           </v-btn>
           <v-btn
+            :loading="waiting"
             color="teal-accent-4"
             variant="outlined"
             class="ma-2 button button-submit"
@@ -54,6 +55,7 @@ const messageStore = useMessageStore('mainId')
 
 const albumName = ref<string>('')
 const formIsValid = ref<boolean>(false)
+const waiting = ref(false)
 
 const rules = {
   required: (value: string) => !!value || 'Album Name is required'
@@ -61,6 +63,7 @@ const rules = {
 
 const createAlbum = async () => {
   try {
+    waiting.value = true
     const createAlbumData = {
       title: albumName.value,
       elements: []
@@ -78,6 +81,7 @@ const createAlbum = async () => {
 
     modalStore.showCreateAlbumsModal = false
     const newAlbumId = response.data
+    waiting.value = false
     await navigateToAlbum(newAlbumId, router)
   } catch (error) {
     console.error('Error creating album:', error)

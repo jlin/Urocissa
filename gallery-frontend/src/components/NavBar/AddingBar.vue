@@ -20,7 +20,13 @@
       "
     />
     <SelectClear v-else isolation-id="tempId" />
-    <v-btn color="teal-accent-4" variant="flat" class="ma-2 button button-submit" @click="submit">
+    <v-btn
+      :loading="waiting"
+      color="teal-accent-4"
+      variant="flat"
+      class="ma-2 button button-submit"
+      @click="submit"
+    >
       Complete
     </v-btn>
   </v-toolbar>
@@ -36,6 +42,7 @@ import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 import { useRerenderStore } from '@/store/rerenderStore'
 import { editAlbums } from '@/worker/toDataWorker'
+import { ref } from 'vue'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
@@ -45,12 +52,16 @@ const props = defineProps<{
   album: Album
 }>()
 
+const waiting = ref(false)
+
 const submit = async () => {
+  waiting.value = true
   const hashArray = Array.from(collectionStore.editModeCollection)
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     await editAlbums(hashArray, [props.album.id], [], timestamp)
     modalStore.showHomeTempModal = false
+    waiting.value = false
     rerenderStore.rerenderHomeIsolated()
   }
 }
