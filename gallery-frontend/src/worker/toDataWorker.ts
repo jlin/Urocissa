@@ -128,6 +128,8 @@ self.addEventListener('message', (e) => {
     editAlbums: async (payload) => {
       const { indexSet, addAlbumsArray, removeAlbumsArray, timestamp } = payload
       await editAlbums(Array.from(indexSet), addAlbumsArray, removeAlbumsArray, timestamp)
+      const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
+      postToMain.notification({ message: 'Successfully edited albums.', messageType: 'info' })
     },
     deleteData: async (payload) => {
       const { indexArray, timestamp } = payload
@@ -464,7 +466,7 @@ const editTags = async (
   return { returnedTagsArray: response }
 }
 
-const editAlbums = async (
+export const editAlbums = async (
   idArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
@@ -478,8 +480,6 @@ const editAlbums = async (
   })
 
   console.log('Successfully edited albums.')
-  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-  postToMain.notification({ message: 'Successfully edited albums.', messageType: 'info' })
 }
 
 /**

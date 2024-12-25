@@ -33,9 +33,9 @@ import SelectAll from '../Menu/Botton/BtnSelectAll.vue'
 import SelectClear from '../Menu/Botton/BtnSelectClear.vue'
 import SelectInverse from '../Menu/Botton/BtnSelectInverse.vue'
 import { Album } from '@/script/common/types'
-import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { useModalStore } from '@/store/modalStore'
 import { useRerenderStore } from '@/store/rerenderStore'
+import { editAlbums } from '@/worker/toDataWorker'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
@@ -45,10 +45,13 @@ const props = defineProps<{
   album: Album
 }>()
 
-const submit = () => {
+const submit = async () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
-  editAlbumsInWorker(hashArray, [props.album.id], [], 'tempId')
-  modalStore.showHomeTempModal = false
-  rerenderStore.rerenderHomeIsolated()
+  const timestamp = prefetchStore.timestamp
+  if (timestamp !== null) {
+    await editAlbums(hashArray, [props.album.id], [], timestamp)
+    modalStore.showHomeTempModal = false
+    rerenderStore.rerenderHomeIsolated()
+  }
 }
 </script>
