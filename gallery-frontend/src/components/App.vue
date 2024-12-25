@@ -16,13 +16,14 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import NotificationWarn from '@/components/NotificationWarn.vue'
+import { useRerenderStore } from '@/store/rerenderStore'
 
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
-
+const rerenderStore = useRerenderStore('mainId')
 const route = useRoute()
 
 const currentPage = computed(() => {
@@ -44,8 +45,12 @@ const routeKey = computed(() => {
   const locate = typeof route.query.locate === 'string' ? route.query.locate : ''
   const priorityId = typeof route.query.priority_id === 'string' ? route.query.priority_id : ''
   const reverse = typeof route.query.reverse === 'string' ? route.query.reverse : ''
+  const homeKey = rerenderStore.homeKey.toString()
+  return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}-${homeKey}`
+})
 
-  return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}`
+watchEffect(() => {
+  console.log('routeKey is', routeKey.value)
 })
 </script>
 

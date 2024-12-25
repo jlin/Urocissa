@@ -1,3 +1,4 @@
+import { useRerenderStore } from '@/store/rerenderStore'
 import { RouteLocationNormalizedLoadedGeneric, Router } from 'vue-router'
 
 export function leaveRead(route: RouteLocationNormalizedLoadedGeneric) {
@@ -42,5 +43,9 @@ export function leaveViewPage(route: RouteLocationNormalizedLoadedGeneric) {
 
 export async function navigateToAlbum(albumId: string, router: Router) {
   const albumPath = `/albums/view/${albumId}/read` // Adjust the path as necessary
+  if (router.currentRoute.value.fullPath.startsWith('/albums')) {
+    const rerenderStore = useRerenderStore('mainId')
+    rerenderStore.rerenderHome()
+  }
   await router.push({ path: albumPath })
 }
