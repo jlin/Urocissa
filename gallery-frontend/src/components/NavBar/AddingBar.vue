@@ -14,7 +14,10 @@
     <SelectInverse isolation-id="tempId" />
     <SelectAll
       isolation-id="tempId"
-      v-if="prefetchStore.dataLength !== collectionStore.editModeCollection.size"
+      v-if="
+        prefetchStore.dataLength === 0 ||
+        prefetchStore.dataLength !== collectionStore.editModeCollection.size
+      "
     />
     <SelectClear v-else isolation-id="tempId" />
     <v-btn color="teal-accent-4" variant="flat" class="ma-2 button button-submit" @click="submit">
@@ -32,6 +35,7 @@ import SelectInverse from '../Menu/Botton/BtnSelectInverse.vue'
 import { Album } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { useModalStore } from '@/store/modalStore'
+import { watchEffect } from 'vue'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
@@ -45,4 +49,14 @@ const submit = () => {
   editAlbumsInWorker(hashArray, [props.album.id], [], 'tempId')
   modalStore.showHomeTempModal = false
 }
+
+watchEffect(() => {
+  console.log('prefetchStore.dataLength is', prefetchStore.dataLength)
+  console.log('collectionStore.editModeCollection.size is', collectionStore.editModeCollection.size)
+
+  console.log(
+    'prefetchStore.dataLength !== collectionStore.editModeCollection.size is',
+    prefetchStore.dataLength !== collectionStore.editModeCollection.size
+  )
+})
 </script>

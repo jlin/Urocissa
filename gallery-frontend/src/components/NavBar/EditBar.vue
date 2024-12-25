@@ -14,7 +14,10 @@
     <v-spacer></v-spacer>
     <SelectInverse :isolation-id="isolationId" />
     <SelectAll
-      v-if="prefetchStore.dataLength !== collectionStore.editModeCollection.size"
+      v-if="
+        prefetchStore.dataLength === 0 ||
+        prefetchStore.dataLength !== collectionStore.editModeCollection.size
+      "
       :isolation-id="isolationId"
     />
     <SelectClear v-else :isolation-id="isolationId" />

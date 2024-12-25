@@ -1,6 +1,6 @@
 <template>
   <AddingBar :album="album" />
-  <ProgessBar isolation-id="subId" />
+  <ProgessBar isolation-id="tempId" />
 </template>
 <script setup lang="ts">
 import { useCollectionStore } from '@/store/collectionStore'
