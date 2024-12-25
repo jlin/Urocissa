@@ -2,7 +2,7 @@
   <!-- This bar is used inside album reading page -->
   <slot name="reading-bar"> </slot>
   <!-- This router-view contains the ViewPage.vue -->
-  <router-view></router-view>
+  <router-view :key="route.params.hash?.toString()"></router-view>
   <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
   <div
     id="image-container"
