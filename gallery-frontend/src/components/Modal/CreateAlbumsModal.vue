@@ -45,7 +45,10 @@ import { ref } from 'vue'
 import axios from 'axios'
 import { useMessageStore } from '@/store/messageStore'
 import { useModalStore } from '@/store/modalStore'
+import { navigateToAlbum } from '@/script/navigator'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const modalStore = useModalStore('mainId')
 const messageStore = useMessageStore('mainId')
 
@@ -63,7 +66,7 @@ const createAlbum = async () => {
       elements: []
     }
 
-    await axios.post<string>('/post/create_album', createAlbumData, {
+    const response = await axios.post<string>('/post/create_album', createAlbumData, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -74,6 +77,8 @@ const createAlbum = async () => {
     messageStore.showMessage = true
 
     modalStore.showCreateAlbumsModal = false
+    const newAlbumId = response.data
+    await navigateToAlbum(newAlbumId, router)
   } catch (error) {
     console.error('Error creating album:', error)
     messageStore.message = 'Failed to create album.'
