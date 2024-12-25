@@ -4,7 +4,7 @@ use crate::router::fairing::ReadOnlyModeGuard;
 use crate::{public::database_struct::database::definition::DataBase, router::fairing::AuthGuard};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-#[put("/put/generate_random_data?<number>")]
+#[get("/put/generate_random_data?<number>")]
 pub async fn generate_random_data(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,

@@ -5,6 +5,7 @@ use crate::public::expire::start_loop::{NEXT_EXPIRE_TIME, SHOULD_CHECK_QUERY_EXP
 use crate::public::expire::{EXPIRE, EXPIRE_TABLE_DEFINITION};
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::utils::{get_current_timestamp_u64, info_wrap};
+use crate::router::put::edit_album::AlbumQueue;
 use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
 
 use arrayvec::ArrayString;
@@ -37,7 +38,7 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> =
+pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> =
     OnceLock::new();
 
 pub static SHOULD_RESET: Notify = Notify::const_new();
@@ -59,7 +60,7 @@ impl Tree {
         tokio::task::spawn(async {
             // Create an unbounded channel for receiving album updates
             let (album_waiting_for_update_sender, mut album_waiting_for_update_receiver) =
-                unbounded_channel::<Vec<ArrayString<64>>>();
+                unbounded_channel::<AlbumQueue>();
 
             // Initialize the global sender with the sender end of the channel
             ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
@@ -202,7 +203,18 @@ impl Tree {
                         ALBUM_QUEUE_SENDER
                             .get()
                             .unwrap()
-                            .send(buffer.into_iter().flatten().collect())
+                            .send(
+                                buffer
+                                    .into_iter()
+                                    .map(|album_queue| {
+                                        if let Some(notify) = album_queue.notify {
+                                            notify.notify_one();
+                                        }
+                                        album_queue.album_list
+                                    })
+                                    .flatten()
+                                    .collect(),
+                            )
                             .unwrap();
 
                         // Log that album updates have been sent to the queue

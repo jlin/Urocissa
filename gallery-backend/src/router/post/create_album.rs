@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Instant;
 
 use arrayvec::ArrayString;
@@ -8,12 +9,14 @@ use rocket::serde::json::Json;
 use rocket::{http::Status, post};
 
 use serde::{Deserialize, Serialize};
+use tokio::sync::Notify;
 
 use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::SHOULD_RESET;
+use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
 use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
+use crate::router::put::edit_album::AlbumQueue;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -28,7 +31,7 @@ pub async fn create_album(
     _read_only_mode: ReadOnlyModeGuard,
     create_album: Json<CreateAlbum>,
 ) -> Result<String, Status> {
-    tokio::task::spawn_blocking(move || {
+    let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
         let album_id: String = rand::thread_rng()
@@ -58,10 +61,23 @@ pub async fn create_album(
             });
         }
         txn.commit().unwrap();
-        SHOULD_RESET.notify_one();
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
-        Ok(album_id.to_string())
+        album_id
     })
     .await
-    .unwrap()
+    .unwrap();
+    let waiting_notify = Arc::new(Notify::new());
+    let album_queue = AlbumQueue {
+        album_list: vec![id],
+        notify: Some(waiting_notify.clone()),
+    };
+    ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
+        .get()
+        .unwrap()
+        .send(album_queue)
+        .unwrap();
+
+    SHOULD_RESET.notify_one();
+    waiting_notify.notified().await;
+    Ok(id.to_string())
 }

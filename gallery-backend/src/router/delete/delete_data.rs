@@ -3,6 +3,7 @@ use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SH
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
+use crate::router::put::edit_album::AlbumQueue;
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
@@ -64,7 +65,10 @@ pub async fn delete_data(
                     ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
                         .get()
                         .unwrap()
-                        .send(vec![id])
+                        .send(AlbumQueue {
+                            album_list: vec![id],
+                            notify: None,
+                        })
                         .unwrap();
                 }
             }
