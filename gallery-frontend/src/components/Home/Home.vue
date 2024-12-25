@@ -2,7 +2,7 @@
   <!-- This bar is used inside album reading page -->
   <slot name="reading-bar"> </slot>
   <!-- This router-view contains the ViewPage.vue -->
-  <router-view :key="route.params.hash?.toString()"></router-view>
+  <router-view :key="albumHomeIsolatedKey"></router-view>
   <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
   <div
     id="image-container"
@@ -71,6 +71,7 @@ import HomeEmptyCard from './HomeEmptyCard.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { IsolationId } from '@/script/common/types'
+import { useRerenderStore } from '@/store/rerenderStore'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -91,6 +92,7 @@ const queueStore = useQueueStore(props.isolationId)
 const imgStore = useImgStore(props.isolationId)
 const locationStore = useLocationStore(props.isolationId)
 const optimisticUpateStore = useOptimisticStore(props.isolationId)
+const rerenderStore = useRerenderStore('mainId')
 
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -142,6 +144,16 @@ const bufferHeight = computed(() => {
     return 600000
     // A large value to enable scrolling within the imageContainer without reaching the top or bottom prematurely.
     // This value must be a multiple of 3 to avoid pixel misalignment when dividing bufferHeight by 3 (in useInitializeScrollPosition.ts).
+  }
+})
+
+const albumHomeIsolatedKey = computed(() => {
+  const hash = route.params.hash
+  if (typeof hash === 'string') {
+    const rerenderKey = rerenderStore.homeIsolatedKey.toString()
+    return rerenderKey
+  } else {
+    return 'undefineBehavior'
   }
 })
 

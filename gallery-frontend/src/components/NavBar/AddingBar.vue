@@ -35,11 +35,12 @@ import SelectInverse from '../Menu/Botton/BtnSelectInverse.vue'
 import { Album } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { useModalStore } from '@/store/modalStore'
-import { watchEffect } from 'vue'
+import { useRerenderStore } from '@/store/rerenderStore'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
 const modalStore = useModalStore('mainId')
+const rerenderStore = useRerenderStore('mainId')
 const props = defineProps<{
   album: Album
 }>()
@@ -48,15 +49,6 @@ const submit = () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
   editAlbumsInWorker(hashArray, [props.album.id], [], 'tempId')
   modalStore.showHomeTempModal = false
+  rerenderStore.rerenderHomeIsolated()
 }
-
-watchEffect(() => {
-  console.log('prefetchStore.dataLength is', prefetchStore.dataLength)
-  console.log('collectionStore.editModeCollection.size is', collectionStore.editModeCollection.size)
-
-  console.log(
-    'prefetchStore.dataLength !== collectionStore.editModeCollection.size is',
-    prefetchStore.dataLength !== collectionStore.editModeCollection.size
-  )
-})
 </script>
