@@ -43,7 +43,6 @@ const props = defineProps<{
 const submit = () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
   editAlbumsInWorker(hashArray, [props.album.id], [], 'tempId')
-  console.log('added')
   modalStore.showHomeTempModal = false
 }
 </script>
