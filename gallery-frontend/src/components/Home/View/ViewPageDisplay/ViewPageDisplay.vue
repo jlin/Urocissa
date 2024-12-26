@@ -42,9 +42,6 @@
       >
         <v-icon>mdi-arrow-right</v-icon>
       </v-card>
-      <v-col v-if="!metadata" class="h-100 d-flex align-center justify-center">
-        <v-progress-circular color="primary" indeterminate></v-progress-circular>
-      </v-col>
     </v-row>
   </v-col>
 </template>

@@ -1,6 +1,5 @@
 <template>
   <v-overlay
-    v-if="index !== undefined"
     :model-value="true"
     :height="'100%'"
     :width="'100%'"
@@ -10,6 +9,7 @@
     :close-on-back="false"
   >
     <v-container
+      v-if="index !== undefined"
       fluid
       class="pa-0 h-100 overflow-hidden position-relative"
       :style="{ backgroundColor: 'black' }"
@@ -28,6 +28,16 @@
           :hash="hash"
           :isolation-id="isolationId"
         />
+      </v-row>
+    </v-container>
+    <v-container
+      v-else
+      fluid
+      class="pa-0 h-100 overflow-hidden position-relative"
+      :style="{ backgroundColor: 'black' }"
+    >
+      <v-row class="fill-height" align="center" justify="center">
+        <v-progress-circular indeterminate color="primary" size="64" />
       </v-row>
     </v-container>
   </v-overlay>
