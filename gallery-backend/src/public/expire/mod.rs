@@ -3,6 +3,7 @@ use std::sync::LazyLock;
 pub mod expired_check;
 pub mod new;
 pub mod start_loop;
+pub mod update;
 pub static EXPIRE_TABLE_DEFINITION: TableDefinition<u64, Option<u64>> =
     TableDefinition::new("expire_table");
 

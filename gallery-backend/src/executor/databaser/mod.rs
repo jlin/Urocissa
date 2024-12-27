@@ -31,7 +31,7 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize
 
         let vec: Vec<_> = vec_of_hash_alias
             .into_par_iter()
-            .filter_map(|(hash, mut database)| {
+            .filter_map(|(_, mut database)| {
                 if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
                     match process_image_info(&mut database) {
                         Ok(_) => Some(database),
