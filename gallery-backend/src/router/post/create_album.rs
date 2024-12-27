@@ -66,10 +66,10 @@ pub async fn create_album(
     })
     .await
     .unwrap();
-    let waiting_notify = Arc::new(Notify::new());
+    let waiting_update = Arc::new(Notify::new());
     let album_queue = AlbumQueue {
         album_list: vec![id],
-        notify: Some(waiting_notify.clone()),
+        notify: Some(waiting_update.clone()),
     };
     ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
         .get()
@@ -78,6 +78,6 @@ pub async fn create_album(
         .unwrap();
 
     SHOULD_RESET.notify_one();
-    waiting_notify.notified().await;
+    waiting_update.notified().await;
     Ok(id.to_string())
 }
