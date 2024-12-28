@@ -34,6 +34,8 @@ pub fn generate_get_routes() -> Vec<Route> {
         get_page::all_view,
         get_page::setting,
         get_page::favicon,
+        get_page::videos,
+        get_page::videos_view,
         get_prefetch::prefetch
     ]
 }

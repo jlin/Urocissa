@@ -126,6 +126,20 @@ pub async fn all_view(_path: PathBuf) -> Option<NamedFile> {
         .ok()
 }
 
+#[get("/videos")]
+pub async fn videos() -> Option<NamedFile> {
+    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
+        .await
+        .ok()
+}
+
+#[get("/videos/view/<_path..>")]
+pub async fn videos_view(_path: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
+        .await
+        .ok()
+}
+
 #[get("/setting")]
 pub async fn setting() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
