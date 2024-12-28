@@ -4,7 +4,7 @@ use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expire::EXPIRE;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::router::put::edit_album::AlbumQueue;
-use crate::synchronizer::album::ALBUM_QUEUE_SENDER;
+use crate::synchronizer::album::ALBUM_SELFUPDATE_QUEUE_SENDER;
 
 use log::info;
 use rayon::iter::{ParallelBridge, ParallelIterator};
@@ -101,12 +101,13 @@ impl Tree {
 
                     data_vec.extend(album_vec);
                     data_vec.par_sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
                     *self.in_memory.write().unwrap() = data_vec;
 
                     EXPIRE.update_expire_time(start_time);
 
                     if !buffer.is_empty() {
-                        ALBUM_QUEUE_SENDER
+                        ALBUM_SELFUPDATE_QUEUE_SENDER
                             .get()
                             .unwrap()
                             .send(
