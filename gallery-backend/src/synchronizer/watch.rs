@@ -33,23 +33,26 @@ fn get_watcher() -> RecommendedWatcher {
                     match wacher_events.kind {
                         EventKind::Create(_) => {
                             if !wacher_events.paths.is_empty() {
-                                if let Err(send_error) = EVENTS_SENDER
-                                    .get()
-                                    .unwrap()
-                                    .send(wacher_events.paths.clone())
-                                {
-                                    let error_data = ErrorData::new(
-                                        format!("Failed to send paths: {}", send_error),
-                                        format!(
-                                            "Error occur when sending path {:?}",
-                                            wacher_events.paths
-                                        ),
-                                        None,
-                                        None,
-                                        Location::caller(),
-                                        None,
-                                    );
-                                    handle_error(error_data);
+                                // Attempt to send the paths without cloning.
+                                match EVENTS_SENDER.get().unwrap().send(wacher_events.paths) {
+                                    Ok(_) => {
+                                        // Successfully sent. Nothing else needed.
+                                    }
+                                    Err(err) => {
+                                        // The send failed, and we get `returned_paths` back here.
+                                        let error_data = ErrorData::new(
+                                            format!("Failed to send paths: {}", err),
+                                            format!(
+                                                "Error occurred when sending path: {:?}",
+                                                err.0
+                                            ),
+                                            None,
+                                            None,
+                                            Location::caller(),
+                                            None,
+                                        );
+                                        handle_error(error_data);
+                                    }
                                 }
                             }
                         }
