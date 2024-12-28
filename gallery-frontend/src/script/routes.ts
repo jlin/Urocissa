@@ -15,6 +15,7 @@ import AlbumsPage from '@/components/Page/AlbumsPage.vue'
 import ViewPageMain from '@/components/Home/View/ViewPageMain.vue'
 import HomeIsolated from '@/components/Home/HomeIsolated.vue'
 import ViewPageIsolated from '@/components/Home/View/ViewPageIsolated.vue'
+import VideosPage from '@/components/Page/VideosPage.vue'
 
 // ======================================
 // 1. Define Simple Static Routes
@@ -142,6 +143,13 @@ const albumsPageRoutes = createRoute(
   'and(type:"album", not(tag:"_trashed"))'
 )
 
+const videosPageRoutes = createRoute(
+  'videos',
+  VideosPage,
+  'VideosPage',
+  'and(type:"video", not(tag:"_trashed"))'
+)
+
 // ======================================
 // 4. Combine All Routes
 // ======================================
@@ -153,7 +161,8 @@ const routes: RouteRecordRaw[] = [
   ...favoritePageRoutes,
   ...archivedPageRoutes,
   ...trashedPageRoutes,
-  ...albumsPageRoutes
+  ...albumsPageRoutes,
+  ...videosPageRoutes
 ]
 
 // ======================================

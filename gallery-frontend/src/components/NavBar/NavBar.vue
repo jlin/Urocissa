@@ -4,8 +4,16 @@
   <v-navigation-drawer v-model="showDrawer" temporary touchless width="150" class="no-select">
     <v-list nav :key="route.fullPath">
       <v-list-item slim to="/" prepend-icon="mdi-home" title="Home"></v-list-item>
+      <v-divider></v-divider>
       <v-list-item slim to="/tags" prepend-icon="mdi-tag-multiple" title="Tags"></v-list-item>
       <v-list-item slim to="/albums" prepend-icon="mdi-image-album" title="Albums"></v-list-item>
+      <v-list-item
+        slim
+        to="/videos"
+        prepend-icon="mdi-play-circle-outline"
+        title="Videos"
+      ></v-list-item>
+      <v-divider></v-divider>
       <v-list-item slim to="/favorite" prepend-icon="mdi-star" title="Favorite"></v-list-item>
       <v-list-item
         slim
