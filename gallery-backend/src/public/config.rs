@@ -33,6 +33,7 @@ pub static PUBLIC_CONFIG: LazyLock<PublicConfig> = LazyLock::new(|| {
 pub struct PrivateConfig {
     pub password: String,
     pub sync_path: Vec<PathBuf>,
+    pub auth_key: Option<String>,
     pub discord_hook_url: Option<String>,
 }
 

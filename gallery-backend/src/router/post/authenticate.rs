@@ -12,10 +12,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::public::config::PRIVATE_CONFIG;
 
-pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<[u8; 32]> = LazyLock::new(|| {
-    let mut secret = [0u8; 32]; // Inline 32-byte secret key length
-    OsRng.fill_bytes(&mut secret); // Use OsRng to securely fill the random bytes
-    secret
+pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<Vec<u8>> = LazyLock::new(|| {
+    if let Some(auth_key) = PRIVATE_CONFIG.auth_key.as_ref() {
+        auth_key.as_bytes().to_vec()
+    } else {
+        let mut secret = vec![0u8; 32];
+        OsRng.fill_bytes(&mut secret);
+        secret
+    }
 });
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,9 +28,7 @@ pub struct Claims {
 }
 
 #[post("/post/authenticate", data = "<password>")]
-pub async fn authenticate(
-    password: Json<String>,
-) -> Result<Json<String>, &'static str> {
+pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'static str> {
     let input_password = password.into_inner();
 
     // Verify the password
