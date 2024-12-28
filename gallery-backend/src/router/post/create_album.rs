@@ -69,7 +69,7 @@ pub async fn create_album(
     let waiting_update = Arc::new(Notify::new());
     let album_queue = AlbumQueue {
         album_list: vec![id],
-        notify: Some(waiting_update.clone()),
+        notify: Some(Arc::clone(&waiting_update)),
     };
     ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
         .get()
