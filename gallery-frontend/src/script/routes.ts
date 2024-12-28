@@ -147,7 +147,7 @@ const videosPageRoutes = createRoute(
   'videos',
   VideosPage,
   'VideosPage',
-  'and(type:"video", not(tag:"_trashed"))'
+  'and(type:"video", not(tag:"_archived"), not(tag:"_trashed"))'
 )
 
 // ======================================
