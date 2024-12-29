@@ -62,36 +62,13 @@
               timer(metadata.database.timestamp)
             }}</v-list-item-subtitle>
           </v-list-item>
-          <v-list-item
+          <ItemExif
             v-if="
               metadata.database.exif_vec.Make !== undefined ||
               metadata.database.exif_vec.Model !== undefined
             "
-          >
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-camera-iris</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{
-              generateExifMake(metadata.database.exif_vec)
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">
-              <v-row>
-                <v-col cols="auto">{{ formatExifData(metadata.database.exif_vec).FNumber }}</v-col>
-                <v-col cols="auto">{{
-                  formatExifData(metadata.database.exif_vec).ExposureTime
-                }}</v-col>
-                <v-col cols="auto">{{
-                  formatExifData(metadata.database.exif_vec).FocalLength
-                }}</v-col>
-                <v-col cols="auto">{{
-                  formatExifData(metadata.database.exif_vec).PhotographicSensitivity
-                }}</v-col>
-              </v-row>
-            </v-list-item-subtitle>
-          </v-list-item>
-
+            :database="metadata.database"
+          />
           <!-- Tags Section -->
           <v-divider></v-divider>
           <v-list-item>
@@ -333,6 +310,7 @@ import { AbstractData, IsolationId } from '@/script/common/types'
 import { dater, searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { navigateToAlbum } from '@/script/navigator'
+import ItemExif from './Item/ItemExif.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -390,52 +368,6 @@ function openEditAlbumsModal() {
   modalStore.showEditAlbumsModal = true
 }
 
-function generateExifMake(exifData: Record<string, string>): string {
-  let make_formated = ''
-  let model_formated = ''
-  if (exifData.Make !== undefined) {
-    const make: string = exifData.Make.replace(/"/g, '')
-    make_formated = make
-      .split(',')
-      .map((part) => part.trim())
-      .filter((part) => part !== '')
-      .join(', ')
-  }
-  if (exifData.Model !== undefined) {
-    const model: string = exifData.Model.replace(/"/g, '')
-    model_formated = model
-      .split(',')
-      .map((part) => part.trim())
-      .filter((part) => part !== '')
-      .join(', ')
-  }
-  return make_formated + ' ' + model_formated
-}
-
-interface ExifData {
-  FNumber: string // Aperture value as a string, e.g., "f/2.8"
-  ExposureTime: string // Exposure time as a string, e.g., "1/60 s"
-  FocalLength: string // Focal length as a string, e.g., "35 mm"
-  PhotographicSensitivity: string
-}
-
-function formatExifData(exifData: Record<string, string | undefined>): ExifData {
-  const formattedExifData: ExifData = {
-    FNumber: exifData.FNumber !== undefined ? exifData.FNumber.replace('f/', 'ƒ/') : '',
-    ExposureTime:
-      exifData.ExposureTime !== undefined
-        ? `1/${exifData.ExposureTime.replace(' s', '').replace('1/', '')}`
-        : '',
-    FocalLength:
-      exifData.FocalLength !== undefined ? `${exifData.FocalLength.replace(' mm', '')} mm` : '',
-    PhotographicSensitivity:
-      exifData.PhotographicSensitivity !== undefined
-        ? `ISO ${exifData.PhotographicSensitivity}`
-        : ''
-  }
-
-  return formattedExifData
-}
 function timer(timestamp: number): string {
   const locale = navigator.language
   return new Intl.DateTimeFormat(locale, {
