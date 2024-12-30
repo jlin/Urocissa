@@ -7,7 +7,7 @@
     </template>
     <v-list-item-title>
       <v-chip
-        v-if="database.tag.includes('_favorite')"
+        v-if="tags.includes('_favorite')"
         prepend-icon="mdi-star"
         color="black"
         variant="tonal"
@@ -27,7 +27,7 @@
         >favorite</v-chip
       >
       <v-chip
-        v-if="database.tag.includes('_archived')"
+        v-if="tags.includes('_archived')"
         prepend-icon="mdi-archive-arrow-down"
         color="black"
         variant="tonal"
@@ -78,14 +78,14 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
-import { DataBase, IsolationId } from '@/script/common/types'
+import { IsolationId } from '@/script/common/types'
 import { searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 
 const props = defineProps<{
   isolationId: IsolationId
   index: number
-  database: DataBase
+  tags: string[]
 }>()
 
 const modalStore = useModalStore('mainId')
@@ -94,7 +94,7 @@ const router = useRouter()
 
 // Computed Properties
 const filteredTags = computed(() => {
-  return props.database.tag.filter(
+  return props.tags.filter(
     (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
   )
 })

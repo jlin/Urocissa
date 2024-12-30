@@ -38,7 +38,7 @@
           <ItemTag
             :isolation-id="props.isolationId"
             :index="props.index"
-            :database="metadata.database"
+            :tags="metadata.database.tag"
           />
 
           <!-- Albums Section -->
