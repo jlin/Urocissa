@@ -23,32 +23,8 @@
       <v-col class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <!-- Metadata Items -->
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-image</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{
-              `${metadata.database.width} \u00D7 ${metadata.database.height}`
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">{{
-              filesize(metadata.database.size)
-            }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-folder</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{
-              `${filePath.split(separator).pop() || ''}`
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">{{
-              `${filePathComplete}`
-            }}</v-list-item-subtitle>
-          </v-list-item>
+          <ItemSize :database="metadata.database" />
+          <ItemPath :database="metadata.database" />
           <v-list-item>
             <template #prepend>
               <v-avatar>
@@ -311,6 +287,8 @@ import { dater, searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { navigateToAlbum } from '@/script/navigator'
 import ItemExif from './Item/ItemExif.vue'
+import ItemSize from './Item/ItemSize.vue'
+import ItemPath from './Item/ItemPath.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -326,18 +304,6 @@ const infoStore = useInfoStore('mainId')
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
 const router = useRouter()
-
-const filePathComplete = computed(() => {
-  return props.metadata.database?.alias[0]?.file
-})
-
-const filePath = computed(() => {
-  return `${filePathComplete.value?.split('/').pop()}`
-})
-
-const separator = computed(() => {
-  return filePath.value.includes('\\') ? '\\' : '/'
-})
 
 // Computed Properties
 const filteredTags = computed(() => {
