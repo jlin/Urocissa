@@ -42,37 +42,11 @@
           />
 
           <!-- Albums Section -->
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-image-album</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-subtitle class="text-wrap">
-              <v-chip
-                variant="flat"
-                color="black"
-                v-for="albumId in metadata.database.album"
-                :key="albumId"
-                link
-                class="ma-1"
-                @click="navigateToAlbum(albumId, router)"
-              >
-                {{ albumStore.albumMap.get(albumId)! }}
-              </v-chip>
-            </v-list-item-subtitle>
-            <v-list-item-subtitle>
-              <v-chip
-                prepend-icon="mdi-pencil"
-                color="black"
-                variant="outlined"
-                class="ma-1"
-                link
-                @click="openEditAlbumsModal"
-                >edit</v-chip
-              >
-            </v-list-item-subtitle>
-          </v-list-item>
+          <ItemAlbum
+            :isolation-id="props.isolationId"
+            :index="props.index"
+            :albums="metadata.database.album"
+          />
         </v-list>
       </v-col>
     </v-row>
@@ -129,18 +103,16 @@
 
 <script setup lang="ts">
 import { watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useInfoStore } from '@/store/infoStore'
-import { useModalStore } from '@/store/modalStore'
-import { useAlbumStore } from '@/store/albumStore'
 import { filesize } from 'filesize'
 import { AbstractData, IsolationId } from '@/script/common/types'
-import { navigateToAlbum } from '@/script/navigator'
+
 import ItemExif from './Item/ItemExif.vue'
 import ItemSize from './Item/ItemSize.vue'
 import ItemPath from './Item/ItemPath.vue'
 import ItemDate from './Item/ItemDate.vue'
 import ItemTag from './Item/ItemTag.vue'
+import ItemAlbum from './Item/ItemAlbum.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -149,21 +121,10 @@ const props = defineProps<{
   metadata: AbstractData
 }>()
 
-// Stores
-
 const infoStore = useInfoStore('mainId')
 
-const modalStore = useModalStore('mainId')
-const albumStore = useAlbumStore('mainId')
-const router = useRouter()
-
-// Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
-}
-
-function openEditAlbumsModal() {
-  modalStore.showEditAlbumsModal = true
 }
 
 watch(
