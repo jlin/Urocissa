@@ -116,79 +116,11 @@
           </v-list-item>
           <!-- Tags Section -->
           <v-divider></v-divider>
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-tag</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title>
-              <v-chip
-                v-if="metadata.album.tag.includes('_favorite')"
-                prepend-icon="mdi-star"
-                color="black"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickRemoveTags('_favorite', [index], isolationId)"
-                >favorite</v-chip
-              >
-              <v-chip
-                v-else
-                prepend-icon="mdi-star-outline"
-                color="grey"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickAddTags('_favorite', [index], isolationId)"
-                >favorite</v-chip
-              >
-              <v-chip
-                v-if="metadata.album.tag.includes('_archived')"
-                prepend-icon="mdi-archive-arrow-down"
-                color="black"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickRemoveTags('_archived', [index], isolationId)"
-                >archived</v-chip
-              >
-              <v-chip
-                v-else
-                prepend-icon="mdi-archive-arrow-down"
-                color="grey"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickAddTags('_archived', [index], isolationId)"
-                >archived</v-chip
-              >
-            </v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">
-              <v-chip
-                variant="flat"
-                color="black"
-                v-for="tag in filteredTags"
-                :key="tag"
-                link
-                class="ma-1"
-                @click="searchByTag(tag, router)"
-              >
-                {{ tag }}
-              </v-chip>
-            </v-list-item-subtitle>
-            <v-list-item-subtitle>
-              <v-chip
-                prepend-icon="mdi-pencil"
-                color="black"
-                variant="outlined"
-                class="ma-1"
-                link
-                @click="openEditTagsModal"
-                >edit</v-chip
-              >
-            </v-list-item-subtitle>
-          </v-list-item>
+          <ItemTag
+            :isolation-id="props.isolationId"
+            :index="props.index"
+            :tags="metadata.album.tag"
+          />
         </v-list>
       </v-col>
     </v-row>
@@ -196,15 +128,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useInfoStore } from '@/store/infoStore'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { filesize } from 'filesize'
 import { AbstractData, IsolationId } from '@/script/common/types'
-import { searchByTag } from '@/script/common/functions'
-import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { navigateToAlbum } from '@/script/navigator'
 import ItemExif from './Item/ItemExif.vue'
 import ItemSize from './Item/ItemSize.vue'
@@ -227,29 +157,9 @@ const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
 const router = useRouter()
 
-// Computed Properties
-const filteredTags = computed(() => {
-  if (props.metadata.database) {
-    return props.metadata.database.tag.filter(
-      (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
-    )
-  } else if (props.metadata.album) {
-    return props.metadata.album.tag.filter(
-      (tag) => tag !== '_favorite' && tag !== '_archived' && tag !== '_trashed'
-    )
-  } else {
-    // Throw an error if neither database nor album metadata is available
-    throw new Error('Invalid metadata: Neither database nor album is available for filtering tags.')
-  }
-})
-
 // Methods
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
-}
-
-function openEditTagsModal() {
-  modalStore.showEditTagsModal = true
 }
 
 function openEditAlbumsModal() {
