@@ -17,7 +17,7 @@
 </template>
 <script setup lang="ts">
 import Home from './Home.vue'
-import ReadingBar from '../NavBar/ReadingBar.vue'
+import ReadingBar from '@/components/NavBar/ReadingBar.vue'
 import { Album } from '@/script/common/types'
 import { onMounted, Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'

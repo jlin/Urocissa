@@ -30,9 +30,9 @@
 import { useCollectionStore } from '@/store/collectionStore'
 import { leaveRead } from '@/script/navigator'
 import { useRoute } from 'vue-router'
-import EditBar from './EditBar.vue'
-import ProgessBar from './ProgessBar.vue'
-import HomeTemp from '../Home/HomeTemp.vue'
+import EditBar from '@/components/NavBar/EditBar.vue'
+import ProgessBar from '@/components/NavBar/ProgessBar.vue'
+import HomeTemp from '@/components/Home/Page/HomeTemp.vue'
 import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 const modalStore = useModalStore('mainId')

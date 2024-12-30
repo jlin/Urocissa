@@ -35,9 +35,9 @@
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import SelectAll from '../Menu/Botton/BtnSelectAll.vue'
-import SelectClear from '../Menu/Botton/BtnSelectClear.vue'
-import SelectInverse from '../Menu/Botton/BtnSelectInverse.vue'
+import SelectAll from '@/components/Menu/Botton/BtnSelectAll.vue'
+import SelectClear from '@/components/Menu/Botton/BtnSelectClear.vue'
+import SelectInverse from '@/components/Menu/Botton/BtnSelectInverse.vue'
 import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 import { useRerenderStore } from '@/store/rerenderStore'

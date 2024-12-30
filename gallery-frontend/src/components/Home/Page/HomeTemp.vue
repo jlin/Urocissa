@@ -19,7 +19,7 @@
 import { Album } from '@/script/common/types'
 import Home from './Home.vue'
 import { generateJsonString } from '@/script/lexer/generateJson'
-import SelectionBar from '../NavBar/SelectionBar.vue'
+import SelectionBar from '@/components/NavBar/SelectionBar.vue'
 const props = defineProps<{
   album: Album
 }>()
