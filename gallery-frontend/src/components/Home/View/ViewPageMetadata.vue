@@ -35,79 +35,11 @@
           />
           <!-- Tags Section -->
           <v-divider></v-divider>
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-tag</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title>
-              <v-chip
-                v-if="metadata.database.tag.includes('_favorite')"
-                prepend-icon="mdi-star"
-                color="black"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickRemoveTags('_favorite', [index], isolationId)"
-                >favorite</v-chip
-              >
-              <v-chip
-                v-else
-                prepend-icon="mdi-star-outline"
-                color="grey"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickAddTags('_favorite', [index], isolationId)"
-                >favorite</v-chip
-              >
-              <v-chip
-                v-if="metadata.database.tag.includes('_archived')"
-                prepend-icon="mdi-archive-arrow-down"
-                color="black"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickRemoveTags('_archived', [index], isolationId)"
-                >archived</v-chip
-              >
-              <v-chip
-                v-else
-                prepend-icon="mdi-archive-arrow-down"
-                color="grey"
-                variant="tonal"
-                class="ma-1"
-                link
-                @click="quickAddTags('_archived', [index], isolationId)"
-                >archived</v-chip
-              >
-            </v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">
-              <v-chip
-                variant="flat"
-                color="black"
-                v-for="tag in filteredTags"
-                :key="tag"
-                link
-                class="ma-1"
-                @click="searchByTag(tag, router)"
-              >
-                {{ tag }}
-              </v-chip>
-            </v-list-item-subtitle>
-            <v-list-item-subtitle>
-              <v-chip
-                prepend-icon="mdi-pencil"
-                color="black"
-                variant="outlined"
-                class="ma-1"
-                link
-                @click="openEditTagsModal"
-                >edit</v-chip
-              >
-            </v-list-item-subtitle>
-          </v-list-item>
+          <ItemTag
+            :isolation-id="props.isolationId"
+            :index="props.index"
+            :database="metadata.database"
+          />
 
           <!-- Albums Section -->
           <v-list-item>
@@ -278,6 +210,7 @@ import ItemExif from './Item/ItemExif.vue'
 import ItemSize from './Item/ItemSize.vue'
 import ItemPath from './Item/ItemPath.vue'
 import ItemDate from './Item/ItemDate.vue'
+import ItemTag from './Item/ItemTag.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
