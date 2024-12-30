@@ -68,19 +68,7 @@
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <!-- Metadata Items -->
           <ItemTitle :title="metadata.album.title" />
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-image</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{
-              `${metadata.album.itemCount} items`
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">
-              {{ filesize(metadata.album.itemSize) }}
-            </v-list-item-subtitle>
-          </v-list-item>
+          <ItemCount :album="metadata.album" />
           <!-- Tags Section -->
           <v-divider></v-divider>
           <ItemTag
@@ -97,7 +85,7 @@
 <script setup lang="ts">
 import { watch } from 'vue'
 import { useInfoStore } from '@/store/infoStore'
-import { filesize } from 'filesize'
+
 import { AbstractData, IsolationId } from '@/script/common/types'
 
 import ItemExif from './Item/ItemExif.vue'
@@ -107,6 +95,7 @@ import ItemDate from './Item/ItemDate.vue'
 import ItemTag from './Item/ItemTag.vue'
 import ItemAlbum from './Item/ItemAlbum.vue'
 import ItemTitle from './Item/ItemTitle.vue'
+import ItemCount from './Item/ItemCount.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
