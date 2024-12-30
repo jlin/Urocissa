@@ -25,19 +25,7 @@
           <!-- Metadata Items -->
           <ItemSize :database="metadata.database" />
           <ItemPath :database="metadata.database" />
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-calendar</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{
-              dater(metadata.database.timestamp)
-            }}</v-list-item-title>
-            <v-list-item-subtitle class="text-wrap">{{
-              timer(metadata.database.timestamp)
-            }}</v-list-item-subtitle>
-          </v-list-item>
+          <ItemDate :database="metadata.database" />
           <ItemExif
             v-if="
               metadata.database.exif_vec.Make !== undefined ||
@@ -283,12 +271,13 @@ import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { filesize } from 'filesize'
 import { AbstractData, IsolationId } from '@/script/common/types'
-import { dater, searchByTag } from '@/script/common/functions'
+import { searchByTag } from '@/script/common/functions'
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
 import { navigateToAlbum } from '@/script/navigator'
 import ItemExif from './Item/ItemExif.vue'
 import ItemSize from './Item/ItemSize.vue'
 import ItemPath from './Item/ItemPath.vue'
+import ItemDate from './Item/ItemDate.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -334,18 +323,6 @@ function openEditAlbumsModal() {
   modalStore.showEditAlbumsModal = true
 }
 
-function timer(timestamp: number): string {
-  const locale = navigator.language
-  return new Intl.DateTimeFormat(locale, {
-    weekday: 'long',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: true,
-    dayPeriod: 'narrow',
-    timeZoneName: 'short'
-  }).format(timestamp)
-}
 watch(
   () => props.hash,
   () => {
