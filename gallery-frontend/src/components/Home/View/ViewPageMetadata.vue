@@ -67,14 +67,7 @@
       <v-col class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <!-- Metadata Items -->
-          <v-list-item>
-            <template #prepend>
-              <v-avatar>
-                <v-icon color="black">mdi-image-album</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="text-wrap">{{ metadata.album.title }}</v-list-item-title>
-          </v-list-item>
+          <ItemTitle :title="metadata.album.title" />
           <v-list-item>
             <template #prepend>
               <v-avatar>
@@ -113,6 +106,7 @@ import ItemPath from './Item/ItemPath.vue'
 import ItemDate from './Item/ItemDate.vue'
 import ItemTag from './Item/ItemTag.vue'
 import ItemAlbum from './Item/ItemAlbum.vue'
+import ItemTitle from './Item/ItemTitle.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
