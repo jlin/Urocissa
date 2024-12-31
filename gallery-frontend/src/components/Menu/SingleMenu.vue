@@ -4,24 +4,21 @@
       <v-btn v-bind="MenuBtn" icon="mdi-dots-vertical"></v-btn>
     </template>
     <v-list>
-      <ViewOriginalFile
+      <ItemViewOriginalFile
         :src="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!, undefined )"
       />
-      <Download :index-list="[props.index]" />
-      <FindInTimeline :hash="props.hash" />
+      <ItemDownload :index-list="[props.index]" />
+      <ItemFindInTimeline :hash="props.hash" />
       <v-divider></v-divider>
-      <EditTags />
-      <EditAlbums />
-      <Delete v-if="!database.tag.includes('_trashed')" :index-list="[props.index]" />
-      <Restore v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
-      <PermanentlyDelete
-        v-if="database.tag.includes('_trashed')"
-        :index-list="[props.index]"
-      ></PermanentlyDelete>
+      <ItemEditTags />
+      <ItemEditAlbums />
+      <ItemDelete v-if="!database.tag.includes('_trashed')" :index-list="[props.index]" />
+      <ItemRestore v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
+      <ItemPermanentlyDelete v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
       <v-divider></v-divider>
-      <RegeneratePreview :index-list="[props.index]" />
-      <RegenerateMetadata :index-list="[props.index]" />
-      <ItemSetPreviewByCurrentFrame
+      <ItemRegeneratePreview :index-list="[props.index]" />
+      <ItemRegenerateMetadata :index-list="[props.index]" />
+      <ItemRegenerateCurrentFrame
         v-if="currentFrameStore.video !== null"
         :index="props.index"
         :hash="props.hash"
@@ -33,17 +30,17 @@
 import { DataBase, IsolationId } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import Cookies from 'js-cookie'
-import ViewOriginalFile from './Item/ItemViewOriginalFile.vue'
-import Download from './Item/ItemDownload.vue'
-import FindInTimeline from './Item/ItemFindInTimeline.vue'
-import EditTags from './Item/ItemEditTags.vue'
-import EditAlbums from './Item/ItemEditAlbums.vue'
-import Delete from './Item/ItemDelete.vue'
-import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
-import RegeneratePreview from './Item/ItemRegeneratePreview.vue'
-import RegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
-import Restore from './Item/ItemRestore.vue'
-import ItemSetPreviewByCurrentFrame from './Item/ItemSetPreviewByCurrentFrame.vue'
+import ItemViewOriginalFile from './Item/ItemViewOriginalFile.vue'
+import ItemDownload from './Item/ItemDownload.vue'
+import ItemFindInTimeline from './Item/ItemFindInTimeline.vue'
+import ItemEditTags from './Item/ItemEditTags.vue'
+import ItemEditAlbums from './Item/ItemEditAlbums.vue'
+import ItemDelete from './Item/ItemDelete.vue'
+import ItemPermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
+import ItemRegeneratePreview from './Item/ItemRegeneratePreview.vue'
+import ItemRegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
+import ItemRestore from './Item/ItemRestore.vue'
+import ItemRegenerateCurrentFrame from './Item/ItemRegenerateCurrentFrame.vue'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 
 const props = defineProps<{
