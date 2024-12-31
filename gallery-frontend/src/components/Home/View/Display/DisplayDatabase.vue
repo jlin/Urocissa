@@ -29,10 +29,9 @@
         maxHeight: '100%'
       }"
       inline
-      @timeupdate="updateTime"
-    >
-      >
-    </video>
+      ref="videoRef"
+    ></video>
+    <v-btn @click="getCapture">Capture Frame</v-btn>
 
     <v-card
       v-if="metadata.database.ext_type === 'video' && metadata.database.pending"
@@ -59,8 +58,7 @@ import { useImgStore } from '@/store/imgStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData, IsolationId } from '@/script/common/types'
 import Cookies from 'js-cookie'
-import { useCurrentFrameStore } from '@/store/currentFrameStore'
-import { watch } from 'vue'
+import { ref } from 'vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -72,24 +70,33 @@ const props = defineProps<{
 }>()
 
 const imgStore = useImgStore(props.isolationId)
-const currentFrmStore = useCurrentFrameStore(props.isolationId)
 
-const updateTime = (event: Event) => {
-  const target = event.target as HTMLVideoElement
-  if (props.metadata.database?.ext_type !== 'video') {
-    return
-  }
-  currentFrmStore.currentFrame = target.currentTime
-  console.log('currentTime.value is', currentFrmStore.currentFrame)
-}
+const videoRef = ref<HTMLVideoElement | null>(null)
 
-watch(
-  () => props.metadata.database?.ext_type,
-  () => {
-    if (props.metadata.database?.ext_type !== 'video') {
-      currentFrmStore.currentFrame = undefined
-      console.log('currentFrmStore.currentFrame is', currentFrmStore.currentFrame)
+const getCapture = () => {
+  const video = videoRef.value
+  if (video) {
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const context = canvas.getContext('2d')
+    if (context) {
+      // Draw the current video frame onto the canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+      // Get the image data as a data URL
+      const capturedImage = canvas.toDataURL('image/png')
+
+      // Create a download link
+      const link = document.createElement('a')
+      link.href = capturedImage
+      link.download = 'captured-frame.png' // Set the desired file name
+
+      // Simulate a click to trigger the download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
-)
+}
 </script>
