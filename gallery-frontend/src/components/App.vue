@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import { useRerenderStore } from '@/store/rerenderStore'
@@ -47,10 +47,6 @@ const routeKey = computed(() => {
   const reverse = typeof route.query.reverse === 'string' ? route.query.reverse : ''
   const homeKey = rerenderStore.homeKey.toString()
   return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}-${homeKey}`
-})
-
-watchEffect(() => {
-  console.log('routeKey is', routeKey.value)
 })
 </script>
 

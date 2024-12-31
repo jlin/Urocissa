@@ -148,6 +148,8 @@ async function editTitle() {
     if (albumInfo && album) {
       albumInfo.albumName = titleModel.value
       album.title = titleModel.value
+    } else {
+      console.error(`Cannot find album with id ${id}`)
     }
   }
 }
