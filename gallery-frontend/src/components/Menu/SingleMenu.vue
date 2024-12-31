@@ -22,10 +22,9 @@
       <RegeneratePreview :index-list="[props.index]" />
       <RegenerateMetadata :index-list="[props.index]" />
       <ItemSetPreviewByCurrentFrame
-        v-if="currentFrameStore.currentFrame !== undefined"
+        v-if="currentFrameStore.video !== null"
         :index="props.index"
         :hash="props.hash"
-        :current-frame="currentFrameStore.currentFrame"
       />
     </v-list>
   </v-menu>

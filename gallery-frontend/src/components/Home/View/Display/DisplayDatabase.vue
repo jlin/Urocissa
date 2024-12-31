@@ -33,7 +33,6 @@
     >
       >
     </video>
-    <v-btn @click="getCapture">Capture Frame</v-btn>
     <v-card
       v-if="metadata.database.ext_type === 'video' && metadata.database.pending"
       class="d-flex align-center justify-start"
@@ -72,38 +71,11 @@ const props = defineProps<{
 }>()
 
 const imgStore = useImgStore(props.isolationId)
-const currentFrmStore = useCurrentFrameStore(props.isolationId)
+const currentFrameStore = useCurrentFrameStore(props.isolationId)
 const videoRef = ref<HTMLVideoElement | null>(null)
 
-const getCapture = () => {
-  const video = videoRef.value
-  if (video) {
-    const canvas = document.createElement('canvas')
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    const context = canvas.getContext('2d')
-    if (context) {
-      // Draw the current video frame onto the canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-      // Get the image data as a data URL
-      const capturedImage = canvas.toDataURL('image/png')
-
-      // Create a download link
-      const link = document.createElement('a')
-      link.href = capturedImage
-      link.download = 'captured-frame.png' // Set the desired file name
-
-      // Simulate a click to trigger the download
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
-  }
-}
-
 watch(videoRef, () => {
-  currentFrmStore.currentFrame = videoRef.value
+  currentFrameStore.video = videoRef.value
   console.log('videoRef.value is', videoRef.value)
 })
 </script>
