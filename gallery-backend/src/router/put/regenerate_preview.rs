@@ -3,6 +3,7 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use rocket::http::Status;
 
 use crate::executor::databaser::generate_compressed_image::regenerate_compressed_image;
+use crate::executor::databaser::generate_preview::generate_preview_by_current_frame;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -10,11 +11,12 @@ use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use rocket::serde::json::Json;
 use serde::Deserialize;
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RegenerateData {
-    #[serde(rename = "indexArray")]
     index_array: Vec<usize>,
     timestamp: u128,
 }
+
 #[post("/put/regenerate-preview", format = "json", data = "<json_data>")]
 pub async fn regenerate_preview(
     _auth: AuthGuard,
@@ -44,6 +46,38 @@ pub async fn regenerate_preview(
                 regenerate_compressed_image(&mut database).unwrap();
             });
         }
+    });
+
+    // Return 200 OK immediately
+    Status::Ok
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RegenerateWithFrame {
+    index: usize,
+    timestamp: u128,
+    frame_second: f64,
+}
+
+#[post(
+    "/put/regenerate-preview-with-frame",
+    format = "json",
+    data = "<json_data>"
+)]
+pub async fn regenerate_preview_with_frame(
+    _auth: AuthGuard,
+    _read_only_mode: ReadOnlyModeGuard,
+    json_data: Json<RegenerateWithFrame>,
+) -> Status {
+    tokio::task::spawn_blocking(move || {
+        let reduced_data_vec = TREE_SNAPSHOT
+            .read_tree_snapshot(&json_data.timestamp)
+            .unwrap();
+        let table = TREE.read_tree_api();
+        let hash = reduced_data_vec.get_hash(json_data.index);
+        let database = table.get(&*hash).unwrap().unwrap().value();
+        generate_preview_by_current_frame(&database, json_data.frame_second).unwrap();
     });
 
     // Return 200 OK immediately

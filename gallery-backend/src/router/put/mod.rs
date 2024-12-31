@@ -13,6 +13,7 @@ pub fn generate_put_routes() -> Vec<Route> {
         edit_tag::edit_tag,
         random::generate_random_data,
         regenerate_preview::regenerate_preview,
-        regenerate_metadata::regenerate_metadata
+        regenerate_preview::regenerate_preview_with_frame,
+        regenerate_metadata::regenerate_metadata,
     ]
 }
