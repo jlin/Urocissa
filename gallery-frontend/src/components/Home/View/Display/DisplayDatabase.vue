@@ -16,6 +16,7 @@
         objectFit: 'scale-down'
       }"
     />
+
     <video
       controls
       autoplay
@@ -28,7 +29,11 @@
         maxHeight: '100%'
       }"
       inline
-    ></video>
+      @timeupdate="updateTime"
+    >
+      >
+    </video>
+
     <v-card
       v-if="metadata.database.ext_type === 'video' && metadata.database.pending"
       class="d-flex align-center justify-start"
@@ -54,6 +59,7 @@ import { useImgStore } from '@/store/imgStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData, IsolationId } from '@/script/common/types'
 import Cookies from 'js-cookie'
+import { ref } from 'vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -65,4 +71,12 @@ const props = defineProps<{
 }>()
 
 const imgStore = useImgStore(props.isolationId)
+
+const currentTime = ref(0)
+
+const updateTime = (event: Event) => {
+  const target = event.target as HTMLVideoElement
+  currentTime.value = target.currentTime
+  console.log('currentTime.value is', currentTime.value)
+}
 </script>
