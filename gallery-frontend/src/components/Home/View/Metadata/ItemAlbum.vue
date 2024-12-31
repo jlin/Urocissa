@@ -15,7 +15,7 @@
         class="ma-1"
         @click="navigateToAlbum(albumId, router)"
       >
-        {{ albumStore.albumMap.get(albumId)! }}
+        {{ albumStore.albums.get(albumId)!.albumName }}
       </v-chip>
     </v-list-item-subtitle>
     <v-list-item-subtitle>

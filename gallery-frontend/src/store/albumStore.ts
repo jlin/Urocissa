@@ -7,13 +7,11 @@ import { z, ZodError } from 'zod'
 export const useAlbumStore = (isolationId: IsolationId) =>
   defineStore('albumStore' + isolationId, {
     state: (): {
-      albums: AlbumInfo[]
-      albumMap: Map<string, string> // id -> name
+      albums: Map<string, AlbumInfo> // id -> album
       fetched: boolean
       leaveAlbumPath: string | undefined
     } => ({
-      albums: [],
-      albumMap: new Map(),
+      albums: new Map(),
       fetched: false,
       leaveAlbumPath: undefined
     }),
@@ -29,11 +27,8 @@ export const useAlbumStore = (isolationId: IsolationId) =>
           const albumsArraySchema = z.array(albumInfoSchema)
           const albums = albumsArraySchema.parse(response.data)
 
-          this.albums = albums
-          this.albums.sort((a, b) => a.albumName.localeCompare(b.albumName))
-
-          this.albums.forEach((album) => {
-            this.albumMap.set(album.albumId, album.albumName)
+          albums.forEach((album) => {
+            this.albums.set(album.albumId, album)
           })
 
           this.fetched = true

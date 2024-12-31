@@ -18,7 +18,7 @@
       class="w-50"
     >
       <v-card-title class="text-truncate">
-        {{ albumStore.albumMap.get(route.params.hash) }}
+        {{ albumStore.albums.get(route.params.hash) }}
       </v-card-title>
     </v-card>
     <v-card

@@ -16,7 +16,7 @@
             label="Add Albumss"
             item-title="albumName"
             :rules="[addAlbumsRule]"
-            :items="albumStore.albums"
+            :items="[...albumStore.albums.values()]"
             return-object
           ></v-combobox>
         </v-container>
@@ -28,8 +28,8 @@
             label="Remove Albums"
             item-title="albumName"
             :rules="[removeAlbumsRule]"
-            :items="albumStore.albums"
-            return-object
+            :items="[...albumStore.albums.values()]"
+            return-objects
           ></v-combobox>
         </v-container>
         <v-card-actions>

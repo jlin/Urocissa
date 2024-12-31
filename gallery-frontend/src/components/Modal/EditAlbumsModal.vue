@@ -32,7 +32,7 @@
             chips
             multiple
             item-title="albumName"
-            :items="albumStore.albums"
+            :items="[...albumStore.albums.values()]"
             label="Albums"
             closable-chips
             return-object
@@ -104,7 +104,7 @@ onMounted(() => {
     const defaultAlbums: AlbumInfo[] = []
 
     for (const albumId of data.database.album) {
-      const albumName = albumStore.albumMap.get(albumId)
+      const albumName = albumStore.albums.get(albumId)?.albumName
       if (albumName === undefined) {
         console.error(`useSubmit Error: Album name not found for albumId '${albumId}'.`)
         return undefined
