@@ -67,14 +67,14 @@ import { useInfoStore } from '@/store/infoStore'
 
 import { AbstractData, IsolationId } from '@/script/common/types'
 
-import ItemExif from './Item/ItemExif.vue'
-import ItemSize from './Item/ItemSize.vue'
-import ItemPath from './Item/ItemPath.vue'
-import ItemDate from './Item/ItemDate.vue'
-import ItemTag from './Item/ItemTag.vue'
-import ItemAlbum from './Item/ItemAlbum.vue'
-import ItemTitle from './Item/ItemTitle.vue'
-import ItemCount from './Item/ItemCount.vue'
+import ItemExif from './ItemExif.vue'
+import ItemSize from './ItemSize.vue'
+import ItemPath from './ItemPath.vue'
+import ItemDate from './ItemDate.vue'
+import ItemTag from './ItemTag.vue'
+import ItemAlbum from './ItemAlbum.vue'
+import ItemTitle from './ItemTitle.vue'
+import ItemCount from './ItemCount.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
