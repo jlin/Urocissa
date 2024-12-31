@@ -135,10 +135,16 @@ const props = defineProps<{
 
 async function editTitle() {
   if ((props.album.title ?? '') !== titleModel.value) {
+    const id = props.album.id
+    const title = titleModel.value === '' ? null : titleModel.value
     await axios.post('/post/set_album_title', {
-      albumId: props.album.id,
-      title: titleModel.value === '' ? null : titleModel.value
+      albumId: id,
+      title: title
     })
+    const albumInfo = albumStore.albums.get(id)
+    if (albumInfo) {
+      albumInfo.albumName = titleModel.value
+    }
   }
 }
 
