@@ -90,7 +90,7 @@ pub async fn get_tags(_auth: AuthGuard) -> Json<Vec<TagInfo>> {
 #[serde(rename_all = "camelCase")]
 pub struct AlbumInfo {
     pub album_id: String,
-    pub album_name: String,
+    pub album_name: Option<String>,
 }
 
 #[get("/get/get-albums")]
@@ -101,7 +101,7 @@ pub async fn get_albums(_auth: AuthGuard) -> Json<Vec<AlbumInfo>> {
             .into_iter()
             .map(|album| AlbumInfo {
                 album_id: album.id.to_string(),
-                album_name: album.title.unwrap_or("".to_string()),
+                album_name: album.title,
             })
             .collect();
         Json(album_info_list)

@@ -84,7 +84,8 @@
                 size="small"
                 v-if="
                   dataStore.data.has(row.start + subIndex) &&
-                  dataStore.data.get(row.start + subIndex)?.album
+                  dataStore.data.get(row.start + subIndex)?.album &&
+                  dataStore.data.get(row.start + subIndex)?.album?.title !== null
                 "
                 color="black"
                 variant="flat"

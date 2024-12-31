@@ -110,6 +110,7 @@
 </template>
 
 <script setup lang="ts">
+import axios from 'axios'
 import { useImgStore } from '@/store/imgStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { VCol } from 'vuetify/components'
@@ -118,13 +119,14 @@ import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
 import { Album } from '@/script/common/types'
 import { onMounted, ref } from 'vue'
-import axios from 'axios'
+import { useDataStore } from '@/store/dataStore'
 
 const titleModel = ref('')
 
 const route = useRoute()
 const albumStore = useAlbumStore('mainId')
 const imgStore = useImgStore('mainId')
+const dataStore = useDataStore('mainId')
 
 const props = defineProps<{
   index: number
@@ -142,8 +144,10 @@ async function editTitle() {
       title: title
     })
     const albumInfo = albumStore.albums.get(id)
-    if (albumInfo) {
+    const album = dataStore.data.get(props.index)?.album
+    if (albumInfo && album) {
       albumInfo.albumName = titleModel.value
+      album.title = titleModel.value
     }
   }
 }
