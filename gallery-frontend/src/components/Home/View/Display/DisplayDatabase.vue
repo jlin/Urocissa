@@ -30,9 +30,10 @@
       }"
       inline
       ref="videoRef"
-    ></video>
+    >
+      >
+    </video>
     <v-btn @click="getCapture">Capture Frame</v-btn>
-
     <v-card
       v-if="metadata.database.ext_type === 'video' && metadata.database.pending"
       class="d-flex align-center justify-start"
@@ -58,7 +59,8 @@ import { useImgStore } from '@/store/imgStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData, IsolationId } from '@/script/common/types'
 import Cookies from 'js-cookie'
-import { ref } from 'vue'
+import { useCurrentFrameStore } from '@/store/currentFrameStore'
+import { ref, watch } from 'vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -70,7 +72,7 @@ const props = defineProps<{
 }>()
 
 const imgStore = useImgStore(props.isolationId)
-
+const currentFrmStore = useCurrentFrameStore(props.isolationId)
 const videoRef = ref<HTMLVideoElement | null>(null)
 
 const getCapture = () => {
@@ -99,4 +101,9 @@ const getCapture = () => {
     }
   }
 }
+
+watch(videoRef, () => {
+  currentFrmStore.currentFrame = videoRef.value
+  console.log('videoRef.value is', videoRef.value)
+})
 </script>

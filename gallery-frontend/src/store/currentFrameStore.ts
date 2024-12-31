@@ -4,9 +4,9 @@ import { defineStore } from 'pinia'
 export const useCurrentFrameStore = (isolationId: IsolationId) =>
   defineStore('currentFrameStore' + isolationId, {
     state: (): {
-      currentFrame: number | undefined // unit: second
+      currentFrame: HTMLVideoElement | null // unit: second
     } => ({
-      currentFrame: undefined
+      currentFrame: null
     }),
     actions: {}
   })()
