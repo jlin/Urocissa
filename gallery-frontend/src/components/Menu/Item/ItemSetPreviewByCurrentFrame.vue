@@ -8,11 +8,13 @@
 import { useRoute } from 'vue-router'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import axios from 'axios'
-import { getIsolationIdByRoute } from '@/script/common/functions'
+import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
 import { useMessageStore } from '@/store/messageStore'
+import { getSrc } from '@/../config'
 
 const props = defineProps<{
   index: number
+  hash: string
   currentFrame: number
 }>()
 
@@ -33,6 +35,14 @@ const setPreviewByCurrentFrame = async () => {
       }
     })
     console.log('Response:', response.data)
+    await axios.get<Blob>(getSrc(props.hash, false, 'jpg', getCookiesJwt(), undefined), {
+      responseType: 'blob',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0'
+      }
+    })
     messageStore.message = 'Regenerating preview with frame...'
     messageStore.warn = false
     messageStore.showMessage = true

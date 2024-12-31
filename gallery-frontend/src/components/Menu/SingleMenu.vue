@@ -21,9 +21,10 @@
       <v-divider></v-divider>
       <RegeneratePreview :index-list="[props.index]" />
       <RegenerateMetadata :index-list="[props.index]" />
-      <ItemSetPreviewByCurrentFrane
+      <ItemSetPreviewByCurrentFrame
         v-if="currentFrameStore.currentFrame !== undefined"
         :index="props.index"
+        :hash="props.hash"
         :current-frame="currentFrameStore.currentFrame"
       />
     </v-list>
@@ -43,7 +44,7 @@ import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 import RegeneratePreview from './Item/ItemRegeneratePreview.vue'
 import RegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
 import Restore from './Item/ItemRestore.vue'
-import ItemSetPreviewByCurrentFrane from './Item/ItemSetPreviewByCurrentFrane.vue'
+import ItemSetPreviewByCurrentFrame from './Item/ItemSetPreviewByCurrentFrame.vue'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 
 const props = defineProps<{

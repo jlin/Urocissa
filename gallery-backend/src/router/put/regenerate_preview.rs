@@ -78,7 +78,7 @@ pub async fn regenerate_preview_with_frame(
         let hash = reduced_data_vec.get_hash(json_data.index);
         let database = table.get(&*hash).unwrap().unwrap().value();
         generate_preview_by_current_frame(&database, json_data.frame_second).unwrap();
-    });
+    }).await.unwrap();
 
     // Return 200 OK immediately
     Status::Ok
