@@ -21,6 +21,11 @@
       <v-divider></v-divider>
       <RegeneratePreview :index-list="[props.index]" />
       <RegenerateMetadata :index-list="[props.index]" />
+      <ItemSetPreviewByCurrentFrane
+        v-if="currentFrameStore.currentFrame !== undefined"
+        :index="props.index"
+        :current-frame="currentFrameStore.currentFrame"
+      />
     </v-list>
   </v-menu>
 </template>
@@ -38,6 +43,8 @@ import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 import RegeneratePreview from './Item/ItemRegeneratePreview.vue'
 import RegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
 import Restore from './Item/ItemRestore.vue'
+import ItemSetPreviewByCurrentFrane from './Item/ItemSetPreviewByCurrentFrane.vue'
+import { useCurrentFrameStore } from '@/store/currentFrameStore'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -45,4 +52,6 @@ const props = defineProps<{
   index: number
   database: DataBase
 }>()
+
+const currentFrameStore = useCurrentFrameStore(props.isolationId)
 </script>

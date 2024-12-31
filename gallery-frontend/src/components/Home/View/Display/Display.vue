@@ -7,7 +7,7 @@
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
-      <ViewBar :metadata="metadata" :index="index" :hash="hash" :isolation-id="isolationId" />
+      <ViewBar :metadata="metadata" :index="index" :hash="hash" :isolation-id="isolationId"/>
       <ViewPageDisplayDatabase
         v-if="metadata && !configStore.disableImg"
         :index="index"
@@ -246,7 +246,6 @@ watch(
       checkAndFetch(props.index)
       // Prefetch next and previous 10 hashes if they exist
       await prefetch(props.index, props.isolationId)
-      // console.log(props.metadata) // debug usage
     }
   },
   { immediate: true }

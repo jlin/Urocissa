@@ -59,7 +59,8 @@ import { useImgStore } from '@/store/imgStore'
 import { getSrc } from '@/../config.ts'
 import { AbstractData, IsolationId } from '@/script/common/types'
 import Cookies from 'js-cookie'
-import { ref } from 'vue'
+import { useCurrentFrameStore } from '@/store/currentFrameStore'
+import { watch } from 'vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -71,12 +72,24 @@ const props = defineProps<{
 }>()
 
 const imgStore = useImgStore(props.isolationId)
-
-const currentTime = ref(0)
+const currentFrmStore = useCurrentFrameStore(props.isolationId)
 
 const updateTime = (event: Event) => {
   const target = event.target as HTMLVideoElement
-  currentTime.value = target.currentTime
-  console.log('currentTime.value is', currentTime.value)
+  if (props.metadata.database?.ext_type !== 'video') {
+    return
+  }
+  currentFrmStore.currentFrame = target.currentTime
+  console.log('currentTime.value is', currentFrmStore.currentFrame)
 }
+
+watch(
+  () => props.metadata.database?.ext_type,
+  () => {
+    if (props.metadata.database?.ext_type !== 'video') {
+      currentFrmStore.currentFrame = undefined
+      console.log('currentFrmStore.currentFrame is', currentFrmStore.currentFrame)
+    }
+  }
+)
 </script>
