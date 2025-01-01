@@ -6,25 +6,34 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { usePrefetchStore } from '@/store/prefetchStore'
 import axios from 'axios'
-import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
-import { useMessageStore } from '@/store/messageStore'
-import { getSrc } from '@/../config'
+import { getIsolationIdByRoute } from '@/script/common/functions'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
-
-const props = defineProps<{
-  index: number
-  hash: string
-}>()
 
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-const prefetchStore = usePrefetchStore(isolationId)
-const messageStore = useMessageStore('mainId')
 const currentFrameStore = useCurrentFrameStore(isolationId)
 
 const setPreviewByCurrentFrame = async () => {
-  currentFrameStore.getCapture()
+  const hash = route.params.hash
+  const blob = await currentFrameStore.getCapture()
+  if (typeof hash === 'string' && blob) {
+    const formData = new FormData()
+
+    // Append the hash first
+    formData.append('hash', hash)
+
+    // Append the file
+    formData.append('file', blob)
+
+    // Send the request
+    const response = await axios.put('/put/regenerate-preview-with-frame', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
+    console.log('Response:', response.data)
+  }
 }
 </script>

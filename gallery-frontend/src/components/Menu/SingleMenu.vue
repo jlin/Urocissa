@@ -18,11 +18,7 @@
       <v-divider></v-divider>
       <ItemRegeneratePreview :index-list="[props.index]" />
       <ItemRegenerateMetadata :index-list="[props.index]" />
-      <ItemRegenerateCurrentFrame
-        v-if="currentFrameStore.video !== null"
-        :index="props.index"
-        :hash="props.hash"
-      />
+      <ItemRegenerateCurrentFrame v-if="currentFrameStore.video !== null" />
     </v-list>
   </v-menu>
 </template>

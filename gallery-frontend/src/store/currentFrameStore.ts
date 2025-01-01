@@ -9,7 +9,7 @@ export const useCurrentFrameStore = (isolationId: IsolationId) =>
       video: null
     }),
     actions: {
-      getCapture() {
+      async getCapture() {
         if (this.video) {
           const canvas = document.createElement('canvas')
           canvas.width = this.video.videoWidth
@@ -19,18 +19,15 @@ export const useCurrentFrameStore = (isolationId: IsolationId) =>
             // Draw the current video frame onto the canvas
             context.drawImage(this.video, 0, 0, canvas.width, canvas.height)
 
-            // Get the image data as a data URL
-            const capturedImage = canvas.toDataURL('image/png')
+            const blob = await new Promise<Blob | null>((resolve) => {
+              canvas.toBlob((blob) => {
+                resolve(blob)
+              }, 'image/jpeg')
+            })
 
-            // Create a download link
-            const link = document.createElement('a')
-            link.href = capturedImage
-            link.download = 'captured-frame.png' // Set the desired file name
-
-            // Simulate a click to trigger the download
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
+            if (blob) {
+              return blob
+            }
           }
         }
       }
