@@ -26,7 +26,7 @@ const regeneratePreview = async () => {
     timestamp: prefetchStore.timestamp
   }
   try {
-    const response = await axios.post('/put/regenerate-preview', regenerateData, {
+    const response = await axios.put('/put/regenerate-preview', regenerateData, {
       headers: {
         'Content-Type': 'application/json'
       }

@@ -19,7 +19,7 @@ pub struct RegenerateData {
     timestamp: u128,
 }
 
-#[post("/put/regenerate-preview", format = "json", data = "<json_data>")]
+#[put("/put/regenerate-preview", format = "json", data = "<json_data>")]
 pub async fn regenerate_preview(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
