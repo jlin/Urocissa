@@ -18,7 +18,7 @@
       <v-divider></v-divider>
       <ItemRegeneratePreview :index-list="[props.index]" />
       <ItemRegenerateMetadata :index-list="[props.index]" />
-      <ItemRegenerateCurrentFrame v-if="currentFrameStore.video !== null" />
+      <ItemRegeneratePreviewByFrame v-if="currentFrameStore.video !== null" />
     </v-list>
   </v-menu>
 </template>
@@ -36,7 +36,7 @@ import ItemPermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 import ItemRegeneratePreview from './Item/ItemRegeneratePreview.vue'
 import ItemRegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
 import ItemRestore from './Item/ItemRestore.vue'
-import ItemRegenerateCurrentFrame from './Item/ItemRegenerateCurrentFrame.vue'
+import ItemRegeneratePreviewByFrame from './Item/ItemRegeneratePreviewByFrame.vue'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 
 const props = defineProps<{

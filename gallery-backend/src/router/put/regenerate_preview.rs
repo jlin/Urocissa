@@ -61,10 +61,7 @@ pub enum FrameData<'r> {
 #[rocket::async_trait]
 impl<'r> FromFormField<'r> for FrameData<'r> {
     fn from_value(field: ValueField<'r>) -> form::Result<'r, Self> {
-        // Attempt to parse the field value as a string
         let valid_hash = String::from_value(field)?;
-
-        // Attempt to convert the string into ArrayString<64>
         match ArrayString::<64>::from(&valid_hash) {
             Ok(hash) => Ok(FrameData::Hash(hash)),
             Err(_) => Err(form::Error::validation("Invalid hash length or format").into()),
@@ -72,7 +69,6 @@ impl<'r> FromFormField<'r> for FrameData<'r> {
     }
 
     async fn from_data(field: DataField<'r, '_>) -> form::Result<'r, Self> {
-        // Attempt to parse the field data as a TempFile
         match TempFile::from_data(field).await {
             Ok(temp_file) => Ok(FrameData::File(temp_file)),
             Err(err) => Err(err),
@@ -105,7 +101,6 @@ pub async fn regenerate_preview_with_frame(
         }
     }
 
-    // Regenerate the preview logic (replace this with your actual logic)
     info!("Regenerating preview successfully");
 
     Ok(Status::Ok)
