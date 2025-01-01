@@ -30,6 +30,7 @@
       }"
       inline
       ref="videoRef"
+      crossorigin="anonymous"
     >
       >
     </video>
