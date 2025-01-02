@@ -1,4 +1,6 @@
-use crate::executor::databaser::generate_thumbnail::regenerate_thumbnail_for_image;
+use crate::executor::databaser::generate_thumbnail::{
+    generate_thumbnail_for_video, regenerate_thumbnail_for_image,
+};
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -44,8 +46,11 @@ pub async fn regenerate_thumbnail(
 
             batch.into_par_iter().for_each(|string| {
                 let mut database = table.get(&**string).unwrap().unwrap().value();
-
-                regenerate_thumbnail_for_image(&mut database).unwrap();
+                if database.ext_type == "image" {
+                    regenerate_thumbnail_for_image(&mut database).unwrap();
+                } else if database.ext_type == "video" {
+                    generate_thumbnail_for_video(&database).unwrap();
+                }
             });
         }
     });
