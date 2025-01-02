@@ -1,4 +1,4 @@
-use crate::executor::databaser::generate_compressed_image::regenerate_compressed_image;
+use crate::executor::databaser::generate_thumbnail::regenerate_compressed_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;

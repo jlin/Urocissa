@@ -1,5 +1,5 @@
 use crate::{
-    executor::databaser::generate_compressed_image::regenerate_compressed_image,
+    executor::databaser::generate_thumbnail::regenerate_compressed_image,
     public::database_struct::database::definition::DataBase,
 };
 use anyhow::{Context, Result};

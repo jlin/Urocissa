@@ -13,7 +13,6 @@ use dashmap::DashMap;
 use dashmap::DashSet;
 use rayon::prelude::*;
 pub mod fix_orientation;
-pub mod generate_compressed_image;
 pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
 pub mod generate_exif;
