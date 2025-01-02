@@ -20,15 +20,15 @@ const messageStore = useMessageStore('mainId')
 const regenerateThumbnailByFrame = async () => {
   try {
     const hash = route.params.hash
-    const blob = await currentFrameStore.getCapture()
-    if (typeof hash === 'string' && blob) {
+    const currentFrameBlob = await currentFrameStore.getCapture()
+    if (typeof hash === 'string' && currentFrameBlob) {
       const formData = new FormData()
 
       // Append the hash first
       formData.append('hash', hash)
 
       // Append the file
-      formData.append('file', blob)
+      formData.append('file', currentFrameBlob)
       messageStore.message = 'Regenerating thumbnail...'
       messageStore.warn = false
       messageStore.showMessage = true
@@ -38,14 +38,13 @@ const regenerateThumbnailByFrame = async () => {
           'Content-Type': 'multipart/form-data'
         }
       })
-      await axios.get<Blob>(getSrc(hash, false, 'jpg', getCookiesJwt(), undefined), {
-        responseType: 'blob',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-          Expires: '0'
-        }
+
+      const blobHeader = await fetch(getSrc(hash, false, 'jpg', getCookiesJwt(), undefined), {
+        method: 'GET',
+        cache: 'reload'
       })
+      await blobHeader.blob()
+
       messageStore.message = 'Regenerating thumbnail successfually'
       messageStore.warn = false
       messageStore.showMessage = true
