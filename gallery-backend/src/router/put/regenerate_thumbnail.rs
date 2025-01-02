@@ -1,3 +1,6 @@
+use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
+use crate::executor::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
+use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use arrayvec::ArrayString;
 
@@ -49,6 +52,16 @@ pub async fn regenerate_thumbnail_with_frame(
                     eprintln!("Failed to save file: {:?}", e);
                     return Err(Status::InternalServerError);
                 }
+                tokio::task::spawn_blocking(move || {
+                    let table = TREE.read_tree_api();
+                    let mut database = table.get(&*hash).unwrap().unwrap().value();
+                    let dynamic_image = generate_dynamic_image(&database).unwrap();
+                    database.thumbhash = generate_thumbhash(&dynamic_image).unwrap();
+                    database.phash = generate_phash(&dynamic_image);
+                    TREE.insert_tree_api(&vec![database]).unwrap();
+                })
+                .await
+                .unwrap();
             }
         }
     }

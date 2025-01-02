@@ -24,10 +24,7 @@ pub async fn regenerate_metadata(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
 ) -> Status {
-    // Clone the data to move it into the spawned task
     let json_data = json_data.into_inner();
-
-    // Spawn the blocking task without awaiting it
     tokio::task::spawn_blocking(move || {
         let table = TREE.read_tree_api();
 

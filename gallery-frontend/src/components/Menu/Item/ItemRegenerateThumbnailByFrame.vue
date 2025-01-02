@@ -1,6 +1,6 @@
 <template>
   <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regenerateThumbnailByFrame">
-    <v-list-item-title class="wrap">Regenerate Thumbnail By Current Frame</v-list-item-title>
+    <v-list-item-title class="wrap">Capture Frame as Thumb</v-list-item-title>
   </v-list-item>
 </template>
 

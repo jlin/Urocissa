@@ -16,7 +16,6 @@
       <ItemRestore v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
       <ItemPermanentlyDelete v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
       <v-divider></v-divider>
-      <ItemRegenerateThumbnail :index-list="[props.index]" />
       <ItemRegenerateMetadata :index-list="[props.index]" />
       <ItemRegenerateThumbnailByFrame v-if="currentFrameStore.video !== null" />
     </v-list>
