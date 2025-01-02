@@ -7,21 +7,17 @@ use crate::public::{
     constant::VALID_IMAGE_EXTENSIONS, database_struct::database::definition::DataBase,
 };
 
-pub fn generate_image_exif(database: &DataBase) -> BTreeMap<String, String> {
-    extract_image_exif(&database.source_path())
-}
-
 pub fn regenerate_exif(database: &DataBase) -> BTreeMap<String, String> {
     if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-        extract_image_exif(&database.imported_path())
+        generate_exif_for_image(&database)
     } else {
-        generate_video_exif(&database.imported_path_string()).unwrap()
+        generate_exif_for_video(&database.imported_path_string()).unwrap()
     }
 }
 
-fn extract_image_exif(path: &Path) -> BTreeMap<String, String> {
+pub fn generate_exif_for_image(database: &DataBase) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();
-    if let Ok(exif) = read_exif(path) {
+    if let Ok(exif) = read_exif(&database.source_path()) {
         for field in exif.fields() {
             let tag = field.tag.to_string();
             let value = field.display_value().with_unit(&exif).to_string();
@@ -51,7 +47,9 @@ fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
-pub fn generate_video_exif(source_path: &str) -> Result<BTreeMap<String, String>, Box<dyn Error>> {
+pub fn generate_exif_for_video(
+    source_path: &str,
+) -> Result<BTreeMap<String, String>, Box<dyn Error>> {
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")
         .arg("-v")

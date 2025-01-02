@@ -6,14 +6,14 @@ use super::{
     fix_orientation::{fix_image_orientation, fix_image_width_height, fix_video_width_height},
     generate_thumbnail::generate_thumbnail_for_image,
     generate_dynamic_image::generate_dynamic_image,
-    generate_exif::{generate_image_exif, generate_video_exif, regenerate_exif},
+    generate_exif::{generate_exif_for_image, generate_exif_for_video, regenerate_exif},
     generate_image_hash::{generate_phash, generate_thumbhash},
     generate_thumbnail::generate_thumbnail_for_video,
     generate_width_height::{generate_image_width_height, generate_video_width_height},
 };
 
 pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
-    database.exif_vec = generate_image_exif(&database);
+    database.exif_vec = generate_exif_for_image(&database);
     let mut dynamic_image = generate_dynamic_image(&database)?;
     (database.width, database.height) = generate_image_width_height(&dynamic_image);
     fix_image_width_height(database);
@@ -25,7 +25,7 @@ pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
 }
 
 pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
-    database.exif_vec = generate_video_exif(database.source_path_string())?;
+    database.exif_vec = generate_exif_for_video(database.source_path_string())?;
     (database.width, database.height) = generate_video_width_height(&database)?;
     fix_video_width_height(database);
     generate_thumbnail_for_video(database)?;
