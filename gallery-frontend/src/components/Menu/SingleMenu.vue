@@ -16,9 +16,9 @@
       <ItemRestore v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
       <ItemPermanentlyDelete v-if="database.tag.includes('_trashed')" :index-list="[props.index]" />
       <v-divider></v-divider>
-      <ItemRegeneratePreview :index-list="[props.index]" />
+      <ItemRegenerateThumbnail :index-list="[props.index]" />
       <ItemRegenerateMetadata :index-list="[props.index]" />
-      <ItemRegeneratePreviewByFrame v-if="currentFrameStore.video !== null" />
+      <ItemRegenerateThumbnailByFrame v-if="currentFrameStore.video !== null" />
     </v-list>
   </v-menu>
 </template>
@@ -33,10 +33,10 @@ import ItemEditTags from './Item/ItemEditTags.vue'
 import ItemEditAlbums from './Item/ItemEditAlbums.vue'
 import ItemDelete from './Item/ItemDelete.vue'
 import ItemPermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
-import ItemRegeneratePreview from './Item/ItemRegeneratePreview.vue'
+import ItemRegenerateThumbnail from './Item/ItemRegenerateThumbnail.vue'
 import ItemRegenerateMetadata from './Item/ItemRegenerateMetadata.vue'
 import ItemRestore from './Item/ItemRestore.vue'
-import ItemRegeneratePreviewByFrame from './Item/ItemRegeneratePreviewByFrame.vue'
+import ItemRegenerateThumbnailByFrame from './Item/ItemRegenerateThumbnailByFrame.vue'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 
 const props = defineProps<{

@@ -1,6 +1,6 @@
 <template>
-  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regeneratePreview">
-    <v-list-item-title class="wrap">Regenerate Preview</v-list-item-title>
+  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regenerateThumbnail">
+    <v-list-item-title class="wrap">Regenerate Thumbnail</v-list-item-title>
   </v-list-item>
 </template>
 
@@ -19,20 +19,20 @@ const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const prefetchStore = usePrefetchStore(isolationId)
 const messageStore = useMessageStore('mainId')
-const regeneratePreview = async () => {
+const regenerateThumbnail = async () => {
   const indexArray = props.indexList
   const regenerateData = {
     indexArray: indexArray,
     timestamp: prefetchStore.timestamp
   }
   try {
-    const response = await axios.put('/put/regenerate-preview', regenerateData, {
+    const response = await axios.put('/put/regenerate-thumbnail', regenerateData, {
       headers: {
         'Content-Type': 'application/json'
       }
     })
     console.log('Response:', response.data)
-    messageStore.message = 'Regenerating preview...'
+    messageStore.message = 'Regenerating thumbnail...'
     messageStore.warn = false
     messageStore.showMessage = true
   } catch (error) {

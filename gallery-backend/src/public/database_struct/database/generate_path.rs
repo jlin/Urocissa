@@ -30,7 +30,7 @@ impl DataBase {
     pub fn compressed_path(&self) -> PathBuf {
         PathBuf::from(self.compressed_path_string())
     }
-    pub fn preview_path(&self) -> String {
+    pub fn thumbnail_path(&self) -> String {
         format!("./object/compressed/{}/{}.jpg", &self.hash[0..2], self.hash)
     }
     pub fn compressed_path_parent(&self) -> PathBuf {

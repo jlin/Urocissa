@@ -18,7 +18,7 @@ pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
 pub mod generate_exif;
 pub mod generate_image_hash;
-pub mod generate_preview;
+pub mod generate_thumbnail;
 pub mod generate_width_height;
 pub mod image_decoder;
 pub mod processor;

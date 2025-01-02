@@ -30,8 +30,8 @@
 
       <v-divider></v-divider>
 
-      <!-- Regenerate Preview Action -->
-      <RegeneratePreview :index-list="editModeList" />
+      <!-- Regenerate Action -->
+      <RegenerateThumbnail :index-list="editModeList" />
       <RegenerateMetadata :index-list="editModeList" />
     </v-list>
   </v-menu>
@@ -50,7 +50,7 @@ import BatchEditTags from './Item/ItemBatchEditTags.vue'
 import BatchEditAlbums from './Item/ItemBatchEditAlbums.vue'
 import Download from './Item/ItemDownload.vue'
 import Delete from './Item/ItemDelete.vue'
-import RegeneratePreview from './Item/ItemRegeneratePreview.vue'
+import RegenerateThumbnail from './Item/ItemRegenerateThumbnail.vue'
 import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 
 // Utility function to extract isolation ID from the route

@@ -62,7 +62,7 @@ pub fn handle_error(error_data: ErrorData) -> () {
         let remove_file_list = vec![
             database.imported_path(),
             database.compressed_path(),
-            database.preview_path().into(),
+            database.thumbnail_path().into(),
         ];
         for file_path in remove_file_list {
             if file_path.exists() {

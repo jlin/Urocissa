@@ -1,6 +1,6 @@
 <template>
-  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regeneratePreviewByFrame">
-    <v-list-item-title class="wrap">Regenerate Preview By Current Frame</v-list-item-title>
+  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regenerateThumbnailByFrame">
+    <v-list-item-title class="wrap">Regenerate Thumbnail By Current Frame</v-list-item-title>
   </v-list-item>
 </template>
 
@@ -15,7 +15,7 @@ const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const currentFrameStore = useCurrentFrameStore(isolationId)
 
-const regeneratePreviewByFrame = async () => {
+const regenerateThumbnailByFrame = async () => {
   const hash = route.params.hash
   const blob = await currentFrameStore.getCapture()
   if (typeof hash === 'string' && blob) {
@@ -27,7 +27,7 @@ const regeneratePreviewByFrame = async () => {
     // Append the file
     formData.append('file', blob)
 
-    const response = await axios.put('/put/regenerate-preview-with-frame', formData, {
+    const response = await axios.put('/put/regenerate-thumbnail-with-frame', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

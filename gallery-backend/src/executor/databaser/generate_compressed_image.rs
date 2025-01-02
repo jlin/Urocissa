@@ -17,7 +17,7 @@ pub fn generate_compressed_image(
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
 
-    let preview_image = dynamic_image
+    let thumbnail_image = dynamic_image
         .thumbnail_exact(compressed_width, compressed_height)
         .to_rgb8();
 
@@ -30,7 +30,7 @@ pub fn generate_compressed_image(
     })?;
 
     std::fs::create_dir_all(parent_path)?;
-    preview_image.save_with_format(database.compressed_path(), ImageFormat::Jpeg)?;
+    thumbnail_image.save_with_format(database.compressed_path(), ImageFormat::Jpeg)?;
 
     Ok(())
 }
@@ -46,7 +46,7 @@ pub fn regenerate_compressed_image(database: &mut DataBase) -> Result<(), Box<dy
         dyn_img
     };
 
-    let preview_image = dynamic_image
+    let thumbnail_image = dynamic_image
         .thumbnail_exact(compressed_width, compressed_height)
         .to_rgb8();
 
@@ -59,7 +59,7 @@ pub fn regenerate_compressed_image(database: &mut DataBase) -> Result<(), Box<dy
     })?;
 
     std::fs::create_dir_all(parent_path)?;
-    preview_image.save_with_format(database.compressed_path(), ImageFormat::Jpeg)?;
+    thumbnail_image.save_with_format(database.compressed_path(), ImageFormat::Jpeg)?;
 
     Ok(())
 }

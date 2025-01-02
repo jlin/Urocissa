@@ -19,8 +19,8 @@ pub struct RegenerateData {
     timestamp: u128,
 }
 
-#[put("/put/regenerate-preview", format = "json", data = "<json_data>")]
-pub async fn regenerate_preview(
+#[put("/put/regenerate-thumbnail", format = "json", data = "<json_data>")]
+pub async fn regenerate_thumbnail(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
@@ -76,8 +76,8 @@ impl<'r> FromFormField<'r> for FrameData<'r> {
     }
 }
 
-#[put("/put/regenerate-preview-with-frame", data = "<data>")]
-pub async fn regenerate_preview_with_frame(
+#[put("/put/regenerate-thumbnail-with-frame", data = "<data>")]
+pub async fn regenerate_thumbnail_with_frame(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     data: Form<Vec<FrameData<'_>>>,
@@ -101,7 +101,7 @@ pub async fn regenerate_preview_with_frame(
         }
     }
 
-    info!("Regenerating preview successfully");
+    info!("Regenerating thumbnail successfully");
 
     Ok(Status::Ok)
 }

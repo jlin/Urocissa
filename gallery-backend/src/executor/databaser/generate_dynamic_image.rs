@@ -9,7 +9,7 @@ pub fn generate_dynamic_image(database: &DataBase) -> Result<DynamicImage, Box<d
     let img_path = if database.ext_type == "image".to_string() {
         database.imported_path()
     } else {
-        PathBuf::from(database.preview_path())
+        PathBuf::from(database.thumbnail_path())
     };
     let dynamic_image = decode_image(&img_path)?;
     Ok(dynamic_image)
