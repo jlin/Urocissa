@@ -79,7 +79,7 @@ pub fn generate_thumbnail_for_video(database: &DataBase) -> Result<(), Box<dyn E
     Ok(())
 }
 
-pub fn regenerate_compressed_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+pub fn regenerate_thumbnail_for_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
     let dynamic_image = {

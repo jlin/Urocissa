@@ -1,4 +1,4 @@
-use crate::executor::databaser::generate_thumbnail::regenerate_compressed_image;
+use crate::executor::databaser::generate_thumbnail::regenerate_thumbnail_for_image;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
@@ -45,7 +45,7 @@ pub async fn regenerate_thumbnail(
             batch.into_par_iter().for_each(|string| {
                 let mut database = table.get(&**string).unwrap().unwrap().value();
 
-                regenerate_compressed_image(&mut database).unwrap();
+                regenerate_thumbnail_for_image(&mut database).unwrap();
             });
         }
     });

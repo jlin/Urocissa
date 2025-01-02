@@ -1,5 +1,5 @@
 use crate::{
-    executor::databaser::generate_thumbnail::regenerate_compressed_image,
+    executor::databaser::generate_thumbnail::regenerate_thumbnail_for_image,
     public::database_struct::database::definition::DataBase,
 };
 use anyhow::{Context, Result};
@@ -24,7 +24,7 @@ pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn 
                 database.imported_path_string()
             );
             database.ext_type = "image".to_string();
-            return regenerate_compressed_image(database);
+            return regenerate_thumbnail_for_image(database);
         }
         Ok(d) => d, // If no error and the duration is not 0.1 seconds, continue using this value
         Err(e) => {
@@ -33,7 +33,7 @@ pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn 
             {
                 info!("This may not be a gif");
                 database.ext_type = "image".to_string();
-                return regenerate_compressed_image(database);
+                return regenerate_thumbnail_for_image(database);
             } else {
                 return Err(e);
             }
