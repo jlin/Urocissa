@@ -2,8 +2,8 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
-use crate::executor::databaser::processor::regenerate_metadata_for_image;
-use crate::public::constant::PROCESS_BATCH_NUMBER;
+use crate::executor::databaser::processor::{regenerate_metadata_for_image, regenerate_metadata_for_video};
+use crate::public::constant::{PROCESS_BATCH_NUMBER, VALID_IMAGE_EXTENSIONS};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
@@ -46,9 +46,16 @@ pub async fn regenerate_metadata(
                 .into_par_iter()
                 .filter_map(|string| {
                     let mut database = table.get(&**string).unwrap().unwrap().value();
-                    match regenerate_metadata_for_image(&mut database) {
-                        Ok(_) => Some(database),
-                        Err(_) => None,
+                    if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
+                        match regenerate_metadata_for_image(&mut database) {
+                            Ok(_) => Some(database),
+                            Err(_) => None,
+                        }
+                    } else {
+                        match regenerate_metadata_for_video(&mut database) {
+                            Ok(_) => Some(database),
+                            Err(_) => None,
+                        }
                     }
                 })
                 .collect();

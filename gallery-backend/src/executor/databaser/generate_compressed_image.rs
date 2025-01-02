@@ -6,7 +6,7 @@ use image::{DynamicImage, ImageFormat};
 use std::error::Error;
 
 use super::{
-    fix_orientation::fix_image_orientation, generate_exif::regenerate_image_exif,
+    fix_orientation::fix_image_orientation, generate_exif::regenerate_exif,
     small_width_height,
 };
 
@@ -40,7 +40,7 @@ pub fn regenerate_compressed_image(database: &mut DataBase) -> Result<(), Box<dy
         small_width_height(database.width, database.height, 1280);
     let dynamic_image = {
         // To ensure that the exif_vec is accurate, regenerate a new one from imported path
-        database.exif_vec = regenerate_image_exif(&database);
+        database.exif_vec = regenerate_exif(&database);
         let mut dyn_img = generate_dynamic_image(database)?;
         fix_image_orientation(database, &mut dyn_img);
         dyn_img
