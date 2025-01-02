@@ -24,6 +24,17 @@ pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
     Ok(())
 }
 
+pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+    database.exif_vec = generate_video_exif(database.source_path_string())?;
+    (database.width, database.height) = generate_video_width_height(&database)?;
+    fix_video_width_height(database);
+    generate_preview(database)?;
+    let dynamic_image = generate_dynamic_image(database)?;
+    database.thumbhash = generate_thumbhash(&dynamic_image)?;
+    database.phash = generate_phash(&dynamic_image);
+    Ok(())
+}
+
 pub fn regenerate_metadata_for_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     database.size = metadata(&database.imported_path()).unwrap().len();
     database.exif_vec = regenerate_exif(&database);
@@ -42,17 +53,6 @@ pub fn regenerate_metadata_for_video(database: &mut DataBase) -> Result<(), Box<
     let dynamic_image = generate_dynamic_image(&database)?;
     (database.width, database.height) = generate_video_width_height(&database)?;
     fix_video_width_height(database);
-    database.thumbhash = generate_thumbhash(&dynamic_image)?;
-    database.phash = generate_phash(&dynamic_image);
-    Ok(())
-}
-
-pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
-    database.exif_vec = generate_video_exif(database.source_path_string())?;
-    (database.width, database.height) = generate_video_width_height(&database)?;
-    fix_video_width_height(database);
-    generate_preview(database)?;
-    let dynamic_image = generate_dynamic_image(database)?;
     database.thumbhash = generate_thumbhash(&dynamic_image)?;
     database.phash = generate_phash(&dynamic_image);
     Ok(())
