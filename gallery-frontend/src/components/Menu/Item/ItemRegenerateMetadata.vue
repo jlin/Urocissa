@@ -1,6 +1,6 @@
 <template>
   <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regenerateMetadata">
-    <v-list-item-title class="wrap">Regenerate Metadata</v-list-item-title>
+    <v-list-item-title class="wrap">Reindex</v-list-item-title>
   </v-list-item>
 </template>
 

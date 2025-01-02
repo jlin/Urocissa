@@ -50,7 +50,6 @@ import BatchEditTags from './Item/ItemBatchEditTags.vue'
 import BatchEditAlbums from './Item/ItemBatchEditAlbums.vue'
 import Download from './Item/ItemDownload.vue'
 import Delete from './Item/ItemDelete.vue'
-import RegenerateThumbnail from './Item/ItemRegenerateThumbnail.vue'
 import PermanentlyDelete from './Item/ItemPermanentlyDelete.vue'
 
 // Utility function to extract isolation ID from the route

@@ -37,23 +37,12 @@ pub fn process_video_info(database: &mut DataBase) -> Result<(), Box<dyn Error>>
 
 pub fn regenerate_metadata_for_image(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     database.size = metadata(&database.imported_path()).unwrap().len();
-    database.exif_vec = generate_exif_for_image(&database);
-    let mut dynamic_image = generate_dynamic_image(&database)?;
-    (database.width, database.height) = generate_image_width_height(&dynamic_image);
-    fix_image_width_height(database);
-    fix_image_orientation(database, &mut dynamic_image);
-    database.thumbhash = generate_thumbhash(&dynamic_image)?;
-    database.phash = generate_phash(&dynamic_image);
+    process_image_info(database)?;
     Ok(())
 }
 
 pub fn regenerate_metadata_for_video(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     database.size = metadata(&database.imported_path()).unwrap().len();
-    database.exif_vec = generate_exif_for_video(&database)?;
-    let dynamic_image = generate_dynamic_image(&database)?;
-    (database.width, database.height) = generate_video_width_height(&database)?;
-    fix_video_width_height(database);
-    database.thumbhash = generate_thumbhash(&dynamic_image)?;
-    database.phash = generate_phash(&dynamic_image);
+    process_video_info(database)?;
     Ok(())
 }

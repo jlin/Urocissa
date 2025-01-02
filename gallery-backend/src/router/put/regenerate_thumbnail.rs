@@ -14,50 +14,6 @@ use rocket::http::Status;
 use rocket::serde::json::Json;
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct RegenerateData {
-    index_array: Vec<usize>,
-    timestamp: u128,
-}
-
-#[put("/put/regenerate-thumbnail", format = "json", data = "<json_data>")]
-pub async fn regenerate_thumbnail(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
-    json_data: Json<RegenerateData>,
-) -> Status {
-    tokio::task::spawn_blocking(move || {
-        let table = TREE.read_tree_api();
-
-        let reduced_data_vec = TREE_SNAPSHOT
-            .read_tree_snapshot(&json_data.timestamp)
-            .unwrap();
-
-        let hash_vec: Vec<ArrayString<64>> = json_data
-            .index_array
-            .par_iter()
-            .map(|index| reduced_data_vec.get_hash(*index))
-            .collect();
-        let total_batches = (hash_vec.len() + PROCESS_BATCH_NUMBER - 1) / PROCESS_BATCH_NUMBER;
-
-        for (i, batch) in hash_vec.chunks(PROCESS_BATCH_NUMBER).enumerate() {
-            info!("Processing batch {}/{}", i + 1, total_batches);
-
-            batch.into_par_iter().for_each(|string| {
-                let mut database = table.get(&**string).unwrap().unwrap().value();
-                if database.ext_type == "image" {
-                    regenerate_thumbnail_for_image(&mut database).unwrap();
-                } else if database.ext_type == "video" {
-                    generate_thumbnail_for_video(&database).unwrap();
-                }
-            });
-        }
-    });
-
-    // Return 200 OK immediately
-    Status::Ok
-}
 pub enum FrameData<'r> {
     Hash(ArrayString<64>),
     File(TempFile<'r>),
