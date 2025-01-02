@@ -1,12 +1,10 @@
 mod validator_extension;
 mod validator_hash;
 mod validator_modified;
-
+use crate::public::database_struct::database::definition::DataBase;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use std::path::PathBuf;
-
-use crate::public::database_struct::database::definition::DataBase;
 
 pub fn filter(all_paths: Vec<PathBuf>) -> DashMap<ArrayString<64>, DataBase> {
     let valid_extension_paths = validator_extension::validator(all_paths);

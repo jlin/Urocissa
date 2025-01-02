@@ -4,6 +4,7 @@ use crate::public::{
 };
 use rayon::prelude::*;
 use std::{ffi::OsStr, panic::Location, path::PathBuf};
+
 pub fn validator(all_paths: Vec<PathBuf>) -> impl ParallelIterator<Item = PathBuf> {
     all_paths.into_par_iter().filter_map(move |file_path| {
         let extension = file_path.extension().and_then(OsStr::to_str);

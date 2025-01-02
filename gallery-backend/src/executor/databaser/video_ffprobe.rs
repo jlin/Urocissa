@@ -1,7 +1,7 @@
+use anyhow::Context;
 use std::error::Error;
 use std::process::Command;
 
-use anyhow::Context;
 pub fn video_width_height(info: &str, file_path: &str) -> Result<u32, Box<dyn Error>> {
     let command_text = match info {
         "width" => Ok("stream=width"),

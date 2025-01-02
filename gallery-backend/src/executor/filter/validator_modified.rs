@@ -1,7 +1,6 @@
 use crate::public::database_struct::database::definition::DataBase;
 use crate::public::database_struct::file_modify::FileModify;
 use crate::public::error_data::{handle_error, ErrorData};
-
 use path_clean::PathClean;
 use rayon::prelude::*;
 use std::{fs::metadata, panic::Location, path::PathBuf, time::UNIX_EPOCH};

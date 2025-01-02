@@ -1,5 +1,6 @@
+use super::video_ffprobe::video_duration;
 use crate::{
-    executor::databaser::generate_thumbnail::regenerate_thumbnail_for_image,
+    executor::databaser::processor::process_image_info,
     public::database_struct::database::definition::DataBase,
 };
 use anyhow::{Context, Result};
@@ -10,8 +11,6 @@ use std::{
     io::{BufRead, BufReader},
     process::{Command, Stdio},
 };
-
-use super::video_ffprobe::video_duration;
 
 pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
@@ -24,7 +23,7 @@ pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn 
                 database.imported_path_string()
             );
             database.ext_type = "image".to_string();
-            return regenerate_thumbnail_for_image(database);
+            return process_image_info(database);
         }
         Ok(d) => d, // If no error and the duration is not 0.1 seconds, continue using this value
         Err(e) => {
@@ -33,7 +32,7 @@ pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn 
             {
                 info!("This may not be a gif");
                 database.ext_type = "image".to_string();
-                return regenerate_thumbnail_for_image(database);
+                return process_image_info(database);
             } else {
                 return Err(e);
             }

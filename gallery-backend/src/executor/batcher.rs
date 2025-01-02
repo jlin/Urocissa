@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use walkdir::WalkDir;
+
 pub fn merge_file_paths(sync_path: Vec<PathBuf>) -> Vec<PathBuf> {
     let all_paths: Vec<PathBuf> = {
         let mut empty_all_paths = Vec::<PathBuf>::new();

@@ -1,8 +1,7 @@
-use image::DynamicImage;
-
 use crate::public::{
     constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION, database_struct::database::definition::DataBase,
 };
+use image::DynamicImage;
 
 pub fn fix_image_orientation(database: &DataBase, dynamic_image: &mut DynamicImage) -> () {
     if let Some(orientation) = database.exif_vec.get("Orientation") {

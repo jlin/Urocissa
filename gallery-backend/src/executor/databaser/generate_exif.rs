@@ -1,9 +1,7 @@
-use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command, sync::LazyLock};
-
+use crate::public::database_struct::database::definition::DataBase;
 use anyhow::Context;
 use regex::Regex;
-
-use crate::public::database_struct::database::definition::DataBase;
+use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command, sync::LazyLock};
 
 pub fn generate_exif_for_image(database: &DataBase) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();

@@ -1,6 +1,3 @@
-use std::cmp;
-use std::panic::Location;
-
 use self::processor::{process_image_info, process_video_info};
 use crate::public::constant::VALID_IMAGE_EXTENSIONS;
 use crate::public::database_struct::database::definition::DataBase;
@@ -11,9 +8,10 @@ use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use dashmap::DashSet;
-use rayon::prelude::*;
-
 use indicatif::{ProgressBar, ProgressStyle};
+use rayon::prelude::*;
+use std::cmp;
+use std::panic::Location;
 use std::sync::Arc;
 pub mod fix_orientation;
 pub mod generate_compressed_video;
@@ -22,9 +20,9 @@ pub mod generate_exif;
 pub mod generate_image_hash;
 pub mod generate_thumbnail;
 pub mod generate_width_height;
-pub mod image_decoder;
 pub mod processor;
 pub mod video_ffprobe;
+
 pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize {
     let progress_bar = ProgressBar::new(vec_of_hash_alias.len() as u64);
     progress_bar.set_style(

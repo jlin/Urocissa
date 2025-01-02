@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::public::database_struct::database::definition::DataBase;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
@@ -7,6 +5,7 @@ use futures::stream::{self, StreamExt};
 use futures::TryStreamExt;
 use indicatif::{ProgressBar, ProgressStyle};
 use log::error;
+use std::sync::Arc;
 use tokio::fs;
 use tokio::io;
 

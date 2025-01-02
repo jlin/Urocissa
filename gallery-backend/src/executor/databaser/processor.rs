@@ -1,7 +1,3 @@
-use std::{error::Error, fs::metadata};
-
-use crate::public::database_struct::database::definition::DataBase;
-
 use super::{
     fix_orientation::{fix_image_orientation, fix_image_width_height, fix_video_width_height},
     generate_dynamic_image::generate_dynamic_image,
@@ -11,6 +7,8 @@ use super::{
     generate_thumbnail::generate_thumbnail_for_video,
     generate_width_height::{generate_image_width_height, generate_video_width_height},
 };
+use crate::public::database_struct::database::definition::DataBase;
+use std::{error::Error, fs::metadata};
 
 pub fn process_image_info(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
     database.exif_vec = generate_exif_for_image(&database);

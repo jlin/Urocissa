@@ -1,6 +1,7 @@
 use image::DynamicImage;
 use image_hasher::HasherConfig;
 use std::error::Error;
+
 pub fn generate_thumbhash(dynamic_image_rotated: &DynamicImage) -> Result<Vec<u8>, Box<dyn Error>> {
     let resized_image = dynamic_image_rotated.thumbnail_exact(100, 100);
     let rgba_image = resized_image.to_rgba8();
