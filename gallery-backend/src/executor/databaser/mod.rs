@@ -12,6 +12,9 @@ use arrayvec::ArrayString;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use rayon::prelude::*;
+
+use indicatif::{ProgressBar, ProgressStyle};
+use std::sync::Arc;
 pub mod fix_orientation;
 pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
@@ -23,6 +26,18 @@ pub mod image_decoder;
 pub mod processor;
 pub mod video_ffprobe;
 pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize {
+    let progress_bar = ProgressBar::new(vec_of_hash_alias.len() as u64);
+    progress_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} ({eta}) {msg}")
+            .unwrap() // Added {msg} to the template
+            .progress_chars("##-"),
+    );
+
+    progress_bar.set_message("Indexing...");
+
+    let progress_bar = Arc::new(progress_bar);
+
     let write_txn = TREE.in_disk.begin_write().unwrap();
     let video_hash_dashset = DashSet::new();
     let successfully_handled_length = {
@@ -33,7 +48,11 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize
             .filter_map(|(_, mut database)| {
                 if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
                     match process_image_info(&mut database) {
-                        Ok(_) => Some(database),
+                        Ok(_) => {
+                            // Update the progress bar
+                            progress_bar.inc(1);
+                            Some(database)
+                        }
                         Err(e) => {
                             handle_error(ErrorData::new(
                                 e.to_string(),
@@ -49,6 +68,7 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize
                 } else {
                     match process_video_info(&mut database) {
                         Ok(_) => {
+                            progress_bar.inc(1);
                             video_hash_dashset.insert(database.hash);
                             database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
                             Some(database)
@@ -68,6 +88,8 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, DataBase>) -> usize
                 }
             })
             .collect();
+
+        progress_bar.finish_with_message(format!("Index completed"));
         vec.iter().for_each(|database| {
             write_table.insert(&*database.hash, database).unwrap();
         });

@@ -1,5 +1,4 @@
 use std::sync::Arc;
-use std::time::Instant; // Import Instant for time measurement
 
 use crate::public::database_struct::database::definition::DataBase;
 use arrayvec::ArrayString;
@@ -15,10 +14,6 @@ use tokio::io;
 pub fn import(
     deduplicated_file_list: &DashMap<ArrayString<64>, DataBase>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Start time measurement
-    let start_time = Instant::now();
-
-    // Initialize the progress bar
     let progress_bar = ProgressBar::new(deduplicated_file_list.len() as u64);
     progress_bar.set_style(
         ProgressStyle::default_bar()
@@ -26,36 +21,23 @@ pub fn import(
             .progress_chars("##-"),
     );
 
-    // Set an initial empty message
-    progress_bar.set_message("");
+    progress_bar.set_message("Importing...");
 
-    // Wrap the progress bar in an Arc to allow sharing across threads/tasks
     let progress_bar = Arc::new(progress_bar);
 
-    // Create a new Tokio runtime
+    // Create a new Tokio runtime to perform async copy
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()?;
 
-    // Execute the asynchronous import logic within the runtime
     if let Err(e) = rt.block_on(async_import(deduplicated_file_list, progress_bar.clone())) {
-        // Calculate elapsed time in case of error
-        let elapsed = start_time.elapsed();
-        // Set error message
-        progress_bar.set_message(format!("Error encountered after {:?}", elapsed));
-        // Finish the progress bar to display the message
-        progress_bar.finish_with_message(format!("Import failed in {:?}", elapsed));
+        progress_bar.finish_with_message(format!("Import failed"));
         return Err(e);
     }
 
-    // Calculate elapsed time
-    let elapsed = start_time.elapsed();
+    progress_bar.set_message(format!("Import completed"));
 
-    // Set completion message
-    progress_bar.set_message(format!("Import completed in {:?}", elapsed));
-
-    // Finalize the progress bar with the completion message
-    progress_bar.finish_with_message(format!("Import completed in {:?}", elapsed));
+    progress_bar.finish_with_message(format!("Import completed"));
 
     Ok(())
 }
@@ -72,7 +54,7 @@ async fn async_import(
     let copy_tasks = stream::iter(deduplicated_file_list.iter())
         .map(|entry| {
             let database = entry.value();
-            // Clone the Arc to share the progress bar across tasks
+
             let source_path = database.source_path();
             let dest_path = database.imported_path();
             let progress_bar = Arc::clone(&progress_bar);
@@ -85,7 +67,6 @@ async fn async_import(
                     }
                 }
 
-                // Perform the file copy
                 if let Err(err) = fs::copy(&source_path, &dest_path).await {
                     error!(
                         "Failed to copy file from {:?} to {:?}: {:?}",
@@ -94,7 +75,6 @@ async fn async_import(
                     return Err(err);
                 }
 
-                // Update the progress bar
                 progress_bar.inc(1);
                 Ok::<(), io::Error>(())
             }
