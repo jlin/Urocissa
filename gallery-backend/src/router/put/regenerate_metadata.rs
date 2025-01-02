@@ -62,8 +62,8 @@ pub async fn regenerate_metadata(
                 .collect();
             TREE.insert_tree_api(&list_of_database).unwrap();
         }
-    });
-
-    // Return 200 OK immediately
-    Status::Ok
+        Status::Ok
+    })
+    .await
+    .unwrap()
 }

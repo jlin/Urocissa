@@ -27,17 +27,21 @@ const regenerateMetadata = async () => {
     timestamp: prefetchStore.timestamp
   }
   try {
-    const response = await axios.post('/put/regenerate-metadata', regenerateData, {
+    messageStore.message = 'Regenerating metadata...'
+    messageStore.warn = false
+    messageStore.showMessage = true
+    await axios.post('/put/regenerate-metadata', regenerateData, {
       headers: {
         'Content-Type': 'application/json'
       }
     })
-    console.log('Response:', response.data)
-    messageStore.message = 'Regenerating metadata...'
+    messageStore.message = 'Regenerating metadata successfully'
     messageStore.warn = false
     messageStore.showMessage = true
   } catch (error) {
-    console.error('Error:', error)
+    messageStore.message = `Regenerating metadata failed: ${String(error)}`
+    messageStore.warn = true
+    messageStore.showMessage = true
   }
 }
 </script>
