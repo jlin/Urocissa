@@ -3,17 +3,7 @@ use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command,
 use anyhow::Context;
 use regex::Regex;
 
-use crate::public::{
-    constant::VALID_IMAGE_EXTENSIONS, database_struct::database::definition::DataBase,
-};
-
-pub fn regenerate_exif(database: &DataBase) -> BTreeMap<String, String> {
-    if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-        generate_exif_for_image(&database)
-    } else {
-        generate_exif_for_video(&database.imported_path_string()).unwrap()
-    }
-}
+use crate::public::database_struct::database::definition::DataBase;
 
 pub fn generate_exif_for_image(database: &DataBase) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();
@@ -48,8 +38,9 @@ fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
 pub fn generate_exif_for_video(
-    source_path: &str,
+    database: &DataBase,
 ) -> Result<BTreeMap<String, String>, Box<dyn Error>> {
+    let source_path = database.source_path_string();
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")
         .arg("-v")

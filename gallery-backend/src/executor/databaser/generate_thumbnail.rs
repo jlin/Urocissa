@@ -2,12 +2,12 @@ use crate::public::database_struct::database::definition::DataBase;
 use anyhow::Context;
 use std::{error::Error, process::Command};
 
-use super::small_width_height;
+use super::{generate_exif::generate_exif_for_image, small_width_height};
 
 use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
 use image::{DynamicImage, ImageFormat};
 
-use super::{fix_orientation::fix_image_orientation, generate_exif::regenerate_exif};
+use super::fix_orientation::fix_image_orientation;
 
 pub fn generate_thumbnail_for_image(
     database: &mut DataBase,
@@ -84,7 +84,7 @@ pub fn regenerate_compressed_image(database: &mut DataBase) -> Result<(), Box<dy
         small_width_height(database.width, database.height, 1280);
     let dynamic_image = {
         // To ensure that the exif_vec is accurate, regenerate a new one from imported path
-        database.exif_vec = regenerate_exif(&database);
+        database.exif_vec = generate_exif_for_image(&database);
         let mut dyn_img = generate_dynamic_image(database)?;
         fix_image_orientation(database, &mut dyn_img);
         dyn_img
