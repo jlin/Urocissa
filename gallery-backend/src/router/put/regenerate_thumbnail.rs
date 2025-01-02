@@ -1,5 +1,6 @@
 use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::executor::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
+use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use arrayvec::ArrayString;
@@ -59,6 +60,7 @@ pub async fn regenerate_thumbnail_with_frame(
                     database.thumbhash = generate_thumbhash(&dynamic_image).unwrap();
                     database.phash = generate_phash(&dynamic_image);
                     TREE.insert_tree_api(&vec![database]).unwrap();
+                    SHOULD_RESET.notify_one();
                 })
                 .await
                 .unwrap();
