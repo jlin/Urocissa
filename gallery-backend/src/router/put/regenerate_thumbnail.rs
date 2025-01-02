@@ -1,19 +1,10 @@
-use crate::executor::databaser::generate_thumbnail::{
-    generate_thumbnail_for_video, regenerate_thumbnail_for_image,
-};
-use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::public::tree::TREE;
-use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use arrayvec::ArrayString;
-use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
+
 use rocket::form::Form;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::fs::TempFile;
 use rocket::http::Status;
-use rocket::serde::json::Json;
-use serde::Deserialize;
-
 pub enum FrameData<'r> {
     Hash(ArrayString<64>),
     File(TempFile<'r>),
