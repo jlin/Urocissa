@@ -23,23 +23,12 @@
             v-bind="hoverProps"
           >
             <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
-              <div v-if="!mobile">
-                <div
-                  style="position: relative"
-                  @click="handleClickIcon($event, row.start + subIndex)"
-                >
-                  <v-icon
-                    v-show="imgIsHovering"
-                    icon="mdi-check-circle"
-                    class="icon-hover"
-                    :style="{
-                      position: 'absolute',
-                      margin: '8px',
-                      zIndex: 4
-                    }"
-                  ></v-icon>
-                </div>
-              </div>
+              <DesktopIconWrapper
+                class="icon-hover"
+                v-if="!mobile"
+                v-show="imgIsHovering"
+                :on-click="(event) => handleClickIcon(event, row.start + subIndex)"
+              />
               <v-chip
                 id="processing-chip"
                 prepend-icon="mdi-alert-circle-outline"
@@ -200,6 +189,7 @@ import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
+import DesktopIconWrapper from './FunctionalComponent/DesktopHoverIcon'
 import {
   getArrayValue,
   getCookiesJwt,
