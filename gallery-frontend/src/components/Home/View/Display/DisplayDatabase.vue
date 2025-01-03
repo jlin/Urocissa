@@ -77,6 +77,5 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 
 watch(videoRef, () => {
   currentFrameStore.video = videoRef.value
-  console.log('videoRef.value is', videoRef.value)
 })
 </script>
