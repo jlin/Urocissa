@@ -84,8 +84,7 @@
                 size="small"
                 v-if="
                   dataStore.data.has(row.start + subIndex) &&
-                  dataStore.data.get(row.start + subIndex)?.album &&
-                  dataStore.data.get(row.start + subIndex)?.album?.title !== null
+                  dataStore.data.get(row.start + subIndex)?.album
                 "
                 color="black"
                 variant="flat"
@@ -102,7 +101,7 @@
                     maxWidth: `${(data.displayWidth - 8) * 0.75}px`
                   }"
                 >
-                  {{ dataStore.data.get(row.start + subIndex)?.album?.title }}
+                  {{ dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled' }}
                 </span>
               </v-chip>
               <div
