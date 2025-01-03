@@ -140,10 +140,7 @@
                 class="w-100 h-100"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
               />
-              <img
-                id="desktop-small-image"
-                draggable="false"
-                @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
+              <DesktopSmallImage
                 v-if="
                   !mobile &&
                   !configStore.disableImg &&
@@ -151,17 +148,11 @@
                   checkAndFetch(row.start + subIndex, data.displayWidth, data.displayHeight) &&
                   imgStore.imgUrl.has(row.start + subIndex)
                 "
-                :style="{
-                  zIndex: 2,
-                  position: 'absolute',
-                  objectFit: 'cover',
-                  border: dataStore.data.get(row.start + subIndex)?.album
-                    ? '8px solid white'
-                    : undefined
-                }"
-                class="w-100 h-100"
+                :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
+                :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
               />
+
               <transition name="slide-fade" appear>
                 <img
                   id="thumbhash-image"
@@ -206,7 +197,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-
+import DesktopSmallImage from './ImgFunctionalComponent'
 import {
   getArrayValue,
   getCookiesJwt,
