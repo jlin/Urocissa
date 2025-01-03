@@ -23,21 +23,23 @@
             v-bind="hoverProps"
           >
             <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
-              <v-hover v-if="!mobile">
-                <template #default="{ isHovering: iconIsHovering, props: iconHoverProps }">
+              <div v-if="!mobile">
+                <div
+                  style="position: relative"
+                  @click="handleClickIcon($event, row.start + subIndex)"
+                >
                   <v-icon
                     v-show="imgIsHovering"
                     icon="mdi-check-circle"
-                    class="position-absolute ma-2"
-                    :class="iconIsHovering ? 'text-white' : 'text-grey-lighten-5'"
+                    class="icon-hover"
                     :style="{
+                      position: 'absolute',
+                      margin: '8px',
                       zIndex: 4
                     }"
-                    v-bind="iconHoverProps"
-                    @click="handleClickIcon($event, row.start + subIndex)"
                   ></v-icon>
-                </template>
-              </v-hover>
+                </div>
+              </div>
               <v-chip
                 id="processing-chip"
                 prepend-icon="mdi-alert-circle-outline"
@@ -393,5 +395,14 @@ watch(
 }
 .no-select * {
   user-select: none;
+}
+.icon-hover {
+  color: var(--v-grey-lighten-5); /* Default color */
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+.icon-hover:hover {
+  color: var(--v-white); /* Hover color */
 }
 </style>
