@@ -167,17 +167,14 @@
                 <img
                   id="thumbhash-image"
                   draggable="false"
-                  v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg"
+                  v-if="dataStore.data.has(row.start + subIndex) && !configStore.disableImg && dataStore.data.get(row.start + subIndex)!.database"
                   :key="row.start + subIndex"
                   :style="{
                     position: 'absolute',
-                    zIndex: 1,
-                    border: dataStore.data.get(row.start + subIndex)?.album
-                      ? '8px solid white'
-                      : undefined
+                    zIndex: 1
                   }"
                   class="w-100 h-100 bg-grey-darken-2"
-                  :src="getThumbHashUrl(row.start + subIndex)"
+                  :src="dataStore.data.get(row.start + subIndex)!.database?.thumbhashUrl"
                 />
               </transition>
             </div>
@@ -239,24 +236,6 @@ const timeInterval = ref(0)
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
 const scrollingTimer = ref<number | null>(null)
-
-const getThumbHashUrl = (index: number) => {
-  const abstractData = dataStore.data.get(index)
-  if (abstractData?.database) {
-    return abstractData.database.thumbhashUrl
-  } else if (abstractData?.album) {
-    const coverHash = abstractData.album.cover
-    if (coverHash !== null) {
-      const coverIndex = dataStore.hashMapData.get(coverHash)
-      if (coverIndex !== undefined) {
-        const abstractData = dataStore.data.get(coverIndex)
-        if (abstractData?.database) {
-          return abstractData.database.thumbhashUrl
-        }
-      }
-    }
-  }
-}
 
 const { handleClick } = useHandleClick(router, route, props.isolationId)
 
