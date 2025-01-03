@@ -199,7 +199,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import DesktopSmallImage from './ImgFunctionalComponent'
+import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import {
   getArrayValue,
   getCookiesJwt,
