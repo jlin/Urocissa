@@ -77,16 +77,6 @@ export const DataBaseSchema = DataBaseParse.extend({
 })
 
 /**
- * Schema for database timestamp.
- */
-export const DataBaseTimestamp = z.object({
-  database: z.object({
-    DataBase: DataBaseParse
-  }),
-  timestamp: z.number()
-})
-
-/**
  * Schema for share information.
  */
 export const ShareSchema = z.object({
