@@ -23,13 +23,15 @@ export const useWorkerStore = (isolationId: IsolationId) =>
       imgWorker: Worker[]
       postToWorkerList: postToWorkerType[] | undefined
     } => ({
-      concurrencyNumber: Math.min(navigator.hardwareConcurrency, 1),
+      concurrencyNumber: Math.max(navigator.hardwareConcurrency, 1),
       worker: null,
       imgWorker: [],
       postToWorkerList: undefined
     }),
     actions: {
       initializeWorker(isolationId: IsolationId) {
+        console.log('concurrencyNumber is', this.concurrencyNumber)
+
         if (this.worker === null) {
           this.worker = new Worker(new URL('../worker/toDataWorker.ts', import.meta.url), {
             type: 'module'
