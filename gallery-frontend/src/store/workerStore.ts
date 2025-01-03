@@ -30,8 +30,6 @@ export const useWorkerStore = (isolationId: IsolationId) =>
     }),
     actions: {
       initializeWorker(isolationId: IsolationId) {
-        console.log('concurrencyNumber is', this.concurrencyNumber)
-
         if (this.worker === null) {
           this.worker = new Worker(new URL('../worker/toDataWorker.ts', import.meta.url), {
             type: 'module'
