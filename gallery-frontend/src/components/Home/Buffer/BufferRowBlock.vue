@@ -33,66 +33,23 @@
                 class="w-100 h-100 position-absolute"
                 v-if="dataStore.data.has(row.start + subIndex)"
               >
-                <v-chip
-                  id="processing-chip"
-                  prepend-icon="mdi-alert-circle-outline"
-                  density="comfortable"
-                  size="small"
+                <ProcessingChip
                   v-if="dataStore.data.get(row.start + subIndex)?.database?.pending"
-                  color="grey"
-                  variant="flat"
-                  class="position-absolute ma-2"
-                  :style="{
-                    top: '0px',
-                    right: '0px',
-                    zIndex: 4
-                  }"
-                >
-                  {{ 'Processing' }}
-                </v-chip>
-                <v-chip
-                  id="duration-chip"
-                  density="comfortable"
-                  size="small"
+                />
+                <DurationChip
                   v-if="dataStore.data.get(row.start + subIndex)?.database?.ext_type === 'video'"
-                  color="grey"
-                  variant="flat"
-                  class="position-absolute ma-2"
-                  :style="{
-                    bottom: '0px',
-                    right: '0px',
-                    zIndex: 4
-                  }"
-                >
-                  {{
+                  :label="
                     formatDuration(
                       dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!
                     )
-                  }}
-                </v-chip>
-                <v-chip
-                  id="album-chip"
-                  density="comfortable"
-                  size="small"
+                  "
+                />
+                <AlbumChip
                   v-if="dataStore.data.get(row.start + subIndex)?.album"
-                  color="black"
-                  variant="flat"
-                  class="position-absolute ma-2"
-                  :style="{
-                    bottom: '0px',
-                    right: '0px',
-                    zIndex: 4
-                  }"
-                >
-                  <span
-                    class="text-truncate"
-                    :style="{
-                      maxWidth: `${(data.displayWidth - 8) * 0.75}px`
-                    }"
-                  >
-                    {{ dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled' }}
-                  </span>
-                </v-chip>
+                  :label="dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled'"
+                  :max-width="`${(data.displayWidth - 8) * 0.75}px`"
+                />
+
                 <div
                   id="hover-gradient-div"
                   v-if="!mobile"
@@ -164,6 +121,9 @@ import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
 import MobileSmallImage from './FunctionalComponent/MobileSmallImage'
+import ProcessingChip from './FunctionalComponent/ProcessingChip'
+import DurationChip from './FunctionalComponent/DurationChip'
+import AlbumChip from './FunctionalComponent/AlbumChip'
 import {
   getArrayValue,
   getCookiesJwt,
