@@ -178,6 +178,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
+import MobileSmallImage from './FunctionalComponent/MobileSmallImage'
 import {
   getArrayValue,
   getCookiesJwt,
