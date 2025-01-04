@@ -29,122 +29,107 @@
                 v-show="imgIsHovering"
                 :on-click="(event) => handleClickIcon(event, row.start + subIndex)"
               />
-              <v-chip
-                id="processing-chip"
-                prepend-icon="mdi-alert-circle-outline"
-                density="comfortable"
-                size="small"
-                v-if="dataStore.data.get(row.start + subIndex)?.database?.pending"
-                color="grey"
-                variant="flat"
-                class="position-absolute ma-2"
-                :style="{
-                  top: '0px',
-                  right: '0px',
-                  zIndex: 4
-                }"
+              <div
+                class="w-100 h-100 position-absolute"
+                v-if="dataStore.data.has(row.start + subIndex)"
               >
-                {{ 'Processing' }}
-              </v-chip>
-              <v-chip
-                id="duration-chip"
-                density="comfortable"
-                size="small"
-                v-if="
-                  dataStore.data.has(row.start + subIndex) &&
-                  dataStore.data.get(row.start + subIndex)?.database?.ext_type === 'video'
-                "
-                color="grey"
-                variant="flat"
-                class="position-absolute ma-2"
-                :style="{
-                  bottom: '0px',
-                  right: '0px',
-                  zIndex: 4
-                }"
-              >
-                {{
-                  formatDuration(
-                    dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!
-                  )
-                }}
-              </v-chip>
-              <v-chip
-                id="album-chip"
-                density="comfortable"
-                size="small"
-                v-if="
-                  dataStore.data.has(row.start + subIndex) &&
-                  dataStore.data.get(row.start + subIndex)?.album
-                "
-                color="black"
-                variant="flat"
-                class="position-absolute ma-2"
-                :style="{
-                  bottom: '0px',
-                  right: '0px',
-                  zIndex: 4
-                }"
-              >
-                <span
-                  class="text-truncate"
+                <v-chip
+                  id="processing-chip"
+                  prepend-icon="mdi-alert-circle-outline"
+                  density="comfortable"
+                  size="small"
+                  v-if="dataStore.data.get(row.start + subIndex)?.database?.pending"
+                  color="grey"
+                  variant="flat"
+                  class="position-absolute ma-2"
                   :style="{
-                    maxWidth: `${(data.displayWidth - 8) * 0.75}px`
+                    top: '0px',
+                    right: '0px',
+                    zIndex: 4
                   }"
                 >
-                  {{ dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled' }}
-                </span>
-              </v-chip>
-              <div
-                id="hover-gradient-div"
-                v-if="!mobile"
-                v-show="imgIsHovering"
-                class="position-absolute w-100"
-                :style="{
-                  zIndex: 3,
-                  height: `40px`,
-                  background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0) 100%)`,
-                  pointerEvents: 'none'
-                }"
-              ></div>
-              <MobileSmallImage
-                v-if="
-                  mobile &&
-                  !configStore.disableImg &&
-                  dataStore.data.has(row.start + subIndex) &&
-                  checkAndFetch(row.start + subIndex, data.displayWidth, data.displayHeight) &&
-                  imgStore.imgUrl.has(row.start + subIndex)
-                "
-                :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
-                :src="imgStore.imgUrl.get(row.start + subIndex)!"
-                :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
-                :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
-                :on-pointerleave="handlePointerLeave"
-              />
-              <DesktopSmallImage
-                v-if="
-                  !mobile &&
-                  !configStore.disableImg &&
-                  dataStore.data.has(row.start + subIndex) &&
-                  checkAndFetch(row.start + subIndex, data.displayWidth, data.displayHeight) &&
-                  imgStore.imgUrl.has(row.start + subIndex)
-                "
-                :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
-                :src="imgStore.imgUrl.get(row.start + subIndex)!"
-                :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
-              />
-
-              <transition name="slide-fade" appear>
-                <ThumbhashImage
-                  v-if="
-                    dataStore.data.has(row.start + subIndex) &&
-                    !configStore.disableImg &&
-                    dataStore.data.get(row.start + subIndex)!.database
-                  "
-                  :key="row.start + subIndex"
-                  :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
+                  {{ 'Processing' }}
+                </v-chip>
+                <v-chip
+                  id="duration-chip"
+                  density="comfortable"
+                  size="small"
+                  v-if="dataStore.data.get(row.start + subIndex)?.database?.ext_type === 'video'"
+                  color="grey"
+                  variant="flat"
+                  class="position-absolute ma-2"
+                  :style="{
+                    bottom: '0px',
+                    right: '0px',
+                    zIndex: 4
+                  }"
+                >
+                  {{
+                    formatDuration(
+                      dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!
+                    )
+                  }}
+                </v-chip>
+                <v-chip
+                  id="album-chip"
+                  density="comfortable"
+                  size="small"
+                  v-if="dataStore.data.get(row.start + subIndex)?.album"
+                  color="black"
+                  variant="flat"
+                  class="position-absolute ma-2"
+                  :style="{
+                    bottom: '0px',
+                    right: '0px',
+                    zIndex: 4
+                  }"
+                >
+                  <span
+                    class="text-truncate"
+                    :style="{
+                      maxWidth: `${(data.displayWidth - 8) * 0.75}px`
+                    }"
+                  >
+                    {{ dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled' }}
+                  </span>
+                </v-chip>
+                <div
+                  id="hover-gradient-div"
+                  v-if="!mobile"
+                  v-show="imgIsHovering"
+                  class="position-absolute w-100"
+                  :style="{
+                    zIndex: 3,
+                    height: `40px`,
+                    background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0) 100%)`,
+                    pointerEvents: 'none'
+                  }"
+                ></div>
+                <MobileSmallImage
+                  v-if="mobile && showSmallImage(row.start + subIndex, data)"
+                  :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
+                  :src="imgStore.imgUrl.get(row.start + subIndex)!"
+                  :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
+                  :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
+                  :on-pointerleave="handlePointerLeave"
                 />
-              </transition>
+                <DesktopSmallImage
+                  v-if="!mobile && showSmallImage(row.start + subIndex, data)"
+                  :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
+                  :src="imgStore.imgUrl.get(row.start + subIndex)!"
+                  :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
+                />
+
+                <transition name="slide-fade" appear>
+                  <ThumbhashImage
+                    v-if="
+                    !configStore.disableImg &&
+                    dataStore.data.get(row.start + subIndex)!.database"
+                    :key="row.start + subIndex"
+                    :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
+                  />
+                </transition>
+              </div>
             </div>
             <div
               id="grey-background-placeholder"
@@ -164,7 +149,7 @@
 
 <script setup lang="ts">
 import { layoutBatchNumber } from '@/script/common/constants'
-import { IsolationId, Row } from '@/script/common/types'
+import { DisplayElement, IsolationId, Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
@@ -297,6 +282,14 @@ const checkAndFetch = (index: number, displayWidth: number, displayHeight: numbe
   } else {
     return false
   }
+}
+
+const showSmallImage = (index: number, displayElement: DisplayElement): boolean => {
+  return (
+    !configStore.disableImg &&
+    checkAndFetch(index, displayElement.displayWidth, displayElement.displayHeight) &&
+    imgStore.imgUrl.has(index)
+  )
 }
 
 function formatDuration(durationString: string) {
