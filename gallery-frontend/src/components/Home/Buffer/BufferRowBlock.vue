@@ -23,7 +23,7 @@
             v-bind="hoverProps"
           >
             <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
-              <DesktopIconWrapper
+              <DesktopHoverIcon
                 class="icon-hover"
                 v-if="!mobile"
                 v-show="imgIsHovering"
@@ -107,12 +107,7 @@
                   pointerEvents: 'none'
                 }"
               ></div>
-              <img
-                id="mobile-small-image"
-                @contextmenu.prevent
-                @pointerdown="($event) => handlePointerdown($event, row.start + subIndex)"
-                @pointerup="($event) => handlePointerUp($event, row.start + subIndex)"
-                @pointerleave="handlePointerLeave"
+              <MobileSmallImage
                 v-if="
                   mobile &&
                   !configStore.disableImg &&
@@ -120,16 +115,11 @@
                   checkAndFetch(row.start + subIndex, data.displayWidth, data.displayHeight) &&
                   imgStore.imgUrl.has(row.start + subIndex)
                 "
-                :style="{
-                  zIndex: 2,
-                  position: 'absolute',
-                  objectFit: 'cover',
-                  border: dataStore.data.get(row.start + subIndex)?.album
-                    ? '8px solid white'
-                    : undefined
-                }"
-                class="w-100 h-100"
+                :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
                 :src="imgStore.imgUrl.get(row.start + subIndex)!"
+                :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
+                :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
+                :on-pointerleave="handlePointerLeave"
               />
               <DesktopSmallImage
                 v-if="
@@ -189,7 +179,7 @@ import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
-import DesktopIconWrapper from './FunctionalComponent/DesktopHoverIcon'
+import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import {
   getArrayValue,
   getCookiesJwt,

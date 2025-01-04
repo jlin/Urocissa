@@ -5,7 +5,7 @@ interface DesktopIconWrapperProps {
   onClick: (event: MouseEvent) => void
 }
 
-const DesktopIconWrapper: FunctionalComponent<DesktopIconWrapperProps> = (props) => {
+const DesktopHoverIcon: FunctionalComponent<DesktopIconWrapperProps> = (props) => {
   return h(
     'div',
     {
@@ -27,11 +27,11 @@ const DesktopIconWrapper: FunctionalComponent<DesktopIconWrapperProps> = (props)
   )
 }
 
-DesktopIconWrapper.props = {
+DesktopHoverIcon.props = {
   onClick: {
     type: Function as PropType<(event: MouseEvent) => void>,
     required: true
   }
 }
 
-export default DesktopIconWrapper
+export default DesktopHoverIcon
