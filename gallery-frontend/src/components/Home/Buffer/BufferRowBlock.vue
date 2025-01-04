@@ -139,7 +139,7 @@
                   v-if="
                     dataStore.data.has(row.start + subIndex) &&
                     !configStore.disableImg &&
-                    dataStore.data.get(row.start + subIndex)?.database
+                    dataStore.data.get(row.start + subIndex)!.database
                   "
                   :key="row.start + subIndex"
                   :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
@@ -177,6 +177,7 @@ import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
+import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
 import {
   getArrayValue,
   getCookiesJwt,

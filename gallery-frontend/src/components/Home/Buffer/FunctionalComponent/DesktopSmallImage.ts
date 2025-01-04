@@ -8,7 +8,6 @@ interface DesktopSmallImageProps {
 
 const DesktopSmallImage: FunctionalComponent<DesktopSmallImageProps> = (props) => {
   return h('img', {
-    id: 'desktop-small-image',
     draggable: false,
     onClick: props.onClick,
     style: {
@@ -17,7 +16,7 @@ const DesktopSmallImage: FunctionalComponent<DesktopSmallImageProps> = (props) =
       objectFit: 'cover',
       border: props.hasBorder ? '8px solid white' : undefined
     },
-    class: 'w-100 h-100',
+    class: 'desktop-small-image w-100 h-100',
     src: props.src
   })
 }
