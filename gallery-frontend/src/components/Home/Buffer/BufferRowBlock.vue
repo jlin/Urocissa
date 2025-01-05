@@ -45,10 +45,13 @@
               }"
             ></div>
             <SmallImageContainer
-              v-if="showSmallImage(row.start + subIndex, data)"
+              :key="imgStore.imgUrl.get(row.start + subIndex)"
+              :abstract-data="dataStore.data.get(row.start + subIndex)"
+              :index="row.start + subIndex"
+              :display-element="data"
+              :isolation-id="props.isolationId"
               :mobile="mobile"
               :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
-              :src="imgStore.imgUrl.get(row.start + subIndex)!"
               :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
               :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
               :on-pointerleave="handlePointerLeave"
@@ -82,7 +85,7 @@
 
 <script setup lang="ts">
 import { layoutBatchNumber } from '@/script/common/constants'
-import { DisplayElement, IsolationId, Row } from '@/script/common/types'
+import { IsolationId, Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
@@ -97,12 +100,7 @@ import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
 import SmallImageContainer from './FunctionalComponent/SmallImageContainer'
 import ChipsContainer from './FunctionalComponent/ChipsContainer'
-import {
-  getArrayValue,
-  getCookiesJwt,
-  getInjectValue,
-  getMapValue
-} from '@/script/common/functions'
+import { getArrayValue, getInjectValue } from '@/script/common/functions'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 
 const props = defineProps<{
@@ -177,52 +175,6 @@ const handleLongPressClick = (event: MouseEvent, currentIndex: number) => {
   } else {
     handleClick(event, currentIndex)
   }
-}
-
-const checkAndFetch = (index: number, displayWidth: number, displayHeight: number): boolean => {
-  if (imgStore.imgUrl.has(index)) {
-    return true
-  } else if (!queueStore.img.has(index)) {
-    queueStore.img.add(index)
-    const workerIndex = index % workerStore.concurrencyNumber
-
-    if (workerStore.postToWorkerList !== undefined) {
-      const data = getMapValue(dataStore.data, index) // always succeed by v-if
-      if (data.database) {
-        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
-          index: index,
-          hash: data.database.hash,
-          width: displayWidth,
-          height: displayHeight,
-          devicePixelRatio: window.devicePixelRatio,
-          jwt: getCookiesJwt()
-        })
-      } else if (data.album?.cover !== null && data.album?.cover !== undefined) {
-        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
-          index: index,
-          hash: data.album.cover,
-          width: displayWidth,
-          height: displayHeight,
-          devicePixelRatio: window.devicePixelRatio,
-          jwt: getCookiesJwt(),
-          albumMode: true
-        })
-      }
-    } else {
-      console.error('workerStore.postToWorkerList is undefined')
-    }
-    return false
-  } else {
-    return false
-  }
-}
-
-const showSmallImage = (index: number, displayElement: DisplayElement): boolean => {
-  return (
-    !configStore.disableImg &&
-    checkAndFetch(index, displayElement.displayWidth, displayElement.displayHeight) &&
-    imgStore.imgUrl.has(index)
-  )
 }
 
 onMounted(() => {
