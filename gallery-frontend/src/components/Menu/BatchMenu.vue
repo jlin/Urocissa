@@ -31,7 +31,6 @@
       <v-divider></v-divider>
 
       <!-- Regenerate Action -->
-      <RegenerateThumbnail :index-list="editModeList" />
       <RegenerateMetadata :index-list="editModeList" />
     </v-list>
   </v-menu>
