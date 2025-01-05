@@ -9,81 +9,73 @@
       }"
       class="ma-1"
     >
-      <v-hover>
-        <template #default="{ isHovering: imgIsHovering, props: hoverProps }">
+      <div
+        class="position-relative w-100 h-100 parent"
+        :style="{
+          border:
+            collectionStore.editModeOn &&
+            collectionStore.editModeCollection.has(row.start + subIndex)
+              ? '4px solid #81D4FA'
+              : ''
+        }"
+      >
+        <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
+          <DesktopHoverIcon
+            class="icon-hover child"
+            v-if="!mobile"
+            :on-click="(event) => handleClickIcon(event, row.start + subIndex)"
+          />
           <div
-            class="position-relative w-100 h-100"
-            :style="{
-              border:
-                collectionStore.editModeOn &&
-                collectionStore.editModeCollection.has(row.start + subIndex)
-                  ? '4px solid #81D4FA'
-                  : ''
-            }"
-            v-bind="hoverProps"
+            class="w-100 h-100 position-absolute"
+            v-if="dataStore.data.has(row.start + subIndex)"
           >
-            <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
-              <DesktopHoverIcon
-                class="icon-hover"
-                v-if="!mobile"
-                v-show="imgIsHovering"
-                :on-click="(event) => handleClickIcon(event, row.start + subIndex)"
-              />
-              <div
-                class="w-100 h-100 position-absolute"
-                v-if="dataStore.data.has(row.start + subIndex)"
-              >
-                <ChipsContainer
-                  :abstract-data="dataStore.data.get(row.start + subIndex)!"
-                  :display-element="data"
-                />
+            <ChipsContainer
+              :abstract-data="dataStore.data.get(row.start + subIndex)!"
+              :display-element="data"
+            />
+            <div
+              id="hover-gradient-div"
+              v-if="!mobile"
+              class="position-absolute w-100 child"
+              :style="{
+                zIndex: 3,
+                height: `40px`,
+                background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0) 100%)`,
+                pointerEvents: 'none'
+              }"
+            ></div>
+            <SmallImageContainer
+              v-if="showSmallImage(row.start + subIndex, data)"
+              :mobile="mobile"
+              :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
+              :src="imgStore.imgUrl.get(row.start + subIndex)!"
+              :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
+              :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
+              :on-pointerleave="handlePointerLeave"
+              :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
+            />
 
-                <div
-                  id="hover-gradient-div"
-                  v-if="!mobile"
-                  v-show="imgIsHovering"
-                  class="position-absolute w-100"
-                  :style="{
-                    zIndex: 3,
-                    height: `40px`,
-                    background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0) 100%)`,
-                    pointerEvents: 'none'
-                  }"
-                ></div>
-                <SmallImageContainer
-                  v-if="showSmallImage(row.start + subIndex, data)"
-                  :mobile="mobile"
-                  :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
-                  :src="imgStore.imgUrl.get(row.start + subIndex)!"
-                  :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
-                  :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
-                  :on-pointerleave="handlePointerLeave"
-                  :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
-                />
-
-                <transition name="slide-fade" appear>
-                  <ThumbhashImage
-                    v-if="
+            <transition name="slide-fade" appear>
+              <ThumbhashImage
+                v-if="
                     !configStore.disableImg &&
                     dataStore.data.get(row.start + subIndex)!.database"
-                    :key="row.start + subIndex"
-                    :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
-                  />
-                </transition>
-              </div>
-            </div>
-            <div
-              id="grey-background-placeholder"
-              :style="{
-                position: 'absolute',
-                zIndex: 0
-              }"
-              @click="($event) => handleClick($event, row.start + subIndex)"
-              class="w-100 h-100 bg-grey-darken-2"
-            ></div>
+                :key="row.start + subIndex"
+                :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
+              />
+            </transition>
           </div>
-        </template>
-      </v-hover>
+        </div>
+        <div
+          id="grey-background-placeholder"
+          :style="{
+            position: 'absolute',
+            zIndex: 0
+          }"
+          @click="($event) => handleClick($event, row.start + subIndex)"
+          class="w-100 h-100 bg-grey-darken-2"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
@@ -285,13 +277,16 @@ watch(
 .no-select * {
   user-select: none;
 }
+.parent:not(:hover) .child {
+  display: none;
+}
 .icon-hover {
-  color: var(--v-grey-lighten-5); /* Default color */
+  color: #fafafa;
   transition: color 0.3s;
   cursor: pointer;
 }
 
 .icon-hover:hover {
-  color: var(--v-white); /* Hover color */
+  color: white;
 }
 </style>
