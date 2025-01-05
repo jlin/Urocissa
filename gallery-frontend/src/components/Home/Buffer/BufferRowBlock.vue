@@ -33,21 +33,9 @@
                 class="w-100 h-100 position-absolute"
                 v-if="dataStore.data.has(row.start + subIndex)"
               >
-                <ProcessingChip
-                  v-if="dataStore.data.get(row.start + subIndex)?.database?.pending"
-                />
-                <DurationChip
-                  v-if="dataStore.data.get(row.start + subIndex)?.database?.ext_type === 'video'"
-                  :label="
-                    formatDuration(
-                      dataStore.data.get(row.start + subIndex)?.database?.exif_vec.duration!
-                    )
-                  "
-                />
-                <AlbumChip
-                  v-if="dataStore.data.get(row.start + subIndex)?.album"
-                  :label="dataStore.data.get(row.start + subIndex)?.album?.title ?? 'Untitled'"
-                  :max-width="`${(data.displayWidth - 8) * 0.75}px`"
+                <ChipsContainer
+                  :abstract-data="dataStore.data.get(row.start + subIndex)!"
+                  :display-element="data"
                 />
 
                 <div
@@ -121,9 +109,7 @@ import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
 import MobileSmallImage from './FunctionalComponent/MobileSmallImage'
-import ProcessingChip from './FunctionalComponent/ProcessingChip'
-import DurationChip from './FunctionalComponent/DurationChip'
-import AlbumChip from './FunctionalComponent/AlbumChip'
+import ChipsContainer from './FunctionalComponent/ChipsContainer'
 import {
   getArrayValue,
   getCookiesJwt,
@@ -250,30 +236,6 @@ const showSmallImage = (index: number, displayElement: DisplayElement): boolean 
     checkAndFetch(index, displayElement.displayWidth, displayElement.displayHeight) &&
     imgStore.imgUrl.has(index)
   )
-}
-
-function formatDuration(durationString: string) {
-  // Convert the duration string to a number and truncate to the integer part
-  const durationInSeconds = Math.floor(parseFloat(durationString))
-
-  // Calculate hours, minutes, and seconds
-  const hours = Math.floor(durationInSeconds / 3600)
-  const minutes = Math.floor((durationInSeconds % 3600) / 60)
-  const seconds = durationInSeconds % 60
-
-  // Determine the formatted duration based on the presence of hours, minutes, and seconds
-  let formattedDuration = ''
-  if (hours > 0) {
-    formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`
-  } else {
-    formattedDuration = `${minutes.toString().padStart(2, '0')}:${seconds
-      .toString()
-      .padStart(2, '0')}`
-  }
-
-  return formattedDuration
 }
 
 onMounted(() => {
