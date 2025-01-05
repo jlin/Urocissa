@@ -120,9 +120,29 @@ const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
 const scorllTopStore = useScrollTopStore(props.isolationId)
 const timeInterval = ref(0)
+
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
 const scrollingTimer = ref<number | null>(null)
+const isScrolling = ref(false)
+
+// Prevent accidental touches while scrolling
+watch(
+  () => scorllTopStore.scrollTop,
+  () => {
+    isScrolling.value = true
+
+    if (scrollingTimer.value !== null) {
+      clearTimeout(scrollingTimer.value)
+    }
+
+    scrollingTimer.value = window.setTimeout(() => {
+      isScrolling.value = false
+
+      scrollingTimer.value = null
+    }, 100)
+  }
+)
 
 const { handleClick } = useHandleClick(router, route, props.isolationId)
 
@@ -201,26 +221,6 @@ onBeforeUnmount(() => {
     queueStore.img.delete(abortIndex)
   }
 })
-
-const isScrolling = ref(false)
-
-// Prevent accidental touches while scrolling
-watch(
-  () => scorllTopStore.scrollTop,
-  () => {
-    isScrolling.value = true
-
-    if (scrollingTimer.value !== null) {
-      clearTimeout(scrollingTimer.value)
-    }
-
-    scrollingTimer.value = window.setTimeout(() => {
-      isScrolling.value = false
-
-      scrollingTimer.value = null
-    }, 100)
-  }
-)
 </script>
 <style scoped>
 .no-select {

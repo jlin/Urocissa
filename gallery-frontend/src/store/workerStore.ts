@@ -23,7 +23,7 @@ export const useWorkerStore = (isolationId: IsolationId) =>
       imgWorker: Worker[]
       postToWorkerList: postToWorkerType[] | undefined
     } => ({
-      concurrencyNumber: Math.max(navigator.hardwareConcurrency, 1),
+      concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1),
       worker: null,
       imgWorker: [],
       postToWorkerList: undefined
