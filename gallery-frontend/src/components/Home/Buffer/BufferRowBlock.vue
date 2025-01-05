@@ -50,18 +50,14 @@
                     pointerEvents: 'none'
                   }"
                 ></div>
-                <MobileSmallImage
-                  v-if="mobile && showSmallImage(row.start + subIndex, data)"
+                <SmallImageContainer
+                  v-if="showSmallImage(row.start + subIndex, data)"
+                  :mobile="mobile"
                   :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
                   :src="imgStore.imgUrl.get(row.start + subIndex)!"
                   :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
                   :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
                   :on-pointerleave="handlePointerLeave"
-                />
-                <DesktopSmallImage
-                  v-if="!mobile && showSmallImage(row.start + subIndex, data)"
-                  :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
-                  :src="imgStore.imgUrl.get(row.start + subIndex)!"
                   :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
                 />
 
@@ -105,10 +101,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import DesktopSmallImage from './FunctionalComponent/DesktopSmallImage'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
-import MobileSmallImage from './FunctionalComponent/MobileSmallImage'
+import SmallImageContainer from './FunctionalComponent/SmallImageContainer'
 import ChipsContainer from './FunctionalComponent/ChipsContainer'
 import {
   getArrayValue,
@@ -125,7 +120,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const mobile = getInjectValue('mobile')
+const mobile = getInjectValue<string | null>('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const dataStore = useDataStore(props.isolationId)
