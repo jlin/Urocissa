@@ -1,12 +1,10 @@
 import { DisplayElement, IsolationId } from '@/script/common/types'
-import { useConfigStore } from '@/store/configStore'
+
 import { useDataStore } from '@/store/dataStore'
-import { useImgStore } from '@/store/imgStore'
-import { useQueueStore } from '@/store/queueStore'
-import { FunctionalComponent, h, PropType, Transition } from 'vue'
+import { FunctionalComponent, h, PropType } from 'vue'
 import ChipsContainer from './ChipsContainer'
 import SmallImageContainer from './SmallImageContainer'
-import HoverGradientDiv from './HoverGradientDiv'
+import ThumbhashImage from './ThumbhashImage'
 
 interface MainBlockProps {
   index: number
@@ -20,9 +18,6 @@ interface MainBlockProps {
 }
 
 const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
-  const configStore = useConfigStore(props.isolationId)
-  const imgStore = useImgStore(props.isolationId)
-  const queueStore = useQueueStore(props.isolationId)
   const dataStore = useDataStore(props.isolationId)
 
   const abstractData = dataStore.data.get(props.index)
@@ -38,13 +33,20 @@ const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
       displayElement: props.displayElement
     })
   )
-  chips.push(
-    h(HoverGradientDiv, {
-      mobile: props.mobile
-    })
-  )
+
+  const thumbhashUrl = abstractData.database?.thumbhashUrl
+  if (thumbhashUrl) {
+    chips.push(
+      h(ThumbhashImage, {
+        index: props.index,
+        src: thumbhashUrl
+      })
+    )
+  }
+
   chips.push(
     h(SmallImageContainer, {
+      abstractData: abstractData,
       index: props.index,
       displayElement: props.displayElement,
       isolationId: props.isolationId,

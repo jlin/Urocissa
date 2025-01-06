@@ -10,6 +10,7 @@
       class="ma-1"
     >
       <div
+        v-if="subIndex < timeInterval"
         class="position-relative w-100 h-100 parent"
         :style="{
           border:
@@ -19,8 +20,13 @@
               : ''
         }"
       >
+        <DesktopHoverIcon
+          class="icon-hover child"
+          v-if="!mobile"
+          :on-click="(event: MouseEvent) => handleClickIcon(event, row.start + subIndex)"
+        />
+        <HoverGradientDiv :mobile="mobile" />
         <MainBlock
-          v-if="subIndex < timeInterval"
           :index="row.start + subIndex"
           :display-element="data"
           :isolation-id="props.isolationId"
@@ -57,7 +63,8 @@ import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue, getInjectValue } from '@/script/common/functions'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import MainBlock from './FunctionalComponent/MainBlock'
-
+import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
+import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
 const props = defineProps<{
   row: Row
   isolationId: IsolationId
@@ -130,6 +137,15 @@ const handlePointerLeave = () => {
 }
 
 const handleLongPressClick = (event: MouseEvent, currentIndex: number) => {
+  if (!collectionStore.editModeOn) {
+    collectionStore.editModeOn = true
+    collectionStore.addApi(currentIndex)
+    collectionStore.lastClick = currentIndex
+  } else {
+    handleClick(event, currentIndex)
+  }
+}
+const handleClickIcon = (event: MouseEvent, currentIndex: number) => {
   if (!collectionStore.editModeOn) {
     collectionStore.editModeOn = true
     collectionStore.addApi(currentIndex)

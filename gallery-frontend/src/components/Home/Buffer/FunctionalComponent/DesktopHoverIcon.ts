@@ -9,6 +9,7 @@ const DesktopHoverIcon: FunctionalComponent<DesktopIconWrapperProps> = (props) =
   return h(
     'div',
     {
+      class: 'child',
       style: {
         position: 'relative'
       },
