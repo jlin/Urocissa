@@ -7,9 +7,9 @@ import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue, getCookiesJwt } from '@/script/common/functions'
 import { useConfigStore } from '@/store/configStore'
+import { useDataStore } from '@/store/dataStore'
 
 interface SmallImageContainerProps {
-  abstractData?: AbstractData
   index: number
   displayElement: DisplayElement
   isolationId: IsolationId
@@ -24,8 +24,10 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
   const configStore = useConfigStore(props.isolationId)
   const imgStore = useImgStore(props.isolationId)
   const queueStore = useQueueStore(props.isolationId)
+  const dataStore = useDataStore(props.isolationId)
 
-  if (!props.abstractData || configStore.disableImg) {
+  const abstractData = dataStore.data.get(props.index)
+  if (!abstractData || configStore.disableImg) {
     return null
   }
 
@@ -37,7 +39,7 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
     } else {
       queueStore.img.add(props.index)
       checkAndFetch(
-        props.abstractData,
+        abstractData,
         props.index,
         props.displayElement.displayWidth,
         props.displayElement.displayHeight,
@@ -47,7 +49,7 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
     }
   }
 
-  const hasBorder = props.abstractData.album !== undefined
+  const hasBorder = abstractData.album !== undefined
   const chips = []
   if (props.mobile !== null) {
     chips.push(
@@ -72,10 +74,6 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
 }
 
 SmallImageContainer.props = {
-  abstractData: {
-    type: Object as PropType<AbstractData>,
-    required: false
-  },
   displayElement: {
     type: Object as PropType<DisplayElement>,
     required: true

@@ -45,7 +45,6 @@
               }"
             ></div>
             <SmallImageContainer
-              :abstract-data="dataStore.data.get(row.start + subIndex)"
               :index="row.start + subIndex"
               :display-element="data"
               :isolation-id="props.isolationId"
