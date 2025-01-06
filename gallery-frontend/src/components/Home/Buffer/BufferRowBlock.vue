@@ -19,33 +19,17 @@
               : ''
         }"
       >
-        <div v-if="subIndex < timeInterval" class="delay-show w-100 h-100 position-absolute">
-          <DesktopHoverIcon
-            class="icon-hover child"
-            v-if="!mobile"
-            :on-click="(event) => handleClickIcon(event, row.start + subIndex)"
-          />
-          <div
-            class="w-100 h-100 position-absolute"
-            v-if="dataStore.data.has(row.start + subIndex)"
-          >
-            <ChipsContainer
-              :abstract-data="dataStore.data.get(row.start + subIndex)!"
-              :display-element="data"
-            />
-            <HoverGradientDiv :mobile="mobile" />
-            <SmallImageContainer
-              :index="row.start + subIndex"
-              :display-element="data"
-              :isolation-id="props.isolationId"
-              :mobile="mobile"
-              :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
-              :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
-              :on-pointerleave="handlePointerLeave"
-              :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
-            />
-          </div>
-        </div>
+        <MainBlock
+          v-if="subIndex < timeInterval"
+          :index="row.start + subIndex"
+          :display-element="data"
+          :isolation-id="props.isolationId"
+          :mobile="mobile"
+          :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
+          :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
+          :on-pointerleave="handlePointerLeave"
+          :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
+        />
         <div
           id="grey-background-placeholder"
           :style="{
@@ -65,18 +49,14 @@ import { layoutBatchNumber } from '@/script/common/constants'
 import { IsolationId, Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { useDataStore } from '@/store/dataStore'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHandleClick } from '@/components/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
-import SmallImageContainer from './FunctionalComponent/SmallImageContainer'
-import ChipsContainer from './FunctionalComponent/ChipsContainer'
 import { getArrayValue, getInjectValue } from '@/script/common/functions'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
+import MainBlock from './FunctionalComponent/MainBlock'
 
 const props = defineProps<{
   row: Row
@@ -88,7 +68,6 @@ const route = useRoute()
 const mobile = getInjectValue<string | null>('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
-const dataStore = useDataStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
 const scorllTopStore = useScrollTopStore(props.isolationId)
@@ -118,16 +97,6 @@ watch(
 )
 
 const { handleClick } = useHandleClick(router, route, props.isolationId)
-
-const handleClickIcon = (event: MouseEvent, currentIndex: number) => {
-  if (!collectionStore.editModeOn) {
-    collectionStore.editModeOn = true
-    collectionStore.addApi(currentIndex)
-    collectionStore.lastClick = currentIndex
-  } else {
-    handleClick(event, currentIndex)
-  }
-}
 
 const handlePointerdown = (event: MouseEvent, currentIndex: number) => {
   if (isScrolling.value) {
