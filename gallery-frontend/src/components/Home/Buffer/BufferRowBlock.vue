@@ -33,17 +33,7 @@
               :abstract-data="dataStore.data.get(row.start + subIndex)!"
               :display-element="data"
             />
-            <div
-              id="hover-gradient-div"
-              v-if="!mobile"
-              class="position-absolute w-100 child"
-              :style="{
-                zIndex: 3,
-                height: `40px`,
-                background: `linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(255,255,255,0) 100%)`,
-                pointerEvents: 'none'
-              }"
-            ></div>
+            <HoverGradientDiv :mobile="mobile" />
             <SmallImageContainer
               :index="row.start + subIndex"
               :display-element="data"
@@ -86,6 +76,7 @@ import SmallImageContainer from './FunctionalComponent/SmallImageContainer'
 import ChipsContainer from './FunctionalComponent/ChipsContainer'
 import { getArrayValue, getInjectValue } from '@/script/common/functions'
 import { useScrollTopStore } from '@/store/scrollTopStore'
+import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
 
 const props = defineProps<{
   row: Row
