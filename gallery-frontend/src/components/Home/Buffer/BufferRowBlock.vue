@@ -54,16 +54,13 @@
               :on-pointerleave="handlePointerLeave"
               :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
             />
-
-            <transition name="slide-fade" appear>
-              <ThumbhashImage
-                v-if="
+            <ThumbhashImage
+              v-if="
                     !configStore.disableImg &&
                     dataStore.data.get(row.start + subIndex)!.database"
-                :key="row.start + subIndex"
-                :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
-              />
-            </transition>
+              :key="row.start + subIndex"
+              :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
+            />
           </div>
         </div>
         <div

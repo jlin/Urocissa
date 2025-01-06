@@ -1,19 +1,21 @@
-import { FunctionalComponent, h } from 'vue'
+import { FunctionalComponent, h, Transition } from 'vue'
 
 interface ThumbhashImageProps {
   src: string | undefined
 }
 
 const ThumbhashImage: FunctionalComponent<ThumbhashImageProps> = (props) => {
-  return h('img', {
-    draggable: false,
-    style: {
-      position: 'absolute',
-      zIndex: 1
-    },
-    class: 'thumbhash-image w-100 h-100 bg-grey-darken-2',
-    src: props.src
-  })
+  return h(Transition, { name: 'slide-fade', appear: true }, () =>
+    h('img', {
+      draggable: false,
+      style: {
+        position: 'absolute',
+        zIndex: 1
+      },
+      class: 'thumbhash-image w-100 h-100 bg-grey-darken-2',
+      src: props.src
+    })
+  )
 }
 
 ThumbhashImage.props = {

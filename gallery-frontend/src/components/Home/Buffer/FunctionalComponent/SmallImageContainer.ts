@@ -70,6 +70,9 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
       })
     )
   }
+
+  
+
   return h(Fragment, null, chips)
 }
 
