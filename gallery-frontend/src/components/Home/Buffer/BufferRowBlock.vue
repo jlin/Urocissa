@@ -54,13 +54,6 @@
               :on-pointerleave="handlePointerLeave"
               :on-click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
             />
-            <ThumbhashImage
-              v-if="
-                    !configStore.disableImg &&
-                    dataStore.data.get(row.start + subIndex)!.database"
-              :key="row.start + subIndex"
-              :src="dataStore.data.get(row.start + subIndex)?.database?.thumbhashUrl"
-            />
           </div>
         </div>
         <div
@@ -86,11 +79,9 @@ import { useDataStore } from '@/store/dataStore'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHandleClick } from '@/components/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
-import { useConfigStore } from '@/store/configStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
-import ThumbhashImage from './FunctionalComponent/ThumbhashImage'
 import SmallImageContainer from './FunctionalComponent/SmallImageContainer'
 import ChipsContainer from './FunctionalComponent/ChipsContainer'
 import { getArrayValue, getInjectValue } from '@/script/common/functions'
@@ -107,7 +98,6 @@ const mobile = getInjectValue<string | null>('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const dataStore = useDataStore(props.isolationId)
-const configStore = useConfigStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
 const scorllTopStore = useScrollTopStore(props.isolationId)
