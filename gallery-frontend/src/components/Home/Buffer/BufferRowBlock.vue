@@ -42,7 +42,7 @@
             position: 'absolute',
             zIndex: 0
           }"
-          @click="($event) => handleClick($event, row.start + subIndex)"
+          @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
           class="w-100 h-100 bg-grey-darken-2"
         ></div>
       </div>

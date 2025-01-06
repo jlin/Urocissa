@@ -31,6 +31,7 @@
 import { paddingPixel } from '@/script/common/constants'
 import { getInjectValue } from '@/script/common/functions'
 import { computed, onMounted, Ref, ref, watchEffect } from 'vue'
+
 const placeholderRef = ref<HTMLElement>()
 const windowWidth = getInjectValue<Ref<number>>('windowWidth')
 const windowHeight = getInjectValue<Ref<number>>('windowHeight')
