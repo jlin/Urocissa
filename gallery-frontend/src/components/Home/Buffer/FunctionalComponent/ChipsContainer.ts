@@ -5,24 +5,22 @@ import AlbumChip from './AlbumChip'
 import { AbstractData, DisplayElement } from '@/script/common/types'
 import { formatDuration } from '@/script/common/functions'
 
-// Define the props interface for ChipsContainer
 interface ChipsContainerProps {
   abstractData: AbstractData
   displayElement: DisplayElement
 }
 
-// Define the ChipsContainer as a Functional Component
 const ChipsContainer: FunctionalComponent<ChipsContainerProps> = (props) => {
   const chips = []
   const database = props.abstractData.database
   if (database) {
     const pending = database.pending
-    // Conditionally add ProcessingChip
+
     if (pending) {
       chips.push(h(ProcessingChip))
     }
     const duration = database.exif_vec.duration
-    // Conditionally add DurationChip
+
     if (duration !== undefined) {
       const formattedDuration = formatDuration(duration)
       chips.push(h(DurationChip, { label: formattedDuration }))

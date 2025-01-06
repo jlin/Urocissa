@@ -35,7 +35,7 @@ const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
   )
 
   const thumbhashUrl = abstractData.database?.thumbhashUrl
-  if (thumbhashUrl) {
+  if (thumbhashUrl !== undefined) {
     chips.push(
       h(ThumbhashImage, {
         index: props.index,

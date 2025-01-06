@@ -1,7 +1,6 @@
 import { FunctionalComponent, h } from 'vue'
 import { VChip } from 'vuetify/components'
 
-// Props interface for DurationChip
 interface DurationChipProps {
   label: string
 }
@@ -26,7 +25,6 @@ const DurationChip: FunctionalComponent<DurationChipProps> = (props) => {
   )
 }
 
-// Define the props for the component
 DurationChip.props = {
   label: {
     type: String,

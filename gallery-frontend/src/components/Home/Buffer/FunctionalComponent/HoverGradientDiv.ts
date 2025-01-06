@@ -1,14 +1,11 @@
 import { FunctionalComponent, h } from 'vue'
 
-// Define the props interface
 interface HoverGradientDivProps {
   mobile: string | null
 }
 
-// Create the functional component
 const HoverGradientDiv: FunctionalComponent<HoverGradientDivProps> = (props) => {
-  // Conditionally render the div only if not mobile
-  if (props.mobile) {
+  if (props.mobile !== null) {
     return null
   }
 
@@ -24,7 +21,6 @@ const HoverGradientDiv: FunctionalComponent<HoverGradientDivProps> = (props) => 
   })
 }
 
-// Define the component props with validation
 HoverGradientDiv.props = {
   mobile: {
     type: [String, null],
