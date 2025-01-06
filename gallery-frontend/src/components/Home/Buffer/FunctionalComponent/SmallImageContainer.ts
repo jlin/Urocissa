@@ -14,7 +14,6 @@ interface SmallImageContainerProps {
   displayElement: DisplayElement
   isolationId: IsolationId
   mobile: string | null
-  hasBorder: boolean
   onPointerdown: (event: PointerEvent) => void
   onPointerup: (event: PointerEvent) => void
   onPointerleave: () => void
@@ -22,40 +21,54 @@ interface SmallImageContainerProps {
 }
 
 const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (props) => {
+  const configStore = useConfigStore(props.isolationId)
   const imgStore = useImgStore(props.isolationId)
-  if (!props.abstractData) {
+  const queueStore = useQueueStore(props.isolationId)
+
+  if (!props.abstractData || configStore.disableImg) {
     return null
   }
-  if (!showSmallImage(props.abstractData, props.index, props.displayElement, props.isolationId)) {
-    return null
-  }
+
   const src = imgStore.imgUrl.get(props.index)
 
-  if (src !== undefined) {
-    const chips = []
-    if (props.mobile !== null) {
-      chips.push(
-        h(MobileSmallImage, {
-          hasBorder: props.hasBorder,
-          src: src,
-          onPointerdown: props.onPointerdown,
-          onPointerup: props.onPointerup,
-          onPointerleave: props.onPointerleave
-        })
-      )
+  if (src === undefined) {
+    if (queueStore.img.has(props.index)) {
+      return null
     } else {
-      chips.push(
-        h(DesktopSmallImage, {
-          hasBorder: props.hasBorder,
-          src: src,
-          onClick: props.onClick
-        })
+      queueStore.img.add(props.index)
+      checkAndFetch(
+        props.abstractData,
+        props.index,
+        props.displayElement.displayWidth,
+        props.displayElement.displayHeight,
+        props.isolationId
       )
+      return null
     }
-    return h(Fragment, null, chips)
-  } else {
-    return null
   }
+
+  const hasBorder = props.abstractData.album !== undefined
+  const chips = []
+  if (props.mobile !== null) {
+    chips.push(
+      h(MobileSmallImage, {
+        hasBorder: hasBorder,
+        src: src,
+        onPointerdown: props.onPointerdown,
+        onPointerup: props.onPointerup,
+        onPointerleave: props.onPointerleave
+      })
+    )
+  } else {
+    chips.push(
+      h(DesktopSmallImage, {
+        hasBorder: hasBorder,
+        src: src,
+        onClick: props.onClick
+      })
+    )
+  }
+  return h(Fragment, null, chips)
 }
 
 SmallImageContainer.props = {
@@ -79,10 +92,6 @@ SmallImageContainer.props = {
     type: [String, null] as PropType<string | null>,
     required: true
   },
-  hasBorder: {
-    type: Boolean,
-    required: true
-  },
   onPointerdown: {
     type: Function as PropType<(event: PointerEvent) => void>,
     required: true
@@ -101,71 +110,38 @@ SmallImageContainer.props = {
   }
 }
 
-function showSmallImage(
-  abstractData: AbstractData,
-  index: number,
-  displayElement: DisplayElement,
-  isolationId: IsolationId
-): boolean {
-  const configStore = useConfigStore(isolationId)
-  const imgStore = useImgStore(isolationId)
-  return (
-    !configStore.disableImg &&
-    checkAndFetch(
-      abstractData,
-      index,
-      displayElement.displayWidth,
-      displayElement.displayHeight,
-      isolationId
-    ) &&
-    imgStore.imgUrl.has(index)
-  )
-}
-
 function checkAndFetch(
   abstractData: AbstractData,
   index: number,
   displayWidth: number,
   displayHeight: number,
   isolationId: IsolationId
-): boolean {
-  const imgStore = useImgStore(isolationId)
-  const queueStore = useQueueStore(isolationId)
+) {
   const workerStore = useWorkerStore(isolationId)
-
-  if (imgStore.imgUrl.has(index)) {
-    return true
-  } else if (!queueStore.img.has(index)) {
-    queueStore.img.add(index)
-    const workerIndex = index % workerStore.concurrencyNumber
-
-    if (workerStore.postToWorkerList !== undefined) {
-      if (abstractData.database) {
-        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
-          index: index,
-          hash: abstractData.database.hash,
-          width: displayWidth,
-          height: displayHeight,
-          devicePixelRatio: window.devicePixelRatio,
-          jwt: getCookiesJwt()
-        })
-      } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
-        getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
-          index: index,
-          hash: abstractData.album.cover,
-          width: displayWidth,
-          height: displayHeight,
-          devicePixelRatio: window.devicePixelRatio,
-          jwt: getCookiesJwt(),
-          albumMode: true
-        })
-      }
-    } else {
-      console.error('workerStore.postToWorkerList is undefined')
+  const workerIndex = index % workerStore.concurrencyNumber
+  if (workerStore.postToWorkerList !== undefined) {
+    if (abstractData.database) {
+      getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
+        index: index,
+        hash: abstractData.database.hash,
+        width: displayWidth,
+        height: displayHeight,
+        devicePixelRatio: window.devicePixelRatio,
+        jwt: getCookiesJwt()
+      })
+    } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
+      getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
+        index: index,
+        hash: abstractData.album.cover,
+        width: displayWidth,
+        height: displayHeight,
+        devicePixelRatio: window.devicePixelRatio,
+        jwt: getCookiesJwt(),
+        albumMode: true
+      })
     }
-    return false
   } else {
-    return false
+    console.error('workerStore.postToWorkerList is undefined')
   }
 }
 

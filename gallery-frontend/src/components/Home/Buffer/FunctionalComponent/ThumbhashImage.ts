@@ -19,7 +19,7 @@ const ThumbhashImage: FunctionalComponent<ThumbhashImageProps> = (props) => {
 ThumbhashImage.props = {
   src: {
     type: String,
-    required: false // `undefined` is valid
+    required: false
   }
 }
 

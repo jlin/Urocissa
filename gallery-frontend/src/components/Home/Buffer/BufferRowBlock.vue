@@ -45,13 +45,11 @@
               }"
             ></div>
             <SmallImageContainer
-              :key="imgStore.imgUrl.get(row.start + subIndex)"
               :abstract-data="dataStore.data.get(row.start + subIndex)"
               :index="row.start + subIndex"
               :display-element="data"
               :isolation-id="props.isolationId"
               :mobile="mobile"
-              :has-border="dataStore.data.get(row.start + subIndex)?.album !== undefined"
               :on-pointerdown="(event: PointerEvent) => handlePointerdown(event, row.start + subIndex)"
               :on-pointerup="(event: PointerEvent) => handlePointerUp(event, row.start + subIndex)"
               :on-pointerleave="handlePointerLeave"
@@ -89,7 +87,6 @@ import { IsolationId, Row } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useDataStore } from '@/store/dataStore'
-import { useImgStore } from '@/store/imgStore'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useHandleClick } from '@/components/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
@@ -114,7 +111,6 @@ const mobile = getInjectValue<string | null>('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const dataStore = useDataStore(props.isolationId)
-const imgStore = useImgStore(props.isolationId)
 const configStore = useConfigStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
