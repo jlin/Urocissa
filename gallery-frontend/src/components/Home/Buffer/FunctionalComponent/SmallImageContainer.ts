@@ -31,6 +31,16 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
   if (!abstractData || configStore.disableImg) {
     return null
   }
+  const thumbhashUrl = abstractData.database?.thumbhashUrl
+  const chips = []
+  if (thumbhashUrl) {
+    chips.push(
+      h(ThumbhashImage, {
+        index: props.index,
+        src: thumbhashUrl
+      })
+    )
+  }
 
   const src = imgStore.imgUrl.get(props.index)
 
@@ -51,17 +61,6 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
   }
 
   const hasBorder = abstractData.album !== undefined
-  const chips = []
-
-  const thumbhashUrl = abstractData.database?.thumbhashUrl
-  if (thumbhashUrl) {
-    chips.push(
-      h(ThumbhashImage, {
-        index: props.index,
-        src: thumbhashUrl
-      })
-    )
-  }
 
   if (props.mobile !== null) {
     chips.push(
