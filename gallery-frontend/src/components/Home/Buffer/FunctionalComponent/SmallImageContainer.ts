@@ -31,6 +31,7 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
   if (!abstractData || configStore.disableImg) {
     return null
   }
+
   const thumbhashUrl = abstractData.database?.thumbhashUrl
   const chips = []
   if (thumbhashUrl) {
@@ -45,9 +46,7 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
   const src = imgStore.imgUrl.get(props.index)
 
   if (src === undefined) {
-    if (queueStore.img.has(props.index)) {
-      return null
-    } else {
+    if (!queueStore.img.has(props.index)) {
       queueStore.img.add(props.index)
       checkAndFetch(
         abstractData,
@@ -56,8 +55,8 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
         props.displayElement.displayHeight,
         props.isolationId
       )
-      return null
     }
+    return h(Fragment, null, chips)
   }
 
   const hasBorder = abstractData.album !== undefined
