@@ -10,7 +10,6 @@
       class="ma-1"
     >
       <div
-        v-if="subIndex < timeInterval"
         class="position-relative w-100 h-100 parent"
         :style="{
           border:
@@ -27,6 +26,7 @@
         />
         <HoverGradientDiv :mobile="mobile" />
         <MainBlock
+          v-if="subIndex < timeInterval"
           :index="row.start + subIndex"
           :display-element="data"
           :isolation-id="props.isolationId"
