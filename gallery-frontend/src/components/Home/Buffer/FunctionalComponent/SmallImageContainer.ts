@@ -8,6 +8,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue, getCookiesJwt } from '@/script/common/functions'
 import { useConfigStore } from '@/store/configStore'
 import { useDataStore } from '@/store/dataStore'
+import ThumbhashImage from './ThumbhashImage'
 
 interface SmallImageContainerProps {
   index: number
@@ -51,6 +52,17 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
 
   const hasBorder = abstractData.album !== undefined
   const chips = []
+
+  const thumbhashUrl = abstractData.database?.thumbhashUrl
+  if (thumbhashUrl) {
+    chips.push(
+      h(ThumbhashImage, {
+        index: props.index,
+        src: thumbhashUrl
+      })
+    )
+  }
+
   if (props.mobile !== null) {
     chips.push(
       h(MobileSmallImage, {
@@ -70,8 +82,6 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
       })
     )
   }
-
-  
 
   return h(Fragment, null, chips)
 }
