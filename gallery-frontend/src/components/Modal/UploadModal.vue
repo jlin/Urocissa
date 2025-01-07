@@ -42,7 +42,7 @@
         variant="outlined"
         class="ma-4"
         @click="modalStore.showUploadModal = false"
-        v-if="uploadStore.status === 'Completed'"
+        v-if="uploadStore.status === 'Completed' || uploadStore.status === 'Canceled'"
       >
         {{ 'Close' }}
       </v-btn>
@@ -51,9 +51,9 @@
         variant="outlined"
         class="ma-4"
         @click="uploadStore.cancelUpload()"
-        :color="uploadStore.status === 'Canceled' ? 'red-lighten-4' : 'blue-lighten-4'"
+        color="'blue-lighten-4'"
       >
-        {{ `${uploadStore.status === 'Canceled' ? 'Canceled' : 'Cancel'}` }}
+        {{ `${'Cancel'}` }}
       </v-btn>
     </template>
   </v-card>
