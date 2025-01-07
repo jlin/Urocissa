@@ -76,12 +76,8 @@ export const useUploadStore = (isolationId: IsolationId) =>
           this.uploadButton.click()
         }
       },
-      async handleFileUpload(event: Event): Promise<void> {
+      async fileUpload(files: File[]): Promise<void> {
         const messageStore = useMessageStore('mainId')
-        const target = event.target as HTMLInputElement
-        const files = target.files
-        if (!files || files.length === 0) return
-
         const formData = new FormData()
         let totalSize = 0
 
@@ -132,6 +128,12 @@ export const useUploadStore = (isolationId: IsolationId) =>
           messageStore.warn = true
           messageStore.showMessage = true
         }
+      },
+      async handleFileUpload(event: Event): Promise<void> {
+        const target = event.target as HTMLInputElement
+        const files = target.files
+        if (!files || files.length === 0) return
+        await this.fileUpload([...files])
       }
     }
   })()
