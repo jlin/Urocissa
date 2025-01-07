@@ -107,6 +107,7 @@ export const useUploadStore = (isolationId: IsolationId) =>
             headers: {
               'Content-Type': 'multipart/form-data'
             },
+            signal: abortController.signal,
             onUploadProgress: (progressEvent) => {
               if (progressEvent.total !== undefined) {
                 this.total = progressEvent.total
