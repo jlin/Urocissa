@@ -2,21 +2,24 @@ import { defineStore } from 'pinia'
 import { useMessageStore } from './messageStore'
 import axios from 'axios'
 import { IsolationId } from '@/script/common/types'
+import { useModalStore } from './modalStore'
 
 export const useUploadStore = (isolationId: IsolationId) =>
   defineStore('uploadStore' + isolationId, {
     state: (): {
-      uploading: boolean
+      status: 'Uploading' | 'Processing' | 'Canceled' | 'Completed'
       total: number | undefined
       loaded: number | undefined
       startTime: number | undefined
       uploadButton: HTMLInputElement | null
+      abortController: AbortController | null
     } => ({
-      uploading: false,
+      status: 'Canceled',
       total: undefined,
       loaded: undefined,
       startTime: undefined,
-      uploadButton: null
+      uploadButton: null,
+      abortController: null
     }),
     actions: {
       createUploadButton() {
@@ -77,6 +80,9 @@ export const useUploadStore = (isolationId: IsolationId) =>
         }
       },
       async fileUpload(files: File[]): Promise<void> {
+        const modalStore = useModalStore('mainId')
+        this.status = 'Uploading'
+        modalStore.showUploadModal = true
         const messageStore = useMessageStore('mainId')
         const formData = new FormData()
         let totalSize = 0
@@ -88,14 +94,14 @@ export const useUploadStore = (isolationId: IsolationId) =>
         })
 
         console.log(`Total upload size: ${totalSize} bytes`)
-
+        const abortController = new AbortController()
+        this.abortController = abortController
         try {
           const startTime = Date.now()
 
           this.total = 0
           this.loaded = 0
           this.startTime = startTime
-          this.uploading = true
 
           await axios.post('/upload', formData, {
             headers: {
@@ -107,11 +113,16 @@ export const useUploadStore = (isolationId: IsolationId) =>
                 this.loaded = progressEvent.loaded
                 this.startTime = startTime
 
+                if (this.total === this.loaded) {
+                  this.status = 'Processing'
+                }
+
                 console.log(`Upload is ${this.percentComplete()}% complete`)
                 console.log(`Remaining time: ${this.remainingTime()} seconds`)
               }
             }
           })
+          this.status = 'Completed'
 
           messageStore.message = 'Files uploaded successfully!'
           messageStore.warn = false
@@ -134,6 +145,13 @@ export const useUploadStore = (isolationId: IsolationId) =>
         const files = target.files
         if (!files || files.length === 0) return
         await this.fileUpload([...files])
+      },
+      cancelUpload() {
+        if (this.abortController) {
+          this.abortController.abort()
+          this.status = 'Canceled'
+          console.log('Upload canceled by the user.')
+        }
       }
     }
   })()
