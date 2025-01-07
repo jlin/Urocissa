@@ -8,7 +8,7 @@
       backgroundColor: 'rgba(255, 255, 255, 0.5)',
       pointerEvents: visible ? 'auto' : 'none',
       opacity: visible ? 1 : 0,
-      zIndex: 1000,
+      zIndex: 2000,
       transition: 'opacity 0.4s ease'
     }"
   >
