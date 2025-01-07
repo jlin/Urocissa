@@ -29,7 +29,7 @@
   <EditAlbumsModal v-if="modalStore.showEditAlbumsModal" />
   <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
   <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
-  <UploadModal v-if="uploadStore.uploading" />
+  <UploadModal v-if="true" />
   <CreateAlbumsModal v-if="modalStore.showCreateAlbumsModal" />
 </template>
 
@@ -37,7 +37,7 @@
 import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
 import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
 import AppBar from '@/components/NavBar/AppBar.vue'
-import UploadModal from '@/components/Modal/uploadModal.vue'
+import UploadModal from '@/components/Modal/UploadModal.vue'
 import CreateAlbumsModal from '@/components/Modal/CreateAlbumsModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
 import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
@@ -46,8 +46,6 @@ import ProgessBar from './ProgessBar.vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { provide, ref } from 'vue'
-import { useUploadStore } from '@/store/uploadStore'
-const uploadStore = useUploadStore('mainId')
 const showDrawer = ref(false)
 const route = useRoute()
 const modalStore = useModalStore('mainId')
