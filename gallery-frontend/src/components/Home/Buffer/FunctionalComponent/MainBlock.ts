@@ -5,6 +5,7 @@ import { FunctionalComponent, h, PropType } from 'vue'
 import ChipsContainer from './ChipsContainer'
 import SmallImageContainer from './SmallImageContainer'
 import ThumbhashImage from './ThumbhashImage'
+import { useConfigStore } from '@/store/configStore'
 
 interface MainBlockProps {
   index: number
@@ -19,7 +20,7 @@ interface MainBlockProps {
 
 const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
   const dataStore = useDataStore(props.isolationId)
-
+  const configStore = useConfigStore(props.isolationId)
   const abstractData = dataStore.data.get(props.index)
 
   if (!abstractData) {
@@ -34,29 +35,31 @@ const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
     })
   )
 
-  const thumbhashUrl = abstractData.database?.thumbhashUrl
-  if (thumbhashUrl !== undefined) {
+  if (!configStore.disableImg) {
+    const thumbhashUrl = abstractData.database?.thumbhashUrl
+    if (thumbhashUrl !== undefined) {
+      chips.push(
+        h(ThumbhashImage, {
+          index: props.index,
+          src: thumbhashUrl
+        })
+      )
+    }
+
     chips.push(
-      h(ThumbhashImage, {
+      h(SmallImageContainer, {
+        abstractData: abstractData,
         index: props.index,
-        src: thumbhashUrl
+        displayElement: props.displayElement,
+        isolationId: props.isolationId,
+        mobile: props.mobile,
+        onPointerdown: props.onPointerdown,
+        onPointerup: props.onPointerup,
+        onPointerleave: props.onPointerleave,
+        onClick: props.onClick
       })
     )
   }
-
-  chips.push(
-    h(SmallImageContainer, {
-      abstractData: abstractData,
-      index: props.index,
-      displayElement: props.displayElement,
-      isolationId: props.isolationId,
-      mobile: props.mobile,
-      onPointerdown: props.onPointerdown,
-      onPointerup: props.onPointerup,
-      onPointerleave: props.onPointerleave,
-      onClick: props.onClick
-    })
-  )
   return h(
     'div',
     {

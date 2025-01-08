@@ -6,7 +6,6 @@ import { useImgStore } from '@/store/imgStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue, getCookiesJwt } from '@/script/common/functions'
-import { useConfigStore } from '@/store/configStore'
 
 interface SmallImageContainerProps {
   abstractData: AbstractData
@@ -21,13 +20,8 @@ interface SmallImageContainerProps {
 }
 
 const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (props) => {
-  const configStore = useConfigStore(props.isolationId)
   const imgStore = useImgStore(props.isolationId)
   const queueStore = useQueueStore(props.isolationId)
-
-  if (configStore.disableImg) {
-    return null
-  }
 
   const src = imgStore.imgUrl.get(props.index)
 
