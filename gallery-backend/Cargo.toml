@@ -1,6 +1,6 @@
 [package]
 name = "Urocissa"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -27,7 +27,7 @@ envy = "0.4.2"
 filetime = "0.2.25"
 futures = "0.3.31"
 image = "0.25.5"
-image_hasher = "2.0.0"
+image_hasher = "3.0.0"
 indicatif = "0.17.9"
 jsonwebtoken = "9.3.0"
 kamadak-exif = "0.6.1"
@@ -36,13 +36,13 @@ notify = "7.0.0"
 path-clean = "1.0.1"
 rand = "0.8.5"
 rayon = "1.10.0"
-redb = "2.3.0"
+redb = "2.4.0"
 regex = "1.11.1"
-reqwest = { version = "0.12.11", features = ["json", "blocking"] }
+reqwest = { version = "0.12.12", features = ["json", "blocking"] }
 rocket = { version = "0.5.1", features = ["json"] }
 rocket_seek_stream = "0.2.6"
 serde = { version = "1.0.217", features = ["derive", "rc"] }
-serde_json = "1.0.134"
+serde_json = "1.0.135"
 thumbhash = "0.1.0"
 tokio = { version = "1.42.0", features = ["full"] }
 uuid = { version = "1.11.0", features = ["v4"] }
