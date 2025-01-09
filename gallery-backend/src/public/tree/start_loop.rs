@@ -3,8 +3,7 @@ use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expire::EXPIRE;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::router::put::edit_album::AlbumQueue;
-use crate::synchronizer::album::ALBUM_SELFUPDATE_QUEUE_SENDER;
+use crate::synchronizer::album::{AlbumQueue, ALBUM_SELFUPDATE_QUEUE_SENDER};
 
 use log::info;
 use rayon::iter::{ParallelBridge, ParallelIterator};
@@ -34,9 +33,6 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .cloned()
     .collect()
 });
-
-pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> =
-    OnceLock::new();
 
 pub static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 

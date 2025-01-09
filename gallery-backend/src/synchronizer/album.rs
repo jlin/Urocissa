@@ -3,35 +3,46 @@ use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
-use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use std::collections::HashSet;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use tokio;
 use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::Notify;
 
-pub static ALBUM_SELFUPDATE_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<ArrayString<64>>>> =
-    OnceLock::new();
+pub struct AlbumQueue {
+    pub album_list: Vec<ArrayString<64>>,
+    pub notify: Option<Arc<Notify>>,
+}
+
+pub static ALBUM_SELFUPDATE_QUEUE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> = OnceLock::new();
 pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
     let (album_selfupdate_queue_sender, mut album_selfupdate_queue_receiver) =
-        unbounded_channel::<Vec<ArrayString<64>>>();
+        unbounded_channel::<AlbumQueue>();
     ALBUM_SELFUPDATE_QUEUE_SENDER
         .set(album_selfupdate_queue_sender)
         .unwrap();
 
     tokio::task::spawn(async move {
-        while let Some(list_of_album_id) = album_selfupdate_queue_receiver.recv().await {
+        loop {
+            let mut buffer = Vec::new();
+
+            album_selfupdate_queue_receiver
+                .recv_many(&mut buffer, usize::MAX)
+                .await;
             tokio::task::spawn_blocking(move || {
-                // Deduplicate
-                let unique_id: HashSet<_> = list_of_album_id.into_iter().collect();
+                let unique_id: HashSet<_> = buffer
+                    .iter()
+                    .flat_map(|album_queue| album_queue.album_list.iter()) // Flatten all album_list vectors
+                    .collect();
                 let id_vec: Vec<_> = unique_id.into_iter().collect();
                 let txn = TREE.in_disk.begin_write().unwrap();
                 {
                     let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
                     id_vec.into_iter().for_each(|album_id| {
                         let album_opt = album_table
-                            .get(&*album_id)
+                            .get(&**album_id)
                             .unwrap()
                             .map(|guard| guard.value());
 
@@ -39,7 +50,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                             album.pending = true;
                             album.self_update();
                             album.pending = false;
-                            album_table.insert(&*album_id, album).unwrap();
+                            album_table.insert(&**album_id, album).unwrap();
                         } else {
                             // Album has been deleted
                             let ref_data = TREE.in_memory.read().unwrap();
@@ -48,7 +59,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                             let hash_list: Vec<_> = ref_data
                                 .par_iter()
                                 .filter_map(|dt| match &dt.abstract_data {
-                                    AbstractData::DataBase(db) if db.album.contains(&album_id) => {
+                                    AbstractData::DataBase(db) if db.album.contains(&*album_id) => {
                                         Some(db.hash)
                                     }
                                     _ => None,
@@ -67,11 +78,38 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                     });
                 }
                 txn.commit().unwrap();
+                buffer.iter().for_each(|album_queue| {
+                    if let Some(notify) = &album_queue.notify {
+                        notify.notify_one();
+                    }
+                });
             })
             .await
             .unwrap();
-            TREE.should_update_async().await;
-            info!("Album self-updated")
         }
     })
+}
+pub fn _album_self_update(album_list: Vec<ArrayString<64>>) {
+    let album_queue = AlbumQueue {
+        album_list: album_list,
+        notify: None,
+    };
+    ALBUM_SELFUPDATE_QUEUE_SENDER
+        .get()
+        .unwrap()
+        .send(album_queue)
+        .unwrap();
+}
+pub async fn album_self_update_async(album_list: Vec<ArrayString<64>>) {
+    let notify = Arc::new(Notify::new());
+    let album_queue = AlbumQueue {
+        album_list: album_list,
+        notify: Some(notify.clone()),
+    };
+    ALBUM_SELFUPDATE_QUEUE_SENDER
+        .get()
+        .unwrap()
+        .send(album_queue)
+        .unwrap();
+    notify.notified().await
 }

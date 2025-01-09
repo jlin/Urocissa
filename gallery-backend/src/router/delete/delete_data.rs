@@ -1,9 +1,9 @@
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
-use crate::router::put::edit_album::AlbumQueue;
+use crate::synchronizer::album::album_self_update_async;
+
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
@@ -18,17 +18,17 @@ pub async fn delete_data(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<DeleteList>,
 ) {
-    tokio::task::spawn_blocking(move || {
+    let id_vec = tokio::task::spawn_blocking(move || {
         let timestamp = &json_data.timestamp;
 
         let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
         let txn = TREE.in_disk.begin_write().unwrap();
-
+        let mut id_vec = vec![];
         {
             let mut table = txn.open_table(DATA_TABLE).unwrap();
 
-            for index in &json_data.delete_list {
+            json_data.delete_list.iter().for_each(|index| {
                 let hash = tree_snapshot.get_hash(*index);
 
                 let found_data = match table.get(hash.as_str()).unwrap() {
@@ -51,32 +51,23 @@ pub async fn delete_data(
                     table.remove(hash.as_str()).unwrap();
                 }
 
-                let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
+                let album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
-                let id_opt = match album_table.get(hash.as_str()).unwrap() {
+                match album_table.get(hash.as_str()).unwrap() {
                     Some(album) => {
                         let album = album.value();
-                        Some(album.id)
+                        id_vec.push(album.id);
                     }
-                    None => None,
+                    None => {}
                 };
-                if let Some(id) = id_opt {
-                    album_table.remove(&*id).unwrap();
-                    ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
-                        .get()
-                        .unwrap()
-                        .send(AlbumQueue {
-                            album_list: vec![id],
-                            notify: None,
-                        })
-                        .unwrap();
-                }
-            }
+            });
         }
 
         txn.commit().unwrap();
+        id_vec
     })
     .await
     .unwrap();
     TREE.should_update_async().await;
+    album_self_update_async(id_vec).await;
 }

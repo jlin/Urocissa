@@ -1,8 +1,7 @@
-use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
+use crate::synchronizer::album::album_self_update_async;
 use std::collections::HashSet;
-use std::sync::Arc;
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
@@ -10,12 +9,6 @@ use redb::ReadableTable;
 use rocket::http::Status;
 use rocket::serde::{json::Json, Deserialize};
 use serde::Serialize;
-use tokio::sync::Notify;
-
-pub struct AlbumQueue {
-    pub album_list: Vec<ArrayString<64>>,
-    pub notify: Option<Arc<Notify>>,
-}
 
 #[derive(Debug, Deserialize)]
 pub struct EditAlbumsData {
@@ -34,7 +27,7 @@ pub async fn edit_album(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<EditAlbumsData>,
 ) -> () {
-    let waiting_notify = tokio::task::spawn_blocking(move || {
+    let concact_result = tokio::task::spawn_blocking(move || {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
             let mut write_table = txn.open_table(DATA_TABLE).unwrap();
@@ -76,23 +69,13 @@ pub async fn edit_album(
             .collect::<HashSet<_>>()
             .into_iter()
             .collect();
-        let waiting_notify = Arc::new(Notify::new());
-        let album_queue = AlbumQueue {
-            album_list: concact_result,
-            notify: Some(waiting_notify.clone()),
-        };
-        ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
-            .get()
-            .unwrap()
-            .send(album_queue)
-            .unwrap();
-
-        TREE.should_update();
-        waiting_notify
+        concact_result
     })
     .await
     .unwrap();
-    waiting_notify.notified().await
+
+    TREE.should_update_async().await;
+    album_self_update_async(concact_result).await;
 }
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]

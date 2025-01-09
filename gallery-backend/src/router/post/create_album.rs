@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::time::Instant;
 
 use arrayvec::ArrayString;
@@ -9,14 +8,12 @@ use rocket::serde::json::Json;
 use rocket::{http::Status, post};
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::Notify;
 
 use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
-use crate::router::put::edit_album::AlbumQueue;
+use crate::synchronizer::album::album_self_update_async;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -66,18 +63,7 @@ pub async fn create_album(
     })
     .await
     .unwrap();
-    let waiting_update = Arc::new(Notify::new());
-    let album_queue = AlbumQueue {
-        album_list: vec![id],
-        notify: Some(Arc::clone(&waiting_update)),
-    };
-    ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER
-        .get()
-        .unwrap()
-        .send(album_queue)
-        .unwrap();
-
-    TREE.should_update();
-    waiting_update.notified().await;
+    TREE.should_update_async().await;
+    album_self_update_async(vec![id]).await;
     Ok(id.to_string())
 }
