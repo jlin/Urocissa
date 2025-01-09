@@ -23,7 +23,7 @@ pub async fn edit_tag(
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<EditTagsData>,
 ) -> Json<Vec<TagInfo>> {
-    tokio::task::spawn_blocking(move || {
+    let vec_tags_info = tokio::task::spawn_blocking(move || {
         let txn = TREE.in_disk.begin_write().unwrap();
         {
             let mut write_table = txn.open_table(DATA_TABLE).unwrap();
@@ -76,9 +76,10 @@ pub async fn edit_tag(
         }
         txn.commit().unwrap();
         let vec_tags_info = TREE_SNAPSHOT.read_tags();
-        SHOULD_RESET.notify_one();
-        Json(vec_tags_info)
+        vec_tags_info
     })
     .await
-    .unwrap()
+    .unwrap();
+    TREE.should_update().await;
+    Json(vec_tags_info)
 }

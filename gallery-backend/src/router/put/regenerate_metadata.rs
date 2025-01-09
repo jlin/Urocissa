@@ -63,9 +63,9 @@ pub async fn regenerate_metadata(
                 .collect();
             TREE.insert_tree_api(&list_of_database).unwrap();
         }
-        SHOULD_RESET.notify_one();
-        Status::Ok
     })
     .await
-    .unwrap()
+    .unwrap();
+    TREE.should_update().await;
+    Status::Ok
 }

@@ -68,11 +68,11 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                     });
                 }
                 txn.commit().unwrap();
-                SHOULD_RESET.notify_one();
-                info!("Album self-updated")
             })
             .await
             .unwrap();
+            TREE.should_update().await;
+            info!("Album self-updated")
         }
     })
 }

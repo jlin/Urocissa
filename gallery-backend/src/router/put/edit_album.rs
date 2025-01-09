@@ -125,12 +125,11 @@ pub async fn set_album_cover(
             album_table.insert(&*album_id, album).unwrap();
         }
         txn.commit().unwrap();
-        SHOULD_RESET.notify_one();
-
-        Ok(())
     })
     .await
-    .unwrap()
+    .unwrap();
+    TREE.should_update().await;
+    Ok(())
 }
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
@@ -160,10 +159,10 @@ pub async fn set_album_title(
             album_table.insert(&*album_id, album).unwrap();
         }
         txn.commit().unwrap();
-        SHOULD_RESET.notify_one();
-
-        Ok(())
     })
     .await
-    .unwrap()
+    .unwrap();
+    TREE.should_update().await;
+
+    Ok(())
 }

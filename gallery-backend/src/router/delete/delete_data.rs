@@ -75,8 +75,8 @@ pub async fn delete_data(
         }
 
         txn.commit().unwrap();
-        SHOULD_RESET.notify_one();
     })
     .await
     .unwrap();
+    TREE.should_update().await;
 }

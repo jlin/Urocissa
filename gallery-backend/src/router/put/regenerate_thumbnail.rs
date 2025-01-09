@@ -60,10 +60,11 @@ pub async fn regenerate_thumbnail_with_frame(
                     database.thumbhash = generate_thumbhash(&dynamic_image).unwrap();
                     database.phash = generate_phash(&dynamic_image);
                     TREE.insert_tree_api(&vec![database]).unwrap();
-                    SHOULD_RESET.notify_one();
                 })
                 .await
                 .unwrap();
+
+                TREE.should_update().await;
             }
         }
     }
