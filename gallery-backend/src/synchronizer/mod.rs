@@ -55,6 +55,8 @@ pub async fn start_sync(shutdown: Shutdown) {
 
     info!("All channels started.");
 
+    TREE.should_update();
+
     // Await the first task to complete
     if let Some((name, result)) = tasks.next().await {
         match result {

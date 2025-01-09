@@ -2,7 +2,6 @@ use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::read_tags::TagInfo;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 
 use redb::ReadableTable;
@@ -80,6 +79,6 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    TREE.should_update().await;
+    TREE.should_update_async().await;
     Json(vec_tags_info)
 }

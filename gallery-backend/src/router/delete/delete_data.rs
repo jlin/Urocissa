@@ -1,5 +1,5 @@
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
+use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
@@ -78,5 +78,5 @@ pub async fn delete_data(
     })
     .await
     .unwrap();
-    TREE.should_update().await;
+    TREE.should_update_async().await;
 }

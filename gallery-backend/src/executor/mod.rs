@@ -5,7 +5,7 @@ mod filter;
 mod importer;
 use crate::{
     executor,
-    public::{constant::PROCESS_BATCH_NUMBER, tree::start_loop::SHOULD_RESET},
+    public::{constant::PROCESS_BATCH_NUMBER, tree::TREE},
 };
 use batcher::merge_file_paths;
 
@@ -17,7 +17,7 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
         let batch: Vec<PathBuf> = batch.to_vec();
         let successfully_handled_length = processor(batch);
         if successfully_handled_length > 0 {
-            SHOULD_RESET.notify_one();
+            TREE.should_update();
         }
     }
 }

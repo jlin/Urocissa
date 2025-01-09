@@ -13,7 +13,7 @@ use tokio::sync::Notify;
 
 use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
+use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use crate::router::put::edit_album::AlbumQueue;
@@ -77,7 +77,7 @@ pub async fn create_album(
         .send(album_queue)
         .unwrap();
 
-    SHOULD_RESET.notify_one();
+    TREE.should_update();
     waiting_update.notified().await;
     Ok(id.to_string())
 }

@@ -38,14 +38,12 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
 pub static ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> =
     OnceLock::new();
 
-pub static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Arc<Notify>>> = OnceLock::new();
-
-pub static SHOULD_RESET: Notify = Notify::const_new();
+pub static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 
 pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 
 impl Tree {
-   /*  pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
+    /*  pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn(async {
             let (album_waiting_for_update_sender, mut album_waiting_for_update_receiver) =
                 unbounded_channel::<AlbumQueue>();
@@ -137,17 +135,15 @@ impl Tree {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn(async {
             let (should_update_sender, mut should_update_receiver) =
-                unbounded_channel::<Arc<Notify>>();
+                unbounded_channel::<Option<Arc<Notify>>>();
 
             SHOULD_UPDATE_SENDER.set(should_update_sender).unwrap();
             loop {
                 let mut buffer = Vec::new();
 
-                if !should_update_receiver.is_empty() {
-                    should_update_receiver
-                        .recv_many(&mut buffer, usize::MAX)
-                        .await;
-                }
+                should_update_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
                 tokio::task::spawn_blocking(|| {
                     let start_time = Instant::now();
                     let read_txn = self.in_disk.begin_read().unwrap();
@@ -190,8 +186,10 @@ impl Tree {
                     *self.in_memory.write().unwrap() = data_vec;
 
                     EXPIRE.update_expire_time(start_time);
-                    buffer.into_iter().for_each(|notify| {
-                        notify.notify_one();
+                    buffer.into_iter().for_each(|notify_opt| {
+                        if let Some(notify) = notify_opt {
+                            notify.notify_one()
+                        };
                     });
                 })
                 .await
@@ -199,13 +197,15 @@ impl Tree {
             }
         })
     }
-    pub async fn should_update(&self) {
-        println!("called");
+    pub fn should_update(&self) {
+        SHOULD_UPDATE_SENDER.get().unwrap().send(None).unwrap();
+    }
+    pub async fn should_update_async(&self) {
         let notify = Arc::new(Notify::new());
         SHOULD_UPDATE_SENDER
             .get()
             .unwrap()
-            .send(notify.clone())
+            .send(Some(notify.clone()))
             .unwrap();
         notify.notified().await
     }

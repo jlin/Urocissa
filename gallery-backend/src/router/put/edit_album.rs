@@ -1,4 +1,4 @@
-use crate::public::tree::start_loop::{ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER, SHOULD_RESET};
+use crate::public::tree::start_loop::ALBUM_WAITING_FOR_MEMORY_UPDATE_SENDER;
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use std::collections::HashSet;
@@ -87,7 +87,7 @@ pub async fn edit_album(
             .send(album_queue)
             .unwrap();
 
-        SHOULD_RESET.notify_one();
+        TREE.should_update();
         waiting_notify
     })
     .await
@@ -128,7 +128,7 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    TREE.should_update().await;
+    TREE.should_update_async().await;
     Ok(())
 }
 
@@ -162,7 +162,7 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    TREE.should_update().await;
+    TREE.should_update_async().await;
 
     Ok(())
 }

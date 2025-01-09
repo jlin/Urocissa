@@ -6,7 +6,6 @@ use crate::executor::databaser::processor::{
     regenerate_metadata_for_image, regenerate_metadata_for_video,
 };
 use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
@@ -66,6 +65,6 @@ pub async fn regenerate_metadata(
     })
     .await
     .unwrap();
-    TREE.should_update().await;
+    TREE.should_update_async().await;
     Status::Ok
 }

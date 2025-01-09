@@ -4,7 +4,6 @@ use initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
 use public::redb::{ALBUM_TABLE, DATA_TABLE};
-use public::tree::start_loop::SHOULD_RESET;
 use public::tree::TREE;
 use redb::ReadableTableMetadata;
 use rocket::fairing::AdHoc;
@@ -39,8 +38,6 @@ async fn rocket() -> _ {
     }
 
     txn.commit().unwrap();
-
-    SHOULD_RESET.notify_one();
 
     rocket::build()
         .attach(cache_control_fairing())

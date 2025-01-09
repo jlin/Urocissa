@@ -1,7 +1,6 @@
 use crate::executor::databaser::generate_compressed_video::generate_compressed_video;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::redb::DATA_TABLE;
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
@@ -47,7 +46,7 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                                 write_table.insert(&*database.hash, &database).unwrap();
                             }
                             write_txn.commit().unwrap();
-                            SHOULD_RESET.notify_one();
+                            TREE.should_update();
                         }
                         Err(error) => {
                             handle_error(ErrorData::new(

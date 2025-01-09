@@ -1,6 +1,6 @@
 use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::executor::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
-use crate::public::tree::start_loop::SHOULD_RESET;
+
 use crate::public::tree::TREE;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use arrayvec::ArrayString;
@@ -64,7 +64,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                TREE.should_update().await;
+                TREE.should_update_async().await;
             }
         }
     }

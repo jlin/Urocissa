@@ -1,6 +1,5 @@
 use crate::public::abstract_data::AbstractData;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::start_loop::SHOULD_RESET;
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
@@ -71,7 +70,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
             })
             .await
             .unwrap();
-            TREE.should_update().await;
+            TREE.should_update_async().await;
             info!("Album self-updated")
         }
     })
