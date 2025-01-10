@@ -1,5 +1,4 @@
 use crate::public::expression::Expression;
-use crate::public::query_snapshot::start_loop::SHOULD_FLUSH_QUERY_SNAPSHOT;
 use crate::public::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::reduced_data::ReducedData;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
@@ -135,7 +134,7 @@ pub async fn prefetch(
         QUERY_SNAPSHOT
             .in_memory
             .insert(expression_hashed, prefetch_opt);
-        SHOULD_FLUSH_QUERY_SNAPSHOT.notify_one();
+        QUERY_SNAPSHOT.should_flush_query_snapshot();
         let json = Json(prefetch_opt);
 
         info_wrap(Some(json_start_time.elapsed()), "Create JSON response");

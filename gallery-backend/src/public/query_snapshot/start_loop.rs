@@ -1,18 +1,36 @@
 use super::QuerySnapshot;
 use crate::public::{query_snapshot::PrefetchReturn, tree::start_loop::VERSION_COUNT_TIMESTAMP};
 use redb::TableDefinition;
-use std::{sync::atomic::Ordering, time::Instant};
-use tokio::sync::Notify;
+use std::{
+    sync::{atomic::Ordering, Arc, OnceLock},
+    time::Instant,
+};
+use tokio::sync::{
+    mpsc::{unbounded_channel, UnboundedSender},
+    Notify,
+};
 
-pub static SHOULD_FLUSH_QUERY_SNAPSHOT: Notify = Notify::const_new();
+static QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
+    OnceLock::new();
 
 impl QuerySnapshot {
-    pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn(async {
-            loop {
-                SHOULD_FLUSH_QUERY_SNAPSHOT.notified().await;
+    pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
+        tokio::task::spawn(async move {
+            let (query_snapshot_should_flush_sender, mut query_snapshot_should_flush_receiver) =
+                unbounded_channel::<Option<Arc<Notify>>>();
 
-                tokio::task::spawn_blocking(|| loop {
+            QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER
+                .set(query_snapshot_should_flush_sender)
+                .unwrap();
+
+            loop {
+                let mut buffer = Vec::new();
+
+                query_snapshot_should_flush_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
+
+                tokio::task::spawn_blocking(move || loop {
                     if self.in_memory.is_empty() {
                         break;
                     }
@@ -62,5 +80,21 @@ impl QuerySnapshot {
                 .unwrap();
             }
         })
+    }
+    pub fn should_flush_query_snapshot(&self) {
+        QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER
+            .get()
+            .unwrap()
+            .send(None)
+            .unwrap();
+    }
+    pub async fn should_flush_query_snapshop_async(&self) {
+        let notify = Arc::new(Notify::new());
+        QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER
+            .get()
+            .unwrap()
+            .send(Some(notify.clone()))
+            .unwrap();
+        notify.notified().await
     }
 }

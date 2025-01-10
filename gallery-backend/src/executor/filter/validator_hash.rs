@@ -32,6 +32,7 @@ where
                         let file_modify = mem::take(&mut database.alias[0]);
                         database_exist.alias.push(file_modify);
                         TREE.insert_tree_api(&vec![database_exist]).unwrap();
+                        TREE.should_update();
                         scaned_number.fetch_add(1, Ordering::SeqCst);
                     }
                     None => {
