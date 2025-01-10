@@ -36,7 +36,15 @@ export function handleScroll(
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
 
         if (prefetchStore.totalHeight - windowHeight.value < 0) {
-          scrollTopStore.scrollTop = 0
+          if (mobile !== null) {
+            stopScroll.value = true
+            scrollTopStore.scrollTop = 0
+            setTimeout(() => {
+              stopScroll.value = false
+            }, 100)
+          } else {
+            scrollTopStore.scrollTop = 0
+          }
           imageContainerRef.value.scrollTop -= difference
           lastScrollTop.value = imageContainerRef.value.scrollTop
           return
