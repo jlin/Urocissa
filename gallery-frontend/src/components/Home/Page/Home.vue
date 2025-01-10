@@ -14,9 +14,7 @@
     :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
     @scroll="
       // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
-      prefetchStore.totalHeight - windowHeight > 0 && prefetchStore.locateTo === null
-        ? throttledHandleScroll()
-        : () => {}
+      prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
     "
   >
     <Buffer
@@ -138,13 +136,9 @@ const resizeDebounce = debounce(() => {
 }, 100)
 
 const bufferHeight = computed(() => {
-  if (prefetchStore.totalHeight <= windowHeight.value) {
-    return 0
-  } else {
-    return 600000
-    // A large value to enable scrolling within the imageContainer without reaching the top or bottom prematurely.
-    // This value must be a multiple of 3 to avoid pixel misalignment when dividing bufferHeight by 3 (in useInitializeScrollPosition.ts).
-  }
+  return 600000
+  // A large value to enable scrolling within the imageContainer without reaching the top or bottom prematurely.
+  // This value must be a multiple of 3 to avoid pixel misalignment when dividing bufferHeight by 3 (in useInitializeScrollPosition.ts).
 })
 
 const albumHomeIsolatedKey = computed(() => {

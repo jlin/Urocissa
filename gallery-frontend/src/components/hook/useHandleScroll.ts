@@ -32,7 +32,16 @@ export function handleScroll(
       if (imageContainerRef.value !== null) {
         const scrollTopStore = useScrollTopStore(isolationId)
         const prefetchStore = usePrefetchStore(isolationId)
+
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
+
+        if (prefetchStore.totalHeight - windowHeight.value < 0) {
+          scrollTopStore.scrollTop = 0
+          imageContainerRef.value.scrollTop -= difference
+          lastScrollTop.value = imageContainerRef.value.scrollTop
+          return
+        }
+
         const result = scrollTopStore.scrollTop + difference
 
         if (result < 0) {
