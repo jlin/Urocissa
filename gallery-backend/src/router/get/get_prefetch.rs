@@ -4,7 +4,6 @@ use crate::public::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::reduced_data::ReducedData;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::public::tree::TREE;
-use crate::public::tree_snapshot::start_loop::SHOULD_FLUSH_TREE_SNAPSHOT;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::utils::info_wrap;
 use crate::router::fairing::AuthGuard;
@@ -124,7 +123,7 @@ pub async fn prefetch(
             .as_millis();
 
         TREE_SNAPSHOT.in_memory.insert(timestamp, reduced_data);
-        SHOULD_FLUSH_TREE_SNAPSHOT.notify_one();
+        TREE_SNAPSHOT.should_flush_tree_snapshot();
 
         info_wrap(Some(db_start_time.elapsed()), "Write cache into memory");
 

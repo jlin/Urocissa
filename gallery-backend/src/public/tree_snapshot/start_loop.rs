@@ -11,7 +11,8 @@ use tokio::sync::{
     Notify,
 };
 
-pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
+static TREE_SNAPSHOT_SHOULD_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
+    OnceLock::new();
 
 static TREE_SNAPSHOT_DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<TreeSnapshotDelete>> =
     OnceLock::new();
@@ -114,11 +115,21 @@ impl TreeSnapshot {
 
     // Flush snapshots in memory to disk
     pub fn start_loop_flush(&'static self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn(async {
-            loop {
-                SHOULD_FLUSH_TREE_SNAPSHOT.notified().await;
+        let (tree_snapshot_should_flush_sender, mut tree_snapshot_should_flush_receiver) =
+            unbounded_channel::<Option<Arc<Notify>>>();
 
-                tokio::task::spawn_blocking(|| loop {
+        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
+            .set(tree_snapshot_should_flush_sender)
+            .unwrap();
+        tokio::task::spawn(async move {
+            loop {
+                let mut buffer = Vec::new();
+
+                tree_snapshot_should_flush_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
+
+                tokio::task::spawn_blocking(move || loop {
                     if self.in_memory.is_empty() {
                         break;
                     }
@@ -160,10 +171,31 @@ impl TreeSnapshot {
                         "{} items remaining in in-memory tree cache",
                         self.in_memory.len()
                     );
+                    buffer.iter().for_each(|notify_opt| {
+                        if let Some(notify) = notify_opt {
+                            notify.notify_one()
+                        }
+                    });
                 })
                 .await
                 .unwrap();
             }
         })
+    }
+    pub fn should_flush_tree_snapshot(&self) {
+        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
+            .get()
+            .unwrap()
+            .send(None)
+            .unwrap();
+    }
+    pub async fn should_flush_tree_snapshop_async(&self) {
+        let notify = Arc::new(Notify::new());
+        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
+            .get()
+            .unwrap()
+            .send(Some(notify.clone()))
+            .unwrap();
+        notify.notified().await
     }
 }
