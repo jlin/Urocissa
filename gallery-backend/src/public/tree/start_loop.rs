@@ -32,7 +32,7 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-pub static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
+static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 
 pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 

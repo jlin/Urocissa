@@ -1,7 +1,11 @@
 use super::TreeSnapshot;
 use crate::public::reduced_data::ReducedData;
 use redb::TableDefinition;
-use std::{sync::OnceLock, time::Instant};
+use std::{
+    collections::HashSet,
+    sync::{Arc, OnceLock},
+    time::Instant,
+};
 use tokio::sync::{
     mpsc::{unbounded_channel, UnboundedSender},
     Notify,
@@ -9,24 +13,37 @@ use tokio::sync::{
 
 pub static SHOULD_FLUSH_TREE_SNAPSHOT: Notify = Notify::const_new();
 
-pub static TREE_SNAPSHOT_DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<u128>>> =
+static TREE_SNAPSHOT_DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<TreeSnapshotDelete>> =
     OnceLock::new();
+
+pub struct TreeSnapshotDelete {
+    pub timestamp_list: Vec<u128>,
+    pub notify: Option<Arc<Notify>>,
+}
 
 impl TreeSnapshot {
     // Delete snapshots send from EXPIRE.
     pub fn start_loop_remove(&'static self) -> tokio::task::JoinHandle<()> {
         tokio::task::spawn(async move {
             let (tree_snapshot_delete_queue_sender, mut tree_snapshot_delete_queue_receiver) =
-                unbounded_channel::<Vec<u128>>();
+                unbounded_channel::<TreeSnapshotDelete>();
 
             TREE_SNAPSHOT_DELETE_QUEUE_SENDER
                 .set(tree_snapshot_delete_queue_sender)
                 .unwrap();
 
-            while let Some(tree_snapshot_delete_queue) =
-                tree_snapshot_delete_queue_receiver.recv().await
-            {
+            loop {
+                let mut buffer = Vec::new();
+
+                tree_snapshot_delete_queue_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
                 tokio::task::spawn_blocking(move || {
+                    let unique_timestamp: HashSet<_> = buffer
+                        .iter()
+                        .flat_map(|tree_snapshot_delete| tree_snapshot_delete.timestamp_list.iter()) // Flatten all album_list vectors
+                        .collect();
+                    let tree_snapshot_delete_queue: Vec<_> = unique_timestamp.into_iter().collect();
                     tree_snapshot_delete_queue
                         .iter()
                         .for_each(|timestamp_delete| {
@@ -59,12 +76,40 @@ impl TreeSnapshot {
                             );
 
                             write_txn.commit().unwrap();
+                            buffer.iter().for_each(|tree_snapshot_delete| {
+                                if let Some(notify) = &tree_snapshot_delete.notify {
+                                    notify.notify_one()
+                                };
+                            });
                         });
                 })
                 .await
                 .unwrap();
             }
         })
+    }
+
+    pub fn tree_snapshot_delete(&self, timestamp_list: Vec<u128>) {
+        TREE_SNAPSHOT_DELETE_QUEUE_SENDER
+            .get()
+            .unwrap()
+            .send(TreeSnapshotDelete {
+                timestamp_list: timestamp_list,
+                notify: None,
+            })
+            .unwrap();
+    }
+    pub async fn tree_snapshot_delete_async(&self, timestamp_list: Vec<u128>) {
+        let notify = Arc::new(Notify::new());
+        TREE_SNAPSHOT_DELETE_QUEUE_SENDER
+            .get()
+            .unwrap()
+            .send(TreeSnapshotDelete {
+                timestamp_list: timestamp_list,
+                notify: Some(notify.clone()),
+            })
+            .unwrap();
+        notify.notified().await
     }
 
     // Flush snapshots in memory to disk

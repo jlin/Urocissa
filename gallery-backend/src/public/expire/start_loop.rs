@@ -1,9 +1,6 @@
 use super::Expire;
 use crate::public::{
-    query_snapshot::{PrefetchReturn, QUERY_SNAPSHOT},
-    tree::start_loop::VERSION_COUNT_TIMESTAMP,
-    tree_snapshot::start_loop::TREE_SNAPSHOT_DELETE_QUEUE_SENDER,
-    utils::get_current_timestamp_u64,
+    query_snapshot::{PrefetchReturn, QUERY_SNAPSHOT}, tree::start_loop::VERSION_COUNT_TIMESTAMP, tree_snapshot::TREE_SNAPSHOT, utils::get_current_timestamp_u64
 };
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};
@@ -56,11 +53,7 @@ impl Expire {
                                             })
                                             .collect();
                                         
-                                            TREE_SNAPSHOT_DELETE_QUEUE_SENDER
-                                                .get()
-                                                .unwrap()
-                                                .send(tree_snapshot_delete_queue)
-                                                .unwrap();
+                                            TREE_SNAPSHOT.tree_snapshot_delete(tree_snapshot_delete_queue);
                                         }
                                         Ok(false) => {
                                             error!("Failed to delete query cache table: {:?}", timestamp);

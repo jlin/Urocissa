@@ -16,7 +16,7 @@ pub struct AlbumQueue {
     pub notify: Option<Arc<Notify>>,
 }
 
-pub static ALBUM_SELFUPDATE_QUEUE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> = OnceLock::new();
+static ALBUM_SELFUPDATE_QUEUE_SENDER: OnceLock<UnboundedSender<AlbumQueue>> = OnceLock::new();
 pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
     let (album_selfupdate_queue_sender, mut album_selfupdate_queue_receiver) =
         unbounded_channel::<AlbumQueue>();
