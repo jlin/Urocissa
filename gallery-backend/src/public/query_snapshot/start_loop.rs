@@ -75,6 +75,11 @@ impl QuerySnapshot {
                         "{} items remaining in in-memory query cache",
                         self.in_memory.len()
                     );
+                    buffer.iter().for_each(|notify_opt| {
+                        if let Some(notify) = notify_opt {
+                            notify.notify_one()
+                        }
+                    });
                 })
                 .await
                 .unwrap();

@@ -5,19 +5,35 @@ use crate::public::{
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};
 use std::{
-    sync::atomic::{AtomicU64, Ordering},
+    sync::{atomic::{AtomicU64, Ordering}, Arc, OnceLock},
     time::Duration,
 };
-use tokio::{sync::Notify, time::sleep};
+use tokio::{sync::{mpsc::{unbounded_channel, UnboundedSender}, Notify}, time::sleep};
 
-pub static SHOULD_CHECK_QUERY_EXPIRE: Notify = Notify::const_new();
+
+static SHOULD_CHECK_QUERY_EXPIRE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
+    OnceLock::new();
+
 pub static NEXT_EXPIRE_TIME: AtomicU64 = AtomicU64::new(0);
 
 impl Expire {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn(async {
+        tokio::task::spawn(async move {
+            let (should_check_query_expire_sender, mut should_check_query_expire_receiver) =
+            unbounded_channel::<Option<Arc<Notify>>>();
+
+            SHOULD_CHECK_QUERY_EXPIRE_SENDER
+            .set(should_check_query_expire_sender)
+            .unwrap();
             loop {
-                tokio::task::spawn_blocking(|| {
+                let mut buffer = Vec::new();
+
+                should_check_query_expire_receiver
+                    .recv_many(&mut buffer, usize::MAX)
+                    .await;
+
+                tokio::task::spawn_blocking(move|| {
+   
                     let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
                     // Iter over all tables in QUERY_SNAPSHOT
                     write_txn
@@ -75,6 +91,11 @@ impl Expire {
                             }
                         });
                     write_txn.commit().unwrap();
+                    buffer.iter().for_each(|notify_opt| {
+                        if let Some(notify) = notify_opt {
+                            notify.notify_one()
+                        }
+                    });
                 })
                 .await
                 .unwrap();
@@ -89,9 +110,25 @@ impl Expire {
                     sleep(duration).await;
                 } else {
                     info!("Expire thread sleep until notified.");
-                    SHOULD_CHECK_QUERY_EXPIRE.notified().await
+                    self.should_check_query_expire()
                 }
             }
         })
+    }
+    pub fn should_check_query_expire(&self) {
+        SHOULD_CHECK_QUERY_EXPIRE_SENDER
+            .get()
+            .unwrap()
+            .send(None)
+            .unwrap();
+    }
+    pub async fn should_check_query_expire_async(&self) {
+        let notify = Arc::new(Notify::new());
+        SHOULD_CHECK_QUERY_EXPIRE_SENDER
+            .get()
+            .unwrap()
+            .send(Some(notify.clone()))
+            .unwrap();
+        notify.notified().await
     }
 }

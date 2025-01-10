@@ -1,4 +1,4 @@
-use crate::public::expire::start_loop::{NEXT_EXPIRE_TIME, SHOULD_CHECK_QUERY_EXPIRE};
+use crate::public::expire::start_loop::NEXT_EXPIRE_TIME;
 use crate::public::expire::EXPIRE_TABLE_DEFINITION;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::public::utils::{get_current_timestamp_u64, info_wrap};
@@ -7,7 +7,7 @@ use log::info;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
-use super::Expire;
+use super::{Expire, EXPIRE};
 
 impl Expire {
     pub fn update_expire_time(&self, start_time: Instant) {
@@ -44,7 +44,7 @@ impl Expire {
 
             expire_write_txn.commit().unwrap();
             NEXT_EXPIRE_TIME.store(new_expire_time, Ordering::SeqCst);
-            SHOULD_CHECK_QUERY_EXPIRE.notify_one();
+            EXPIRE.should_check_query_expire();
         }
     }
 }
