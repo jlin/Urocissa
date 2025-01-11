@@ -1,44 +1,19 @@
-# Use the Alpine variant of cargo-chef as the base image for building
-FROM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
+FROM rust:bookworm AS builder
 
-# Define the build type as a build argument (default to "release")
 ARG BUILD_TYPE=release
 ENV BUILD_TYPE=${BUILD_TYPE}
 
 WORKDIR /app/gallery-backend
 
-######################
-# Planner stage
-######################
-FROM chef AS planner
-
 COPY ./gallery-backend/Cargo.lock /app/gallery-backend/Cargo.lock
 COPY ./gallery-backend/Cargo.toml /app/gallery-backend/Cargo.toml
 COPY ./gallery-backend/src /app/gallery-backend/src
 
-RUN cargo chef prepare --recipe-path recipe.json
-
-######################
-# Builder stage
-######################
-FROM chef AS builder
-
-RUN apk add --no-cache openssl-dev openssl-libs-static
-
-COPY --from=planner /app/gallery-backend/recipe.json /app/gallery-backend/recipe.json
-
-# Use the build argument to determine the build mode
-RUN if [ "${BUILD_TYPE}" = "release" ]; then \
-        cargo chef cook --release --recipe-path recipe.json; \
-    elif [ "${BUILD_TYPE}" = "debug" ]; then \
-        cargo chef cook --recipe-path recipe.json; \
-    else \
-        cargo chef cook --profile "${BUILD_TYPE}" --recipe-path recipe.json; \
-    fi
-
-COPY ./gallery-backend/Cargo.lock /app/gallery-backend/Cargo.lock
-COPY ./gallery-backend/Cargo.toml /app/gallery-backend/Cargo.toml
-COPY ./gallery-backend/src /app/gallery-backend/src
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Build the backend binary based on the build type
 RUN if [ "${BUILD_TYPE}" = "release" ]; then \
@@ -54,17 +29,19 @@ RUN cp /app/gallery-backend/target/${BUILD_TYPE}/Urocissa /app/gallery-backend/U
 ######################
 # Frontend builder stage
 ######################
-FROM node:lts-alpine AS frontend-builder
+FROM node:lts AS frontend-builder
 WORKDIR /app/gallery-frontend
 COPY ./gallery-frontend /app/gallery-frontend
-RUN npm run build
+RUN npm ci && npm run build
 
 ######################
 # Runtime stage
 ######################
-FROM alpine:latest AS runtime
+FROM debian:bookworm-slim AS runtime
 
-RUN apk add --no-cache ffmpeg
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app/gallery-backend
 
@@ -101,6 +78,5 @@ RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo 'echo "Attempting to run ./Urocissa"' >> /entrypoint.sh && \
     echo 'exec ./Urocissa' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
-
 
 ENTRYPOINT ["/entrypoint.sh"]
