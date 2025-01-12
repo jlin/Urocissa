@@ -72,10 +72,10 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 | External Libraries         | ❌     |
 | Existing Folders           | ❌     |
 
-## Steps to Set Up and Use the App
+## Quick Setup
 To instantly set up and try Urocissa using Docker on Linux, follow these steps:
 
-### Instant Setup with Docker
+### Quick Setup with Docker
 
 1. **Clone the Repository**
 
@@ -101,38 +101,19 @@ To instantly set up and try Urocissa using Docker on Linux, follow these steps:
    bash run_urocissa_docker.sh
    ```
 
-This script will install all necessary components and launch **Urocissa** within five seconds. Once the installation is complete, you can access the app using the following link:
+This script will set up all the necessary configurations and launch Urocissa. Once the installation is complete, you can access the app using the following link:
 
 [http://127.0.0.1:5673](http://127.0.0.1:5673)
 
-The default login password is `password`.
+The default login password is `password`. If you want to change the default port or password, refer to the [Configuration Guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md#3-configure-backend-settings).
 
-#### Custom Configuration
+### Quick Update with Docker
 
-If you want to change the default port or password, refer to the [Configuration Guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md#3-configure-backend-settings).
-
-### Build from Source
-
-If you prefer to build and install Urocissa from source, follow the relevant guide for your operating system:
-
-- **Linux Users**: Refer to the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
-- **Windows Users**: Check out the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
-
-## Update
-
-### 1. Pull the Latest Changes from the Repository
-
-Navigate to the project directory and pull the latest updates:
-
-```bash
-git pull
-
-```
----
-
-### 2. Rebuild
-
-If using Docker, follow these steps:
+1. Navigate to the project directory and pull the latest updates:
+   
+   ```bash
+   git pull
+   ```
 
 1. Pull the latest Docker image:
 
@@ -145,40 +126,11 @@ If using Docker, follow these steps:
    ```bash
    bash run_urocissa_docker.sh
    ```
-This will update and start the updated app.
+This will update and launch Urocissa.
 
-If you are not using Docker and prefer to build from source, follow these manual steps to update:
+## Build from Source (Without Using Docker)
 
-### Rebuild the Frontend
+If you prefer to build and install Urocissa from source, follow the relevant guide for your operating system:
 
-1. Navigate to the `gallery-frontend` directory:
-
-   ```bash
-   cd ./Urocissa/gallery-frontend
-   ```
-
-2. Build the frontend:
-
-   ```bash
-   npm run build
-   ```
-
----
-
-### Rebuild the Backend
-
-1. Navigate to the `gallery-backend` directory:
-
-   ```bash
-   cd ./Urocissa/gallery-backend
-   ```
-
-2. Build and run the backend using Cargo:
-
-   ```bash
-   cargo run --release
-   ```
-
----
-
-After following these steps, your Urocissa app will be updated to the latest version.
+- **Linux Users**: Refer to the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/LINUX.md).
+- **Windows Users**: Check out the instructions in [this guide](https://github.com/hsa00000/Urocissa/blob/main/WINDOWS.md).
