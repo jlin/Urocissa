@@ -93,15 +93,15 @@ To instantly set up and try Urocissa using Docker on Linux, follow these steps:
    cd Urocissa
    ```
 
-3. **Run the Setup Script**
+3. **Run the Launch Script**
 
-   Execute the `run_urocissa_docker.sh` script to install and launch Urocissa:
+   Execute the `run_urocissa_docker.sh` script to launch Urocissa:
 
    ```bash
    bash run_urocissa_docker.sh
    ```
 
-This script will set up all the necessary configurations and launch Urocissa. Once the installation is complete, you can access the app using the following link:
+This script will launch Urocissa. You can access the app using the following link:
 
 [http://127.0.0.1:5673](http://127.0.0.1:5673)
 
