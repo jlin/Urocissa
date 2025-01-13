@@ -6,7 +6,7 @@
     }"
   >
     <v-main class="h-screen">
-      <DropZoneModal />
+      <DropZoneModal v-if="!isMobile()" />
       <router-view v-slot="{ Component }" :key="routeKey">
         <component :is="Component" />
       </router-view>
@@ -22,7 +22,7 @@ import { useScrollbarStore } from '@/store/scrollbarStore'
 import { useRerenderStore } from '@/store/rerenderStore'
 import NotificationWarn from '@/components/NotificationWarn.vue'
 import DropZoneModal from './Modal/DropZoneModal.vue'
-
+import isMobile from 'is-mobile'
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 const rerenderStore = useRerenderStore('mainId')

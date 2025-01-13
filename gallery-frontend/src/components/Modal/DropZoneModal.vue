@@ -60,15 +60,9 @@ onMounted(() => {
   window.addEventListener('dragenter', (event: DragEvent) => {
     if (event.dataTransfer) {
       const itemsArray: DataTransferItem[] = Array.from(event.dataTransfer.items)
-      const hasValidType = itemsArray.some((item) => {
-        if (item.kind === 'file') {
-          // Allow images, videos, or folders
-          return (
-            item.type.startsWith('image/') || item.type.startsWith('video/') || item.type === ''
-          ) // Folders usually have an empty type
-        }
-        return false
-      })
+      const hasValidType = itemsArray.some(
+        (item) => item.type.startsWith('image/') || item.type.startsWith('video/')
+      )
       visible.value = hasValidType
     }
   })
