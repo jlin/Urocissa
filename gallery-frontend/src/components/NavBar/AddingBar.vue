@@ -62,7 +62,7 @@ const submit = async () => {
     await editAlbums(hashArray, [props.album.id], [], timestamp)
     modalStore.showHomeTempModal = false
     waiting.value = false
-    rerenderStore.rerenderHomeIsolated()
+    rerenderStore.rerenderHome()
   }
 }
 </script>
