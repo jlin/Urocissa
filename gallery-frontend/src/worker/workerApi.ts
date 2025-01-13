@@ -1,5 +1,12 @@
 // Import necessary types from the commonType module
-import { Prefetch, RowWithOffset, ScrollbarData, SlicedData, TagInfo } from '@/script/common/types'
+import {
+  FetchDataMethod,
+  Prefetch,
+  RowWithOffset,
+  ScrollbarData,
+  SlicedData,
+  TagInfo
+} from '@/script/common/types'
 
 // Import createActionCreators from typesafe-agent-events for defining strongly-typed actions
 import { createActionCreators } from 'typesafe-agent-events'
@@ -66,6 +73,7 @@ export const fromImgWorker = createActionCreators({
 
 // Define the parameter types for different actions to manage data and UI state
 interface FetchDataParams {
+  fetchMethod: FetchDataMethod
   batch: number
   timestamp: number
 }

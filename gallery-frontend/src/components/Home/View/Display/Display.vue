@@ -7,7 +7,7 @@
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
-      <ViewBar :metadata="metadata" :index="index" :hash="hash" :isolation-id="isolationId"/>
+      <ViewBar :metadata="metadata" :index="index" :hash="hash" :isolation-id="isolationId" />
       <ViewPageDisplayDatabase
         v-if="metadata && !configStore.disableImg"
         :index="index"
@@ -60,7 +60,6 @@ import { bindActionDispatch } from 'typesafe-agent-events'
 import { toImgWorker } from '@/worker/workerApi'
 import { useWorkerStore } from '@/store/workerStore'
 import { useQueueStore } from '@/store/queueStore'
-import { batchNumber } from '@/script/common/constants'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { AbstractData, IsolationId } from '@/script/common/types'
@@ -212,7 +211,7 @@ async function prefetch(index: number, isolationId: IsolationId) {
     } else {
       // dataStore.data.get(nextIndex) is undefined then fetch that data
       if (nextIndex <= prefetchStore.dataLength - 1) {
-        fetchDataInWorker(Math.floor(nextIndex / batchNumber), isolationId)
+        fetchDataInWorker('single', nextIndex, isolationId)
       }
     }
 
@@ -228,7 +227,7 @@ async function prefetch(index: number, isolationId: IsolationId) {
     } else {
       // dataStore.data.get(previousIndex) is undefined then fetch that data
       if (previousIndex >= 0) {
-        fetchDataInWorker(Math.floor(previousIndex / batchNumber), isolationId)
+        fetchDataInWorker('single', previousIndex, isolationId)
       }
     }
 

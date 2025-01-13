@@ -10,6 +10,7 @@ import {
   AbstractData,
   DataBase,
   DisplayElement,
+  FetchDataMethod,
   Prefetch,
   Row,
   RowWithOffset,
@@ -66,18 +67,19 @@ axios.interceptors.response.use(
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({
     fetchData: async (payload) => {
-      const { batch, timestamp } = payload
-      // if there are too many batch are processed then try to terminate the oldest request
-      if (shouldProcessBatch.length >= 6) {
-        shouldProcessBatch.shift()
-      }
-      shouldProcessBatch.push(batch)
+      const { fetchMethod, batch, timestamp } = payload
 
-      const result = await fetchData(batch, timestamp)
+      // if there are too many batch are processed then try to terminate the oldest request
+      if (fetchMethod === 'batch') {
+        if (shouldProcessBatch.length >= 6) {
+          shouldProcessBatch.shift()
+        }
+        shouldProcessBatch.push(batch)
+      }
+
+      const { result, startIndex, endIndex } = await fetchData(fetchMethod, batch, timestamp)
 
       if (result.size > 0) {
-        const startIndex = batch * batchNumber
-        const endIndex = (batch + 1) * batchNumber
         const indices = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i)
 
         //Push the result Map into a SlicedData[]
@@ -184,44 +186,71 @@ async function prefetch(
  * @returns A promise that resolves to a Map of data entries keyed by their index,
  *          or an object containing an error message and a warning flag if an error occurs.
  */
-async function fetchData(batchIndex: number, timestamp: number) {
-  const fetchUrl = `/get/get-data?timestamp=${timestamp}&start=${batchIndex * batchNumber}&end=${
-    (batchIndex + 1) * batchNumber
-  }`
+async function fetchData(
+  fetchMethod: FetchDataMethod,
+  index: number,
+  timestamp: number
+): Promise<{ result: Map<number, AbstractData>; startIndex: number; endIndex: number }> {
+  let start: number
+  let end: number
+
+  switch (fetchMethod) {
+    case 'batch': {
+      const batchIndex = index
+      start = batchIndex * batchNumber
+      end = (batchIndex + 1) * batchNumber
+      break
+    }
+    case 'single': {
+      start = index
+      end = index + 1
+      break
+    }
+  }
+
+  const fetchUrl = `/get/get-data?timestamp=${timestamp}&start=${start}&end=${end}`
 
   const response = await axios.get<DataBase[]>(fetchUrl)
   const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
   const data = new Map<number, AbstractData>()
 
-  for (let index = 0; index < databaseTimestampArray.length; index++) {
-    if (!shouldProcessBatch.includes(batchIndex)) {
+  for (let i = 0; i < databaseTimestampArray.length; i++) {
+    // Determine the current batch index based on the fetch method
+    const currentBatchIndex = fetchMethod === 'batch' ? Math.floor(start / batchNumber) : index
+
+    if (!shouldProcessBatch.includes(currentBatchIndex)) {
       break // Stop processing further if the batch should no longer be processed
     }
-    const item = databaseTimestampArray[index]
+
+    const item = databaseTimestampArray[i]
+    const key = start + i
+
     if (item !== undefined && 'DataBase' in item.abstractData) {
       const dataBaseInstance = createDataBase(item.abstractData.DataBase, item.timestamp)
       const abstractData = createAbstractData(dataBaseInstance)
-      const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
     } else if (item !== undefined && 'Album' in item.abstractData) {
       const abstractData = createAbstractData(item.abstractData.Album)
-      const key = batchIndex * batchNumber + index
       data.set(key, abstractData)
     } else {
       console.error(
-        `Error processing item at batchIndex: ${batchIndex}, batchNumber: ${batchNumber}, index: ${index}. ` +
+        `Error processing item at ${fetchMethod === 'batch' ? 'batchIndex' : 'index'}: ${
+          fetchMethod === 'batch' ? index : index
+        }, ` +
+          `batchNumber: ${batchNumber}, index: ${i}. ` +
           `Item is undefined or lacks 'DataBase' and 'Album' in abstractData.`,
         item
       )
     }
 
-    if (index % 100 === 0) {
+    if (i % 100 === 0) {
       // Yield after every 100 items
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
   }
-  return data
+
+  return { result: data, startIndex: start, endIndex: end }
 }
 
 /**

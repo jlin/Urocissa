@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
-import { batchNumber, getSrc } from '@/../config'
+import { getSrc } from '@/../config'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { getCookiesJwt, getIsolationIdByRoute } from '@/script/common/functions'
 import { AbstractData } from '@/script/common/types'
@@ -57,7 +57,7 @@ const downloadAllFiles = async () => {
         let metadata = dataStore.data.get(index)
         if (!metadata) {
           // Initiate data fetch
-          fetchDataInWorker(Math.floor(index / batchNumber), isolationId)
+          fetchDataInWorker('single', index, isolationId)
 
           // Wait for metadata to be available
           try {

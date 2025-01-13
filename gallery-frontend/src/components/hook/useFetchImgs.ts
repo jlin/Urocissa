@@ -35,7 +35,7 @@ export function useFetchImgs(
 
         for (let batchIndex = startBatchIndex; batchIndex <= endBatchIndex; batchIndex++) {
           if (dataStore.batchFetched.get(batchIndex) !== true) {
-            fetchDataInWorker(batchIndex, isolationId)
+            fetchDataInWorker('batch', batchIndex, isolationId)
           }
         }
       }
