@@ -1,15 +1,12 @@
 use super::TreeSnapshot;
-use crate::public::reduced_data::ReducedData;
+use crate::public::{reduced_data::ReducedData, utils::start_loop_util};
 use redb::TableDefinition;
 use std::{
     collections::HashSet,
     sync::{Arc, OnceLock},
     time::Instant,
 };
-use tokio::sync::{
-    mpsc::{unbounded_channel, UnboundedSender},
-    Notify,
-};
+use tokio::sync::{mpsc::UnboundedSender, Notify};
 
 static TREE_SNAPSHOT_SHOULD_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
     OnceLock::new();
@@ -25,68 +22,47 @@ pub struct TreeSnapshotDelete {
 impl TreeSnapshot {
     // Delete snapshots send from EXPIRE.
     pub fn start_loop_remove(&'static self) -> tokio::task::JoinHandle<()> {
-        tokio::task::spawn(async move {
-            let (tree_snapshot_delete_queue_sender, mut tree_snapshot_delete_queue_receiver) =
-                unbounded_channel::<TreeSnapshotDelete>();
+        start_loop_util(&TREE_SNAPSHOT_DELETE_QUEUE_SENDER, |buffer| {
+            let unique_timestamp: HashSet<_> = buffer
+                .iter()
+                .flat_map(|tree_snapshot_delete| tree_snapshot_delete.timestamp_list.iter()) // Flatten all album_list vectors
+                .collect();
+            let tree_snapshot_delete_queue: Vec<_> = unique_timestamp.into_iter().collect();
+            tree_snapshot_delete_queue
+                .iter()
+                .for_each(|timestamp_delete| {
+                    let write_txn = self.in_disk.begin_write().unwrap();
+                    let binding = timestamp_delete.to_string();
+                    let table_definition: TableDefinition<u64, ReducedData> =
+                        TableDefinition::new(&binding);
 
-            TREE_SNAPSHOT_DELETE_QUEUE_SENDER
-                .set(tree_snapshot_delete_queue_sender)
-                .unwrap();
+                    match write_txn.delete_table(table_definition) {
+                        Ok(true) => {
+                            info!("Delete tree cache table: {:?}", timestamp_delete)
+                        }
+                        Ok(false) => {
+                            error!("Failed to delete tree cache table: {:?}", timestamp_delete)
+                        }
+                        Err(e) => {
+                            error!(
+                                "Failed to delete tree cache table: {:?}, error: {:?}",
+                                timestamp_delete, e
+                            )
+                        }
+                    }
 
-            loop {
-                let mut buffer = Vec::new();
+                    info!(
+                        "{} items remaining in disk tree cache",
+                        write_txn.list_tables().unwrap().count()
+                    );
 
-                tree_snapshot_delete_queue_receiver
-                    .recv_many(&mut buffer, usize::MAX)
-                    .await;
-                tokio::task::spawn_blocking(move || {
-                    let unique_timestamp: HashSet<_> = buffer
-                        .iter()
-                        .flat_map(|tree_snapshot_delete| tree_snapshot_delete.timestamp_list.iter()) // Flatten all album_list vectors
-                        .collect();
-                    let tree_snapshot_delete_queue: Vec<_> = unique_timestamp.into_iter().collect();
-                    tree_snapshot_delete_queue
-                        .iter()
-                        .for_each(|timestamp_delete| {
-                            let write_txn = self.in_disk.begin_write().unwrap();
-                            let binding = timestamp_delete.to_string();
-                            let table_definition: TableDefinition<u64, ReducedData> =
-                                TableDefinition::new(&binding);
-
-                            match write_txn.delete_table(table_definition) {
-                                Ok(true) => {
-                                    info!("Delete tree cache table: {:?}", timestamp_delete)
-                                }
-                                Ok(false) => {
-                                    error!(
-                                        "Failed to delete tree cache table: {:?}",
-                                        timestamp_delete
-                                    )
-                                }
-                                Err(e) => {
-                                    error!(
-                                        "Failed to delete tree cache table: {:?}, error: {:?}",
-                                        timestamp_delete, e
-                                    )
-                                }
-                            }
-
-                            info!(
-                                "{} items remaining in disk tree cache",
-                                write_txn.list_tables().unwrap().count()
-                            );
-
-                            write_txn.commit().unwrap();
-                            buffer.iter().for_each(|tree_snapshot_delete| {
-                                if let Some(notify) = &tree_snapshot_delete.notify {
-                                    notify.notify_one()
-                                };
-                            });
-                        });
-                })
-                .await
-                .unwrap();
-            }
+                    write_txn.commit().unwrap();
+                    buffer.iter().for_each(|tree_snapshot_delete| {
+                        if let Some(notify) = &tree_snapshot_delete.notify {
+                            notify.notify_one()
+                        };
+                    });
+                });
         })
     }
 
@@ -100,7 +76,7 @@ impl TreeSnapshot {
             })
             .unwrap();
     }
-    pub async fn tree_snapshot_delete_async(&self, timestamp_list: Vec<u128>) {
+    pub async fn _tree_snapshot_delete_async(&self, timestamp_list: Vec<u128>) {
         let notify = Arc::new(Notify::new());
         TREE_SNAPSHOT_DELETE_QUEUE_SENDER
             .get()
@@ -115,70 +91,54 @@ impl TreeSnapshot {
 
     // Flush snapshots in memory to disk
     pub fn start_loop_flush(&'static self) -> tokio::task::JoinHandle<()> {
-        let (tree_snapshot_should_flush_sender, mut tree_snapshot_should_flush_receiver) =
-            unbounded_channel::<Option<Arc<Notify>>>();
-
-        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
-            .set(tree_snapshot_should_flush_sender)
-            .unwrap();
-        tokio::task::spawn(async move {
+        start_loop_util(&TREE_SNAPSHOT_SHOULD_FLUSH_SENDER, |buffer| {
             loop {
-                let mut buffer = Vec::new();
+                if self.in_memory.is_empty() {
+                    break;
+                }
 
-                tree_snapshot_should_flush_receiver
-                    .recv_many(&mut buffer, usize::MAX)
-                    .await;
-
-                tokio::task::spawn_blocking(move || loop {
-                    if self.in_memory.is_empty() {
+                // Narrow scope for the DashMap reference
+                let timestamp = {
+                    // Attempt to get a reference to one entry:
+                    let Some(entry_ref) = self.in_memory.iter().next() else {
                         break;
-                    }
-
-                    // Narrow scope for the DashMap reference
-                    let timestamp = {
-                        // Attempt to get a reference to one entry:
-                        let Some(entry_ref) = self.in_memory.iter().next() else {
-                            break;
-                        };
-
-                        let timestamp = *entry_ref.key();
-                        let timestamp_str = timestamp.to_string();
-
-                        let timer_start = Instant::now();
-                        let txn = self.in_disk.begin_write().unwrap();
-                        let table_definition: TableDefinition<u64, ReducedData> =
-                            TableDefinition::new(&timestamp_str);
-
-                        {
-                            let mut table = txn.open_table(table_definition).unwrap();
-                            for (index, data) in entry_ref.iter().enumerate() {
-                                table.insert(index as u64, data).unwrap();
-                            }
-                        }
-
-                        txn.commit().unwrap();
-
-                        info!(
-                            duration = &*format!("{:?}", timer_start.elapsed());
-                            "Write in-memory cache into disk"
-                        );
-                        timestamp
                     };
 
-                    //Remove from DashMap *after* reference is dropped
-                    self.in_memory.remove(&timestamp);
-                    info!(
-                        "{} items remaining in in-memory tree cache",
-                        self.in_memory.len()
-                    );
-                    buffer.iter().for_each(|notify_opt| {
-                        if let Some(notify) = notify_opt {
-                            notify.notify_one()
+                    let timestamp = *entry_ref.key();
+                    let timestamp_str = timestamp.to_string();
+
+                    let timer_start = Instant::now();
+                    let txn = self.in_disk.begin_write().unwrap();
+                    let table_definition: TableDefinition<u64, ReducedData> =
+                        TableDefinition::new(&timestamp_str);
+
+                    {
+                        let mut table = txn.open_table(table_definition).unwrap();
+                        for (index, data) in entry_ref.iter().enumerate() {
+                            table.insert(index as u64, data).unwrap();
                         }
-                    });
-                })
-                .await
-                .unwrap();
+                    }
+
+                    txn.commit().unwrap();
+
+                    info!(
+                        duration = &*format!("{:?}", timer_start.elapsed());
+                        "Write in-memory cache into disk"
+                    );
+                    timestamp
+                };
+
+                //Remove from DashMap *after* reference is dropped
+                self.in_memory.remove(&timestamp);
+                info!(
+                    "{} items remaining in in-memory tree cache",
+                    self.in_memory.len()
+                );
+                buffer.iter().for_each(|notify_opt| {
+                    if let Some(notify) = notify_opt {
+                        notify.notify_one()
+                    }
+                });
             }
         })
     }
@@ -189,7 +149,7 @@ impl TreeSnapshot {
             .send(None)
             .unwrap();
     }
-    pub async fn should_flush_tree_snapshop_async(&self) {
+    pub async fn _should_flush_tree_snapshop_async(&self) {
         let notify = Arc::new(Notify::new());
         TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
             .get()
