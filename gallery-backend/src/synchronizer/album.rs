@@ -3,6 +3,7 @@ use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
 
 use arrayvec::ArrayString;
+use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use std::collections::HashSet;
@@ -32,6 +33,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                 .recv_many(&mut buffer, usize::MAX)
                 .await;
             tokio::task::spawn_blocking(move || {
+                info!("Perform album self-update");
                 let unique_id: HashSet<_> = buffer
                     .iter()
                     .flat_map(|album_queue| album_queue.album_list.iter()) // Flatten all album_list vectors
