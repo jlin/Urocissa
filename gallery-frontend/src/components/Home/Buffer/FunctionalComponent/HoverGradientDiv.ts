@@ -1,11 +1,11 @@
 import { FunctionalComponent, h } from 'vue'
 
 interface HoverGradientDivProps {
-  mobile: string | null
+  mobile: boolean
 }
 
 const HoverGradientDiv: FunctionalComponent<HoverGradientDivProps> = (props) => {
-  if (props.mobile !== null) {
+  if (props.mobile) {
     return null
   }
 
@@ -23,7 +23,7 @@ const HoverGradientDiv: FunctionalComponent<HoverGradientDivProps> = (props) => 
 
 HoverGradientDiv.props = {
   mobile: {
-    type: [String, null],
+    type: Boolean,
     required: true
   }
 }

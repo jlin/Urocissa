@@ -12,7 +12,7 @@ interface SmallImageContainerProps {
   index: number
   displayElement: DisplayElement
   isolationId: IsolationId
-  mobile: string | null
+  mobile: boolean
   onPointerdown: (event: PointerEvent) => void
   onPointerup: (event: PointerEvent) => void
   onPointerleave: () => void
@@ -43,7 +43,7 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
 
   const hasBorder = props.abstractData.album !== undefined
 
-  if (props.mobile !== null) {
+  if (props.mobile) {
     chips.push(
       h(MobileSmallImage, {
         hasBorder: hasBorder,
@@ -84,7 +84,7 @@ SmallImageContainer.props = {
     required: true
   },
   mobile: {
-    type: [String, null] as PropType<string | null>,
+    type: Boolean,
     required: true
   },
   onPointerdown: {

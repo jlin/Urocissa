@@ -22,7 +22,7 @@ import { Ref } from 'vue'
 export function handleScroll(
   imageContainerRef: Ref<HTMLElement | null>,
   lastScrollTop: Ref<number>,
-  mobile: string | null,
+  mobile: boolean,
   stopScroll: Ref<boolean>,
   windowHeight: Ref<number>,
   isolationId: IsolationId
@@ -36,7 +36,7 @@ export function handleScroll(
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
 
         if (prefetchStore.totalHeight - windowHeight.value < 0) {
-          if (mobile !== null) {
+          if (mobile) {
             stopScroll.value = true
             scrollTopStore.scrollTop = 0
             setTimeout(() => {
@@ -54,7 +54,7 @@ export function handleScroll(
 
         if (result < 0) {
           // If scrolling exceeds the lower bound, reset the scroll position to 0.
-          if (mobile !== null) {
+          if (mobile) {
             stopScroll.value = true
             scrollTopStore.scrollTop = 0
             setTimeout(() => {
@@ -65,7 +65,7 @@ export function handleScroll(
           }
         } else if (result >= getScrollUpperBound(prefetchStore.totalHeight, windowHeight.value)) {
           // If scrolling exceeds the upper bound, reset the scroll position to the maximum allowed value.
-          if (mobile !== null) {
+          if (mobile) {
             stopScroll.value = true
             scrollTopStore.scrollTop = getScrollUpperBound(
               prefetchStore.totalHeight,

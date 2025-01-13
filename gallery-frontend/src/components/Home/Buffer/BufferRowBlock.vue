@@ -72,7 +72,7 @@ const props = defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const mobile = getInjectValue<string | null>('mobile')
+const mobile = getInjectValue<boolean>('mobile')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)

@@ -24,7 +24,6 @@
     "is-mobile": "^5.0.0",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
-    "mobile-detect": "^1.4.5",
     "pinia": "^2.3.0",
     "thumbhash": "^0.1.1",
     "typesafe-agent-events": "^1.0.2",

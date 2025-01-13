@@ -11,7 +11,7 @@ interface MainBlockProps {
   index: number
   displayElement: DisplayElement
   isolationId: IsolationId
-  mobile: string | null
+  mobile: boolean
   onPointerdown: (event: PointerEvent) => void
   onPointerup: (event: PointerEvent) => void
   onPointerleave: () => void
@@ -83,7 +83,7 @@ MainBlock.props = {
     required: true
   },
   mobile: {
-    type: [String, null] as PropType<string | null>,
+    type: Boolean,
     required: true
   },
   onPointerdown: {

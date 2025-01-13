@@ -55,7 +55,7 @@ import { prefetch } from '@/components/hook/usePrefetch'
 import { handleScroll } from '@/components/hook/useHandleScroll'
 import { useInitializeScrollPosition } from '@/components/hook/useInitializeScrollPosition'
 import { useImgStore } from '@/store/imgStore'
-import MobileDetect from 'mobile-detect'
+import isMobile from 'is-mobile'
 import Buffer from '@/components/Home/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/Page/HomeScrollBar.vue'
 import '@/style/HomePage.css'
@@ -91,7 +91,7 @@ const imgStore = useImgStore(props.isolationId)
 const locationStore = useLocationStore(props.isolationId)
 const optimisticUpateStore = useOptimisticStore(props.isolationId)
 const rerenderStore = useRerenderStore('mainId')
-
+const mobile = isMobile()
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
 const { width: windowWidth, height: windowHeight } = useElementSize(imageContainerRef)
@@ -99,9 +99,6 @@ const clientHeight = ref<number>(0)
 
 const lastScrollTop = ref(0)
 const stopScroll = ref(false)
-
-const md = new MobileDetect(window.navigator.userAgent)
-const mobile = md.mobile()
 
 provide('imageContainerRef', imageContainerRef)
 provide('windowWidth', windowWidth)
