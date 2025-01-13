@@ -186,7 +186,7 @@ const checkAndFetch = (index: number): boolean => {
       index,
       hash,
       devicePixelRatio: window.devicePixelRatio,
-      jwt: getCookiesJwt() // Assuming JWT is always present
+      jwt: getCookiesJwt()
     })
   }
 

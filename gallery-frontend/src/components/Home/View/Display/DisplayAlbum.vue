@@ -147,7 +147,7 @@ async function editTitle() {
     const album = dataStore.data.get(props.index)?.album
     if (albumInfo && album) {
       albumInfo.albumName = title
-      album.title =  title
+      album.title = title
     } else {
       console.error(`Cannot find album with id ${id}`)
     }
