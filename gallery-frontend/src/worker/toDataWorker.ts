@@ -140,10 +140,6 @@ self.addEventListener('message', (e) => {
       const { scrollbarDataArray } = await fetchScrollbar(timestamp)
       const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
       postToMain.fetchScrollbarReturn({ scrollbarDataArray: scrollbarDataArray })
-    },
-    setAsAlbum: async (payload) => {
-      const { albumId, coverHash } = payload
-      await setAsAlbum(albumId, coverHash)
     }
   })
   handler(e.data as ReturnType<(typeof toDataWorker)[keyof typeof toDataWorker]>)
@@ -509,19 +505,4 @@ async function fetchScrollbar(timestamp: number) {
   const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`)
   const scrollBarDataArray = z.array(scrollbarDataSchema).parse(response.data)
   return { scrollbarDataArray: scrollBarDataArray }
-}
-
-async function setAsAlbum(albumId: string, coverHash: string) {
-  const setAlbumCover = {
-    albumId: albumId,
-    coverHash: coverHash
-  }
-  await axios.post('/post/set_album_cover', setAlbumCover, {
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  })
-  console.log('Successfully set as cover.')
-  const postToMain = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
-  postToMain.notification({ message: 'Successfully set as cover.', messageType: 'info' })
 }

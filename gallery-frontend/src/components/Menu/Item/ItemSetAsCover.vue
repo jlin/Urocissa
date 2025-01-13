@@ -8,16 +8,18 @@
 import { useRoute } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
-
+import { useMessageStore } from '@/store/messageStore'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 
-import { setAsCoverInWorker } from '@/script/inWorker/setAsCoverInWorker'
+import axios from 'axios'
+import { useRerenderStore } from '@/store/rerenderStore'
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const collectionStore = useCollectionStore(isolationId)
 const dataStore = useDataStore(isolationId)
+const messageStore = useMessageStore('mainId')
 
-const setAsCover = () => {
+const setAsCover = async () => {
   if (collectionStore.editModeCollection.size !== 1) {
     console.warn('editModeCollection must contain exactly one item to set as cover.')
     return
@@ -39,6 +41,26 @@ const setAsCover = () => {
     return
   }
 
-  setAsCoverInWorker(albumId, coverHash, isolationId)
+  await axios.post(
+    '/post/set_album_cover',
+    {
+      albumId: albumId,
+      coverHash: coverHash
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+
+  messageStore.message = 'Successfully set as cover.'
+  messageStore.warn = false
+  messageStore.showMessage = true
+
+  collectionStore.editModeOn = false
+
+  const rerenderStore = useRerenderStore('mainId')
+  rerenderStore.rerenderHome()
 }
 </script>
