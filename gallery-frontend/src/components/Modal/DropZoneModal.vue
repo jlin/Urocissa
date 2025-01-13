@@ -29,7 +29,6 @@ const uploadStore = useUploadStore('mainId')
 const visible = ref(false)
 const dropZoneRef = ref<HTMLDivElement>()
 function onDrop(files: File[] | null) {
-  console.log(files)
   if (files !== null) {
     uploadStore
       .fileUpload(files)
