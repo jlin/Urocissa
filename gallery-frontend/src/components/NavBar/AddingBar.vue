@@ -43,6 +43,8 @@ import { useModalStore } from '@/store/modalStore'
 import { useRerenderStore } from '@/store/rerenderStore'
 import { ref } from 'vue'
 import axios from 'axios'
+import { refreshAlbumMetadata } from '@/worker/utils'
+import { useRoute } from 'vue-router'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
@@ -51,6 +53,7 @@ const rerenderStore = useRerenderStore('mainId')
 const props = defineProps<{
   album: Album
 }>()
+const route = useRoute()
 
 const waiting = ref(false)
 
@@ -71,6 +74,13 @@ const submit = async () => {
     modalStore.showHomeTempModal = false
     waiting.value = false
 
+    const albumId = route.params.hash
+
+    if (typeof albumId !== 'string') {
+      return
+    }
+
+    refreshAlbumMetadata(albumId)
     rerenderStore.rerenderHomeIsolated()
   }
 }
