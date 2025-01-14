@@ -61,7 +61,7 @@ export function refreshAlbumMetadata(albumId: string) {
         albumMode: true
       })
 
-      messageStore.message = 'Successfully set as cover.'
+      messageStore.message = 'Edit successfully.'
       messageStore.warn = false
       messageStore.showMessage = true
     }
