@@ -193,7 +193,6 @@ async function fetchData(
 ): Promise<{ result: Map<number, AbstractData>; startIndex: number; endIndex: number }> {
   let start: number
   let end: number
-
   switch (fetchMethod) {
     case 'batch': {
       const batchIndex = index
@@ -219,7 +218,7 @@ async function fetchData(
     // Determine the current batch index based on the fetch method
     const currentBatchIndex = fetchMethod === 'batch' ? Math.floor(start / batchNumber) : index
 
-    if (!shouldProcessBatch.includes(currentBatchIndex)) {
+    if (fetchMethod === 'batch' && !shouldProcessBatch.includes(currentBatchIndex)) {
       break // Stop processing further if the batch should no longer be processed
     }
 
@@ -232,6 +231,7 @@ async function fetchData(
       data.set(key, abstractData)
     } else if (item !== undefined && 'Album' in item.abstractData) {
       const abstractData = createAbstractData(item.abstractData.Album)
+
       data.set(key, abstractData)
     } else {
       console.error(

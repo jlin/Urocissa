@@ -41,8 +41,8 @@ import SelectInverse from '@/components/Menu/Botton/BtnSelectInverse.vue'
 import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 import { useRerenderStore } from '@/store/rerenderStore'
-import { editAlbums } from '@/worker/toDataWorker'
 import { ref } from 'vue'
+import axios from 'axios'
 
 const collectionStore = useCollectionStore('tempId')
 const prefetchStore = usePrefetchStore('tempId')
@@ -59,10 +59,19 @@ const submit = async () => {
   const hashArray = Array.from(collectionStore.editModeCollection)
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
-    await editAlbums(hashArray, [props.album.id], [], timestamp)
+    await axios.put('/put/edit_album', {
+      idArray: hashArray,
+      addAlbumsArray: [props.album.id],
+      removeAlbumsArray: [],
+      timestamp: timestamp
+    })
+
+    console.log('Successfully edited albums.')
+
     modalStore.showHomeTempModal = false
     waiting.value = false
-    rerenderStore.rerenderHome()
+
+    rerenderStore.rerenderHomeIsolated()
   }
 }
 </script>
