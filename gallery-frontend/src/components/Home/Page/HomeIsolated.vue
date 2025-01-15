@@ -8,7 +8,7 @@
     transition="false"
     :close-on-back="false"
   >
-    <Home v-if="album !== undefined" isolation-id="subId" :temp-mode="null" :title="album.title">
+    <Home v-if="album !== undefined" isolation-id="subId" :temp-mode="null">
       <template #reading-bar>
         <ReadingBar :album="album" />
       </template>

@@ -20,7 +20,7 @@
       <v-card-title> {{ props.album.title }}</v-card-title>
     </v-card>
     <v-spacer></v-spacer>
-    <v-btn icon="mdi-plus" @click="modalStore.showHomeTempModal = true"> </v-btn>
+    <v-btn icon="mdi-image-plus" @click="modalStore.showHomeTempModal = true"> </v-btn>
   </v-toolbar>
   <EditBar v-else />
   <ProgessBar isolation-id="subId" />

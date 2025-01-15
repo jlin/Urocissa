@@ -1,6 +1,6 @@
 <template>
   <router-view v-slot="{ Component }">
-    <component :is="Component" :title="album.title === null ? '' : album.title" />
+    <component :is="Component" />
   </router-view>
   <v-col class="h-100 d-flex align-center justify-center">
     <v-row>

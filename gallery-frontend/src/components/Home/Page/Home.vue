@@ -74,7 +74,6 @@ import { useRerenderStore } from '@/store/rerenderStore'
 const props = defineProps<{
   isolationId: IsolationId
   tempMode: string | null
-  title: string | null
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)
