@@ -4,7 +4,6 @@ use crate::public::reduced_data::ReducedData;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::public::utils::info_wrap;
 use crate::router::fairing::AuthGuard;
 
 use bitcode::{Decode, Encode};
@@ -58,19 +57,19 @@ pub async fn prefetch(
         let expression_hashed = hasher.finish();
 
         if let Ok(Some(prefetch_opt)) = QUERY_SNAPSHOT.read_query_snapshot(expression_hashed) {
-            info_wrap(Some(find_cache_start_time.elapsed()), "Query cache found");
+            let duration = format!("{:?}", find_cache_start_time.elapsed());
+            info!(duration = &*duration; "Query cache found");
             return Json(prefetch_opt);
         } else {
-            info_wrap(
-                Some(find_cache_start_time.elapsed()),
-                "Query cache not found. Generate a new one.",
-            );
+            let duration = format!("{:?}", find_cache_start_time.elapsed());
+            info!(duration = &*duration; "Query cache not found. Generate a new one.");
         }
 
         // Step 2: Filter items
         let filter_items_start_time = Instant::now();
         let ref_data = TREE.in_memory.read().unwrap();
-        info_wrap(Some(filter_items_start_time.elapsed()), "Filter items");
+        let duration = format!("{:?}", filter_items_start_time.elapsed());
+        info!(duration = &*duration; "Filter items");
 
         // Step 3: Compute layout
         let layout_start_time = Instant::now();
@@ -101,7 +100,8 @@ pub async fn prefetch(
         };
 
         let data_length = reduced_data.len();
-        info_wrap(Some(layout_start_time.elapsed()), "Compute layout");
+        let duration = format!("{:?}", layout_start_time.elapsed());
+        info!(duration = &*duration;  "Compute layout");
 
         // Step 4: Locate hash
         let locate_start_time = Instant::now();
@@ -112,7 +112,9 @@ pub async fn prefetch(
         } else {
             None
         };
-        info_wrap(Some(locate_start_time.elapsed()), "Locate data");
+
+        let duration = format!("{:?}", locate_start_time.elapsed());
+        info!(duration = &*duration;  "Locate data");
 
         // Step 5: Insert data into TREE_SNAPSHOT
         let db_start_time = Instant::now();
@@ -124,7 +126,8 @@ pub async fn prefetch(
         TREE_SNAPSHOT.in_memory.insert(timestamp, reduced_data);
         TREE_SNAPSHOT.should_flush_tree_snapshot();
 
-        info_wrap(Some(db_start_time.elapsed()), "Write cache into memory");
+        let duration = format!("{:?}", db_start_time.elapsed());
+        info!(duration = &*duration;   "Write cache into memory");
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
@@ -137,13 +140,13 @@ pub async fn prefetch(
         QUERY_SNAPSHOT.should_flush_query_snapshot();
         let json = Json(prefetch_opt);
 
-        info_wrap(Some(json_start_time.elapsed()), "Create JSON response");
+        let duration = format!("{:?}", json_start_time.elapsed());
+        info!(duration = &*duration; "Create JSON response");
 
         // Total elapsed time
-        info_wrap(
-            Some(start_time.elapsed()),
-            "(total time) Get_data_length complete",
-        );
+        let duration = format!("{:?}", start_time.elapsed());
+        info!(duration = &*duration; "(total time) Get_data_length complete");
+
         json
     })
     .await

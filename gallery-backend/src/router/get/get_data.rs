@@ -6,7 +6,6 @@ use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::read_tags::TagInfo;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::public::utils::{info_wrap, warn_wrap};
 use crate::router::fairing::AuthGuard;
 
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
@@ -54,10 +53,9 @@ pub async fn get_data(
 
             match data_vec {
                 Ok(vec) => {
-                    warn_wrap(
-                        Some(start_time.elapsed()),
-                        &format!("Get data: {} ~ {}", start, end),
-                    );
+                    let duration = format!("{:?}", start_time.elapsed());
+                    info!(duration = &*duration; "Get data: {} ~ {}", start, end);
+
                     Ok(Json(vec))
                 }
                 Err(e) => Err(e),
@@ -119,10 +117,8 @@ pub async fn get_rows(
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;
-        info_wrap(
-            Some(start_time.elapsed()),
-            &format!("Read rows: index = {}", index),
-        );
+        let duration = format!("{:?}", start_time.elapsed());
+        info!(duration = &*duration; "Read rows: index = {}", index);
         return Ok(Json(filtered_rows));
     })
     .await

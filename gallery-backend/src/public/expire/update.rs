@@ -1,7 +1,7 @@
 use crate::public::expire::start_loop::NEXT_EXPIRE_TIME;
 use crate::public::expire::EXPIRE_TABLE_DEFINITION;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
-use crate::public::utils::{get_current_timestamp_u64, info_wrap};
+use crate::public::utils::get_current_timestamp_u64;
 
 use log::info;
 use std::sync::atomic::Ordering;
@@ -13,11 +13,8 @@ impl Expire {
     pub fn update_expire_time(&self, start_time: Instant) {
         let current_timestamp = get_current_timestamp_u64();
         let last_timestamp = VERSION_COUNT_TIMESTAMP.swap(current_timestamp, Ordering::SeqCst);
-
-        info_wrap(
-            Some(start_time.elapsed()),
-            &format!("In-memory cache updated ({}).", current_timestamp),
-        );
+        let duration = format!("{:?}", start_time.elapsed());
+        info!(duration = &*duration; "In-memory cache updated ({}).", current_timestamp);
 
         if last_timestamp > 0 {
             let expire_write_txn = self.in_disk.begin_write().unwrap();
