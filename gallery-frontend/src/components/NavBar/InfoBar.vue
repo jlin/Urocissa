@@ -61,9 +61,7 @@
         <v-list-item prepend-icon="mdi-upload" value="upload" @click="uploadStore.triggerFileInput">
           <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
         </v-list-item>
-        <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="triggerModal()">
-          <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
-        </v-list-item>
+        <ItemCreateAlbum />
       </v-list>
     </v-menu>
   </v-toolbar>
@@ -74,22 +72,18 @@ import { inject, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
-import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
+import ItemCreateAlbum from '@/components/Menu/Item/ItemCreateAlbum.vue'
 
 const showDrawer = inject('showDrawer')
 
 const albumStore = useAlbumStore('mainId')
-const modalStore = useModalStore('mainId')
 const uploadStore = useUploadStore('mainId')
+const filterStore = useFilterStore('mainId')
+
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
-const filterStore = useFilterStore('mainId')
-
-const triggerModal = () => {
-  modalStore.showCreateAlbumsModal = true
-}
 
 const handleSearch = async () => {
   filterStore.filterString = searchQuery.value

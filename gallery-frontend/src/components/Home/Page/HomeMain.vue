@@ -1,5 +1,5 @@
 <template>
-  <Home isolation-id="mainId" :temp-mode="null" :title="null">
+  <Home isolation-id="mainId" :temp-mode="null">
     <template #reading-bar>
       <NavBar />
     </template>

@@ -8,7 +8,7 @@
     transition="false"
     :close-on-back="false"
   >
-    <Home isolation-id="tempId" :temp-mode="generateJsonString(basicString)" :title="null">
+    <Home isolation-id="tempId" :temp-mode="generateJsonString(basicString)">
       <template #reading-bar>
         <SelectionBar :album="album" />
       </template>
