@@ -71,7 +71,7 @@ const hasHoveringEffect = computed(() => {
   } else if (path.startsWith('/trashed')) {
     return false
   } else if (route.meta.isReadPage) {
-    return false
+    return true
   } else if (path.startsWith('/albums')) {
     return true
   } else if (path.startsWith('/all')) {
@@ -106,7 +106,9 @@ const computedMessage = computed(() => {
 const clickEmptyCard = () => {
   const path = route.path
 
-  if (path.startsWith('/albums')) {
+  if (route.meta.isReadPage) {
+    modalStore.showHomeTempModal = true
+  } else if (path.startsWith('/albums')) {
     modalStore.showCreateAlbumsModal = true
   } else {
     uploadStore.triggerFileInput()
