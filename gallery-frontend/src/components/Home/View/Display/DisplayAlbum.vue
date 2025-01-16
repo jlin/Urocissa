@@ -118,15 +118,16 @@ import { filesize } from 'filesize'
 import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
 import { Album } from '@/script/common/types'
-import { onMounted, ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useDataStore } from '@/store/dataStore'
 
 const titleModel = ref('')
 
 const route = useRoute()
+
+const dataStore = useDataStore('mainId')
 const albumStore = useAlbumStore('mainId')
 const imgStore = useImgStore('mainId')
-const dataStore = useDataStore('mainId')
 
 const props = defineProps<{
   index: number
@@ -154,9 +155,13 @@ async function editTitle() {
   }
 }
 
-onMounted(() => {
-  titleModel.value = props.album.title ?? ''
-})
+watch(
+  () => props.album.title,
+  () => {
+    titleModel.value = props.album.title ?? ''
+  },
+  { immediate: true }
+)
 </script>
 <style scoped>
 .v-text-field :deep(input) {
