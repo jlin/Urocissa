@@ -41,7 +41,7 @@ impl Expire {
 
             expire_write_txn.commit().unwrap();
             NEXT_EXPIRE_TIME.store(new_expire_time, Ordering::SeqCst);
-            EXPIRE.should_check_query_expire();
+            EXPIRE.expire_check();
         }
     }
 }

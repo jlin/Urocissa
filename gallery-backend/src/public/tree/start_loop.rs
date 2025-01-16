@@ -32,13 +32,13 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-static SHOULD_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
+static TREE_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 
 pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 
 impl Tree {
     pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&SHOULD_UPDATE_SENDER, |buffer| {
+        start_loop_util(&TREE_UPDATE_SENDER, |buffer| {
             let start_time = Instant::now();
             let read_txn = self.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(DATA_TABLE).unwrap();
@@ -86,12 +86,12 @@ impl Tree {
             });
         })
     }
-    pub fn should_update(&self) {
-        SHOULD_UPDATE_SENDER.get().unwrap().send(None).unwrap();
+    pub fn tree_update(&self) {
+        TREE_UPDATE_SENDER.get().unwrap().send(None).unwrap();
     }
     pub async fn should_update_async(&self) {
         let notify = Arc::new(Notify::new());
-        SHOULD_UPDATE_SENDER
+        TREE_UPDATE_SENDER
             .get()
             .unwrap()
             .send(Some(notify.clone()))

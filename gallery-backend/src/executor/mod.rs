@@ -17,7 +17,7 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
         let batch: Vec<PathBuf> = batch.to_vec();
         let successfully_handled_length = processor(batch);
         if successfully_handled_length > 0 {
-            TREE.should_update();
+            TREE.tree_update();
         }
     }
 }

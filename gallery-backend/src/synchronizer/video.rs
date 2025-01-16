@@ -46,7 +46,7 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                                 write_table.insert(&*database.hash, &database).unwrap();
                             }
                             write_txn.commit().unwrap();
-                            TREE.should_update();
+                            TREE.tree_update();
                         }
                         Err(error) => {
                             handle_error(ErrorData::new(

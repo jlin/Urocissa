@@ -8,11 +8,9 @@ use std::{
 };
 use tokio::sync::{mpsc::UnboundedSender, Notify};
 
-static TREE_SNAPSHOT_SHOULD_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
-    OnceLock::new();
+static TREE_SNAPSHOT_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 
-static TREE_SNAPSHOT_DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<TreeSnapshotDelete>> =
-    OnceLock::new();
+static TREE_SNAPSHOT_DELETE_SENDER: OnceLock<UnboundedSender<TreeSnapshotDelete>> = OnceLock::new();
 
 pub struct TreeSnapshotDelete {
     pub timestamp_list: Vec<u128>,
@@ -22,7 +20,7 @@ pub struct TreeSnapshotDelete {
 impl TreeSnapshot {
     // Delete snapshots send from EXPIRE.
     pub fn start_loop_remove(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&TREE_SNAPSHOT_DELETE_QUEUE_SENDER, |buffer| {
+        start_loop_util(&TREE_SNAPSHOT_DELETE_SENDER, |buffer| {
             let unique_timestamp: HashSet<_> = buffer
                 .iter()
                 .flat_map(|tree_snapshot_delete| tree_snapshot_delete.timestamp_list.iter()) // Flatten all album_list vectors
@@ -67,7 +65,7 @@ impl TreeSnapshot {
     }
 
     pub fn tree_snapshot_delete(&self, timestamp_list: Vec<u128>) {
-        TREE_SNAPSHOT_DELETE_QUEUE_SENDER
+        TREE_SNAPSHOT_DELETE_SENDER
             .get()
             .unwrap()
             .send(TreeSnapshotDelete {
@@ -78,7 +76,7 @@ impl TreeSnapshot {
     }
     pub async fn _tree_snapshot_delete_async(&self, timestamp_list: Vec<u128>) {
         let notify = Arc::new(Notify::new());
-        TREE_SNAPSHOT_DELETE_QUEUE_SENDER
+        TREE_SNAPSHOT_DELETE_SENDER
             .get()
             .unwrap()
             .send(TreeSnapshotDelete {
@@ -91,7 +89,7 @@ impl TreeSnapshot {
 
     // Flush snapshots in memory to disk
     pub fn start_loop_flush(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&TREE_SNAPSHOT_SHOULD_FLUSH_SENDER, |buffer| {
+        start_loop_util(&TREE_SNAPSHOT_FLUSH_SENDER, |buffer| {
             loop {
                 if self.in_memory.is_empty() {
                     break;
@@ -142,16 +140,16 @@ impl TreeSnapshot {
             }
         })
     }
-    pub fn should_flush_tree_snapshot(&self) {
-        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
+    pub fn tree_snapshot_flush(&self) {
+        TREE_SNAPSHOT_FLUSH_SENDER
             .get()
             .unwrap()
             .send(None)
             .unwrap();
     }
-    pub async fn _should_flush_tree_snapshop_async(&self) {
+    pub async fn _tree_snapshot_flush_async(&self) {
         let notify = Arc::new(Notify::new());
-        TREE_SNAPSHOT_SHOULD_FLUSH_SENDER
+        TREE_SNAPSHOT_FLUSH_SENDER
             .get()
             .unwrap()
             .send(Some(notify.clone()))

@@ -13,14 +13,13 @@ use std::sync::{
 };
 use tokio::sync::{mpsc::UnboundedSender, Notify};
 
-static SHOULD_CHECK_QUERY_EXPIRE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
-    OnceLock::new();
+static EXPIRE_CHECK_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
 
 pub static NEXT_EXPIRE_TIME: AtomicU64 = AtomicU64::new(0);
 
 impl Expire {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&SHOULD_CHECK_QUERY_EXPIRE_SENDER, |buffer| {
+        start_loop_util(&EXPIRE_CHECK_SENDER, |buffer| {
             let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
             // Iter over all tables in QUERY_SNAPSHOT
             write_txn
@@ -84,16 +83,12 @@ impl Expire {
             });
         })
     }
-    pub fn should_check_query_expire(&self) {
-        SHOULD_CHECK_QUERY_EXPIRE_SENDER
-            .get()
-            .unwrap()
-            .send(None)
-            .unwrap();
+    pub fn expire_check(&self) {
+        EXPIRE_CHECK_SENDER.get().unwrap().send(None).unwrap();
     }
-    pub async fn _should_check_query_expire_async(&self) {
+    pub async fn _expire_check_async(&self) {
         let notify = Arc::new(Notify::new());
-        SHOULD_CHECK_QUERY_EXPIRE_SENDER
+        EXPIRE_CHECK_SENDER
             .get()
             .unwrap()
             .send(Some(notify.clone()))

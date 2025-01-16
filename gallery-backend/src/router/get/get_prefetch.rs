@@ -124,7 +124,7 @@ pub async fn prefetch(
             .as_millis();
 
         TREE_SNAPSHOT.in_memory.insert(timestamp, reduced_data);
-        TREE_SNAPSHOT.should_flush_tree_snapshot();
+        TREE_SNAPSHOT.tree_snapshot_flush();
 
         let duration = format!("{:?}", db_start_time.elapsed());
         info!(duration = &*duration;   "Write cache into memory");
@@ -137,7 +137,7 @@ pub async fn prefetch(
         QUERY_SNAPSHOT
             .in_memory
             .insert(expression_hashed, prefetch_opt);
-        QUERY_SNAPSHOT.should_flush_query_snapshot();
+        QUERY_SNAPSHOT.query_snapshot_flush();
         let json = Json(prefetch_opt);
 
         let duration = format!("{:?}", json_start_time.elapsed());

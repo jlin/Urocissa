@@ -10,12 +10,12 @@ use std::{
 };
 use tokio::sync::{mpsc::UnboundedSender, Notify};
 
-static QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
+static QUERY_SNAPSHOT_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> =
     OnceLock::new();
 
 impl QuerySnapshot {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER, |buffer| loop {
+        start_loop_util(&QUERY_SNAPSHOT_FLUSH_SENDER, |buffer| loop {
             if self.in_memory.is_empty() {
                 break;
             }
@@ -66,16 +66,16 @@ impl QuerySnapshot {
             });
         })
     }
-    pub fn should_flush_query_snapshot(&self) {
-        QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER
+    pub fn query_snapshot_flush(&self) {
+        QUERY_SNAPSHOT_FLUSH_SENDER
             .get()
             .unwrap()
             .send(None)
             .unwrap();
     }
-    pub async fn _should_flush_query_snapshop_async(&self) {
+    pub async fn _query_snapshot_flus_async(&self) {
         let notify = Arc::new(Notify::new());
-        QUERY_SNAPSHOT_SHOULD_FLUSH_SENDER
+        QUERY_SNAPSHOT_FLUSH_SENDER
             .get()
             .unwrap()
             .send(Some(notify.clone()))

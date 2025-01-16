@@ -14,6 +14,6 @@ pub async fn generate_random_data(
         .map(|_| DataBase::generate_random_data())
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
-    TREE.should_update();
+    TREE.tree_update();
     info!("Insert random data complete")
 }
