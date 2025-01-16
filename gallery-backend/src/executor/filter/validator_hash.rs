@@ -24,7 +24,7 @@ where
     vec_of_database.for_each(|mut database| {
         match blake3_hasher(&database.source_path()) {
             Ok(hash) => {
-                let read_table = TREE.read_tree_api();
+                let read_table = TREE.api_read_tree();
                 match read_table.get(&*hash).unwrap() {
                     Some(guard) => {
                         // If this file is already in database

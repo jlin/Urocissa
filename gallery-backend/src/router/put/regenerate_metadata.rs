@@ -26,7 +26,7 @@ pub async fn regenerate_metadata(
 ) -> Status {
     let json_data = json_data.into_inner();
     tokio::task::spawn_blocking(move || {
-        let table = TREE.read_tree_api();
+        let table = TREE.api_read_tree();
 
         let reduced_data_vec = TREE_SNAPSHOT
             .read_tree_snapshot(&json_data.timestamp)

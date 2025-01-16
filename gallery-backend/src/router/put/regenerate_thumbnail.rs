@@ -54,7 +54,7 @@ pub async fn regenerate_thumbnail_with_frame(
                     return Err(Status::InternalServerError);
                 }
                 tokio::task::spawn_blocking(move || {
-                    let table = TREE.read_tree_api();
+                    let table = TREE.api_read_tree();
                     let mut database = table.get(&*hash).unwrap().unwrap().value();
                     let dynamic_image = generate_dynamic_image(&database).unwrap();
                     database.thumbhash = generate_thumbhash(&dynamic_image).unwrap();

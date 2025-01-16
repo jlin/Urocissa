@@ -24,7 +24,7 @@ pub fn start_video_channel() -> tokio::task::JoinHandle<()> {
                 let unique_hashes: HashSet<_> = list_of_video_hash.into_iter().collect();
                 let hash_vec: Vec<_> = unique_hashes.into_iter().collect();
 
-                let read_table = TREE.read_tree_api();
+                let read_table = TREE.api_read_tree();
                 let database_vec = hash_vec.into_iter().filter_map(|hash| {
                     match read_table.get(&*hash).unwrap() {
                         Some(guard) => {

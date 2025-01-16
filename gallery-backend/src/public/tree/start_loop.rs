@@ -2,7 +2,6 @@ use super::Tree;
 use crate::public::abstract_data::AbstractData;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::expire::EXPIRE;
-use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::utils::start_loop_util;
 
 use rayon::iter::{ParallelBridge, ParallelIterator};
@@ -37,11 +36,10 @@ static TREE_UPDATE_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = Once
 pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 
 impl Tree {
-    pub fn start_loop(&self) -> tokio::task::JoinHandle<()> {
+    pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
         start_loop_util(&TREE_UPDATE_SENDER, |buffer| {
             let start_time = Instant::now();
-            let read_txn = self.in_disk.begin_read().unwrap();
-            let table = read_txn.open_table(DATA_TABLE).unwrap();
+            let table = self.api_read_tree();
 
             let priority_list = vec!["DateTimeOriginal", "filename", "modified", "scan_time"];
 
@@ -60,7 +58,7 @@ impl Tree {
                 })
                 .collect();
 
-            let album_table = read_txn.open_table(ALBUM_TABLE).unwrap();
+            let album_table = self.api_read_album();
 
             let album_vec: Vec<DataBaseTimestamp> = album_table
                 .iter()

@@ -9,7 +9,7 @@ impl TreeSnapshot {
     pub fn read_tags(&'static self) -> Vec<TagInfo> {
         let tag_counts = DashMap::new();
 
-        TREE.read_tree_api()
+        TREE.api_read_tree()
             .iter()
             .unwrap()
             .par_bridge()
