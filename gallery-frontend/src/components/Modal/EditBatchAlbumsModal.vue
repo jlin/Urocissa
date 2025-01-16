@@ -13,19 +13,30 @@
             v-model="addAlbumsArray"
             chips
             multiple
-            label="Add Albumss"
+            label="Add to Albumss"
             item-title="albumName"
             :rules="[addAlbumsRule]"
             :items="[...albumStore.albums.values()]"
             return-object
-          ></v-combobox>
+          >
+            <template #prepend-item>
+              <v-list-item value="">
+                <template #prepend>
+                  <v-list-item-action>
+                    <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat></v-btn>
+                  </v-list-item-action>
+                  <v-list-item-title class="wrap">Create New Album</v-list-item-title>
+                </template>
+              </v-list-item>
+            </template>
+          </v-combobox>
         </v-container>
         <v-container>
           <v-combobox
             v-model="removeAlbumsArray"
             chips
             multiple
-            label="Remove Albums"
+            label="Remove from Albums"
             item-title="albumName"
             :rules="[removeAlbumsRule]"
             :items="[...albumStore.albums.values()]"
