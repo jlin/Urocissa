@@ -41,7 +41,6 @@ async fn rocket() -> _ {
 
     rocket::build()
         .attach(cache_control_fairing())
-        /* .attach(auth_request_fairing()) */
         .attach(AdHoc::on_liftoff("Shutdown", |rocket| {
             Box::pin(async move {
                 let shutdown = rocket.shutdown();
