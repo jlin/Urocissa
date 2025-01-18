@@ -61,6 +61,8 @@ const titleModel = ref('')
 watch(
   () => props.album.title,
   () => {
+    console.log('props.album.title is', props.album.title)
+
     titleModel.value = props.album.title ?? ''
   },
   { immediate: true }
@@ -78,9 +80,11 @@ async function editTitle() {
       title: title
     })
     const albumInfo = albumStore.albums.get(id)
+
     const index = dataStore.hashMapData.get(props.album.id)
     if (index !== undefined) {
       const album = dataStore.data.get(index)?.album
+
       if (albumInfo && album) {
         albumInfo.albumName = title
         album.title = title

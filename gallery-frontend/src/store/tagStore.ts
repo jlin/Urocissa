@@ -36,6 +36,10 @@ export const useTagStore = (isolationId: IsolationId) =>
           }
         }
       },
+      clearAll() {
+        this.tags = []
+        this.fetched = false
+      },
       applyTags(tagsJson: { tag: string; number: number }[]) {
         this.tags = tagsJson
         this.tags.sort((a, b) => a.tag.localeCompare(b.tag))

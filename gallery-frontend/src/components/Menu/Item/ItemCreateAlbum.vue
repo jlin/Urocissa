@@ -45,7 +45,9 @@ const createAlbum = async () => {
 
     modalStore.showCreateAlbumsModal = false
     const newAlbumId = response.data
+
     waiting.value = false
+
     await navigateToAlbum(newAlbumId, router)
   } catch (error) {
     console.error('Error creating album:', error)

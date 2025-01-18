@@ -70,6 +70,8 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { IsolationId } from '@/script/common/types'
 import { useRerenderStore } from '@/store/rerenderStore'
+import { useTagStore } from '@/store/tagStore'
+import { useAlbumStore } from '@/store/albumStore'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -90,6 +92,8 @@ const imgStore = useImgStore(props.isolationId)
 const locationStore = useLocationStore(props.isolationId)
 const optimisticUpateStore = useOptimisticStore(props.isolationId)
 const rerenderStore = useRerenderStore('mainId')
+const tagStore = useTagStore('mainId')
+const albumStore = useAlbumStore('mainId')
 const mobile = isMobile()
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
@@ -180,6 +184,8 @@ onBeforeUnmount(() => {
   rowStore.clearAll()
   locationStore.clearAll()
   optimisticUpateStore.clearAll()
+  tagStore.clearAll()
+  albumStore.clearAll()
 })
 </script>
 

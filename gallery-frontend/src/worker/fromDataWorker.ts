@@ -27,7 +27,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
   const redirectionStore = useRedirectionStore('mainId')
   const dataStore = useDataStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
-  const tagStore = useTagStore(isolationId)
+  const tagStore = useTagStore('mainId')
   const initializedStore = useInitializedStore(isolationId)
   const scrollbarStore = useScrollbarStore(isolationId)
   const offsetStore = useOffsetStore(isolationId)

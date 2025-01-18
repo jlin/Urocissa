@@ -39,6 +39,10 @@ export const useAlbumStore = (isolationId: IsolationId) =>
             console.error('Failed to fetch tags:', error)
           }
         }
+      },
+      clearAll() {
+        this.albums.clear()
+        this.fetched = false
       }
     }
   })()

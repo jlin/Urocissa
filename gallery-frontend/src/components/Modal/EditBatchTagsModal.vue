@@ -74,7 +74,7 @@ const isolationId = getIsolationIdByRoute(route)
 
 const modalStore = useModalStore('mainId')
 const collectionStore = useCollectionStore(isolationId)
-const tagStore = useTagStore(isolationId)
+const tagStore = useTagStore('mainId')
 
 const tagList = computed(() => {
   return tagStore.tags.map((tag) => tag.tag)

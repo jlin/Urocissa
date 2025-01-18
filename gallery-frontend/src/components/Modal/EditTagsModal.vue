@@ -63,9 +63,8 @@ const changedTagsArray = ref<string[]>([])
 const submit = ref<(() => void) | undefined>(undefined)
 
 const route = useRoute()
-const isolationId = getIsolationIdByRoute(route)
 const modalStore = useModalStore('mainId')
-const tagStore = useTagStore(isolationId)
+const tagStore = useTagStore('mainId')
 
 const tagList = computed(() => tagStore.tags)
 const filteredTagList = computed(() =>
