@@ -51,5 +51,3 @@ const routeKey = computed(() => {
   return `${currentPage.value}-${search}-${locate}-${priorityId}-${reverse}-${homeKey}`
 })
 </script>
-
-<style scoped></style>

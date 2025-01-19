@@ -149,5 +149,3 @@ watchEffect(() => {
   console.log('vModelAlbumsArray is', vModelAlbumsArray.value)
 })
 </script>
-
-<style scoped></style>

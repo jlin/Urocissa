@@ -99,5 +99,3 @@ const submit = () => {
   modalStore.showBatchEditTagsModal = false
 }
 </script>
-
-<style scoped></style>

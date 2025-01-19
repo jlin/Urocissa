@@ -114,5 +114,3 @@ onMounted(() => {
   submit.value = useSubmit()
 })
 </script>
-
-<style scoped></style>
