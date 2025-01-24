@@ -11,6 +11,8 @@ import { createAlbum } from '@/script/common/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 
+const loading = defineModel<boolean>()
+
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
@@ -22,9 +24,11 @@ watchEffect(() => {
 })
 
 const createEmptyAlbum = async () => {
+  loading.value = true
   const newAlbumId = await createAlbum([], isolationId)
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
   }
+  loading.value = false
 }
 </script>

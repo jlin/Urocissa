@@ -55,13 +55,13 @@
 
     <v-menu v-if="!route.meta.isReadPage">
       <template #activator="{ props }">
-        <v-btn v-bind="props" icon="mdi-plus"></v-btn>
+        <v-btn v-bind="props" icon="mdi-plus" :loading="loading"></v-btn>
       </template>
       <v-list>
         <v-list-item prepend-icon="mdi-upload" value="upload" @click="uploadStore.triggerFileInput">
           <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
         </v-list-item>
-        <ItemCreateAlbum />
+        <ItemCreateAlbum v-model="loading" />
       </v-list>
     </v-menu>
   </v-toolbar>
@@ -84,6 +84,7 @@ const filterStore = useFilterStore('mainId')
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
+const loading = ref(false)
 
 const handleSearch = async () => {
   filterStore.filterString = searchQuery.value
