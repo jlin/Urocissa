@@ -27,6 +27,7 @@ pub async fn delete_data(
         let mut id_vec = vec![];
         {
             let mut table = txn.open_table(DATA_TABLE).unwrap();
+            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
             json_data.delete_list.iter().for_each(|index| {
                 let hash = tree_snapshot.get_hash(*index);
@@ -51,15 +52,17 @@ pub async fn delete_data(
                     table.remove(hash.as_str()).unwrap();
                 }
 
-                let album_table = txn.open_table(ALBUM_TABLE).unwrap();
-
-                match album_table.get(hash.as_str()).unwrap() {
+                let found_album = match album_table.get(hash.as_str()).unwrap() {
                     Some(album) => {
                         let album = album.value();
                         id_vec.push(album.id);
+                        true
                     }
-                    None => {}
+                    None => false,
                 };
+                if found_album {
+                    album_table.remove(hash.as_str()).unwrap();
+                }
             });
         }
 
