@@ -7,13 +7,11 @@ use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EditTagsData {
-    #[serde(rename = "indexArray")]
-    edit_mode_collection_array: Vec<usize>,
-    #[serde(rename = "addTagsArray")]
-    add_tags_content: Vec<String>,
-    #[serde(rename = "removeTagsArray")]
-    remove_tags_content: Vec<String>,
+    index_array: Vec<usize>,
+    add_tags_array: Vec<String>,
+    remove_tags_array: Vec<String>,
     timestamp: u128,
 }
 #[put("/put/edit_tag", format = "json", data = "<json_data>")]
@@ -30,48 +28,45 @@ pub async fn edit_tag(
             let timestamp = &json_data.timestamp;
             let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
-            json_data
-                .edit_mode_collection_array
-                .iter()
-                .for_each(|index| {
-                    let hash = tree_snapshot.get_hash(*index);
-                    let data_opt = match write_table.get(hash.as_str()).unwrap() {
-                        Some(data) => {
-                            let mut data = data.value();
-                            json_data.add_tags_content.iter().for_each(|tag| {
-                                data.tag.insert(tag.clone());
-                            });
-                            json_data.remove_tags_content.iter().for_each(|tag| {
-                                data.tag.remove(tag);
-                            });
-                            Some(data)
-                        }
-                        None => None,
-                    };
-
-                    if let Some(data) = data_opt {
-                        write_table.insert(&*data.hash, &data).unwrap();
-                        return;
+            json_data.index_array.iter().for_each(|index| {
+                let hash = tree_snapshot.get_hash(*index);
+                let data_opt = match write_table.get(hash.as_str()).unwrap() {
+                    Some(data) => {
+                        let mut data = data.value();
+                        json_data.add_tags_array.iter().for_each(|tag| {
+                            data.tag.insert(tag.clone());
+                        });
+                        json_data.remove_tags_array.iter().for_each(|tag| {
+                            data.tag.remove(tag);
+                        });
+                        Some(data)
                     }
+                    None => None,
+                };
 
-                    let album_opt = match album_table.get(hash.as_str()).unwrap() {
-                        Some(data) => {
-                            let mut data = data.value();
-                            json_data.add_tags_content.iter().for_each(|tag| {
-                                data.tag.insert(tag.clone());
-                            });
-                            json_data.remove_tags_content.iter().for_each(|tag| {
-                                data.tag.remove(tag);
-                            });
-                            Some(data)
-                        }
-                        None => None,
-                    };
-                    if let Some(album) = album_opt {
-                        album_table.insert(&*album.id, &album).unwrap();
-                        return;
+                if let Some(data) = data_opt {
+                    write_table.insert(&*data.hash, &data).unwrap();
+                    return;
+                }
+
+                let album_opt = match album_table.get(hash.as_str()).unwrap() {
+                    Some(data) => {
+                        let mut data = data.value();
+                        json_data.add_tags_array.iter().for_each(|tag| {
+                            data.tag.insert(tag.clone());
+                        });
+                        json_data.remove_tags_array.iter().for_each(|tag| {
+                            data.tag.remove(tag);
+                        });
+                        Some(data)
                     }
-                });
+                    None => None,
+                };
+                if let Some(album) = album_opt {
+                    album_table.insert(&*album.id, &album).unwrap();
+                    return;
+                }
+            });
         }
         txn.commit().unwrap();
         let vec_tags_info = TREE_SNAPSHOT.read_tags();

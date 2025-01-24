@@ -60,11 +60,11 @@ const waiting = ref(false)
 
 const submit = async () => {
   waiting.value = true
-  const hashArray = Array.from(collectionStore.editModeCollection)
+  const indexArray = Array.from(collectionStore.editModeCollection)
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     await axios.put('/put/edit_album', {
-      idArray: hashArray,
+      idArray: indexArray,
       addAlbumsArray: [props.album.id],
       removeAlbumsArray: [],
       timestamp: timestamp

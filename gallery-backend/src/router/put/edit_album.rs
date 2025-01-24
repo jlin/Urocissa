@@ -11,13 +11,11 @@ use rocket::serde::{json::Json, Deserialize};
 use serde::Serialize;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EditAlbumsData {
-    #[serde(rename = "idArray")]
-    edit_mode_collection_array: Vec<usize>,
-    #[serde(rename = "addAlbumsArray")]
-    add_albums_content: Vec<ArrayString<64>>,
-    #[serde(rename = "removeAlbumsArray")]
-    remove_albums_content: Vec<ArrayString<64>>,
+    index_array: Vec<usize>,
+    add_albums_array: Vec<ArrayString<64>>,
+    remove_albums_array: Vec<ArrayString<64>>,
     timestamp: u128,
 }
 
@@ -35,36 +33,33 @@ pub async fn edit_album(
             let timestamp = &json_data.timestamp;
             let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
-            json_data
-                .edit_mode_collection_array
-                .iter()
-                .for_each(|index| {
-                    let hash = tree_snapshot.get_hash(*index);
-                    let data_opt = match write_table.get(hash.as_str()).unwrap() {
-                        Some(guard) => {
-                            let mut data = guard.value();
-                            json_data.add_albums_content.iter().for_each(|album_id| {
-                                data.album.insert(album_id.clone());
-                            });
+            json_data.index_array.iter().for_each(|index| {
+                let hash = tree_snapshot.get_hash(*index);
+                let data_opt = match write_table.get(hash.as_str()).unwrap() {
+                    Some(guard) => {
+                        let mut data = guard.value();
+                        json_data.add_albums_array.iter().for_each(|album_id| {
+                            data.album.insert(album_id.clone());
+                        });
 
-                            json_data.remove_albums_content.iter().for_each(|album_id| {
-                                data.album.remove(album_id);
-                            });
-                            Some(data)
-                        }
-                        None => None,
-                    };
-                    if let Some(data) = data_opt {
-                        write_table.insert(&*data.hash, &data).unwrap();
-                    };
-                });
+                        json_data.remove_albums_array.iter().for_each(|album_id| {
+                            data.album.remove(album_id);
+                        });
+                        Some(data)
+                    }
+                    None => None,
+                };
+                if let Some(data) = data_opt {
+                    write_table.insert(&*data.hash, &data).unwrap();
+                };
+            });
         }
         txn.commit().unwrap();
 
         let concact_result: Vec<ArrayString<64>> = json_data
-            .add_albums_content
+            .add_albums_array
             .iter()
-            .chain(json_data.remove_albums_content.iter())
+            .chain(json_data.remove_albums_array.iter())
             .cloned()
             .collect::<HashSet<_>>()
             .into_iter()

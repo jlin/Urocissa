@@ -7,8 +7,8 @@ use crate::synchronizer::album::album_self_update_async;
 use redb::ReadableTable;
 use rocket::serde::{json::Json, Deserialize};
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DeleteList {
-    #[serde(rename = "deleteList")]
     delete_list: Vec<usize>, // Keep this field private as it does not need to be accessed outside this struct
     timestamp: u128,
 }

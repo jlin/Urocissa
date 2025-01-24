@@ -12,8 +12,8 @@ use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use rocket::serde::json::Json;
 use serde::Deserialize;
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RegenerateData {
-    #[serde(rename = "indexArray")]
     index_array: Vec<usize>,
     timestamp: u128,
 }
