@@ -1,9 +1,5 @@
 <template>
-  <v-list-item value="create-album" @click="createEmptyAlbum()">
-    <template #prepend>
-      <v-icon v-if="!waiting" icon="mdi-book-plus"></v-icon>
-      <v-icon v-else><v-progress-circular size="24" indeterminate></v-progress-circular></v-icon>
-    </template>
+  <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="createEmptyAlbum()">
     <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
   </v-list-item>
 </template>
@@ -18,7 +14,6 @@ import { getIsolationIdByRoute } from '@/script/common/functions'
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
-const waiting = ref(false)
 
 const isolationId = getIsolationIdByRoute(route)
 
@@ -27,11 +22,9 @@ watchEffect(() => {
 })
 
 const createEmptyAlbum = async () => {
-  waiting.value = true
   const newAlbumId = await createAlbum([], isolationId)
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
   }
-  waiting.value = false
 }
 </script>
