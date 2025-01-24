@@ -58,10 +58,16 @@ pub async fn create_album(
 
             create_album.elements_index.iter().for_each(|index| {
                 let hash = tree_snapshot.get_hash(*index);
-                let mut data = data_table.get(hash.as_str()).unwrap().unwrap().value();
-                data.album.insert(album_id);
 
-                data_table.insert(&*data.hash, &data).unwrap();
+                // album should not be added to album
+                let data_opt = data_table.get(hash.as_str()).unwrap().map(|data_guard| {
+                    let mut data = data_guard.value();
+                    data.album.insert(album_id);
+                    data
+                });
+                if let Some(data) = data_opt {
+                    data_table.insert(&*data.hash, &data).unwrap();
+                }
             });
         }
         txn.commit().unwrap();

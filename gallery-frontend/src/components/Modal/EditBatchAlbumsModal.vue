@@ -18,10 +18,10 @@
             :rules="[addAlbumsRule]"
             :items="[...albumStore.albums.values()]"
             item-value="albumId"
+            :hide-no-data="false"
             return-object
-            id="test"
           >
-            <template #prepend-item>
+            <template #prepend-item v-if="albumStore.albums.size > 0">
               <v-list-item value="">
                 <template #prepend>
                   <v-list-item-action>
@@ -32,6 +32,20 @@
                   >
                 </template>
               </v-list-item>
+              <v-divider></v-divider>
+            </template>
+            <template #no-data v-else>
+              <v-list-item value="">
+                <template #prepend>
+                  <v-list-item-action>
+                    <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat></v-btn>
+                  </v-list-item-action>
+                  <v-list-item-title class="wrap" @click="createNonEmptyAlbum()"
+                    >Create New Album</v-list-item-title
+                  >
+                </template>
+              </v-list-item>
+              <v-divider></v-divider>
             </template>
           </v-combobox>
         </v-container>

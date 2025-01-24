@@ -64,7 +64,7 @@ const submit = async () => {
   const timestamp = prefetchStore.timestamp
   if (timestamp !== null) {
     await axios.put('/put/edit_album', {
-      idArray: indexArray,
+      indexArray: indexArray,
       addAlbumsArray: [props.album.id],
       removeAlbumsArray: [],
       timestamp: timestamp
