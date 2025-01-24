@@ -492,13 +492,13 @@ const editTags = async (
 }
 
 export const editAlbums = async (
-  idArray: number[],
+  indexArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
   timestamp: number
 ) => {
   await axios.put('/put/edit_album', {
-    idArray,
+    indexArray,
     addAlbumsArray,
     removeAlbumsArray,
     timestamp
