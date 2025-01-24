@@ -25,7 +25,16 @@
               <v-list-item value="">
                 <template #prepend>
                   <v-list-item-action>
-                    <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat></v-btn>
+                    <v-btn
+                      v-if="!loading"
+                      color="transparent"
+                      icon="mdi-plus"
+                      density="comfortable"
+                      flat
+                    ></v-btn>
+                    <v-btn v-else color="transparent" icon density="comfortable" flat
+                      ><v-progress-circular size="24" indeterminate></v-progress-circular
+                    ></v-btn>
                   </v-list-item-action>
                   <v-list-item-title class="wrap" @click="createNonEmptyAlbum()"
                     >Create New Album</v-list-item-title
@@ -105,6 +114,7 @@ const router = useRouter()
 const isolationId = getIsolationIdByRoute(route)
 
 const formIsValid = ref(false)
+const loading = ref(false)
 
 const collectionStore = useCollectionStore(isolationId)
 const albumStore = useAlbumStore(isolationId)
@@ -141,11 +151,13 @@ const submit = () => {
 }
 
 const createNonEmptyAlbum = async () => {
+  loading.value = true
   const newAlbumId = await createAlbum([...collectionStore.editModeCollection], isolationId)
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
     modalStore.showBatchEditAlbumsModal = false
     collectionStore.editModeOn = false
+    loading.value = false
   }
 }
 </script>
