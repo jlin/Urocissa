@@ -1,5 +1,5 @@
 <template>
-  <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="createAlbum()">
+  <v-list-item prepend-icon="mdi-book-plus" value="create-album" @click="createEmptyAlbum()">
     <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
   </v-list-item>
 </template>
@@ -7,13 +7,8 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useModalStore } from '@/store/modalStore'
-import axios from 'axios'
-import { useMessageStore } from '@/store/messageStore'
+import { createAlbum } from '@/script/common/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
-
-const modalStore = useModalStore('mainId')
-const messageStore = useMessageStore('mainId')
 
 const route = useRoute()
 const router = useRouter()
@@ -25,35 +20,12 @@ watchEffect(() => {
 
 const waiting = ref(false)
 
-const createAlbum = async () => {
-  try {
-    waiting.value = true
-    const createAlbumData = {
-      title: null,
-      elements: []
-    }
-
-    const response = await axios.post<string>('/post/create_album', createAlbumData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-
-    messageStore.message = 'Album created successfully.'
-    messageStore.warn = false
-    messageStore.showMessage = true
-
-    modalStore.showCreateAlbumsModal = false
-    const newAlbumId = response.data
-
-    waiting.value = false
-
+const createEmptyAlbum = async () => {
+  waiting.value = true
+  const newAlbumId = await createAlbum([])
+  if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
-  } catch (error) {
-    console.error('Error creating album:', error)
-    messageStore.message = 'Failed to create album.'
-    messageStore.warn = true
-    messageStore.showMessage = true
   }
+  waiting.value = false
 }
 </script>

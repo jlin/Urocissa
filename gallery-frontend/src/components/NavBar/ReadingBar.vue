@@ -21,7 +21,7 @@
         <v-text-field
           v-model="titleModel"
           variant="plain"
-          @blur="editTitle"
+          @blur="editTitle(props.album, titleModel)"
           :placeholder="titleModel === '' ? 'Untitled' : undefined"
         ></v-text-field
       ></v-card-title>
@@ -43,9 +43,7 @@ import HomeTemp from '@/components/Home/Page/HomeTemp.vue'
 import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
 import { ref, watch } from 'vue'
-import { useAlbumStore } from '@/store/albumStore'
-import axios from 'axios'
-import { useDataStore } from '@/store/dataStore'
+import { editTitle } from '@/script/common/createAlbums'
 
 const props = defineProps<{
   album: Album
@@ -61,39 +59,10 @@ const titleModel = ref('')
 watch(
   () => props.album.title,
   () => {
-    console.log('props.album.title is', props.album.title)
-
     titleModel.value = props.album.title ?? ''
   },
   { immediate: true }
 )
-
-const dataStore = useDataStore('mainId')
-const albumStore = useAlbumStore('mainId')
-
-async function editTitle() {
-  if ((props.album.title ?? '') !== titleModel.value) {
-    const id = props.album.id
-    const title = titleModel.value === '' ? null : titleModel.value
-    await axios.post('/post/set_album_title', {
-      albumId: id,
-      title: title
-    })
-    const albumInfo = albumStore.albums.get(id)
-
-    const index = dataStore.hashMapData.get(props.album.id)
-    if (index !== undefined) {
-      const album = dataStore.data.get(index)?.album
-
-      if (albumInfo && album) {
-        albumInfo.albumName = title
-        album.title = title
-      } else {
-        console.error(`Cannot find album with id ${id}`)
-      }
-    }
-  }
-}
 </script>
 
 <style scoped>

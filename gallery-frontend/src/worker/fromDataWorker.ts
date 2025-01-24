@@ -25,6 +25,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
   const messageStore = useMessageStore('mainId')
   const modalStore = useModalStore('mainId')
   const redirectionStore = useRedirectionStore('mainId')
+  const albumStore = useAlbumStore('mainId')
   const dataStore = useDataStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
   const tagStore = useTagStore('mainId')
@@ -34,7 +35,6 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
   const rowStore = useRowStore(isolationId)
   const locationStore = useLocationStore(isolationId)
   const configStore = useConfigStore(isolationId)
-  const albumStore = useAlbumStore(isolationId)
   const optimisticUpateStore = useOptimisticStore(isolationId)
 
   const handler = createHandler<typeof fromDataWorker>({

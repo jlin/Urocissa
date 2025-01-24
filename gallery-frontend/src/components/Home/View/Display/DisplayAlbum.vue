@@ -65,7 +65,7 @@
             <v-text-field
               v-model="titleModel"
               variant="underlined"
-              @blur="editTitle"
+              @blur="editTitle(props.album, titleModel)"
               :placeholder="titleModel === '' ? 'Add Title' : undefined"
             ></v-text-field>
           </v-card-item>
@@ -110,7 +110,6 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
 import { useImgStore } from '@/store/imgStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { VCol } from 'vuetify/components'
@@ -119,13 +118,12 @@ import { useRoute } from 'vue-router'
 import { dater } from '@/script/common/functions'
 import { Album } from '@/script/common/types'
 import { ref, watch } from 'vue'
-import { useDataStore } from '@/store/dataStore'
+import { editTitle } from '@/script/common/createAlbums'
 
 const titleModel = ref('')
 
 const route = useRoute()
 
-const dataStore = useDataStore('mainId')
 const albumStore = useAlbumStore('mainId')
 const imgStore = useImgStore('mainId')
 
@@ -135,25 +133,6 @@ const props = defineProps<{
   colWidth: number
   colHeight: number
 }>()
-
-async function editTitle() {
-  if ((props.album.title ?? '') !== titleModel.value) {
-    const id = props.album.id
-    const title = titleModel.value === '' ? null : titleModel.value
-    await axios.post('/post/set_album_title', {
-      albumId: id,
-      title: title
-    })
-    const albumInfo = albumStore.albums.get(id)
-    const album = dataStore.data.get(props.index)?.album
-    if (albumInfo && album) {
-      albumInfo.albumName = title
-      album.title = title
-    } else {
-      console.error(`Cannot find album with id ${id}`)
-    }
-  }
-}
 
 watch(
   () => props.album.title,
