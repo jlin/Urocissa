@@ -18,10 +18,10 @@ export function refreshAlbumMetadata(albumId: string) {
     return
   }
 
-  watch(
+  // perform after fetchDataInWorker
+  const stopWatch = watch(
     () => dataStore.data.get(albumIndex),
     () => {
-      console.log('change detected')
       const postToWorker = bindActionDispatch(toImgWorker, (action) => {
         const worker = workerStore.imgWorker[0]
         if (worker) {
@@ -64,6 +64,7 @@ export function refreshAlbumMetadata(albumId: string) {
       messageStore.message = 'Edit successfully.'
       messageStore.warn = false
       messageStore.showMessage = true
+      stopWatch()
     }
   )
 
