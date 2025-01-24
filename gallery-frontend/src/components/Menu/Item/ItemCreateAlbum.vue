@@ -9,23 +9,22 @@ import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createAlbum } from '@/script/common/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
+import { getIsolationIdByRoute } from '@/script/common/functions'
 
 const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
 
+const isolationId = getIsolationIdByRoute(route)
+
 watchEffect(() => {
   searchQuery.value = route.query.search as string
 })
 
-const waiting = ref(false)
-
 const createEmptyAlbum = async () => {
-  waiting.value = true
-  const newAlbumId = await createAlbum([])
+  const newAlbumId = await createAlbum([], isolationId)
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
   }
-  waiting.value = false
 }
 </script>

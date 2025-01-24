@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
+use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
 use crate::synchronizer::album::album_self_update_async;
 
@@ -19,7 +20,8 @@ use crate::synchronizer::album::album_self_update_async;
 #[serde(rename_all = "camelCase")]
 pub struct CreateAlbum {
     pub title: Option<String>,
-    pub elements: Vec<ArrayString<64>>,
+    pub elements_index: Vec<usize>,
+    pub timestamp: u128,
 }
 
 #[post("/post/create_album", data = "<create_album>")]
@@ -41,6 +43,10 @@ pub async fn create_album(
 
         let album_database = Album::new(album_id, create_album.title);
         let txn = TREE.in_disk.begin_write().unwrap();
+
+        let timestamp = &create_album.timestamp;
+        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
+
         {
             let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
@@ -50,7 +56,8 @@ pub async fn create_album(
 
             let mut data_table = txn.open_table(DATA_TABLE).unwrap();
 
-            create_album.elements.iter().for_each(|hash| {
+            create_album.elements_index.iter().for_each(|index| {
+                let hash = tree_snapshot.get_hash(*index);
                 let mut data = data_table.get(hash.as_str()).unwrap().unwrap().value();
                 data.album.insert(album_id);
 

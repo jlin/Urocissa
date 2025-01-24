@@ -2,17 +2,23 @@ import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
 import { useMessageStore } from '@/store/messageStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { Album } from './types'
+import { Album, IsolationId } from './types'
 import { useDataStore } from '@/store/dataStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 
-export async function createAlbum(elements: string[]): Promise<string | undefined> {
+export async function createAlbum(
+  elementsIndex: number[],
+  isolationId: IsolationId
+): Promise<string | undefined> {
   const modalStore = useModalStore('mainId')
   const messageStore = useMessageStore('mainId')
   const albumStore = useAlbumStore('mainId')
+  const prefetchStore = usePrefetchStore(isolationId)
   try {
     const createAlbumData = {
       title: null,
-      elements: elements
+      elementsIndex: elementsIndex,
+      timestamp: prefetchStore.timestamp
     }
 
     const response = await axios.post<string>('/post/create_album', createAlbumData, {

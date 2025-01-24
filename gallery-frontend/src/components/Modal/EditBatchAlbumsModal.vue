@@ -17,7 +17,9 @@
             item-title="albumName"
             :rules="[addAlbumsRule]"
             :items="[...albumStore.albums.values()]"
+            item-value="albumId"
             return-object
+            id="test"
           >
             <template #prepend-item>
               <v-list-item value="">
@@ -25,7 +27,9 @@
                   <v-list-item-action>
                     <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat></v-btn>
                   </v-list-item-action>
-                  <v-list-item-title class="wrap">Create New Album</v-list-item-title>
+                  <v-list-item-title class="wrap" @click="createNonEmptyAlbum()"
+                    >Create New Album</v-list-item-title
+                  >
                 </template>
               </v-list-item>
             </template>
@@ -73,15 +77,17 @@
  * This modal is used for editing the albums of multiple photos on the home page.
  */
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { AlbumInfo } from '@/script/common/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
-
+import { createAlbum } from '@/script/common/createAlbums'
+import { navigateToAlbum } from '@/script/navigator'
 const route = useRoute()
+const router = useRouter()
 const isolationId = getIsolationIdByRoute(route)
 
 const formIsValid = ref(false)
@@ -95,8 +101,6 @@ const removeAlbumsArray = ref<AlbumInfo[]>([])
 
 // Rule for Add Albums to ensure no album is added that's already in Remove Albums
 const addAlbumsRule = (inputArray: AlbumInfo[]) => {
-  console.log('inputArray is', inputArray)
-
   return (
     inputArray.every(
       (album) =>
@@ -120,5 +124,14 @@ const submit = () => {
     isolationId
   )
   modalStore.showBatchEditAlbumsModal = false
+}
+
+const createNonEmptyAlbum = async () => {
+  const newAlbumId = await createAlbum([...collectionStore.editModeCollection], isolationId)
+  if (typeof newAlbumId === 'string') {
+    await navigateToAlbum(newAlbumId, router)
+    modalStore.showBatchEditAlbumsModal = false
+    collectionStore.editModeOn = false
+  }
 }
 </script>
