@@ -62,7 +62,6 @@ import '@/style/HomePage.css'
 import { layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useRowStore } from '@/store/rowStore'
-import { debounce } from 'lodash'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import HomeEmptyCard from '@/components/Home/Page/HomeEmptyCard.vue'
@@ -127,14 +126,11 @@ watch(windowWidth, () => {
   offsetStore.clearAll()
   queueStore.clearAll()
   imgStore.clearForResize()
-  resizeDebounce()
-})
-
-const resizeDebounce = debounce(() => {
   const locationRowIndex = Math.floor(locationStore.locationIndex / layoutBatchNumber)
+  locationStore.anchor = locationRowIndex
   scrollTopStore.scrollTop = locationRowIndex * 2400
   fetchRowInWorker(locationRowIndex, props.isolationId)
-}, 100)
+})
 
 const bufferHeight = computed(() => {
   return 600000

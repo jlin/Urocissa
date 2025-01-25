@@ -26,10 +26,14 @@ export function fetchRowInWorker(index: number, isolationId: IsolationId) {
   if (queueStore.row.has(index)) {
     return // Already fetched
   }
+  console.log('locationIndex is', locationStore.locationIndex)
+
+  console.log('locationStore.anchor is', locationStore.anchor)
 
   if (locationStore.anchor !== null && locationStore.anchor !== index) {
     return // If a specific row is anchored, this make sure to fetch only that row
   }
+  console.log('fetching index = ', index)
 
   const workerStore = useWorkerStore(isolationId)
 
