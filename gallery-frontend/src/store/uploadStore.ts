@@ -125,20 +125,15 @@ export const useUploadStore = (isolationId: IsolationId) =>
           })
           this.status = 'Completed'
 
-          messageStore.message = 'Files uploaded successfully!'
-          messageStore.warn = false
-          messageStore.showMessage = true
+          messageStore.showInfo('Files uploaded successfully!')
         } catch (error) {
           console.error('There was an error uploading the files: ', error)
 
           if (error instanceof Error) {
-            messageStore.message = `There was an error uploading the files: ${error.message}`
+            messageStore.showWarn(`There was an error uploading the files: ${error.message}`)
           } else {
-            messageStore.message = `There was an error uploading the files: ${String(error)}`
+            messageStore.showWarn(`There was an error uploading the files: ${String(error)}`)
           }
-
-          messageStore.warn = true
-          messageStore.showMessage = true
         }
       },
       async handleFileUpload(event: Event): Promise<void> {

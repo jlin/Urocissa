@@ -27,9 +27,7 @@ export async function createAlbum(
       }
     })
 
-    messageStore.message = 'Album created successfully.'
-    messageStore.warn = false
-    messageStore.showMessage = true
+    messageStore.showInfo('Album created successfully.')
 
     modalStore.showCreateAlbumsModal = false
     const newAlbumId = response.data
@@ -37,9 +35,7 @@ export async function createAlbum(
     return newAlbumId
   } catch (error) {
     console.error('Error creating album:', error)
-    messageStore.message = 'Failed to create album.'
-    messageStore.warn = true
-    messageStore.showMessage = true
+    messageStore.showWarn('Failed to create album.')
   }
 }
 

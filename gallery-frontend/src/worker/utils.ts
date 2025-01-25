@@ -61,9 +61,7 @@ export function refreshAlbumMetadata(albumId: string) {
         albumMode: true
       })
 
-      messageStore.message = 'Edit successfully.'
-      messageStore.warn = false
-      messageStore.showMessage = true
+      messageStore.showInfo('Edit successfully.')
       stopWatch()
     }
   )

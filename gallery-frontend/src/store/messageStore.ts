@@ -12,5 +12,16 @@ export const useMessageStore = (isolationId: IsolationId) =>
       showMessage: false,
       warn: false
     }),
-    actions: {}
+    actions: {
+      showInfo(message: string) {
+        this.message = message
+        this.warn = false
+        this.showMessage = true
+      },
+      showWarn(message: string) {
+        this.message = message
+        this.warn = true
+        this.showMessage = true
+      }
+    }
   })()
