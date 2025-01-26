@@ -17,8 +17,7 @@ pub struct ExportEntry {
 #[get("/get/get-export")]
 pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
     ByteStream! {
-        // Open DB and prepare to iterate
-        let table =  TREE.api_read_tree();
+        let table = TREE.api_read_tree();
 
         let iter = match table.iter() {
             Ok(it) => it,
@@ -28,8 +27,8 @@ pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
             }
         };
 
-        // Start the JSON array
-        yield b"[".to_vec();
+        // Start the JSON array, with a newline
+        yield b"[\n".to_vec();
         let mut first = true;
 
         for entry_res in iter {
@@ -41,9 +40,9 @@ pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
                 }
             };
 
-            // Insert a comma if not the first element
+            // If not the first element, insert a comma + newline
             if !first {
-                yield b",".to_vec();
+                yield b",\n".to_vec();
             }
             first = false;
 
@@ -53,8 +52,8 @@ pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
                 value: value.value().clone(),
             };
 
-            // Convert it to JSON
-            let json_obj = match serde_json::to_string(&export) {
+            // Pretty-print each individual object to JSON
+            let json_obj = match serde_json::to_string_pretty(&export) {
                 Ok(s) => s,
                 Err(_) => {
                     // Skip or handle the error
@@ -66,7 +65,7 @@ pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
             yield json_obj.into_bytes();
         }
 
-        // End the JSON array
-        yield b"]".to_vec();
+        // End the JSON array with a final newline
+        yield b"\n]\n".to_vec();
     }
 }
