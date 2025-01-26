@@ -1,6 +1,7 @@
 use rocket::Route;
 
 pub mod get_data;
+pub mod get_export;
 pub mod get_img;
 pub mod get_page;
 pub mod get_prefetch;
@@ -36,6 +37,7 @@ pub fn generate_get_routes() -> Vec<Route> {
         get_page::favicon,
         get_page::videos,
         get_page::videos_view,
-        get_prefetch::prefetch
+        get_prefetch::prefetch,
+        get_export::get_export
     ]
 }

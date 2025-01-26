@@ -8,3 +8,5 @@ pub const DATA_TABLE: TableDefinition<&str, DataBase> = TableDefinition::new("da
 
 // FIXME: Typo in table name "albumm". Changing this now will cause database corruption.
 pub const ALBUM_TABLE: TableDefinition<&str, Album> = TableDefinition::new("albumm");
+
+pub const SCHEMA_TABLE: TableDefinition<&str, u8> = TableDefinition::new("schema");
