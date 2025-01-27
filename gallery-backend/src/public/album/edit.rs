@@ -11,6 +11,7 @@ use super::Album;
 impl Album {
     pub fn set_cover(&mut self, cover_data: &Database) {
         self.cover = Some(cover_data.hash);
+        self.thumbhash = Some(cover_data.thumbhash.clone());
         self.width = cover_data.width;
         self.height = cover_data.height;
     }
@@ -47,6 +48,7 @@ impl Album {
             self.start_time = None;
             self.end_time = None;
             self.cover = None;
+            self.thumbhash = None;
             self.width = 0;
             self.height = 0;
             return;
