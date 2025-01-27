@@ -1,5 +1,5 @@
 <template>
-  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="regenerateMetadata">
+  <v-list-item prepend-icon="mdi-image-refresh-outline" @click="reindex">
     <v-list-item-title class="wrap">Reindex</v-list-item-title>
   </v-list-item>
 </template>
@@ -20,15 +20,15 @@ const isolationId = getIsolationIdByRoute(route)
 const prefetchStore = usePrefetchStore(isolationId)
 const messageStore = useMessageStore('mainId')
 
-const regenerateMetadata = async () => {
+const reindex = async () => {
   const indexArray = props.indexList
   const regenerateData = {
     indexArray: indexArray,
     timestamp: prefetchStore.timestamp
   }
   try {
-    messageStore.showInfo('Regenerating metadata...')
-    await axios.post('/put/regenerate-metadata', regenerateData, {
+    messageStore.showInfo('Reindexing...')
+    await axios.post('/put/reindex', regenerateData, {
       headers: {
         'Content-Type': 'application/json'
       }

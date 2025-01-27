@@ -9,6 +9,7 @@ use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::{AuthGuard, ReadOnlyModeGuard};
+use crate::synchronizer::album::album_self_update;
 use rocket::serde::json::Json;
 use serde::Deserialize;
 #[derive(Debug, Deserialize)]
@@ -18,16 +19,16 @@ pub struct RegenerateData {
     timestamp: u128,
 }
 
-#[post("/put/regenerate-metadata", format = "json", data = "<json_data>")]
-pub async fn regenerate_metadata(
+#[post("/put/reindex", format = "json", data = "<json_data>")]
+pub async fn reindex(
     _auth: AuthGuard,
     _read_only_mode: ReadOnlyModeGuard,
     json_data: Json<RegenerateData>,
 ) -> Status {
     let json_data = json_data.into_inner();
     tokio::task::spawn_blocking(move || {
-        let table = TREE.api_read_tree();
-
+        let database_table = TREE.api_read_tree();
+        let album_table = TREE.api_read_album();
         let reduced_data_vec = TREE_SNAPSHOT
             .read_tree_snapshot(&json_data.timestamp)
             .unwrap();
@@ -43,19 +44,28 @@ pub async fn regenerate_metadata(
 
             let list_of_database: Vec<_> = batch
                 .into_par_iter()
-                .filter_map(|string| {
-                    let mut database = table.get(&**string).unwrap().unwrap().value();
-                    if database.ext_type == "image" {
-                        match regenerate_metadata_for_image(&mut database) {
-                            Ok(_) => Some(database),
-                            Err(_) => None,
+                .filter_map(|&hash| {
+                    if let Some(guard) = database_table.get(&*hash).unwrap() {
+                        let mut database = guard.value();
+                        if database.ext_type == "image" {
+                            match regenerate_metadata_for_image(&mut database) {
+                                Ok(_) => Some(database),
+                                Err(_) => None,
+                            }
+                        } else if database.ext_type == "video" {
+                            match regenerate_metadata_for_video(&mut database) {
+                                Ok(_) => Some(database),
+                                Err(_) => None,
+                            }
+                        } else {
+                            None
                         }
-                    } else if database.ext_type == "video" {
-                        match regenerate_metadata_for_video(&mut database) {
-                            Ok(_) => Some(database),
-                            Err(_) => None,
-                        }
+                    } else if let Some(_) = album_table.get(&*hash).unwrap() {
+                        // album_self_update already will commit
+                        album_self_update(vec![hash]);
+                        None
                     } else {
+                        error!("Reindex failed: cannot find data with hash/id: {}", hash);
                         None
                     }
                 })

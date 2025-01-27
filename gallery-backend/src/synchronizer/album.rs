@@ -91,7 +91,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
         }
     })
 }
-pub fn _album_self_update(album_list: Vec<ArrayString<64>>) {
+pub fn album_self_update(album_list: Vec<ArrayString<64>>) {
     let album_queue = AlbumQueue {
         album_list: album_list,
         notify: None,
