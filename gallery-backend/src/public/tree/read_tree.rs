@@ -1,4 +1,8 @@
-use crate::public::{album::Album, database_struct::database::definition::Database, redb::{ALBUM_TABLE, DATA_TABLE}};
+use crate::public::{
+    album::Album,
+    database_struct::database::definition::Database,
+    redb::{ALBUM_TABLE, DATA_TABLE},
+};
 
 use redb::ReadOnlyTable;
 use std::error::Error;
@@ -22,9 +26,11 @@ impl Tree {
     }
     pub fn insert_tree_api(&self, data_vec: &Vec<Database>) -> Result<(), Box<dyn Error>> {
         let txn = self.in_disk.begin_write()?;
-        for data in data_vec {
+        {
             let mut table = txn.open_table(DATA_TABLE)?;
-            table.insert(&*data.hash, data)?;
+            for data in data_vec {
+                table.insert(&*data.hash, data)?;
+            }
         }
         txn.commit()?;
         Ok(())
