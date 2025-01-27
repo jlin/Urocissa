@@ -1,4 +1,4 @@
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use crate::public::error_data::{handle_error, ErrorData};
 use crate::public::tree::TREE;
 use arrayvec::ArrayString;
@@ -14,12 +14,12 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering},
 };
 
-pub fn validator<I>(vec_of_database: I) -> DashMap<ArrayString<64>, DataBase>
+pub fn validator<I>(vec_of_database: I) -> DashMap<ArrayString<64>, Database>
 where
-    I: ParallelIterator<Item = DataBase>,
+    I: ParallelIterator<Item = Database>,
 {
     let duplicated_files_number = AtomicUsize::new(0);
-    let dashmap_of_database: DashMap<ArrayString<64>, DataBase> = DashMap::new();
+    let dashmap_of_database: DashMap<ArrayString<64>, Database> = DashMap::new();
     let scaned_number = AtomicUsize::new(0);
     vec_of_database.for_each(|mut database| {
         match blake3_hasher(&database.source_path()) {

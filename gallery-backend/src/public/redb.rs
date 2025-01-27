@@ -1,10 +1,10 @@
 use redb::TableDefinition;
 
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 
 use super::album::Album;
 
-pub const DATA_TABLE: TableDefinition<&str, DataBase> = TableDefinition::new("data");
+pub const DATA_TABLE: TableDefinition<&str, Database> = TableDefinition::new("database");
 
 // FIXME: Typo in table name "albumm". Changing this now will cause database corruption.
 pub const ALBUM_TABLE: TableDefinition<&str, Album> = TableDefinition::new("albumm");

@@ -22,7 +22,7 @@
   </v-menu>
 </template>
 <script setup lang="ts">
-import { DataBase, IsolationId } from '@/script/common/types'
+import { Database, IsolationId } from '@/script/common/types'
 import { getSrc } from '@/../config'
 import Cookies from 'js-cookie'
 import ItemViewOriginalFile from './Item/ItemViewOriginalFile.vue'
@@ -41,7 +41,7 @@ const props = defineProps<{
   isolationId: IsolationId
   hash: string
   index: number
-  database: DataBase
+  database: Database
 }>()
 
 const currentFrameStore = useCurrentFrameStore(props.isolationId)

@@ -7,7 +7,7 @@ use serde_json::json;
 
 use crate::public::config::PRIVATE_CONFIG;
 
-use super::database_struct::database::definition::DataBase;
+use super::database_struct::database::definition::Database;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub struct JsonData(pub &'static str, pub &'static std::path::Path);
@@ -19,7 +19,7 @@ pub struct ErrorData<'a> {
     pub file: Option<PathBuf>,
     pub time: u128,
     pub location: &'a Location<'a>,
-    pub remove_file: Option<DataBase>,
+    pub remove_file: Option<Database>,
 }
 
 impl<'a> ErrorData<'a> {
@@ -29,7 +29,7 @@ impl<'a> ErrorData<'a> {
         hash: Option<ArrayString<64>>,
         file: Option<PathBuf>,
         location: &'a Location,
-        remove_file: Option<DataBase>,
+        remove_file: Option<Database>,
     ) -> Self {
         ErrorData {
             error,

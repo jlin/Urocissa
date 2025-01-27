@@ -1,11 +1,11 @@
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use crate::public::database_struct::file_modify::FileModify;
 use crate::public::error_data::{handle_error, ErrorData};
 use path_clean::PathClean;
 use rayon::prelude::*;
 use std::{fs::metadata, panic::Location, path::PathBuf, time::UNIX_EPOCH};
 
-pub fn validator<I>(file_paths: I) -> impl ParallelIterator<Item = DataBase>
+pub fn validator<I>(file_paths: I) -> impl ParallelIterator<Item = Database>
 where
     I: ParallelIterator<Item = PathBuf>,
 {
@@ -20,7 +20,7 @@ where
                             modified.duration_since(UNIX_EPOCH).unwrap().as_millis();
                         let file_modify = FileModify::new(file_path.clean(), modified_millis);
                         let size = metadata.len();
-                        let database = DataBase::new(size, file_modify);
+                        let database = Database::new(size, file_modify);
                         Some(database)
                     }
                     Err(err) => {

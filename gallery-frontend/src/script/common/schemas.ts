@@ -68,7 +68,7 @@ export const DataBaseParse = z.object({
 })
 
 /**
- * Schema for DataBase with additional fields.
+ * Schema for Database with additional fields.
  */
 export const DataBaseSchema = DataBaseParse.extend({
   timestamp: z.number(),
@@ -111,7 +111,7 @@ export const AlbumSchema = z.object({
 })
 
 export const AbstractDataParseSchema = z.union([
-  z.object({ DataBase: DataBaseParse }),
+  z.object({ Database: DataBaseParse }),
   z.object({ Album: AlbumSchema })
 ])
 
@@ -160,8 +160,7 @@ export const SubRowSchema = z.object({
   displayElements: z.array(displayElementSchema)
 })
 
-
 export const PublicConfigSchema = z.object({
   readOnlyMode: z.boolean(),
-  disableImg: z.boolean(),
+  disableImg: z.boolean()
 })

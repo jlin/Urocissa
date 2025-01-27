@@ -5,9 +5,9 @@ use rand::{distributions::Alphanumeric, Rng};
 
 use std::collections::{BTreeMap, HashSet};
 
-use super::definition::DataBase;
+use super::definition::Database;
 
-impl DataBase {
+impl Database {
     pub fn generate_random_data() -> Self {
         let hash: String = rand::thread_rng()
             .sample_iter(&Alphanumeric)

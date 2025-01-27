@@ -37,7 +37,7 @@ pub async fn get_data(
                 .map(
                     |index| match table.get(&*tree_snapshot.get_hash(index)).unwrap() {
                         Some(database) => Ok(DataBaseTimestamp::new(
-                            AbstractData::DataBase(database.value()),
+                            AbstractData::Database(database.value()),
                             &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
                         )),
                         None => match album_table.get(&*tree_snapshot.get_hash(index)).unwrap() {

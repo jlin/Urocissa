@@ -4,14 +4,14 @@ use rocket::response::stream::ByteStream;
 use serde::Serialize;
 
 use crate::{
-    public::{database_struct::database::definition::DataBase, tree::TREE},
+    public::{database_struct::database::definition::Database, tree::TREE},
     router::fairing::AuthGuard,
 };
 
 #[derive(Debug, Serialize)]
 pub struct ExportEntry {
     key: String,
-    value: DataBase,
+    value: Database,
 }
 
 #[get("/get/get-export")]

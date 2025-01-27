@@ -1,12 +1,12 @@
 use crate::router::get::get_prefetch::Prefetch;
 
 use super::{
-    album::Album, database_struct::database::definition::DataBase, reduced_data::ReducedData,
+    album::Album, database_struct::database::definition::Database, reduced_data::ReducedData,
     row::Row,
 };
 use redb::{TypeName, Value};
 
-impl Value for DataBase {
+impl Value for Database {
     type SelfType<'a>
         = Self
     where
@@ -23,7 +23,7 @@ impl Value for DataBase {
     where
         Self: 'a,
     {
-        bitcode::decode::<Self>(data).expect("Failed to deserialize DataBase")
+        bitcode::decode::<Self>(data).expect("Failed to deserialize Database")
     }
 
     fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a> {
@@ -31,7 +31,7 @@ impl Value for DataBase {
     }
 
     fn type_name() -> TypeName {
-        TypeName::new("DataBase")
+        TypeName::new("Database")
     }
 }
 

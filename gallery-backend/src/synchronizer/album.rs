@@ -61,7 +61,7 @@ pub fn start_album_channel() -> tokio::task::JoinHandle<()> {
                             let hash_list: Vec<_> = ref_data
                                 .par_iter()
                                 .filter_map(|dt| match &dt.abstract_data {
-                                    AbstractData::DataBase(db) if db.album.contains(&*album_id) => {
+                                    AbstractData::Database(db) if db.album.contains(&*album_id) => {
                                         Some(db.hash)
                                     }
                                     _ => None,

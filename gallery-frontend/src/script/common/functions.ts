@@ -3,7 +3,7 @@
 import { thumbHashToDataURL } from 'thumbhash'
 import { z } from 'zod'
 import { DataBaseParse } from './schemas'
-import { DataBase, AbstractData, Album } from './types'
+import { Database, AbstractData, Album } from './types'
 import { RouteLocationNormalizedLoaded, Router } from 'vue-router'
 import { computed, ComputedRef, inject } from 'vue'
 import { useDataStore } from '../../store/dataStore.ts'
@@ -11,13 +11,13 @@ import Cookies from 'js-cookie'
 import { navBarHeight } from './constants.ts'
 
 /**
- * Creates a DataBase instance from parsed data and timestamp.
+ * Creates a Database instance from parsed data and timestamp.
  */
 export function createDataBase(
   databaseParse: z.infer<typeof DataBaseParse>,
   timestamp: number
-): DataBase {
-  const database: DataBase = {
+): Database {
+  const database: Database = {
     ...databaseParse,
     timestamp: timestamp,
     thumbhashUrl: thumbHashToDataURL(databaseParse.thumbhash),
@@ -27,9 +27,9 @@ export function createDataBase(
 }
 
 /**
- * Creates an AbstractData instance from DataBase or Album.
+ * Creates an AbstractData instance from Database or Album.
  */
-export function createAbstractData(data: DataBase | Album): AbstractData {
+export function createAbstractData(data: Database | Album): AbstractData {
   if ('hash' in data) {
     return { database: data }
   } else {

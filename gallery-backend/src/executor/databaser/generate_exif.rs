@@ -1,9 +1,9 @@
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use anyhow::Context;
 use regex::Regex;
 use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command, sync::LazyLock};
 
-pub fn generate_exif_for_image(database: &DataBase) -> BTreeMap<String, String> {
+pub fn generate_exif_for_image(database: &Database) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();
     if let Ok(exif) = read_exif(&database.source_path()) {
         for field in exif.fields() {
@@ -36,7 +36,7 @@ fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
 pub fn generate_exif_for_video(
-    database: &DataBase,
+    database: &Database,
 ) -> Result<BTreeMap<String, String>, Box<dyn Error>> {
     let source_path = database.source_path_string();
     let mut exif_tuple = BTreeMap::new();

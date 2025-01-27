@@ -1,7 +1,7 @@
-use super::definition::DataBase;
+use super::definition::Database;
 use std::path::PathBuf;
 
-impl DataBase {
+impl Database {
     pub fn source_path_string(&self) -> &str {
         &self.alias[0].file
     }

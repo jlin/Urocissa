@@ -1,5 +1,5 @@
 use super::video_ffprobe::video_width_height;
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use image::DynamicImage;
 use std::error::Error;
 
@@ -9,7 +9,7 @@ pub fn generate_image_width_height(dynamic_image: &DynamicImage) -> (u32, u32) {
     (width, height)
 }
 
-pub fn generate_video_width_height(database: &DataBase) -> Result<(u32, u32), Box<dyn Error>> {
+pub fn generate_video_width_height(database: &Database) -> Result<(u32, u32), Box<dyn Error>> {
     let width = video_width_height("width", &database.imported_path_string())?;
     let height = video_width_height("height", &database.imported_path_string())?;
     Ok((width, height))

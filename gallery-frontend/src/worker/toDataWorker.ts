@@ -8,7 +8,7 @@ import {
 } from '@/script/common/schemas'
 import {
   AbstractData,
-  DataBase,
+  Database,
   DisplayElement,
   FetchDataMethod,
   Prefetch,
@@ -179,7 +179,7 @@ async function prefetch(
 
 /**
  * Fetches a batch of data based on the provided batch index and timestamp.
- * Processes the fetched data into DataBase instances and accumulates them into a map.
+ * Processes the fetched data into Database instances and accumulates them into a map.
  *
  * @param batchIndex - The index of the batch to fetch.
  * @param timestamp - The timestamp associated with the data fetch.
@@ -209,7 +209,7 @@ async function fetchData(
 
   const fetchUrl = `/get/get-data?timestamp=${timestamp}&start=${start}&end=${end}`
 
-  const response = await axios.get<DataBase[]>(fetchUrl)
+  const response = await axios.get<Database[]>(fetchUrl)
   const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
   const data = new Map<number, AbstractData>()
@@ -225,8 +225,8 @@ async function fetchData(
     const item = databaseTimestampArray[i]
     const key = start + i
 
-    if (item !== undefined && 'DataBase' in item.abstractData) {
-      const dataBaseInstance = createDataBase(item.abstractData.DataBase, item.timestamp)
+    if (item !== undefined && 'Database' in item.abstractData) {
+      const dataBaseInstance = createDataBase(item.abstractData.Database, item.timestamp)
       const abstractData = createAbstractData(dataBaseInstance)
       data.set(key, abstractData)
     } else if (item !== undefined && 'Album' in item.abstractData) {
@@ -239,7 +239,7 @@ async function fetchData(
           fetchMethod === 'batch' ? index : index
         }, ` +
           `batchNumber: ${batchNumber}, index: ${i}. ` +
-          `Item is undefined or lacks 'DataBase' and 'Album' in abstractData.`,
+          `Item is undefined or lacks 'Database' and 'Album' in abstractData.`,
         item
       )
     }

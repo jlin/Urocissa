@@ -3,6 +3,7 @@ extern crate rocket;
 use initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
+use migration::check_database_schema_version;
 use public::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::tree::TREE;
 use redb::ReadableTableMetadata;
@@ -17,6 +18,7 @@ use std::thread;
 use std::time::Instant;
 mod executor;
 mod initialization;
+mod migration;
 mod public;
 mod router;
 mod synchronizer;
@@ -25,6 +27,7 @@ mod synchronizer;
 async fn rocket() -> _ {
     initialize_logger();
     check_ffmpeg_and_ffprobe();
+    check_database_schema_version();
     initialize_folder();
     initialize_file();
     let start_time = Instant::now();

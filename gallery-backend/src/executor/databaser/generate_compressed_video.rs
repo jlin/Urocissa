@@ -1,7 +1,7 @@
 use super::video_ffprobe::video_duration;
 use crate::{
     executor::databaser::processor::process_image_info,
-    public::database_struct::database::definition::DataBase,
+    public::database_struct::database::definition::Database,
 };
 use anyhow::{Context, Result};
 use regex::Regex;
@@ -12,7 +12,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub fn generate_compressed_video(database: &mut DataBase) -> Result<(), Box<dyn Error>> {
+pub fn generate_compressed_video(database: &mut Database) -> Result<(), Box<dyn Error>> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {

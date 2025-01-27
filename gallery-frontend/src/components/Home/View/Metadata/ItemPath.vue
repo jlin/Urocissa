@@ -13,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import { DataBase } from '@/script/common/types';
+import { Database } from '@/script/common/types'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  database: DataBase
+  database: Database
 }>()
 
 const filePathComplete = computed(() => {
@@ -31,5 +31,4 @@ const filePath = computed(() => {
 const separator = computed(() => {
   return filePath.value.includes('\\') ? '\\' : '/'
 })
-
 </script>

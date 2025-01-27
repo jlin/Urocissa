@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashSet};
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq)]
-pub struct DataBase {
+pub struct Database {
     pub hash: ArrayString<64>,
     pub size: u64,
     pub width: u32,

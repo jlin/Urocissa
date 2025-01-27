@@ -90,9 +90,9 @@ export type Prefetch = z.infer<typeof prefetchSchema>
 export type Album = z.infer<typeof AlbumSchema>
 
 /**
- * Represents DataBase.
+ * Represents Database.
  */
-export type DataBase = z.infer<typeof DataBaseSchema>
+export type Database = z.infer<typeof DataBaseSchema>
 
 /**
  * Represents AbstractData.

@@ -1,15 +1,12 @@
 use crate::public::{constant::VALID_IMAGE_EXTENSIONS, database_struct::file_modify::FileModify};
 
-use super::definition::DataBase;
+use super::definition::Database;
 use arrayvec::ArrayString;
 use std::collections::{BTreeMap, HashSet};
 
-impl DataBase {
-    pub fn new(
-        size: u64,
-        hash_alias: FileModify,
-    ) -> Self {
-        let ext =  hash_alias.ext();
+impl Database {
+    pub fn new(size: u64, hash_alias: FileModify) -> Self {
+        let ext = hash_alias.ext();
         Self {
             hash: ArrayString::<64>::default(),
             size,

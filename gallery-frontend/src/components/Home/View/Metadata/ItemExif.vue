@@ -22,10 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import { DataBase } from '@/script/common/types'
+import { Database } from '@/script/common/types'
 
 const props = defineProps<{
-  database: DataBase
+  database: Database
 }>()
 
 function generateExifMake(exifData: Record<string, string>): string {

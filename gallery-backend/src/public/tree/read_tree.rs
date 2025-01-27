@@ -1,4 +1,4 @@
-use crate::public::{album::Album, database_struct::database::definition::DataBase, redb::{ALBUM_TABLE, DATA_TABLE}};
+use crate::public::{album::Album, database_struct::database::definition::Database, redb::{ALBUM_TABLE, DATA_TABLE}};
 
 use redb::ReadOnlyTable;
 use std::error::Error;
@@ -6,7 +6,7 @@ use std::error::Error;
 use super::Tree;
 
 impl Tree {
-    pub fn api_read_tree(&self) -> ReadOnlyTable<&str, DataBase> {
+    pub fn api_read_tree(&self) -> ReadOnlyTable<&str, Database> {
         self.in_disk
             .begin_read()
             .unwrap()
@@ -20,7 +20,7 @@ impl Tree {
             .open_table(ALBUM_TABLE)
             .unwrap()
     }
-    pub fn insert_tree_api(&self, data_vec: &Vec<DataBase>) -> Result<(), Box<dyn Error>> {
+    pub fn insert_tree_api(&self, data_vec: &Vec<Database>) -> Result<(), Box<dyn Error>> {
         let txn = self.in_disk.begin_write()?;
         for data in data_vec {
             let mut table = txn.open_table(DATA_TABLE)?;

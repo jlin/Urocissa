@@ -1,4 +1,4 @@
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use futures::stream::{self, StreamExt};
@@ -11,7 +11,7 @@ use tokio::io;
 
 /// Synchronous import function that internally uses Tokio's async capabilities
 pub fn import(
-    deduplicated_file_list: &DashMap<ArrayString<64>, DataBase>,
+    deduplicated_file_list: &DashMap<ArrayString<64>, Database>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let progress_bar = ProgressBar::new(deduplicated_file_list.len() as u64);
     progress_bar.set_style(
@@ -43,7 +43,7 @@ pub fn import(
 
 /// Asynchronous helper function to perform concurrent file copying
 async fn async_import(
-    deduplicated_file_list: &DashMap<ArrayString<64>, DataBase>,
+    deduplicated_file_list: &DashMap<ArrayString<64>, Database>,
     progress_bar: Arc<ProgressBar>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Define the level of concurrency (number of simultaneous operations)

@@ -1,11 +1,11 @@
-use crate::public::database_struct::database::definition::DataBase;
+use crate::public::database_struct::database::definition::Database;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use std::error::Error;
 use std::fs::read;
 use std::path::PathBuf;
 use zune_jpeg::{zune_core::options::DecoderOptions, JpegDecoder};
 
-pub fn generate_dynamic_image(database: &DataBase) -> Result<DynamicImage, Box<dyn Error>> {
+pub fn generate_dynamic_image(database: &Database) -> Result<DynamicImage, Box<dyn Error>> {
     let img_path = if database.ext_type == "image".to_string() {
         database.imported_path()
     } else {

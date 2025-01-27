@@ -45,27 +45,27 @@ impl Expression {
             }
             Expression::Tag(tag) => {
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => db.tag.contains(&tag),
+                    AbstractData::Database(db) => db.tag.contains(&tag),
                     AbstractData::Album(album) => album.tag.contains(&tag),
                 })
             }
             Expression::ExtType(ext_type) => {
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => db.ext_type.contains(&ext_type),
+                    AbstractData::Database(db) => db.ext_type.contains(&ext_type),
                     AbstractData::Album(_) => ext_type.contains("album"),
                 })
             }
             Expression::Ext(ext) => {
                 let ext_lower = ext.to_ascii_lowercase();
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => db.ext.to_ascii_lowercase().contains(&ext_lower),
+                    AbstractData::Database(db) => db.ext.to_ascii_lowercase().contains(&ext_lower),
                     AbstractData::Album(_) => false,
                 })
             }
             Expression::Model(model) => {
                 let model_lower = model.to_ascii_lowercase();
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => {
+                    AbstractData::Database(db) => {
                         db.exif_vec.get("Model").map_or(false, |model_of_exif| {
                             model_of_exif.to_ascii_lowercase().contains(&model_lower)
                         })
@@ -76,7 +76,7 @@ impl Expression {
             Expression::Make(make) => {
                 let make_lower = make.to_ascii_lowercase();
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => {
+                    AbstractData::Database(db) => {
                         db.exif_vec.get("Make").map_or(false, |make_of_exif| {
                             make_of_exif.to_ascii_lowercase().contains(&make_lower)
                         })
@@ -87,7 +87,7 @@ impl Expression {
             Expression::Path(path) => {
                 let path_lower = path.to_ascii_lowercase();
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => db.alias.iter().any(|file_modify| {
+                    AbstractData::Database(db) => db.alias.iter().any(|file_modify| {
                         file_modify.file.to_ascii_lowercase().contains(&path_lower)
                     }),
                     AbstractData::Album(_) => false,
@@ -95,14 +95,14 @@ impl Expression {
             }
             Expression::Album(album_id) => {
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => db.album.contains(&album_id),
+                    AbstractData::Database(db) => db.album.contains(&album_id),
                     AbstractData::Album(_) => false,
                 })
             }
             Expression::Any(any_identifier) => {
                 let any_lower = any_identifier.to_ascii_lowercase();
                 Box::new(move |abstract_data: &AbstractData| match abstract_data {
-                    AbstractData::DataBase(db) => {
+                    AbstractData::Database(db) => {
                         db.tag.contains(&any_identifier)
                             || db.ext_type.contains(&any_identifier)
                             || db.ext.to_ascii_lowercase().contains(&any_lower)

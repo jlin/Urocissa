@@ -3,13 +3,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::public::{
-    abstract_data::AbstractData, database_struct::database::definition::DataBase, tree::TREE,
+    abstract_data::AbstractData, database_struct::database::definition::Database, tree::TREE,
 };
 
 use super::Album;
 
 impl Album {
-    pub fn set_cover(&mut self, cover_data: &DataBase) {
+    pub fn set_cover(&mut self, cover_data: &Database) {
         self.cover = Some(cover_data.hash);
         self.width = cover_data.width;
         self.height = cover_data.height;
@@ -19,12 +19,12 @@ impl Album {
         // Acquire a read lock on the in-memory tree
         let ref_data = TREE.in_memory.read().unwrap();
 
-        // Collect relevant DataBase entries along with their timestamps
-        let mut data_in_album: Vec<(&DataBase, u128)> = ref_data
+        // Collect relevant Database entries along with their timestamps
+        let mut data_in_album: Vec<(&Database, u128)> = ref_data
             .par_iter()
             .filter_map(
                 |database_timestamp| match &database_timestamp.abstract_data {
-                    AbstractData::DataBase(database) => {
+                    AbstractData::Database(database) => {
                         if database.album.contains(&self.id) {
                             Some((database, database_timestamp.timestamp))
                         } else {

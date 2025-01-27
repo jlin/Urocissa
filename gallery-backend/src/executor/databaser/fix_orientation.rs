@@ -1,9 +1,9 @@
 use crate::public::{
-    constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION, database_struct::database::definition::DataBase,
+    constant::SHOULD_SWAP_WIDTH_HEIGHT_ROTATION, database_struct::database::definition::Database,
 };
 use image::DynamicImage;
 
-pub fn fix_image_orientation(database: &DataBase, dynamic_image: &mut DynamicImage) -> () {
+pub fn fix_image_orientation(database: &Database, dynamic_image: &mut DynamicImage) -> () {
     if let Some(orientation) = database.exif_vec.get("Orientation") {
         match orientation.as_str() {
             "row 0 at right and column 0 at top" => {
@@ -20,7 +20,7 @@ pub fn fix_image_orientation(database: &DataBase, dynamic_image: &mut DynamicIma
     }
 }
 
-pub fn fix_image_width_height(database: &mut DataBase) -> () {
+pub fn fix_image_width_height(database: &mut Database) -> () {
     if let Some(orientation) = database.exif_vec.get("Orientation") {
         match orientation.as_str() {
             "row 0 at right and column 0 at top" => {
@@ -34,7 +34,7 @@ pub fn fix_image_width_height(database: &mut DataBase) -> () {
     }
 }
 
-pub fn fix_video_width_height(database: &mut DataBase) -> () {
+pub fn fix_video_width_height(database: &mut Database) -> () {
     let should_swap_video_width_height = {
         if let Some(rotation) = database.exif_vec.get("rotation") {
             SHOULD_SWAP_WIDTH_HEIGHT_ROTATION.contains(&rotation.trim())

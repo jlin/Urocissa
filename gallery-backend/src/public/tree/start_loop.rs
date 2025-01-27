@@ -54,7 +54,7 @@ impl Tree {
                     database
                         .exif_vec
                         .retain(|k, _| ALLOWED_KEYS.contains(&k.as_str()));
-                    DataBaseTimestamp::new(AbstractData::DataBase(database), &priority_list)
+                    DataBaseTimestamp::new(AbstractData::Database(database), &priority_list)
                 })
                 .collect();
 

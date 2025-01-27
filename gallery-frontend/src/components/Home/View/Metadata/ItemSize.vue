@@ -16,9 +16,9 @@
 
 <script setup lang="ts">
 import { filesize } from 'filesize'
-import { DataBase } from '@/script/common/types'
+import { Database } from '@/script/common/types'
 
 const props = defineProps<{
-  database: DataBase
+  database: Database
 }>()
 </script>

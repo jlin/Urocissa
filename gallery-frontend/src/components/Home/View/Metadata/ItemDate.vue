@@ -5,9 +5,7 @@
         <v-icon color="black">mdi-calendar</v-icon>
       </v-avatar>
     </template>
-    <v-list-item-title class="text-wrap">{{
-      dater(props.database.timestamp)
-    }}</v-list-item-title>
+    <v-list-item-title class="text-wrap">{{ dater(props.database.timestamp) }}</v-list-item-title>
     <v-list-item-subtitle class="text-wrap">{{
       timer(props.database.timestamp)
     }}</v-list-item-subtitle>
@@ -15,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import { DataBase } from '@/script/common/types'
+import { Database } from '@/script/common/types'
 import { dater } from '@/script/common/functions'
 
 const props = defineProps<{
-  database: DataBase
+  database: Database
 }>()
 
 function timer(timestamp: number): string {
