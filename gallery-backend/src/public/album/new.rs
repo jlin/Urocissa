@@ -18,6 +18,7 @@ impl Album {
             title: title,
             created_time: timestamp,
             cover: None,
+            thumbhash: None,
             user_defined_metadata: HashMap::new(),
             share_list: vec![],
             tag: HashSet::new(),

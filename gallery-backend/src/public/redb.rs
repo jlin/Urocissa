@@ -6,7 +6,6 @@ use super::album::Album;
 
 pub const DATA_TABLE: TableDefinition<&str, Database> = TableDefinition::new("database");
 
-// FIXME: Typo in table name "albumm". Changing this now will cause database corruption.
-pub const ALBUM_TABLE: TableDefinition<&str, Album> = TableDefinition::new("albumm");
+pub const ALBUM_TABLE: TableDefinition<&str, Album> = TableDefinition::new("album");
 
 pub const SCHEMA_TABLE: TableDefinition<&str, u8> = TableDefinition::new("schema");

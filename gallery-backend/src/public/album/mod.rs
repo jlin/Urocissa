@@ -29,6 +29,7 @@ pub struct Album {
     pub end_time: Option<u128>,
     pub last_modified_time: u128,
     pub cover: Option<ArrayString<64>>,
+    pub thumbhash: Option<Vec<u8>>,
     pub user_defined_metadata: HashMap<String, Vec<String>>,
     pub share_list: Vec<Share>,
     pub tag: HashSet<String>,
