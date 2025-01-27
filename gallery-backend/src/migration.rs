@@ -61,7 +61,7 @@ pub fn migration_album() {
             .open_table(crate::public::redb::ALBUM_TABLE)
             .expect("Migration failed: Unable to open new table");
         let old_table = txn
-            .open_table(Urocissa::ALBUM_TABLE)
+            .open_table(urocissa::ALBUM_TABLE)
             .expect("Migration failed: Unable to open old table");
 
         old_table
@@ -123,7 +123,7 @@ pub fn migration_database() {
             .open_table(crate::public::redb::DATA_TABLE)
             .expect("Migration failed: Unable to open new table");
         let old_table = txn
-            .open_table(Urocissa::DATA_TABLE)
+            .open_table(urocissa::DATA_TABLE)
             .expect("Migration failed: Unable to open old table");
 
         old_table

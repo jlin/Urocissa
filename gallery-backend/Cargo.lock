@@ -3,46 +3,6 @@
 version = 4
 
 [[package]]
-name = "Urocissa"
-version = "0.9.0"
-dependencies = [
- "anstyle",
- "anyhow",
- "arrayvec",
- "bitcode",
- "blake3",
- "chrono",
- "dashmap",
- "dotenv",
- "env_logger",
- "envy",
- "filetime",
- "futures",
- "image",
- "image_hasher",
- "indicatif",
- "jsonwebtoken",
- "kamadak-exif",
- "log",
- "notify",
- "path-clean",
- "rand",
- "rayon",
- "redb",
- "regex",
- "reqwest",
- "rocket",
- "rocket_seek_stream",
- "serde",
- "serde_json",
- "thumbhash",
- "tokio",
- "uuid",
- "walkdir",
- "zune-jpeg",
-]
-
-[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3412,6 +3372,46 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "urocissa"
+version = "0.9.0"
+dependencies = [
+ "anstyle",
+ "anyhow",
+ "arrayvec",
+ "bitcode",
+ "blake3",
+ "chrono",
+ "dashmap",
+ "dotenv",
+ "env_logger",
+ "envy",
+ "filetime",
+ "futures",
+ "image",
+ "image_hasher",
+ "indicatif",
+ "jsonwebtoken",
+ "kamadak-exif",
+ "log",
+ "notify",
+ "path-clean",
+ "rand",
+ "rayon",
+ "redb",
+ "regex",
+ "reqwest",
+ "rocket",
+ "rocket_seek_stream",
+ "serde",
+ "serde_json",
+ "thumbhash",
+ "tokio",
+ "uuid",
+ "walkdir",
+ "zune-jpeg",
 ]
 
 [[package]]
