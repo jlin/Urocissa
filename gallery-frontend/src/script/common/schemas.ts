@@ -89,10 +89,7 @@ export const ShareSchema = z.object({
   exp: z.number()
 })
 
-/**
- * Schema for album.
- */
-export const AlbumSchema = z.object({
+export const AlbumParse = z.object({
   id: z.string(),
   title: z.string().nullable(),
   createdTime: z.number(),
@@ -100,6 +97,7 @@ export const AlbumSchema = z.object({
   endTime: z.number().nullable(),
   lastModifiedTime: z.number(),
   cover: z.string().nullable(),
+  thumbhash: z.array(z.number()).nullable(),
   userDefinedMetadata: z.record(z.array(z.string())),
   shareList: z.array(ShareSchema),
   tag: z.array(z.string()),
@@ -110,9 +108,17 @@ export const AlbumSchema = z.object({
   pending: z.boolean()
 })
 
+/**
+ * Schema for Database with additional fields.
+ */
+export const AlbumSchema = AlbumParse.extend({
+  timestamp: z.number(),
+  thumbhashUrl: z.string().nullable() // need initialize
+})
+
 export const AbstractDataParseSchema = z.union([
   z.object({ Database: DataBaseParse }),
-  z.object({ Album: AlbumSchema })
+  z.object({ Album: AlbumParse })
 ])
 
 export const AbstractDataSchema = z.object({

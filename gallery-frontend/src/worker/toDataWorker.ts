@@ -20,7 +20,12 @@ import {
 } from '@/script/common/types'
 import { SubRow } from '@/script/common/types'
 import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/script/common/constants'
-import { createAbstractData, createDataBase, getArrayValue } from '@/script/common/functions'
+import {
+  createAbstractData,
+  createAlbum,
+  createDataBase,
+  getArrayValue
+} from '@/script/common/functions'
 
 import axios, { AxiosResponse } from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
@@ -226,11 +231,12 @@ async function fetchData(
     const key = start + i
 
     if (item !== undefined && 'Database' in item.abstractData) {
-      const dataBaseInstance = createDataBase(item.abstractData.Database, item.timestamp)
-      const abstractData = createAbstractData(dataBaseInstance)
+      const databaseInstance = createDataBase(item.abstractData.Database, item.timestamp)
+      const abstractData = createAbstractData(databaseInstance)
       data.set(key, abstractData)
     } else if (item !== undefined && 'Album' in item.abstractData) {
-      const abstractData = createAbstractData(item.abstractData.Album)
+      const albumInstance = createAlbum(item.abstractData.Album, item.timestamp)
+      const abstractData = createAbstractData(albumInstance)
 
       data.set(key, abstractData)
     } else {

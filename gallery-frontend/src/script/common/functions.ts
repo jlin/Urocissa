@@ -2,7 +2,7 @@
 
 import { thumbHashToDataURL } from 'thumbhash'
 import { z } from 'zod'
-import { DataBaseParse } from './schemas'
+import { AlbumParse, DataBaseParse } from './schemas'
 import { Database, AbstractData, Album } from './types'
 import { RouteLocationNormalizedLoaded, Router } from 'vue-router'
 import { computed, ComputedRef, inject } from 'vue'
@@ -24,6 +24,15 @@ export function createDataBase(
     filename: databaseParse.alias[0]?.file.split('/').pop() ?? ''
   }
   return database
+}
+
+export function createAlbum(albumParse: z.infer<typeof AlbumParse>, timestamp: number): Album {
+  const album: Album = {
+    ...albumParse,
+    timestamp: timestamp,
+    thumbhashUrl: albumParse.thumbhash ? thumbHashToDataURL(albumParse.thumbhash) : null
+  }
+  return album
 }
 
 /**
