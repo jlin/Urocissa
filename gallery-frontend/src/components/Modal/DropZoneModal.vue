@@ -43,9 +43,7 @@ function onDrop(files: File[] | null) {
 
 const { isOverDropZone } = useDropZone(dropZoneRef, {
   onDrop,
-  // control multi-file drop
   multiple: true,
-  // whether to prevent default behavior for unhandled events
   preventDefaultForUnhandled: false
 })
 
