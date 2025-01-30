@@ -67,24 +67,32 @@ impl Album {
             .unwrap()
             .as_millis();
 
-        // Set the cover using the first (earliest) database entry
         if let Some((first_database, first_timestamp)) = data_in_album.first() {
-            if self.cover.is_none() || {
-                // check whether the cover is a member of this album
-                let cover = self.cover.as_ref();
-                !data_in_album
-                    .par_iter()
-                    .any(|(database, _)| cover == Some(&database.hash))
-            } {
+            if self.cover.is_none() {
                 self.set_cover(first_database);
             }
+
+            let cover_database_opt = data_in_album
+                .par_iter()
+                .find_any(|(database, _)| self.cover == Some(database.hash));
+
+            if cover_database_opt.is_none() {
+                self.set_cover(first_database);
+            }
+
+            // cover exists and is a member of album
+
+            let (cover_database, _) = cover_database_opt.unwrap();
+            let cover_thumbhash = &cover_database.thumbhash;
+            self.thumbhash = Some(cover_thumbhash.clone());
+
             // Set the start_time using the first (earliest) timestamp
             self.start_time = Some(*first_timestamp);
-        }
 
-        // Set the end_time using the last (latest) timestamp
-        if let Some((_, last_timestamp)) = data_in_album.last() {
-            self.end_time = Some(*last_timestamp);
+            // Set the end_time using the last (latest) timestamp
+            if let Some((_, last_timestamp)) = data_in_album.last() {
+                self.end_time = Some(*last_timestamp);
+            }
         }
     }
 }
