@@ -36,10 +36,8 @@ const MainBlock: FunctionalComponent<MainBlockProps> = (props) => {
   )
 
   if (!configStore.disableImg) {
-    const thumbhashUrl = abstractData.database?.thumbhashUrl ?? abstractData.album?.thumbhashUrl
-    console.log('abstractData.album?.thumbhashUrl is', abstractData.album?.thumbhashUrl)
-
-    if (typeof thumbhashUrl === 'string') {
+    const thumbhashUrl = abstractData.database?.thumbhashUrl
+    if (thumbhashUrl !== undefined) {
       chips.push(
         h(ThumbhashImage, {
           index: props.index,
