@@ -1,41 +1,71 @@
+use std::io;
+use std::io::Write;
+
 use crate::public::redb::SCHEMA_TABLE;
-use log::{info, warn};
+use indicatif::ProgressBar;
+use indicatif::ProgressStyle;
+use log::{error, info, warn};
 use redb::ReadableTable;
+use redb::ReadableTableMetadata;
 use redb::WriteTransaction;
 
 pub fn check_database_schema_version() {
     let version = read_version();
 
-    info!("Database schema vesrion: {}", version);
+    info!("Database schema version: {}", version);
 
     if version == 0 {
-        warn!("Perform database migration");
+        warn!("Performing database migration.");
+        warn!(
+            "Please BACKUP your database file: Urocissa/gallery-backend/db/index.redb before proceeding."
+        );
+        warn!("Migration has risks and may modify the database schema.");
+        warn!("If migration fails or destroys the database, you can recover from your backup.");
+        print!("Have you backed up your database? (Y/n): ");
+        io::stdout().flush().expect("Failed to flush stdout"); // Replaced unwrap with expect
+
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
+
+        let input = input.trim().to_lowercase();
+        if input != "y" {
+            panic!("Migration aborted. Please backup your database first.");
+        }
+
         migration();
-        info!("Database migration completed.")
+        info!("Database migration completed.");
     }
 }
 
 pub fn read_version() -> u8 {
-    let database = redb::Database::create("./db/index.redb").unwrap();
+    let database = redb::Database::create("./db/index.redb")
+        .expect("Failed to create or open the database at './db/index.redb'");
     let version: u8;
-    let txn = database.begin_write().unwrap();
+    let txn = database
+        .begin_write()
+        .expect("Failed to begin a write transaction on the database");
     {
-        let version_table = txn.open_table(SCHEMA_TABLE).unwrap();
+        let version_table = txn
+            .open_table(SCHEMA_TABLE)
+            .expect("Failed to open the schema table in the database");
 
         // Read "version" or default to 0
         version = version_table
             .get("version")
-            .unwrap()
+            .expect("Failed to retrieve 'version' from the schema table")
             .map(|guard| guard.value())
             .unwrap_or(0);
     }
-    txn.commit().unwrap();
+    txn.commit()
+        .expect("Failed to commit the transaction while reading the version");
     version
 }
 
 pub fn migration() {
     let database = redb::Database::create("./db/index.redb")
-        .expect("Migration failed: Unable to create database");
+        .expect("Migration failed: Unable to create or open the database");
 
     let txn = database
         .begin_write()
@@ -46,23 +76,37 @@ pub fn migration() {
     migration_version(&txn);
 
     txn.commit()
-        .expect("Migration failed: Unable to commit transaction");
+        .expect("Migration failed: Unable to commit transaction; database rolled back.");
 }
 
 pub fn migration_database(txn: &WriteTransaction) {
     let mut new_table = txn
         .open_table(crate::public::redb::DATA_TABLE)
-        .expect("Migration failed: Unable to open new table");
+        .expect("Migration failed: Unable to open the new data table");
     let old_table = txn
         .open_table(urocissa::DATA_TABLE)
-        .expect("Migration failed: Unable to open old table");
+        .expect("Migration failed: Unable to open the old data table");
+
+    let progress_bar = ProgressBar::new(
+        old_table
+            .len()
+            .expect("Migration failed: Cannot get the length of the old data table") as u64,
+    );
+    progress_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} ({eta}) {msg}")
+            .expect("Failed to set progress bar template") // Replaced unwrap with expect
+            .progress_chars("##-"),
+    );
+
+    progress_bar.set_message("Migrating database...");
 
     old_table
         .iter()
-        .expect("Migration failed: Unable to iterate over old table")
+        .expect("Migration failed: Unable to iterate over the old data table")
         .for_each(|result| {
             let (_, value_guard) =
-                result.expect("Migration failed: Unable to retrieve value from old table");
+                result.expect("Migration failed: Unable to retrieve value from the old data table");
             let old_data = value_guard.value();
             let converted = crate::public::database_struct::database::definition::Database {
                 hash: old_data.hash,
@@ -91,30 +135,49 @@ pub fn migration_database(txn: &WriteTransaction) {
             };
             new_table
                 .insert(&*old_data.hash, converted)
-                .expect("Migration failed: Unable to insert data into new table");
+                .expect("Migration failed: Unable to insert data into the new data table");
+            progress_bar.inc(1);
         });
+
+    progress_bar.finish_with_message("Migrating database completed");
+
     txn.delete_table(old_table)
-        .expect("Migration failed: Unable to delete old table");
+        .expect("Migration failed: Unable to delete the old data table");
 }
 
 pub fn migration_album(txn: &WriteTransaction) {
     let mut new_table = txn
         .open_table(crate::public::redb::ALBUM_TABLE)
-        .expect("Migration failed: Unable to open new table");
+        .expect("Migration failed: Unable to open the new album table");
     let old_table = txn
         .open_table(urocissa::ALBUM_TABLE)
-        .expect("Migration failed: Unable to open old table");
+        .expect("Migration failed: Unable to open the old album table");
 
     let database_table = txn
         .open_table(crate::public::redb::DATA_TABLE)
-        .expect("Migration failed: Unable to open new table");
+        .expect("Migration failed: Unable to open the data table");
+
+    let progress_bar = ProgressBar::new(
+        old_table
+            .len()
+            .expect("Migration failed: Cannot get the length of the old album table")
+            as u64,
+    );
+    progress_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} ({eta}) {msg}")
+            .expect("Failed to set progress bar template") // Replaced unwrap with expect
+            .progress_chars("##-"),
+    );
+
+    progress_bar.set_message("Migrating album...");
 
     old_table
         .iter()
-        .expect("Migration failed: Unable to iterate over old table")
+        .expect("Migration failed: Unable to iterate over the old album table")
         .for_each(|result| {
-            let (_, value_guard) =
-                result.expect("Migration failed: Unable to retrieve value from old table");
+            let (_, value_guard) = result
+                .expect("Migration failed: Unable to retrieve value from the old album table");
             let old_album = value_guard.value();
 
             let thumbhash_opt = if let Some(cover_hash) = old_album.cover {
@@ -122,14 +185,14 @@ pub fn migration_album(txn: &WriteTransaction) {
                     Ok(Some(guard)) => Some(guard.value().thumbhash),
                     Ok(None) => {
                         panic!(
-                            "Migration failed: album {} cannot get cover {}",
+                            "Migration failed: Album {} cannot get cover {}",
                             old_album.id, cover_hash
                         );
                     }
                     Err(err) => {
                         error!("{}", err);
                         panic!(
-                            "Migration failed: album {} cannot get thumbhash with cover {}",
+                            "Migration failed: Album {} cannot get thumbhash with cover {}",
                             old_album.id, cover_hash
                         );
                     }
@@ -170,15 +233,22 @@ pub fn migration_album(txn: &WriteTransaction) {
             };
             new_table
                 .insert(&*old_album.id, converted)
-                .expect("Migration failed: Unable to insert data into new table");
+                .expect("Migration failed: Unable to insert data into the new album table");
+            progress_bar.inc(1);
         });
+
+    progress_bar.finish_with_message("Migrating album completed");
+
     txn.delete_table(old_table)
-        .expect("Migration failed: Unable to delete old table");
+        .expect("Migration failed: Unable to delete the old album table");
 }
 
 pub fn migration_version(txn: &WriteTransaction) {
-    let mut version_table = txn.open_table(SCHEMA_TABLE).unwrap();
+    let mut version_table = txn
+        .open_table(SCHEMA_TABLE)
+        .expect("Migration failed: Unable to open the schema table");
     version_table
         .insert("version", 1)
-        .expect("Migration failed: Unable to insert number to version table");
+        .expect("Migration failed: Unable to insert version number into the schema table");
+    info!("Database schema updated to version 1");
 }
