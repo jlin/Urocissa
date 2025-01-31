@@ -17,14 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Build the backend binary based on the build type
 RUN if [ "${BUILD_TYPE}" = "release" ]; then \
-        cargo build --release --bin Urocissa; \
+        cargo build --release --bin urocissa; \
     elif [ "${BUILD_TYPE}" = "debug" ]; then \
-        cargo build --bin Urocissa; \
+        cargo build --bin urocissa; \
     else \
-        cargo build --profile "${BUILD_TYPE}" --bin Urocissa; \
+        cargo build --profile "${BUILD_TYPE}" --bin urocissa; \
     fi
 
-RUN cp /app/gallery-backend/target/${BUILD_TYPE}/Urocissa /app/gallery-backend/Urocissa
+RUN cp /app/gallery-backend/target/${BUILD_TYPE}/urocissa /app/gallery-backend/urocissa
 
 ######################
 # Frontend builder stage
@@ -46,7 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app/gallery-backend
 
 # Copy backend binary
-COPY --from=builder /app/gallery-backend/Urocissa /app/gallery-backend/Urocissa
+COPY --from=builder /app/gallery-backend/urocissa /app/gallery-backend/urocissa
 
 # Copy frontend assets
 COPY --from=frontend-builder /app/gallery-frontend/dist /app/gallery-frontend/dist
@@ -55,7 +55,7 @@ COPY --from=frontend-builder /app/gallery-frontend/public /app/gallery-frontend/
 # Add an entrypoint script that will:
 # 1. Check if UROCISSA_PATH is set
 # 2. Move /app/gallery-* to ${UROCISSA_PATH}/gallery-* if set
-# 3. Run the Urocissa binary
+# 3. Run the urocissa binary
 WORKDIR /app
 
 # Create the entrypoint script
@@ -75,8 +75,8 @@ RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo '    ls -al "${UROCISSA_PATH}/gallery-frontend"' >> /entrypoint.sh && \
     echo '    cd "${UROCISSA_PATH}/gallery-backend"' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
-    echo 'echo "Attempting to run ./Urocissa"' >> /entrypoint.sh && \
-    echo 'exec ./Urocissa' >> /entrypoint.sh && \
+    echo 'echo "Attempting to run ./urocissa"' >> /entrypoint.sh && \
+    echo 'exec ./urocissa' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
