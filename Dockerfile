@@ -8,6 +8,7 @@ WORKDIR /app/gallery-backend
 COPY ./gallery-backend/Cargo.lock /app/gallery-backend/Cargo.lock
 COPY ./gallery-backend/Cargo.toml /app/gallery-backend/Cargo.toml
 COPY ./gallery-backend/src /app/gallery-backend/src
+COPY ./gallery-backend/lib /app/gallery-backend/lib
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \

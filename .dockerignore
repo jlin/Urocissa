@@ -13,11 +13,13 @@ gallery-backend/**
 !gallery-frontend/public/
 !gallery-frontend/src/
 !gallery-backend/src/
+!gallery-backend/lib/
 
 # Include all files and subdirectories within the included subdirectories
 !gallery-frontend/public/**
 !gallery-frontend/src/**
 !gallery-backend/src/**
+!gallery-backend/lib/**
 
 # Include specific files in gallery-frontend
 !gallery-frontend/config.default.ts
