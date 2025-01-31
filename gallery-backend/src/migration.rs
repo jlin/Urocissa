@@ -49,59 +49,6 @@ pub fn migration() {
         .expect("Migration failed: Unable to commit transaction");
 }
 
-pub fn migration_album(txn: &WriteTransaction) {
-    let mut new_table = txn
-        .open_table(crate::public::redb::ALBUM_TABLE)
-        .expect("Migration failed: Unable to open new table");
-    let old_table = txn
-        .open_table(urocissa::ALBUM_TABLE)
-        .expect("Migration failed: Unable to open old table");
-
-    old_table
-        .iter()
-        .expect("Migration failed: Unable to iterate over old table")
-        .for_each(|result| {
-            let (_, value_guard) =
-                result.expect("Migration failed: Unable to retrieve value from old table");
-            let old_album = value_guard.value();
-            let converted = crate::public::album::Album {
-                id: old_album.id,
-                title: old_album.title,
-                created_time: old_album.created_time,
-                start_time: old_album.start_time,
-                end_time: old_album.end_time,
-                last_modified_time: old_album.last_modified_time,
-                cover: old_album.cover,
-                thumbhash: None,
-                user_defined_metadata: old_album.user_defined_metadata,
-                share_list: old_album
-                    .share_list
-                    .into_iter()
-                    .map(|share| crate::public::album::Share {
-                        url: share.url,
-                        description: share.description,
-                        password: share.password,
-                        show_metadata: share.show_metadata,
-                        show_download: share.show_download,
-                        show_upload: share.show_upload,
-                        exp: share.exp,
-                    })
-                    .collect(),
-                tag: old_album.tag,
-                width: old_album.width,
-                height: old_album.height,
-                item_count: old_album.item_count,
-                item_size: old_album.item_size,
-                pending: old_album.pending,
-            };
-            new_table
-                .insert(&*old_album.id, converted)
-                .expect("Migration failed: Unable to insert data into new table");
-        });
-    txn.delete_table(old_table)
-        .expect("Migration failed: Unable to delete old table");
-}
-
 pub fn migration_database(txn: &WriteTransaction) {
     let mut new_table = txn
         .open_table(crate::public::redb::DATA_TABLE)
@@ -144,6 +91,85 @@ pub fn migration_database(txn: &WriteTransaction) {
             };
             new_table
                 .insert(&*old_data.hash, converted)
+                .expect("Migration failed: Unable to insert data into new table");
+        });
+    txn.delete_table(old_table)
+        .expect("Migration failed: Unable to delete old table");
+}
+
+pub fn migration_album(txn: &WriteTransaction) {
+    let mut new_table = txn
+        .open_table(crate::public::redb::ALBUM_TABLE)
+        .expect("Migration failed: Unable to open new table");
+    let old_table = txn
+        .open_table(urocissa::ALBUM_TABLE)
+        .expect("Migration failed: Unable to open old table");
+
+    let database_table = txn
+        .open_table(crate::public::redb::DATA_TABLE)
+        .expect("Migration failed: Unable to open new table");
+
+    old_table
+        .iter()
+        .expect("Migration failed: Unable to iterate over old table")
+        .for_each(|result| {
+            let (_, value_guard) =
+                result.expect("Migration failed: Unable to retrieve value from old table");
+            let old_album = value_guard.value();
+
+            let thumbhash_opt = if let Some(cover_hash) = old_album.cover {
+                match database_table.get(&*cover_hash) {
+                    Ok(Some(guard)) => Some(guard.value().thumbhash),
+                    Ok(None) => {
+                        panic!(
+                            "Migration failed: album {} cannot get cover {}",
+                            old_album.id, cover_hash
+                        );
+                    }
+                    Err(err) => {
+                        error!("{}", err);
+                        panic!(
+                            "Migration failed: album {} cannot get thumbhash with cover {}",
+                            old_album.id, cover_hash
+                        );
+                    }
+                }
+            } else {
+                None
+            };
+
+            let converted = crate::public::album::Album {
+                id: old_album.id,
+                title: old_album.title,
+                created_time: old_album.created_time,
+                start_time: old_album.start_time,
+                end_time: old_album.end_time,
+                last_modified_time: old_album.last_modified_time,
+                cover: old_album.cover,
+                thumbhash: thumbhash_opt,
+                user_defined_metadata: old_album.user_defined_metadata,
+                share_list: old_album
+                    .share_list
+                    .into_iter()
+                    .map(|share| crate::public::album::Share {
+                        url: share.url,
+                        description: share.description,
+                        password: share.password,
+                        show_metadata: share.show_metadata,
+                        show_download: share.show_download,
+                        show_upload: share.show_upload,
+                        exp: share.exp,
+                    })
+                    .collect(),
+                tag: old_album.tag,
+                width: old_album.width,
+                height: old_album.height,
+                item_count: old_album.item_count,
+                item_size: old_album.item_size,
+                pending: old_album.pending,
+            };
+            new_table
+                .insert(&*old_album.id, converted)
                 .expect("Migration failed: Unable to insert data into new table");
         });
     txn.delete_table(old_table)
