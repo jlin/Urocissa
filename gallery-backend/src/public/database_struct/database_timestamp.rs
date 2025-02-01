@@ -10,7 +10,7 @@ pub struct DataBaseTimestamp {
 }
 
 impl DataBaseTimestamp {
-    pub fn new(abstract_data: AbstractData, priority_list: &Vec<&str>) -> Self {
+    pub fn new(abstract_data: AbstractData, priority_list: &[&str]) -> Self {
         let timestamp = abstract_data.compute_timestamp(priority_list);
         Self {
             abstract_data,

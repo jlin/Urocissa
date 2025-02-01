@@ -1,5 +1,6 @@
 use crate::public::abstract_data::AbstractData;
 use crate::public::config::{PublicConfig, PUBLIC_CONFIG};
+use crate::public::constant::DEFAULT_PRIORITY_LIST;
 use crate::public::database_struct::database_timestamp::DataBaseTimestamp;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::row::{Row, ScrollBarData};
@@ -38,12 +39,12 @@ pub async fn get_data(
                     |index| match table.get(&*tree_snapshot.get_hash(index)).unwrap() {
                         Some(database) => Ok(DataBaseTimestamp::new(
                             AbstractData::Database(database.value()),
-                            &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
+                            &DEFAULT_PRIORITY_LIST,
                         )),
                         None => match album_table.get(&*tree_snapshot.get_hash(index)).unwrap() {
                             Some(album) => Ok(DataBaseTimestamp::new(
                                 AbstractData::Album(album.value()),
-                                &vec!["DateTimeOriginal", "filename", "modified", "scan_time"],
+                                &DEFAULT_PRIORITY_LIST,
                             )),
                             None => Err(Status::InternalServerError),
                         },

@@ -10,3 +10,6 @@ pub const VALID_IMAGE_EXTENSIONS: [&str; 9] = [
 pub const VALID_VIDEO_EXTENSIONS: [&str; 10] = [
     "gif", "mp4", "webm", "mkv", "mov", "avi", "mkv", "flv", "wmv", "mpeg",
 ];
+
+pub const DEFAULT_PRIORITY_LIST: [&str; 4] =
+    ["DateTimeOriginal", "filename", "modified", "scan_time"];

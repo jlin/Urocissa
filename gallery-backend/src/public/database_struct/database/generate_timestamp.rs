@@ -11,7 +11,7 @@ static FILE_NAME_TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 impl Database {
-    pub fn compute_timestamp(&self, priority_list: &Vec<&str>) -> u128 {
+    pub fn compute_timestamp(&self, priority_list: &[&str]) -> u128 {
         let now_time = Utc::now().naive_utc();
         for &field in priority_list {
             match field {
