@@ -47,6 +47,7 @@
 </template>
 <script setup lang="ts">
 import { IsolationId } from '@/script/common/types'
+import { useCollectionStore } from '@/store/collectionStore'
 import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
@@ -59,6 +60,7 @@ const props = defineProps<{
 const route = useRoute()
 
 const uploadStore = useUploadStore(props.isolationId)
+const collectionStore = useCollectionStore(props.isolationId)
 const modalStore = useModalStore('mainId')
 
 const hasHoveringEffect = computed(() => {
@@ -71,7 +73,7 @@ const hasHoveringEffect = computed(() => {
   } else if (path.startsWith('/trashed')) {
     return false
   } else if (route.meta.isReadPage) {
-    return true
+    return collectionStore.editModeOn ? false : true // Inside the component for adding photos
   } else if (path.startsWith('/albums')) {
     return true
   } else if (path.startsWith('/all')) {
@@ -87,22 +89,23 @@ const computedMessage = computed(() => {
   const path = route.path
 
   if (path.startsWith('/favorite')) {
-    return 'Quickly find your favorite photos and videos here!'
+    return 'Add your favorite photos and videos here!'
   } else if (path.startsWith('/archived')) {
     return 'Archived photos won’t appear on the home page.'
   } else if (path.startsWith('/trashed')) {
-    return 'Deleted photos and videos will only appear here.'
+    return 'Deleted photos and videos appear here.'
   } else if (path.startsWith('/all')) {
-    return 'Try uploading some photos here!'
+    return 'Upload some photos here!'
   } else if (route.meta.isReadPage) {
-    return 'Add some photos to this album!'
+    return collectionStore.editModeOn
+      ? 'All photos are already added!' // Inside the component for adding photos
+      : 'Add photos to this album!'
   } else if (path.startsWith('/albums')) {
-    return 'Try creating some albums here!'
+    return 'Create some albums here!'
   } else {
-    return 'Try uploading some photos here!'
+    return 'Upload some photos here!'
   }
 })
-
 const clickEmptyCard = () => {
   const path = route.path
 
