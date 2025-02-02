@@ -12,8 +12,9 @@ const DurationChip: FunctionalComponent<DurationChipProps> = (props) => {
       id: 'duration-chip',
       density: 'comfortable',
       size: 'small',
-      color: 'grey',
+      color: 'black',
       variant: 'flat',
+      prependIcon: 'mdi-play-circle-outline',
       class: 'position-absolute ma-2',
       style: {
         bottom: '0px',

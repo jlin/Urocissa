@@ -16,6 +16,7 @@ const AlbumChip: FunctionalComponent<AlbumChipProps> = (props) => {
       size: 'small',
       color: 'black',
       variant: 'flat',
+      prependIcon: 'mdi-image-album',
       class: 'position-absolute ma-2',
       style: {
         bottom: '0px',
