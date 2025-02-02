@@ -7,6 +7,7 @@
     id="view-page"
     transition="false"
     :close-on-back="false"
+    persistent
   >
     <Home isolation-id="tempId" :temp-mode="generateJsonString(basicString)">
       <template #reading-bar>

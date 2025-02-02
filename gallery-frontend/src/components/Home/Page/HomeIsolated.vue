@@ -7,6 +7,7 @@
     id="view-page"
     transition="false"
     :close-on-back="false"
+    persistent
   >
     <Home v-if="album !== undefined" isolation-id="subId" :temp-mode="null">
       <template #reading-bar>

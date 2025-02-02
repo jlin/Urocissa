@@ -7,6 +7,7 @@
     id="view-page"
     transition="false"
     :close-on-back="false"
+    persistent
   >
     <v-container
       v-if="index !== undefined"
