@@ -65,7 +65,7 @@
             chips
             multiple
             label="Remove from Albums"
-            item-title="albumName"
+            item-title="displayName"
             :rules="[removeAlbumsRule]"
             :items="[...albumStore.albums.values()]"
             return-objects
