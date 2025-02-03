@@ -28,6 +28,7 @@ export const useAlbumStore = (isolationId: IsolationId) =>
           const albums = albumsArraySchema.parse(response.data)
 
           albums.forEach((album) => {
+            album.displayName = album.albumName ?? 'Untitled'
             this.albums.set(album.albumId, album)
           })
 

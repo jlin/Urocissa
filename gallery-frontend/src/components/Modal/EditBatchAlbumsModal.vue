@@ -14,7 +14,7 @@
             chips
             multiple
             label="Add to Albumss"
-            item-title="albumName"
+            item-title="displayName"
             :rules="[addAlbumsRule]"
             :items="[...albumStore.albums.values()]"
             item-value="albumId"
@@ -43,6 +43,7 @@
               </v-list-item>
               <v-divider></v-divider>
             </template>
+
             <template #no-data v-else>
               <v-list-item value="">
                 <template #prepend>

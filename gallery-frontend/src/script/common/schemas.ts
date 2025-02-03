@@ -148,7 +148,8 @@ export const tagInfoSchema = z.object({
  */
 export const albumInfoSchema = z.object({
   albumId: z.string(),
-  albumName: z.string().optional().nullable()
+  albumName: z.string().nullable(),
+  displayName: z.string().optional()
 })
 
 /**
