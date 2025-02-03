@@ -31,7 +31,7 @@
             v-model="vModelAlbumsArray"
             chips
             multiple
-            item-title="albumName"
+            item-title="displayName"
             :items="[...albumStore.albums.values()]"
             label="Albums"
             closable-chips

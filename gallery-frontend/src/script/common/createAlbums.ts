@@ -58,6 +58,7 @@ export async function editTitle(album: Album, titleModelValue: string) {
 
       if (albumInfo && album) {
         albumInfo.albumName = title
+        albumInfo.displayName = albumInfo.albumName ?? 'Untitled'
         album.title = title
       } else {
         console.error(`Cannot find album with id ${id}`)
