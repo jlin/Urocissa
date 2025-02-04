@@ -1,10 +1,8 @@
 import { MyLexer, MyParser, MyVisitor } from '@/script/lexer/lexer'
 export function generateJsonString(inputText: string): string {
-  console.log('inputText is', inputText)
-
   const lexingResult = MyLexer.tokenize(inputText)
   if (lexingResult.errors.length) {
-    console.error(lexingResult.errors)
+    console.warn(lexingResult.errors)
     throw new Error('Lexing errors detected')
   }
 
@@ -12,8 +10,8 @@ export function generateJsonString(inputText: string): string {
   parser.input = lexingResult.tokens
   const cst = parser.expression()
   if (parser.errors.length) {
-    console.error('Parsing errors detected')
-    console.error(parser.errors)
+    console.warn('Parsing errors detected')
+    console.warn(parser.errors)
     throw new Error('Parsing errors detected')
   }
 

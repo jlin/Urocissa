@@ -1,6 +1,6 @@
 <template>
   <v-container class="d-flex align-center justify-center" fluid>
-    <v-row justify="center">
+    <v-row v-if="!isSearching" justify="center">
       <v-col
         v-if="route.meta.isReadPage && !collectionStore.editModeOn"
         class="w-100"
@@ -53,6 +53,32 @@
         </v-hover>
       </v-col>
     </v-row>
+    <v-row justify="center">
+      <v-col class="w-100" cols="12" md="6" lg="4">
+        <v-hover v-slot="{ isHovering }">
+          <v-card
+            class="pa-4 text-center mx-auto"
+            :class="{ 'hover-cursor': hasHoveringEffect }"
+            :style="{
+              border:
+                hasHoveringEffect && isHovering ? '2px solid #BDBDBD' : '2px solid transparent'
+            }"
+            :elevation="hasHoveringEffect && isHovering ? 12 : 2"
+            rounded="lg"
+            width="100%"
+            v-bind="props"
+            @click="undefined"
+          >
+            <v-icon class="mb-5" color="grey" size="100"> mdi-book-remove-multiple </v-icon>
+            <v-card-item>
+              <v-card-subtitle>
+                {{ 'Result not found.' }}
+              </v-card-subtitle>
+            </v-card-item>
+          </v-card>
+        </v-hover>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 <script setup lang="ts">
@@ -72,6 +98,10 @@ const route = useRoute()
 const uploadStore = useUploadStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const modalStore = useModalStore('mainId')
+
+const isSearching = computed(() => {
+  return route.query.search !== undefined && route.query.search?.toString() !== ''
+})
 
 const hasHoveringEffect = computed(() => {
   const path = route.path
@@ -114,6 +144,7 @@ const computedMessage = computed(() => {
     return 'Upload some photos here!'
   }
 })
+
 const clickEmptyCard = () => {
   const path = route.path
 

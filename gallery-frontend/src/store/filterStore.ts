@@ -18,13 +18,26 @@ export const useFilterStore = (isolationId: IsolationId) =>
       // Generates the filter JSON string using basicString and filterString
       // This JSON info is used to send to the backend
       generateFilterJsonString(): string | null {
-        if (this.basicString !== null && this.filterString === null) {
-          return generateJsonString(this.basicString)
-        } else if (this.basicString === null && this.filterString !== null) {
-          return generateJsonString(this.filterString)
-        } else if (this.basicString !== null && this.filterString !== null) {
-          return generateJsonString(`and(${this.basicString},${this.filterString})`)
-        } else {
+        try {
+          if (this.basicString !== null && this.filterString === null) {
+            return generateJsonString(this.basicString)
+          } else if (this.basicString === null && this.filterString !== null) {
+            try {
+              return generateJsonString(this.filterString)
+            } catch {
+              return generateJsonString(`any: "${this.filterString}"`)
+            }
+          } else if (this.basicString !== null && this.filterString !== null) {
+            try {
+              return generateJsonString(`and(${this.basicString},${this.filterString})`)
+            } catch {
+              return generateJsonString(`and(${this.basicString}, any: "${this.filterString}")`)
+            }
+          } else {
+            return null
+          }
+        } catch (err) {
+          console.error(err)
           return null
         }
       },
