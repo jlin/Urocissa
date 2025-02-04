@@ -87,6 +87,12 @@ const searchQuery = ref('')
 const loading = ref(false)
 
 const handleSearch = async () => {
+  if (/^\S+$/.test(searchQuery.value) && !searchQuery.value.includes('"')) {
+    searchQuery.value = `any: "${searchQuery.value}"`
+  }
+
+  console.log('searchQuery.value is', searchQuery.value)
+
   filterStore.filterString = searchQuery.value
   await router.replace({
     path: route.path,
