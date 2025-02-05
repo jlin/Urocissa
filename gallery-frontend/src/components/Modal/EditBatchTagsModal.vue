@@ -17,6 +17,7 @@
             :rules="[addTagsRule]"
             :items="tagList.filter((tag) => !specialTag(tag))"
             :menu-props="{ maxWidth: 0 }"
+            closable-chips
           ></v-combobox>
         </v-container>
         <v-container>
@@ -27,6 +28,7 @@
             label="Remove Tags"
             :rules="[removeTagsRule]"
             :items="tagList.filter((tag) => !specialTag(tag))"
+            closable-chips
           ></v-combobox>
         </v-container>
         <v-card-actions>

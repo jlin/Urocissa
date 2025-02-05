@@ -10,6 +10,7 @@
       <v-form ref="formRef" v-model="formIsValid" @submit.prevent="submit">
         <v-container>
           <v-combobox
+            clearable
             v-model="addAlbumsArray"
             chips
             multiple
@@ -21,6 +22,7 @@
             :hide-no-data="false"
             return-object
             :menu-props="{ maxWidth: 0 }"
+            closable-chips
           >
             <template #prepend-item v-if="albumStore.albums.size > 0">
               <v-list-item value="">
@@ -72,6 +74,7 @@
             item-value="albumId"
             return-objects
             :menu-props="{ maxWidth: 0 }"
+            closable-chips
           ></v-combobox>
         </v-container>
         <v-card-actions>
