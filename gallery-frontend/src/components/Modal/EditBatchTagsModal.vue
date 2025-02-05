@@ -7,7 +7,7 @@
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated">
       <v-card-title class="text-h5"> Edit Tags </v-card-title>
-      <v-form v-model="formIsValid" @submit.prevent="submit" validate-on="input">
+      <v-form ref="formRef" v-model="formIsValid" @submit.prevent="submit" validate-on="input">
         <v-container>
           <v-combobox
             v-model="addTagsArray"
@@ -61,14 +61,15 @@
 /**
  * This modal is used for editing the tags of multiple photos on the home page.
  */
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useTagStore } from '@/store/tagStore'
 import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
-
+import { VForm } from 'vuetify/components/VForm'
+const formRef = ref<VForm | null>(null)
 const formIsValid = ref(false)
 const addTagsArray = ref<string[]>([])
 const removeTagsArray = ref<string[]>([])
@@ -102,4 +103,7 @@ const submit = () => {
   editTagsInWorker(hashArray, addTagsArray.value, removeTagsArray.value, isolationId)
   modalStore.showBatchEditTagsModal = false
 }
+watch([addTagsArray, removeTagsArray], async () => {
+  await formRef.value?.validate()
+})
 </script>
