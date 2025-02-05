@@ -7,7 +7,7 @@
   >
     <v-card class="mx-auto w-100" max-width="400" variant="elevated">
       <v-card-title class="text-h5"> Edit Albums </v-card-title>
-      <v-form v-model="formIsValid" @submit.prevent="submit" validate-on="input">
+      <v-form ref="formRef" v-model="formIsValid" @submit.prevent="submit">
         <v-container>
           <v-combobox
             v-model="addAlbumsArray"
@@ -20,6 +20,7 @@
             item-value="albumId"
             :hide-no-data="false"
             return-object
+            :menu-props="{ maxWidth: 0 }"
           >
             <template #prepend-item v-if="albumStore.albums.size > 0">
               <v-list-item value="">
@@ -69,6 +70,7 @@
             :rules="[removeAlbumsRule]"
             :items="[...albumStore.albums.values()]"
             return-objects
+            :menu-props="{ maxWidth: 0 }"
           ></v-combobox>
         </v-container>
         <v-card-actions>
@@ -100,7 +102,7 @@
 /**
  * This modal is used for editing the albums of multiple photos on the home page.
  */
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
@@ -110,10 +112,12 @@ import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@/script/common/functions'
 import { createAlbum } from '@/script/common/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
+import { VForm } from 'vuetify/components/VForm'
 const route = useRoute()
 const router = useRouter()
 const isolationId = getIsolationIdByRoute(route)
 
+const formRef = ref<VForm | null>(null)
 const formIsValid = ref(false)
 const loading = ref(false)
 
@@ -161,4 +165,8 @@ const createNonEmptyAlbum = async () => {
     loading.value = false
   }
 }
+
+watch([addAlbumsArray, removeAlbumsArray], async () => {
+  await formRef.value?.validate()
+})
 </script>

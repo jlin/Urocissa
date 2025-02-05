@@ -16,6 +16,7 @@
             label="Add Tags"
             :rules="[addTagsRule]"
             :items="tagList.filter((tag) => !specialTag(tag))"
+            :menu-props="{ maxWidth: 0 }"
           ></v-combobox>
         </v-container>
         <v-container>
@@ -35,6 +36,7 @@
             variant="outlined"
             class="ma-2 button button-submit"
             @click="modalStore.showBatchEditTagsModal = false"
+            :menu-props="{ maxWidth: 0 }"
           >
             Cancel
           </v-btn>
