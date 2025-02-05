@@ -69,6 +69,7 @@
             item-title="displayName"
             :rules="[removeAlbumsRule]"
             :items="[...albumStore.albums.values()]"
+            item-value="albumId"
             return-objects
             :menu-props="{ maxWidth: 0 }"
           ></v-combobox>
