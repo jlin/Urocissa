@@ -27,13 +27,11 @@
       ></v-card-title>
     </v-card>
     <v-spacer></v-spacer>
-    <v-btn icon="mdi-share-variant" @click="modalStore.showShareModal = true"> </v-btn>
     <v-btn icon="mdi-image-plus" @click="modalStore.showHomeTempModal = true"> </v-btn>
   </v-toolbar>
   <EditBar v-else />
   <ProgessBar isolation-id="subId" />
-  <HomeTemp v-if="modalStore.showHomeTempModal" :album="props.album" />
-  <ShareModal v-if="modalStore.showShareModal" />
+  <HomeTemp v-if="modalStore.showHomeTempModal" :album="props.album"> </HomeTemp>
 </template>
 <script setup lang="ts">
 import { useCollectionStore } from '@/store/collectionStore'
@@ -44,8 +42,7 @@ import ProgessBar from '@/components/NavBar/ProgessBar.vue'
 import HomeTemp from '@/components/Home/Page/HomeTemp.vue'
 import { Album } from '@/script/common/types'
 import { useModalStore } from '@/store/modalStore'
-import ShareModal from '@/components/Modal/ShareModal.vue'
-import { ref, watch, watchEffect } from 'vue'
+import { ref, watch } from 'vue'
 import { editTitle } from '@/script/common/createAlbums'
 
 const props = defineProps<{
@@ -66,10 +63,6 @@ watch(
   },
   { immediate: true }
 )
-
-watchEffect(() => {
-  console.log('modalStore.showShareModal is', modalStore.showShareModal)
-})
 </script>
 
 <style scoped>
