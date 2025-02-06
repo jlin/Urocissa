@@ -1,6 +1,6 @@
 use arrayvec::ArrayString;
 use jsonwebtoken::{encode, EncodingKey, Header};
-use rand::{rngs::OsRng, RngCore};
+use rand::{rngs::OsRng, TryRngCore};
 use rocket::post;
 use rocket::serde::json::Json;
 use std::{
@@ -17,7 +17,9 @@ pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<Vec<u8>> = LazyLock::new(|| {
         auth_key.as_bytes().to_vec()
     } else {
         let mut secret = vec![0u8; 32];
-        OsRng.fill_bytes(&mut secret);
+        OsRng
+            .try_fill_bytes(&mut secret)
+            .expect("Failed to generate random secret key");
         secret
     }
 });

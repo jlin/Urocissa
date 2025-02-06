@@ -1,7 +1,7 @@
 use crate::public::database_struct::file_modify::FileModify;
 use arrayvec::ArrayString;
 
-use rand::{distributions::Alphanumeric, Rng};
+use rand::{distr::Alphanumeric, Rng};
 
 use std::collections::{BTreeMap, HashSet};
 
@@ -9,7 +9,7 @@ use super::definition::Database;
 
 impl Database {
     pub fn generate_random_data() -> Self {
-        let hash: String = rand::thread_rng()
+        let hash: String = rand::rng()
             .sample_iter(&Alphanumeric)
             .filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
             .take(64)
@@ -18,8 +18,8 @@ impl Database {
 
         let hash = ArrayString::<64>::from(&hash).unwrap();
 
-        let width = rand::thread_rng().gen_range(300..=600);
-        let height = rand::thread_rng().gen_range(300..=600);
+        let width = rand::rng().random_range(300..=600);
+        let height = rand::rng().random_range(300..=600);
 
         Self {
             size: 0,

@@ -76,8 +76,8 @@ impl Database {
                     }
                 }
                 "random" => {
-                    let mut rng = rand::thread_rng();
-                    let random_number: u128 = rng.gen();
+                    let mut rng = rand::rng();
+                    let random_number: u128 = rng.random();
                     return random_number;
                 }
                 _ => panic!("Unknown field type: {}", field),

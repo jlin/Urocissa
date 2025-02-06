@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use arrayvec::ArrayString;
-use rand::distributions::Alphanumeric;
+use rand::distr::Alphanumeric;
 use rand::Rng;
 use redb::ReadableTable;
 use rocket::serde::json::Json;
@@ -33,7 +33,7 @@ pub async fn create_album(
     let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
-        let album_id: String = rand::thread_rng()
+        let album_id: String = rand::rng()
             .sample_iter(&Alphanumeric)
             .filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
             .take(64)
