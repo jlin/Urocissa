@@ -53,7 +53,7 @@
         </v-hover>
       </v-col>
     </v-row>
-    <v-row justify="center">
+    <v-row justify="center" v-else>
       <v-col class="w-100" cols="12" md="6" lg="4">
         <v-hover v-slot="{ isHovering }">
           <v-card
