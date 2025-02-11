@@ -1,16 +1,16 @@
-import { useModalStore } from '@/store/modalStore'
 import axios from 'axios'
 import { useMessageStore } from '@/store/messageStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { Album, IsolationId } from './types'
 import { useDataStore } from '@/store/dataStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
+import { Router } from 'vue-router'
+import { navigateToAlbum } from '@/script/navigator'
 
 export async function createAlbum(
   elementsIndex: number[],
   isolationId: IsolationId
 ): Promise<string | undefined> {
-  const modalStore = useModalStore('mainId')
   const messageStore = useMessageStore('mainId')
   const albumStore = useAlbumStore('mainId')
   const prefetchStore = usePrefetchStore(isolationId)
@@ -29,7 +29,6 @@ export async function createAlbum(
 
     messageStore.showInfo('Album created successfully.')
 
-    modalStore.showCreateAlbumsModal = false
     const newAlbumId = response.data
     await albumStore.fetchAlbums()
     return newAlbumId
@@ -64,5 +63,12 @@ export async function editTitle(album: Album, titleModelValue: string) {
         console.error(`Cannot find album with id ${id}`)
       }
     }
+  }
+}
+
+export async function createEmptyAlbum(isolationId: IsolationId, router: Router) {
+  const newAlbumId = await createAlbum([], isolationId)
+  if (typeof newAlbumId === 'string') {
+    await navigateToAlbum(newAlbumId, router)
   }
 }

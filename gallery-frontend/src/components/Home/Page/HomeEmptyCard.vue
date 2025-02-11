@@ -82,18 +82,20 @@
   </v-container>
 </template>
 <script setup lang="ts">
+import { createEmptyAlbum } from '@/script/common/createAlbums'
 import { IsolationId } from '@/script/common/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps<{
   isolationId: IsolationId
 }>()
 
 const route = useRoute()
+const router = useRouter()
 
 const uploadStore = useUploadStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
@@ -145,13 +147,13 @@ const computedMessage = computed(() => {
   }
 })
 
-const clickEmptyCard = () => {
+const clickEmptyCard = async () => {
   const path = route.path
 
   if (route.meta.isReadPage) {
     modalStore.showHomeTempModal = true
   } else if (path.startsWith('/albums')) {
-    modalStore.showCreateAlbumsModal = true
+    await createEmptyAlbum(props.isolationId, router)
   } else {
     uploadStore.triggerFileInput()
   }
