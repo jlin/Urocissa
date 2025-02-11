@@ -1,6 +1,6 @@
 use std::io;
 use std::io::Write;
-
+use std::fs;
 use crate::public::redb::SCHEMA_TABLE;
 use indicatif::ProgressBar;
 use indicatif::ProgressStyle;
@@ -10,6 +10,17 @@ use redb::ReadableTableMetadata;
 use redb::WriteTransaction;
 
 pub fn check_database_schema_version() {
+    let db_path = "./db/index.redb";
+
+    // Check if the database directory or file exists
+    if !fs::metadata(db_path).is_ok() {
+        warn!(
+            "Database '{}' not found. Skipping schema check.",
+            db_path
+        );
+        return;
+    }
+
     let version = read_version();
 
     info!("Database schema version: {}", version);
