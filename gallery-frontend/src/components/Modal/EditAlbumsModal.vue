@@ -104,12 +104,12 @@ onMounted(() => {
     const defaultAlbums: AlbumInfo[] = []
 
     for (const albumId of data.database.album) {
-      const albumName = albumStore.albums.get(albumId)?.albumName
+      const albumName = albumStore.albums.get(albumId)
       if (albumName === undefined) {
         console.error(`useSubmit Error: Album name not found for albumId '${albumId}'.`)
         return undefined
       }
-      defaultAlbums.push({ albumId, albumName })
+      defaultAlbums.push(albumName)
     }
 
     // Initialize vModelAlbumsArray with defaultAlbums
