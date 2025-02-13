@@ -1,6 +1,3 @@
-use std::io;
-use std::io::Write;
-use std::fs;
 use crate::public::redb::SCHEMA_TABLE;
 use indicatif::ProgressBar;
 use indicatif::ProgressStyle;
@@ -8,16 +5,18 @@ use log::{error, info, warn};
 use redb::ReadableTable;
 use redb::ReadableTableMetadata;
 use redb::WriteTransaction;
+use std::fs;
+use std::io;
+use std::io::Write;
 
 pub fn check_database_schema_version() {
-    let db_path = "./db/index.redb";
-
     // Check if the database directory or file exists
-    if !fs::metadata(db_path).is_ok() {
-        warn!(
-            "Database '{}' not found. Skipping schema check.",
-            db_path
-        );
+    if !fs::metadata("./db/index.redb").is_ok() {
+        warn!("Database not found. Creating a new one.");
+        let txn = crate::public::tree::TREE.in_disk.begin_write().unwrap();
+        migration_version(&txn);
+        txn.commit()
+            .expect("Migration failed: Unable to commit transaction; database rolled back.");
         return;
     }
 

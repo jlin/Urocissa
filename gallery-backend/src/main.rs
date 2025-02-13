@@ -27,9 +27,9 @@ mod synchronizer;
 async fn rocket() -> _ {
     initialize_logger();
     check_ffmpeg_and_ffprobe();
-    check_database_schema_version();
     initialize_folder();
     initialize_file();
+    check_database_schema_version();
     let start_time = Instant::now();
     let txn = TREE.in_disk.begin_write().unwrap();
 
