@@ -119,6 +119,7 @@ const throttledHandleScroll = handleScroll(
 
 watch(windowWidth, () => {
   // Handles browser resizing.
+
   locationStore.triggerForResize()
   prefetchStore.windowWidth = Math.round(windowWidth.value)
   prefetchStore.clearForResize()
@@ -127,7 +128,10 @@ watch(windowWidth, () => {
   queueStore.clearAll()
   imgStore.clearForResize()
   const locationRowIndex = Math.floor(locationStore.locationIndex / layoutBatchNumber)
-  locationStore.anchor = locationRowIndex
+
+  // Prevent findInTimeline from failing due to the anchor being set too early before initialization
+  locationStore.anchor = initializedStore.initialized ? locationRowIndex : null
+
   scrollTopStore.scrollTop = locationRowIndex * 2400
   fetchRowInWorker(locationRowIndex, props.isolationId)
 })
