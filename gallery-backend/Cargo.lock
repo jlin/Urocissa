@@ -3407,7 +3407,7 @@ dependencies = [
 
 [[package]]
 name = "urocissa"
-version = "0.10.1"
+version = "0.10.2"
 dependencies = [
  "anstyle",
  "anyhow",
