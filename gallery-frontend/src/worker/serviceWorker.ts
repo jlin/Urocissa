@@ -1,7 +1,7 @@
 import { getHashToken } from '@/indexedDb/hashToken'
 import { extractHashFromAbsoluteUrl } from '@/script/utils/getter'
 
-self.addEventListener('install', () => {
+/* self.addEventListener('install', () => {
   console.log('[Service Worker] Installing...')
   const result = self as unknown as ServiceWorkerGlobalScope
   result.skipWaiting().catch((err: unknown) => {
@@ -37,7 +37,7 @@ self.addEventListener('activate', (event: unknown) => {
     })()
   )
 })
-
+ */
 
 self.addEventListener('fetch', (event: unknown) => {
   if (!(event instanceof FetchEvent)) {
@@ -46,7 +46,6 @@ self.addEventListener('fetch', (event: unknown) => {
 
   const url = new URL(event.request.url)
 
-  // Early return for non-/object requests
   if (!url.pathname.startsWith('/object')) {
     event.respondWith(fetch(event.request))
     return
@@ -60,13 +59,16 @@ self.addEventListener('fetch', (event: unknown) => {
   }
 
   event.respondWith(
-    (async () => {
-      try {
-        const token = await getHashToken(hash)
+    getHashToken(hash)
+      .then((token) => {
         if (token === null) {
           console.error('[Service Worker] Failed to get hash token:', hash)
           return new Response('Failed to get hash token', { status: 404 })
         }
+
+        console.log('hash is', hash)
+        console.log('token is', token)
+
         const modifiedHeaders = new Headers(event.request.headers)
         modifiedHeaders.set('Authorization', `Bearer ${token}`)
 
@@ -74,11 +76,11 @@ self.addEventListener('fetch', (event: unknown) => {
           headers: modifiedHeaders
         })
 
-        return await fetch(modifiedRequest)
-      } catch (error: unknown) {
-        console.error('[Service Worker] Failed to get hash token:', error)
-        return new Response('Failed to get hash token', { status: 500 })
-      }
-    })()
+        return fetch(modifiedRequest)
+      })
+      .catch((error: unknown) => {
+        console.error('[Service Worker] Error fetching hash token:', error)
+        return new Response('Internal Server Error', { status: 500 })
+      })
   )
 })

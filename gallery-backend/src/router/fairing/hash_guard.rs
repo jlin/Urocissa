@@ -69,6 +69,9 @@ impl<'r> FromRequest<'r> for HashGuard {
                 return Outcome::Forward(Status::Unauthorized);
             }
         };
+
+        println!("token is {}", token);
+
         // Decode the token
         let token_data = match decode::<HashClaims>(
             token,
