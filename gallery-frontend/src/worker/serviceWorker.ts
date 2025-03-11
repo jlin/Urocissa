@@ -23,14 +23,6 @@ self.addEventListener('activate', (event: unknown) => {
         // 讓新的 SW 立即接管所有頁面
         await result.clients.claim()
         console.log('[Service Worker] Clients claimed.')
-
-        // **嘗試移除舊的 Service Worker**
-        const unregistered = await result.registration.unregister()
-        if (unregistered) {
-          console.log('[Service Worker] Old Service Worker unregistered successfully.')
-        } else {
-          console.warn('[Service Worker] Failed to unregister old Service Worker.')
-        }
       } catch (err) {
         console.error('[Service Worker] Failed during activation:', err)
       }
