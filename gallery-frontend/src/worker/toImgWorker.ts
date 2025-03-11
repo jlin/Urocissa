@@ -17,7 +17,7 @@ const workerAxios = axios.create()
 interceptorImg(workerAxios)
 
 axiosRetry(workerAxios, {
-  retries: Infinity,
+  retries: 0,
   retryDelay: () => {
     return 200
   },
