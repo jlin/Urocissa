@@ -1,11 +1,11 @@
 import { getHashToken } from '@/indexedDb/hashToken'
 import { extractHashFromAbsoluteUrl } from '@/script/utils/getter'
 
-/* self.addEventListener('install', () => {
+self.addEventListener('install', () => {
   console.log('[Service Worker] Installing...')
   const result = self as unknown as ServiceWorkerGlobalScope
   result.skipWaiting().catch((err: unknown) => {
-    console.error('[AABCDDService Worker] skipWaiting() failed:', err)
+    console.error('[Service Worker] skipWaiting() failed:', err)
   })
 })
 
@@ -37,7 +37,6 @@ self.addEventListener('activate', (event: unknown) => {
     })()
   )
 })
- */
 
 self.addEventListener('fetch', (event: unknown) => {
   if (!(event instanceof FetchEvent)) {
@@ -65,9 +64,6 @@ self.addEventListener('fetch', (event: unknown) => {
           console.error('[Service Worker] Failed to get hash token:', hash)
           return new Response('Failed to get hash token', { status: 404 })
         }
-
-        console.log('hash is', hash)
-        console.log('token is', token)
 
         const modifiedHeaders = new Headers(event.request.headers)
         modifiedHeaders.set('Authorization', `Bearer ${token}`)
