@@ -70,8 +70,6 @@ impl<'r> FromRequest<'r> for HashGuard {
             }
         };
 
-        println!("token is {}", token);
-
         // Decode the token
         let token_data = match decode::<HashClaims>(
             token,
