@@ -177,7 +177,9 @@ async function fetchData(
       const albumInstance = createAlbum(item.abstractData.Album, item.timestamp)
       const abstractData = createAbstractData(albumInstance)
       data.set(key, abstractData)
-      await storeHashToken(item.abstractData.Album.id, item.token)
+      if (item.abstractData.Album.cover !== null) {
+        await storeHashToken(item.abstractData.Album.cover, item.token)
+      }
     }
 
     if (i % 100 === 0) {
