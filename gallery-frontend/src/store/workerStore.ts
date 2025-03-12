@@ -1,4 +1,4 @@
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { handleDataWorkerReturn, removeHandleDataWorkerReturn } from '@/worker/fromDataWorker'
 import { handleImgWorker, removeHandleImgWorkerReturn } from '@/worker/fromImgWorker'
 import {

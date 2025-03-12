@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { tokenReturnSchema } from '@/script/common/schemas'
+import { tokenReturnSchema } from '@type/schemas'
 import { postToMainData } from './toDataWorker'
 import { storeTimestampToken } from '@/indexedDb/timestampToken'
 

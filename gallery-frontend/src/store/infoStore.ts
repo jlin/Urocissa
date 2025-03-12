@@ -1,4 +1,4 @@
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { defineStore } from 'pinia'
 export const useInfoStore = (isolationId: IsolationId) =>
   defineStore('infoStore' + isolationId, {

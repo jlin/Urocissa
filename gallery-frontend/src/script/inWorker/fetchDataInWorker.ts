@@ -2,7 +2,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { toDataWorker } from '@/worker/workerApi'
-import { FetchDataMethod, IsolationId } from '../common/types'
+import { FetchDataMethod, IsolationId } from '@type/types'
 import { getTimestampToken } from '@/indexedDb/timestampToken'
 
 export function fetchDataInWorker(

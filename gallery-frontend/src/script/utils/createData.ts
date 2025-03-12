@@ -1,7 +1,7 @@
 import { thumbHashToDataURL } from 'thumbhash'
 import { z } from 'zod'
-import { AlbumParse, DataBaseParse } from '../common/schemas.ts'
-import { AbstractData, Album, Database } from '../common/types.ts'
+import { AlbumParse, DataBaseParse } from '@type/schemas'
+import { AbstractData, Album, Database } from '@type/types'
 
 export function createDataBase(
   databaseParse: z.infer<typeof DataBaseParse>,

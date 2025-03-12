@@ -21,7 +21,7 @@
   </v-toolbar>
 </template>
 <script setup lang="ts">
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { useInitializedStore } from '@/store/initializedStore'
 
 const props = defineProps<{

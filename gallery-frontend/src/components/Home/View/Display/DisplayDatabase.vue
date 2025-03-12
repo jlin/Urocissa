@@ -47,7 +47,7 @@
 import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 
-import { AbstractData, IsolationId } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@type/types'
 
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { ref, watch } from 'vue'

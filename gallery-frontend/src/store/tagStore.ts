@@ -1,5 +1,5 @@
-import { IsolationId, TagInfo } from '@/script/common/types'
-import { tagInfoSchema } from '@/script/common/schemas'
+import { IsolationId, TagInfo } from '@type/types'
+import { tagInfoSchema } from '@type/schemas'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'

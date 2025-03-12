@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { layoutBatchNumber } from '@/script/common/constants'
-import { IsolationId, Row } from '@/script/common/types'
+import { IsolationId, Row } from '@type/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'

@@ -1,5 +1,5 @@
-import { AlbumInfo, IsolationId } from '@/script/common/types'
-import { albumInfoSchema } from '@/script/common/schemas'
+import { AlbumInfo, IsolationId } from '@type/types'
+import { albumInfoSchema } from '@type/schemas'
 import axios from 'axios'
 import { defineStore } from 'pinia'
 import { z, ZodError } from 'zod'

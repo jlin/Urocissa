@@ -6,7 +6,9 @@
       "@/*": ["src/*"],
       "@Menu/*": ["src/components/Menu/*"],
       "@worker/*": ["src/worker/*"],
-      "@utils/*": ["src/script/utils/*"]
+      "@utils/*": ["src/script/utils/*"],
+      "@type/*": ["src/type/*"],
+      "@constants": ["src/script/common/constants"]
     },
     "target": "ES2023",
     "useDefineForClassFields": true,

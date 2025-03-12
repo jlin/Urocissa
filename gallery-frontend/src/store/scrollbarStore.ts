@@ -1,4 +1,4 @@
-import { IsolationId, ScrollbarData } from '@/script/common/types'
+import { IsolationId, ScrollbarData } from '@type/types'
 import { defineStore } from 'pinia'
 export const useScrollbarStore = (isolationId: IsolationId) =>
   defineStore('scrollbarStore' + isolationId, {

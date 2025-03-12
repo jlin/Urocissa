@@ -3,7 +3,7 @@ import {
   rowWithOffsetSchema,
   tagInfoSchema,
   databaseTimestampSchema
-} from '@/script/common/schemas'
+} from '@type/schemas'
 import {
   AbstractData,
   Database,
@@ -12,9 +12,9 @@ import {
   Row,
   RowWithOffset,
   SlicedData,
-  TagInfo
-} from '@/script/common/types'
-import { SubRow } from '@/script/common/types'
+  TagInfo,
+  SubRow
+} from '@type/types'
 import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/script/common/constants'
 import { getArrayValue } from '@utils/getter'
 import { createAbstractData, createAlbum, createDataBase } from '@utils/createData'

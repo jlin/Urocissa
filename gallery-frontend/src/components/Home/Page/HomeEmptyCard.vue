@@ -85,7 +85,7 @@
 </template>
 <script setup lang="ts">
 import { createEmptyAlbum } from '@/script/common/createAlbums'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'

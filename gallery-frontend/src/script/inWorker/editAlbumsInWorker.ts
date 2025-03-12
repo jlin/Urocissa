@@ -4,7 +4,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
-import { IsolationId } from '../common/types'
+import { IsolationId } from '@type/types'
 
 export function editAlbumsInWorker(
   indexArray: number[],

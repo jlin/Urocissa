@@ -1,5 +1,5 @@
 import { getScrollUpperBound } from '@utils/getter'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { throttle } from 'lodash'

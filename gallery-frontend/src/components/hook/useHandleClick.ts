@@ -1,7 +1,7 @@
 import { Router, RouteLocationNormalizedLoaded } from 'vue-router'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useDataStore } from '@/store/dataStore'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 
 export function useHandleClick(
   router: Router,

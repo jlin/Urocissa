@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { useMessageStore } from '@/store/messageStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { Album, IsolationId } from './types'
+import { Album, IsolationId } from '@type/types'
 import { useDataStore } from '@/store/dataStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { Router } from 'vue-router'

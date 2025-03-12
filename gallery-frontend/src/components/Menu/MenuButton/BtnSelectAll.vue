@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 

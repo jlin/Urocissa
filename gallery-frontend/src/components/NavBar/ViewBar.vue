@@ -43,9 +43,9 @@
 </template>
 <script setup lang="ts">
 import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
-import { AbstractData, IsolationId } from '@/script/common/types'
-import ViewPageToolBarDatabase from '@Menu//MenuMain/SingleMenu.vue'
-import AlbumMenu from '@Menu//MenuMain/AlbumMenu.vue'
+import { AbstractData, IsolationId } from '@type/types'
+import ViewPageToolBarDatabase from '@Menu/Page/SingleMenu.vue'
+import AlbumMenu from '@Menu/Page/AlbumMenu.vue'
 import LeaveView from '@Menu/MenuButton/BtnLeaveView.vue'
 import ShowInfo from '@Menu/MenuButton/BtnShowInfo.vue'
 

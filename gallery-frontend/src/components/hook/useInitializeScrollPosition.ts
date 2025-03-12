@@ -4,7 +4,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 
 /**
  * Initializes scroll position and client height for the image container.

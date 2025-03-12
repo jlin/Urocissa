@@ -1,4 +1,4 @@
-import { IsolationId, Row } from '@/script/common/types'
+import { IsolationId, Row } from '@type/types'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useLocationStore } from '@/store/locationStore'

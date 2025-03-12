@@ -1,5 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import { IsolationId, SlicedDataItem } from '@/script/common/types'
+import { IsolationId, SlicedDataItem } from '@type/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useTagStore } from '@/store/tagStore'

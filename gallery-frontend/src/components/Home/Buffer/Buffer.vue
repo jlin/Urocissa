@@ -80,7 +80,7 @@ import BufferPlaceholder from '@/components/Home/Buffer/BufferPlaceholder.vue'
 import RowBlock from '@/components/Home/Buffer/BufferRowBlock.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getArrayValue, getInjectValue } from '@utils/getter'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 
 const props = defineProps<{
   isolationId: IsolationId

@@ -1,4 +1,4 @@
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { generateJsonString } from '@/script/lexer/generateJson'
 import { defineStore } from 'pinia'
 import { RouteLocationNormalizedLoaded } from 'vue-router'

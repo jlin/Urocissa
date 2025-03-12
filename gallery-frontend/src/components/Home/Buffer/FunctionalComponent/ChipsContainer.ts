@@ -2,7 +2,7 @@ import { FunctionalComponent, h, Fragment, PropType } from 'vue'
 import ProcessingChip from './ProcessingChip'
 import DurationChip from './DurationChip'
 import AlbumChip from './AlbumChip'
-import { AbstractData, DisplayElement } from '@/script/common/types'
+import { AbstractData, DisplayElement } from '@type/types'
 import { formatDuration } from '@utils/dater'
 
 interface ChipsContainerProps {

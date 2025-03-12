@@ -1,7 +1,7 @@
 import { Fragment, FunctionalComponent, h, PropType } from 'vue'
 import DesktopSmallImage from './DesktopSmallImage'
 import MobileSmallImage from './MobileSmallImage'
-import { AbstractData, DisplayElement, IsolationId } from '@/script/common/types'
+import { AbstractData, DisplayElement, IsolationId } from '@type/types'
 import { useImgStore } from '@/store/imgStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { Database } from '@/script/common/types'
+import { Database } from '@type/types'
 
 const props = defineProps<{
   database: Database

@@ -116,7 +116,7 @@ import { VCol } from 'vuetify/components'
 import { filesize } from 'filesize'
 import { useRoute } from 'vue-router'
 import { dater } from '@utils/dater'
-import { Album } from '@/script/common/types'
+import { Album } from '@type/types'
 import { ref, watch } from 'vue'
 import { editTitle } from '@/script/common/createAlbums'
 

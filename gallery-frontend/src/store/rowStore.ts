@@ -1,4 +1,4 @@
-import type { IsolationId, Row } from '@/script/common/types'
+import type { IsolationId, Row } from '@type/types'
 import { defineStore } from 'pinia'
 
 export const useRowStore = (isolationId: IsolationId) =>

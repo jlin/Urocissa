@@ -72,7 +72,7 @@ import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
-import { AlbumInfo } from '@/script/common/types'
+import { AlbumInfo } from '@type/types'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@utils/getter'
 
 const route = useRoute()

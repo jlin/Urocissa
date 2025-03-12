@@ -1,4 +1,4 @@
-import type { AbstractData, IsolationId } from '@/script/common/types'
+import type { AbstractData, IsolationId } from '@type/types'
 import { defineStore } from 'pinia'
 
 export const useDataStore = (isolationId: IsolationId) =>

@@ -1,5 +1,5 @@
 import { editTagsInWorker } from '../inWorker/editTagsInWorker'
-import { IsolationId } from './types'
+import { IsolationId } from '@type/types'
 
 export function quickAddTags(tag: string, indexList: number[], isolationId: IsolationId) {
   const indexArray = indexList

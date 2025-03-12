@@ -22,7 +22,7 @@
   </v-menu>
 </template>
 <script setup lang="ts">
-import { Database, IsolationId } from '@/script/common/types'
+import { Database, IsolationId } from '@type/types'
 import { getSrc } from '@/../config'
 import Cookies from 'js-cookie'
 import ItemViewOriginalFile from '@Menu/MenuItem/ItemViewOriginalFile.vue'

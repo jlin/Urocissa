@@ -10,7 +10,7 @@ import axios from 'axios'
 import { saveAs } from 'file-saver'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
 import { getCookiesJwt, getIsolationIdByRoute } from '@utils/getter'
-import { AbstractData } from '@/script/common/types'
+import { AbstractData } from '@type/types'
 import { getSrc } from '@/../config'
 
 const props = defineProps<{

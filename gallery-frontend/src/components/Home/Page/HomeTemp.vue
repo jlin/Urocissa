@@ -17,7 +17,7 @@
   </v-overlay>
 </template>
 <script setup lang="ts">
-import { Album } from '@/script/common/types'
+import { Album } from '@type/types'
 import Home from './Home.vue'
 import { generateJsonString } from '@/script/lexer/generateJson'
 import SelectionBar from '@/components/NavBar/SelectionBar.vue'

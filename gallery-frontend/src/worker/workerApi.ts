@@ -1,5 +1,5 @@
 // Import necessary types from the commonType module
-import { FetchDataMethod, RowWithOffset, SlicedData, TagInfo } from '@/script/common/types'
+import { FetchDataMethod, RowWithOffset, SlicedData, TagInfo } from '@type/types'
 
 // Import createActionCreators from typesafe-agent-events for defining strongly-typed actions
 import { createActionCreators } from 'typesafe-agent-events'

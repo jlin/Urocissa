@@ -7,7 +7,7 @@ import { useCollectionStore } from '@/store/collectionStore'
 
 import AddingBar from './AddingBar.vue'
 import ProgessBar from './ProgessBar.vue'
-import { Album } from '@/script/common/types'
+import { Album } from '@type/types'
 import { watchEffect } from 'vue'
 
 defineProps<{

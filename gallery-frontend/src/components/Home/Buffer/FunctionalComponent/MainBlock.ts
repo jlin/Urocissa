@@ -1,4 +1,4 @@
-import { DisplayElement, IsolationId } from '@/script/common/types'
+import { DisplayElement, IsolationId } from '@type/types'
 
 import { useDataStore } from '@/store/dataStore'
 import { FunctionalComponent, h, PropType } from 'vue'

@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { Database, IsolationId } from '@/script/common/types'
+import { Database, IsolationId } from '@type/types'
 import Cookies from 'js-cookie'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { ref, watch } from 'vue'

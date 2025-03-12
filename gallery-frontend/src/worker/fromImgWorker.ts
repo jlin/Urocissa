@@ -2,7 +2,7 @@ import { useImgStore } from '@/store/imgStore'
 import { createHandler } from 'typesafe-agent-events'
 import { fromImgWorker } from '@/worker/workerApi'
 import router from '@/script/routes'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { useMessageStore } from '@/store/messageStore'
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 

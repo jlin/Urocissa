@@ -4,7 +4,7 @@
 
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 
 const props = defineProps<{
   isolationId: IsolationId

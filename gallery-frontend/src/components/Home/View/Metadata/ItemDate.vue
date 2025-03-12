@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { Database } from '@/script/common/types'
+import { Database } from '@type/types'
 import { dater } from '@utils/dater'
 
 const props = defineProps<{

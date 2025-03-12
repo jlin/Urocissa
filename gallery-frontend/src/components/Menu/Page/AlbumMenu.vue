@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { Album, IsolationId } from '@/script/common/types'
+import { Album, IsolationId } from '@type/types'
 import FindInTimeline from '@Menu/MenuItem/ItemFindInTimeline.vue'
 import EditTags from '@Menu/MenuItem/ItemEditTags.vue'
 import Delete from '@Menu/MenuItem/ItemDelete.vue'

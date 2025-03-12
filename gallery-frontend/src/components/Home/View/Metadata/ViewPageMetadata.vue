@@ -65,7 +65,7 @@
 import { watch } from 'vue'
 import { useInfoStore } from '@/store/infoStore'
 
-import { AbstractData, IsolationId } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@type/types'
 
 import ItemExif from './ItemExif.vue'
 import ItemSize from './ItemSize.vue'

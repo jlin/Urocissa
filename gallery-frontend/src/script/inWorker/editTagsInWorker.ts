@@ -3,7 +3,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
-import { IsolationId } from '../common/types'
+import { IsolationId } from '@type/types'
 
 export function editTagsInWorker(
   indexArray: number[],

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useMessageStore } from './messageStore'
 import axios from 'axios'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 import { useModalStore } from './modalStore'
 
 export const useUploadStore = (isolationId: IsolationId) =>

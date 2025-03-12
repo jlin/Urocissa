@@ -7,7 +7,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useRowStore } from '@/store/rowStore'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
-import { IsolationId } from '@/script/common/types'
+import { IsolationId } from '@type/types'
 
 /**
  * Computes the sum of offsets for rows above the given scroll position.

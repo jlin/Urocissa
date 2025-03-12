@@ -15,7 +15,7 @@ import {
   PublicConfigSchema,
   prefetchReturnSchema,
   tokenReturnSchema
-} from './schemas'
+} from '@type/schemas'
 
 export type Sorting = 'ascending' | 'descending' | 'random' | 'similar'
 

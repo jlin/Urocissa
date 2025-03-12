@@ -5,7 +5,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import { toDataWorker } from '@/worker/workerApi'
 import { clamp } from 'lodash'
 import { bindActionDispatch } from 'typesafe-agent-events'
-import { IsolationId } from '../common/types'
+import { IsolationId } from '@type/types'
 import { getTimestampToken } from '@/indexedDb/timestampToken'
 
 /**

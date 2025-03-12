@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import { tokenReturnSchema } from '@/script/common/schemas'
+import { tokenReturnSchema } from '@type/schemas'
 import { postToMainImg } from './toImgWorker'
 import { getTimestampToken } from '@/indexedDb/timestampToken'
 import { interceptorData } from './interceptorData'

@@ -1,4 +1,4 @@
-import { AbstractData, IsolationId } from '@/script/common/types'
+import { AbstractData, IsolationId } from '@type/types'
 import { EditAlbumsParams, EditTagsParams } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { useDataStore } from './dataStore'

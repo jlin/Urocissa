@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { Database } from '@/script/common/types'
+import { Database } from '@type/types'
 import { computed } from 'vue'
 
 const props = defineProps<{

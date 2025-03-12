@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 import { filesize } from 'filesize'
-import { Album } from '@/script/common/types'
+import { Album } from '@type/types'
 
 const props = defineProps<{
   album: Album

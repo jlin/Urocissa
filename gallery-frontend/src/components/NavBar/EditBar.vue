@@ -28,7 +28,7 @@
 <script lang="ts" setup>
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import BatchMenu from '@Menu/MenuMain/BatchMenu.vue'
+import BatchMenu from '@Menu/Page/BatchMenu.vue'
 import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@utils/getter'
 import LeaveEdit from '@Menu/MenuButton/BtnLeaveEdit.vue'

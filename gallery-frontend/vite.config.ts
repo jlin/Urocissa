@@ -27,7 +27,8 @@ export default defineConfig({
       '@Menu': resolve(__dirname, 'src/components/Menu'),
       '@worker': resolve(__dirname, 'src/worker'),
       '@utils': resolve(__dirname, 'src/script/utils'),
-      '@constants': resolve(__dirname, 'src/script/common/constants')
+      '@constants': resolve(__dirname, 'src/script/common/constants'),
+      '@type': resolve(__dirname, 'src/type'),
     }
   },
   build: {

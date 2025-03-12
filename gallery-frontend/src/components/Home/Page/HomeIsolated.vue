@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import Home from './Home.vue'
 import ReadingBar from '@/components/NavBar/ReadingBar.vue'
-import { Album } from '@/script/common/types'
+import { Album } from '@type/types'
 import { onMounted, Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
