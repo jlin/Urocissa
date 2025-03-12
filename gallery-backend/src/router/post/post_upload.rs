@@ -1,8 +1,8 @@
 use std::time::Instant;
 
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
 use rocket::{form::Form, fs::TempFile};
@@ -57,8 +57,8 @@ fn get_extension(file: &TempFile<'_>) -> Result<String, Status> {
 
 #[post("/upload", data = "<data>")]
 pub async fn upload(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     data: Form<Vec<FileUpload<'_>>>,
 ) -> Result<(), Status> {
     let mut last_modified_time = 0;

@@ -4,10 +4,10 @@ use rocket::request::{FromRequest, Outcome};
 
 use crate::public::config::PUBLIC_CONFIG;
 
-pub struct ReadOnlyModeGuard;
+pub struct GuardReadOnlyMode;
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for ReadOnlyModeGuard {
+impl<'r> FromRequest<'r> for GuardReadOnlyMode {
     type Error = ();
 
     async fn from_request(_req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -15,6 +15,6 @@ impl<'r> FromRequest<'r> for ReadOnlyModeGuard {
             return Outcome::Error((Status::InternalServerError, ()));
         }
 
-        Outcome::Success(ReadOnlyModeGuard)
+        Outcome::Success(GuardReadOnlyMode)
     }
 }

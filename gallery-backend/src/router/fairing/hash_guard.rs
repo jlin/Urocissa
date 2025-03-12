@@ -47,10 +47,10 @@ impl HashClaims {
         .expect("Failed to generate token")
     }
 }
-pub struct HashGuard;
+pub struct GuardHash;
 
 #[async_trait]
-impl<'r> FromRequest<'r> for HashGuard {
+impl<'r> FromRequest<'r> for GuardHash {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -110,27 +110,27 @@ impl<'r> FromRequest<'r> for HashGuard {
             );
             return Outcome::Forward(Status::Unauthorized);
         }
-        Outcome::Success(HashGuard)
+        Outcome::Success(GuardHash)
     }
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TokenRequest {
+pub struct RenewHashToken {
     pub expired_hash_token: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TokenReturn {
+pub struct RenewHashTokenReturn {
     pub token: String,
 }
 
 #[post("/post/renew-hash-token", format = "json", data = "<token_request>")]
 pub async fn renew_hash_token(
     auth: TimestampGuardModified,
-    token_request: Json<TokenRequest>,
-) -> Result<Json<TokenReturn>, Status> {
+    token_request: Json<RenewHashToken>,
+) -> Result<Json<RenewHashTokenReturn>, Status> {
     tokio::task::spawn_blocking(move || {
         let expired_hash_token = token_request.into_inner().expired_hash_token;
         let token_data = match decode::<HashClaims>(
@@ -160,7 +160,7 @@ pub async fn renew_hash_token(
         let new_hash_claims = HashClaims::new(claims.hash, claims.timestamp);
         let new_hash_token = new_hash_claims.encode();
 
-        Ok(Json(TokenReturn {
+        Ok(Json(RenewHashTokenReturn {
             token: new_hash_token,
         }))
     })

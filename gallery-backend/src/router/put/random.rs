@@ -1,12 +1,12 @@
 use crate::public::{database_struct::database::definition::Database, tree::TREE};
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[get("/put/generate_random_data?<number>")]
 pub async fn generate_random_data(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     number: usize,
 ) {
     let data_vec: Vec<Database> = (0..number)

@@ -10,8 +10,8 @@ use rocket::{http::Status, post};
 use crate::public::album::Share;
 use crate::public::redb::ALBUM_TABLE;
 use crate::public::tree::TREE;
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
@@ -28,8 +28,8 @@ pub struct CreateShare {
 
 #[post("/post/create_share", data = "<create_share>")]
 pub async fn create_share(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     create_share: Json<CreateShare>,
 ) -> Result<String, Status> {
     tokio::task::spawn_blocking(move || {

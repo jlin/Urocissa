@@ -2,8 +2,8 @@ use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::read_tags::TagInfo;
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 
 use redb::ReadableTable;
 use rocket::serde::{Deserialize, json::Json};
@@ -17,8 +17,8 @@ pub struct EditTagsData {
 }
 #[put("/put/edit_tag", format = "json", data = "<json_data>")]
 pub async fn edit_tag(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     json_data: Json<EditTagsData>,
 ) -> Json<Vec<TagInfo>> {
     let vec_tags_info = tokio::task::spawn_blocking(move || {

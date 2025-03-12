@@ -5,7 +5,7 @@ use serde::Serialize;
 
 use crate::{
     public::{database_struct::database::definition::Database, tree::TREE},
-    router::fairing::auth_guard::AuthGuard,
+    router::fairing::auth_guard::GuardAuth,
 };
 
 #[derive(Debug, Serialize)]
@@ -15,7 +15,7 @@ pub struct ExportEntry {
 }
 
 #[get("/get/get-export")]
-pub async fn get_export(_auth: AuthGuard) -> ByteStream![Vec<u8>] {
+pub async fn get_export(_auth: GuardAuth) -> ByteStream![Vec<u8>] {
     ByteStream! {
         // Open DB and prepare to iterate
         let table =  TREE.api_read_tree();

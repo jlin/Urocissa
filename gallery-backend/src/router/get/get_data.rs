@@ -1,19 +1,19 @@
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
 use crate::public::tree::TREE;
 use crate::public::tree::read_tags::TagInfo;
-use crate::router::fairing::auth_guard::AuthGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
 
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 
 #[get("/get/get-config.json")]
-pub async fn get_config(_auth: AuthGuard) -> Json<&'static PublicConfig> {
+pub async fn get_config(_auth: GuardAuth) -> Json<&'static PublicConfig> {
     Json(&*PUBLIC_CONFIG)
 }
 
 #[get("/get/get-tags")]
-pub async fn get_tags(_auth: AuthGuard) -> Json<Vec<TagInfo>> {
+pub async fn get_tags(_auth: GuardAuth) -> Json<Vec<TagInfo>> {
     tokio::task::spawn_blocking(move || {
         let vec_tags_info = TREE.read_tags();
         Json(vec_tags_info)
@@ -30,7 +30,7 @@ pub struct AlbumInfo {
 }
 
 #[get("/get/get-albums")]
-pub async fn get_albums(_auth: AuthGuard) -> Json<Vec<AlbumInfo>> {
+pub async fn get_albums(_auth: GuardAuth) -> Json<Vec<AlbumInfo>> {
     tokio::task::spawn_blocking(move || {
         let album_list = TREE.read_albums();
         let album_info_list = album_list

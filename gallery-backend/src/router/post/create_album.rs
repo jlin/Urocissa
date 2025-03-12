@@ -13,8 +13,8 @@ use crate::public::album::Album;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use crate::synchronizer::album::album_self_update_async;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
@@ -27,8 +27,8 @@ pub struct CreateAlbum {
 
 #[post("/post/create_album", data = "<create_album>")]
 pub async fn create_album(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     create_album: Json<CreateAlbum>,
 ) -> Result<String, Status> {
     let id = tokio::task::spawn_blocking(move || {

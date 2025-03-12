@@ -10,7 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
-use super::auth_guard::AuthGuard;
+use super::auth_guard::GuardAuth;
 use super::VALIDATION_ALLOW_EXPIRED;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,10 +41,10 @@ impl TimestampClaims {
     }
 }
 
-pub struct TimestampGuard;
+pub struct GuardTimestamp;
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for TimestampGuard {
+impl<'r> FromRequest<'r> for GuardTimestamp {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -100,19 +100,19 @@ impl<'r> FromRequest<'r> for TimestampGuard {
             return Outcome::Forward(Status::Unauthorized);
         }
 
-        Outcome::Success(TimestampGuard)
+        Outcome::Success(GuardTimestamp)
     }
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TokenRequest {
+pub struct RenewTimestampToken {
     pub token: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TokenReturn {
+pub struct RenewTimestampTokenReturn {
     pub token: String,
 }
 
@@ -122,9 +122,9 @@ pub struct TokenReturn {
     data = "<token_request>"
 )]
 pub async fn renew_timestamp_token(
-    _auth: AuthGuard,
-    token_request: Json<TokenRequest>,
-) -> Result<Json<TokenReturn>, Status> {
+    _auth: GuardAuth,
+    token_request: Json<RenewTimestampToken>,
+) -> Result<Json<RenewTimestampTokenReturn>, Status> {
     tokio::task::spawn_blocking(move || {
         let token = token_request.into_inner().token;
         let token_data = match decode::<TimestampClaims>(
@@ -146,7 +146,7 @@ pub async fn renew_timestamp_token(
         let new_claims = TimestampClaims::new(claims.timestamp);
         let new_token = new_claims.encode();
 
-        Ok(Json(TokenReturn { token: new_token }))
+        Ok(Json(RenewTimestampTokenReturn { token: new_token }))
     })
     .await
     .unwrap()

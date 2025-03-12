@@ -1,6 +1,6 @@
 use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use crate::synchronizer::album::album_self_update_async;
 use std::collections::HashSet;
 
@@ -22,8 +22,8 @@ pub struct EditAlbumsData {
 
 #[put("/put/edit_album", format = "json", data = "<json_data>")]
 pub async fn edit_album(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     json_data: Json<EditAlbumsData>,
 ) -> () {
     let concact_result = tokio::task::spawn_blocking(move || {
@@ -83,8 +83,8 @@ pub struct SetAlbumCover {
 
 #[post("/post/set_album_cover", data = "<set_album_cover>")]
 pub async fn set_album_cover(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     set_album_cover: Json<SetAlbumCover>,
 ) -> Result<(), Status> {
     tokio::task::spawn_blocking(move || {
@@ -120,8 +120,8 @@ pub struct SetAlbumTitle {
 
 #[post("/post/set_album_title", data = "<set_album_title>")]
 pub async fn set_album_title(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     set_album_title: Json<SetAlbumTitle>,
 ) -> Result<(), Status> {
     tokio::task::spawn_blocking(move || {

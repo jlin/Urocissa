@@ -1,8 +1,8 @@
 use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::executor::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::public::tree::TREE;
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use arrayvec::ArrayString;
 use rocket::form::Form;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -33,8 +33,8 @@ impl<'r> FromFormField<'r> for FrameData<'r> {
 
 #[put("/put/regenerate-thumbnail-with-frame", data = "<data>")]
 pub async fn regenerate_thumbnail_with_frame(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     data: Form<Vec<FrameData<'_>>>,
 ) -> Result<Status, Status> {
     let mut hash: Option<ArrayString<64>> = None;

@@ -6,7 +6,7 @@ use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 
-use crate::router::fairing::timestamp_guard::TimestampGuard;
+use crate::router::fairing::timestamp_guard::GuardTimestamp;
 use log::info;
 use rocket::http::Status;
 
@@ -16,7 +16,7 @@ use std::time::Instant;
 
 #[get("/get/get-data?<timestamp>&<start>&<end>")]
 pub async fn get_data(
-    _auth: TimestampGuard,
+    _auth: GuardTimestamp,
     timestamp: u128,
     start: usize,
     end: usize,
@@ -65,7 +65,7 @@ pub async fn get_data(
 
 #[get("/get/get-rows?<index>&<timestamp>")]
 pub async fn get_rows(
-    _auth: TimestampGuard,
+    _auth: GuardTimestamp,
     index: usize,
     timestamp: u128,
 ) -> Result<Json<Row>, Status> {
@@ -81,7 +81,7 @@ pub async fn get_rows(
 }
 
 #[get("/get/get-scroll-bar?<timestamp>")]
-pub async fn get_scroll_bar(_auth: TimestampGuard, timestamp: u128) -> Json<Vec<ScrollBarData>> {
+pub async fn get_scroll_bar(_auth: GuardTimestamp, timestamp: u128) -> Json<Vec<ScrollBarData>> {
     let scrollbar_data = TREE_SNAPSHOT.read_scrollbar(timestamp);
     Json(scrollbar_data)
 }

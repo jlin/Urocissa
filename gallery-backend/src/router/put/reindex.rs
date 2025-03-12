@@ -8,8 +8,8 @@ use crate::executor::databaser::processor::{
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::fairing::auth_guard::AuthGuard;
-use crate::router::fairing::read_only_mod_guard::ReadOnlyModeGuard;
+use crate::router::fairing::auth_guard::GuardAuth;
+use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
 use crate::synchronizer::album::album_self_update;
 use rocket::serde::json::Json;
 use serde::Deserialize;
@@ -22,8 +22,8 @@ pub struct RegenerateData {
 
 #[post("/put/reindex", format = "json", data = "<json_data>")]
 pub async fn reindex(
-    _auth: AuthGuard,
-    _read_only_mode: ReadOnlyModeGuard,
+    _auth: GuardAuth,
+    _read_only_mode: GuardReadOnlyMode,
     json_data: Json<RegenerateData>,
 ) -> Status {
     let json_data = json_data.into_inner();

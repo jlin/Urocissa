@@ -41,12 +41,12 @@ impl Claims {
     }
 }
 
-pub struct AuthGuard {
+pub struct GuardAuth {
     pub claims: Claims,
 }
 
 #[rocket::async_trait]
-impl<'r> FromRequest<'r> for AuthGuard {
+impl<'r> FromRequest<'r> for GuardAuth {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
@@ -62,7 +62,7 @@ impl<'r> FromRequest<'r> for AuthGuard {
             ) {
                 Ok(token_data_claims) => {
                     let claims = token_data_claims.claims;
-                    return Outcome::Success(AuthGuard { claims });
+                    return Outcome::Success(GuardAuth { claims });
                 }
                 _ => {
                     warn!("JWT validation failed.");
