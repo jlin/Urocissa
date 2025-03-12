@@ -80,7 +80,7 @@ import { useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { IsolationId } from '@type/types'
 import { searchByTag } from '@utils/getter'
-import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
+import { quickRemoveTags, quickAddTags } from '@utils/quickEditTags'
 
 const props = defineProps<{
   isolationId: IsolationId

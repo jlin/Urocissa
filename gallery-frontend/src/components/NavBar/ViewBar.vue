@@ -42,7 +42,7 @@
   </v-toolbar>
 </template>
 <script setup lang="ts">
-import { quickRemoveTags, quickAddTags } from '@/script/common/quickEditTags'
+import { quickRemoveTags, quickAddTags } from '@utils/quickEditTags'
 import { AbstractData, IsolationId } from '@type/types'
 import ViewPageToolBarDatabase from '@Menu/Page/SingleMenu.vue'
 import AlbumMenu from '@Menu/Page/AlbumMenu.vue'

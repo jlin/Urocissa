@@ -10,7 +10,7 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 import { getIsolationIdByRoute } from '@utils/getter'
-import { quickAddTags } from '@/script/common/quickEditTags'
+import { quickAddTags } from '@utils/quickEditTags'
 
 const props = defineProps<{
   indexList: number[]
