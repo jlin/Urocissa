@@ -1,3 +1,4 @@
+import router from '@/script/routes'
 import { IsolationId } from '@type/types'
 import { defineStore } from 'pinia'
 
@@ -8,5 +9,11 @@ export const useRedirectionStore = (isolationId: IsolationId) =>
     } => ({
       redirection: null
     }),
-    actions: {}
+    actions: {
+      async redirectionToLogin() {
+        console.warn('401 Unauthorized detected, redirecting to /login')
+        this.redirection = router.currentRoute.value.fullPath
+        await router.push('/login')
+      }
+    }
   })()

@@ -9,7 +9,6 @@ import { useOffsetStore } from '@/store/offsetStore'
 import { useRowStore } from '@/store/rowStore'
 import { useLocationStore } from '@/store/locationStore'
 import { useModalStore } from '@/store/modalStore'
-import router from '@/script/routes'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { useRedirectionStore } from '@/store/redirectionStore'
 
@@ -90,8 +89,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
       messageStore.showMessage = true
     },
     unauthorized: async () => {
-      redirectionStore.redirection = router.currentRoute.value.fullPath
-      await router.push('/login')
+      redirectionStore.redirectionToLogin()
     }
   })
 
