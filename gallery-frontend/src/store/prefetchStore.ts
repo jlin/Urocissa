@@ -1,4 +1,4 @@
-import { fixedBigRowHeight, layoutBatchNumber } from '@/script/common/constants'
+import { fixedBigRowHeight, layoutBatchNumber } from '@/type/constants'
 import { IsolationId } from '@type/types'
 import { defineStore } from 'pinia'
 

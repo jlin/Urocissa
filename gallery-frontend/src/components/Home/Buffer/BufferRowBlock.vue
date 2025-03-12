@@ -51,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { layoutBatchNumber } from '@/script/common/constants'
+import { layoutBatchNumber } from '@/type/constants'
 import { IsolationId, Row } from '@type/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { usePrefetchStore } from '@/store/prefetchStore'

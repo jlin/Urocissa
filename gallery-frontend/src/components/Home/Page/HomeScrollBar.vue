@@ -95,7 +95,7 @@ import { useQueueStore } from '@/store/queueStore'
 import { useLocationStore } from '@/store/locationStore'
 import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
 import { IsolationId, ScrollbarData } from '@type/types'
-import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/script/common/constants'
+import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/type/constants'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getInjectValue, getScrollUpperBound } from '@utils/getter'
 const isScrolling = ref(false)

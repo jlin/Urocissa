@@ -15,7 +15,7 @@ import {
   TagInfo,
   SubRow
 } from '@type/types'
-import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/script/common/constants'
+import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/type/constants'
 import { getArrayValue } from '@utils/getter'
 import { createAbstractData, createAlbum, createDataBase } from '@utils/createData'
 

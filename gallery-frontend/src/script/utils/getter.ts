@@ -3,7 +3,7 @@ import { inject } from 'vue'
 import { useDataStore } from '@/store/dataStore'
 import Cookies from 'js-cookie'
 import { escapeAndWrap } from '@utils/escape'
-import { navBarHeight } from '../common/constants'
+import { navBarHeight } from '../../type/constants'
 
 export function getIsolationIdByRoute(route: RouteLocationNormalizedLoaded) {
   const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'

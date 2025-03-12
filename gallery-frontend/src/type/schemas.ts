@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { fixedBigRowHeight } from '@constants'
+import { fixedBigRowHeight } from '@/type/constants'
 
 export const AliasSchema = z.object({
   file: z.string(),

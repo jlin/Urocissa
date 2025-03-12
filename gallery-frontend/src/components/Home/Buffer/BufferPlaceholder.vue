@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { paddingPixel } from '@/script/common/constants'
+import { paddingPixel } from '@/type/constants'
 import { getInjectValue } from '@utils/getter'
 import { computed, onMounted, Ref, ref, watchEffect } from 'vue'
 

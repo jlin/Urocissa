@@ -49,7 +49,7 @@ import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
 import { searchByTag } from '@utils/getter'
-import { navBarHeight } from '@/script/common/constants'
+import { navBarHeight } from '@/type/constants'
 import NavBar from '@/components/NavBar/NavBar.vue'
 const initializedStore = useInitializedStore('mainId')
 const tagStore = useTagStore('mainId')
