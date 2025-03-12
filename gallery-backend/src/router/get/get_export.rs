@@ -5,7 +5,7 @@ use serde::Serialize;
 
 use crate::{
     public::{database_struct::database::definition::Database, tree::TREE},
-    router::fairing::auth_guard::GuardAuth,
+    router::fairing::guard_auth::GuardAuth,
 };
 
 #[derive(Debug, Serialize)]

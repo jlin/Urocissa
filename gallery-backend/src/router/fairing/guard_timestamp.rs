@@ -10,7 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
-use super::auth_guard::GuardAuth;
+use super::guard_auth::GuardAuth;
 use super::VALIDATION_ALLOW_EXPIRED;
 
 #[derive(Debug, Serialize, Deserialize)]

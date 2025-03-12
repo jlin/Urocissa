@@ -3,17 +3,17 @@ use std::sync::LazyLock;
 use jsonwebtoken::{Algorithm, Validation};
 use rocket::Route;
 
-pub mod auth_guard;
+pub mod guard_auth;
 pub mod cache_control_fairing;
-pub mod hash_guard;
-pub mod read_only_mod_guard;
-pub mod share_guard;
-pub mod timestamp_guard;
+pub mod guard_hash;
+pub mod guard_read_only_mod;
+pub mod guard_share;
+pub mod guard_timestamp;
 
 pub fn generate_fairing_routes() -> Vec<Route> {
     routes![
-        timestamp_guard::renew_timestamp_token,
-        hash_guard::renew_hash_token
+        guard_timestamp::renew_timestamp_token,
+        guard_hash::renew_hash_token
     ]
 }
 

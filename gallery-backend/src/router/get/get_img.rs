@@ -4,7 +4,7 @@ use rocket::response::Responder;
 use rocket_seek_stream::SeekStream;
 use std::path::{Path, PathBuf};
 
-use crate::router::fairing::{auth_guard::GuardAuth, hash_guard::GuardHash};
+use crate::router::fairing::{guard_auth::GuardAuth, guard_hash::GuardHash};
 #[derive(Responder)]
 pub enum CompressedFileResponse<'a> {
     SeekStream(SeekStream<'a>),

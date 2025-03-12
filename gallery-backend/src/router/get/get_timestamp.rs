@@ -6,7 +6,7 @@ use crate::public::row::{Row, ScrollBarData};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
 
-use crate::router::fairing::timestamp_guard::GuardTimestamp;
+use crate::router::fairing::guard_timestamp::GuardTimestamp;
 use log::info;
 use rocket::http::Status;
 

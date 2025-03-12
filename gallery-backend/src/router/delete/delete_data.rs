@@ -1,8 +1,8 @@
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::tree::TREE;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::fairing::auth_guard::GuardAuth;
-use crate::router::fairing::read_only_mod_guard::GuardReadOnlyMode;
+use crate::router::fairing::guard_auth::GuardAuth;
+use crate::router::fairing::guard_read_only_mod::GuardReadOnlyMode;
 use crate::synchronizer::album::album_self_update_async;
 
 use redb::ReadableTable;
