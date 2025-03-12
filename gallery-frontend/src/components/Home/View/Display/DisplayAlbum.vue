@@ -118,7 +118,7 @@ import { useRoute } from 'vue-router'
 import { dater } from '@utils/dater'
 import { Album } from '@type/types'
 import { ref, watch } from 'vue'
-import { editTitle } from '@/script/common/createAlbums'
+import { editTitle } from '@utils/createAlbums'
 
 const titleModel = ref('')
 

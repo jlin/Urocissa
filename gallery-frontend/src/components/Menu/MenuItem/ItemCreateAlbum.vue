@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { createEmptyAlbum } from '@/script/common/createAlbums'
+import { createEmptyAlbum } from '@utils/createAlbums'
 import { getIsolationIdByRoute } from '@utils/getter'
 
 const loading = defineModel<boolean>()

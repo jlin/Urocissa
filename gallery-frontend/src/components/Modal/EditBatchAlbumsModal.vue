@@ -114,7 +114,7 @@ import { useAlbumStore } from '@/store/albumStore'
 import { AlbumInfo } from '@type/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
-import { createAlbum } from '@/script/common/createAlbums'
+import { createAlbum } from '@utils/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
 import { VForm } from 'vuetify/components/VForm'
 const route = useRoute()

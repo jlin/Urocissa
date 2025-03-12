@@ -45,7 +45,7 @@ import ShareModal from '@/components/Modal/ShareModal.vue'
 import { Album } from '@type/types'
 import { useModalStore } from '@/store/modalStore'
 import { ref, watch } from 'vue'
-import { editTitle } from '@/script/common/createAlbums'
+import { editTitle } from '@utils/createAlbums'
 import { useRouter } from 'vue-router'
 
 const props = defineProps<{

@@ -84,7 +84,7 @@
   </v-container>
 </template>
 <script setup lang="ts">
-import { createEmptyAlbum } from '@/script/common/createAlbums'
+import { createEmptyAlbum } from '@utils/createAlbums'
 import { IsolationId } from '@type/types'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useModalStore } from '@/store/modalStore'
