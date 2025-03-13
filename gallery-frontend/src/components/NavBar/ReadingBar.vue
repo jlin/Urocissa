@@ -15,7 +15,7 @@
       backgroundColor: '#212121'
     }"
   >
-    <v-btn icon="mdi mdi-arrow-left" @click = "leave(router)"></v-btn>
+    <v-btn icon="mdi mdi-arrow-left" @click="leave(router)"></v-btn>
     <v-card elevation="0" class="w-100">
       <v-card-title>
         <v-text-field
@@ -27,7 +27,7 @@
       ></v-card-title>
     </v-card>
     <v-spacer></v-spacer>
-    <v-btn v-if="false" icon="mdi-share-variant" @click="modalStore.showShareModal = true"> </v-btn>
+    <v-btn icon="mdi-share-variant" @click="modalStore.showShareModal = true"> </v-btn>
     <v-btn icon="mdi-image-plus" @click="modalStore.showHomeTempModal = true"> </v-btn>
   </v-toolbar>
   <EditBar v-else />

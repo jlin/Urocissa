@@ -116,7 +116,20 @@ const simpleRoutes: RouteRecordRaw[] = [
           query: route.query
         }
       }
-    }
+    },
+    children: [
+      {
+        path: 'view/:hash',
+        component: ViewPageMain,
+        name: `shareViewPage`,
+        meta: {
+          isReadPage: false,
+          isViewPage: true,
+          basicString: null,
+          baseName: 'share'
+        }
+      }
+    ]
   }
 ]
 

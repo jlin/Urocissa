@@ -11,7 +11,7 @@
   >
     <Home
       v-if="basicString !== undefined"
-      isolation-id="shareId"
+      isolation-id="mainId"
       :filter-determined-by-query="generateJsonString(basicString)"
     >
     </Home>
