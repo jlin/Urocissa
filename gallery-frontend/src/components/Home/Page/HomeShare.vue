@@ -1,21 +1,10 @@
 <template>
-  <v-overlay
-    :model-value="true"
-    :height="'100%'"
-    :width="'100%'"
-    class="d-flex"
-    id="view-page"
-    transition="false"
-    :close-on-back="false"
-    persistent
+  <Home
+    v-if="basicString !== undefined"
+    isolation-id="mainId"
+    :filter-determined-by-query="generateJsonString(basicString)"
   >
-    <Home
-      v-if="basicString !== undefined"
-      isolation-id="mainId"
-      :filter-determined-by-query="generateJsonString(basicString)"
-    >
-    </Home>
-  </v-overlay>
+  </Home>
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
