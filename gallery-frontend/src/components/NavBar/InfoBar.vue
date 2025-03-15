@@ -89,7 +89,7 @@ const loading = ref(false)
 const handleSearch = async () => {
   console.log('searchQuery.value is', searchQuery.value)
 
-  filterStore.filterString = searchQuery.value
+  filterStore.searchString = searchQuery.value
   await router.replace({
     path: route.path,
     query: { search: searchQuery.value }

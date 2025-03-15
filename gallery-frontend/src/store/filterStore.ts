@@ -9,29 +9,29 @@ export const useFilterStore = (isolationId: IsolationId) =>
       // Records the type of gallery area: default, favorite, archived, etc.
       basicString: string | null
       // Records the gallery search filter
-      filterString: string | null
+      searchString: string | null
     } => ({
       basicString: null,
-      filterString: null
+      searchString: null
     }),
     actions: {
-      // Generates the filter JSON string using basicString and filterString
+      // Generates the filter JSON string using basicString and searchString
       // This JSON info is used to send to the backend
       generateFilterJsonString(): string | null {
         try {
-          if (this.basicString !== null && this.filterString === null) {
+          if (this.basicString !== null && this.searchString === null) {
             return generateJsonString(this.basicString)
-          } else if (this.basicString === null && this.filterString !== null) {
+          } else if (this.basicString === null && this.searchString !== null) {
             try {
-              return generateJsonString(this.filterString)
+              return generateJsonString(this.searchString)
             } catch {
-              return generateJsonString(`any: "${this.filterString}"`)
+              return generateJsonString(`any: "${this.searchString}"`)
             }
-          } else if (this.basicString !== null && this.filterString !== null) {
+          } else if (this.basicString !== null && this.searchString !== null) {
             try {
-              return generateJsonString(`and(${this.basicString},${this.filterString})`)
+              return generateJsonString(`and(${this.basicString},${this.searchString})`)
             } catch {
-              return generateJsonString(`and(${this.basicString}, any: "${this.filterString}")`)
+              return generateJsonString(`and(${this.basicString}, any: "${this.searchString}")`)
             }
           } else {
             return null
@@ -43,7 +43,7 @@ export const useFilterStore = (isolationId: IsolationId) =>
       },
       handleFilterString(route: RouteLocationNormalizedLoaded) {
         const searchString = route.query.search as string
-        this.filterString = searchString ? searchString : null
+        this.searchString = searchString ? searchString : null
       },
       handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: IsolationId) {
         if (route.meta.isReadPage) {
