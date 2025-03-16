@@ -9,7 +9,7 @@
     :close-on-back="false"
     persistent
   >
-    <Home isolation-id="tempId" :filter-determined-by-query="generateJsonString(basicString)">
+    <Home isolation-id="tempId" :basic-string="basicString">
       <template #reading-bar>
         <SelectionBar :album="album" />
       </template>
@@ -19,7 +19,6 @@
 <script setup lang="ts">
 import { Album } from '@type/types'
 import Home from './Home.vue'
-import { generateJsonString } from '@/script/lexer/generateJson'
 import SelectionBar from '@/components/NavBar/SelectionBar.vue'
 const props = defineProps<{
   album: Album

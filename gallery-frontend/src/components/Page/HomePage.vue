@@ -4,5 +4,5 @@
 
 <script setup lang="ts">
 import HomeMain from '@/components/Home/Page/HomeMain.vue'
-const basicString = 'not(tag:"_trashed")'
+const basicString = 'and(not(tag:"_archived"), not(tag:"_trashed"))'
 </script>

@@ -1,8 +1,8 @@
 <template>
-    <HomePage />
+  <HomeMain :basic-string="basicString" />
 </template>
 
 <script setup lang="ts">
-import HomePage from '@/components/Home/Page/HomeMain.vue';
-
+import HomeMain from '@/components/Home/Page/HomeMain.vue'
+const basicString = 'and(tag:"_trashed")'
 </script>

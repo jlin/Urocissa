@@ -6,7 +6,7 @@ import 'vue-router'
 
 import TagsPage from '@/components/Page/TagsPage.vue'
 import LoginPage from '@/components/LoginPage.vue'
-import HomeMain from '@/components/Home/Page/HomeMain.vue'
+import HomeMain from '@/components/Page/HomePage.vue'
 import AllPage from '@/components/Page/AllPage.vue'
 import FavoritePage from '@/components/Page/FavoritePage.vue'
 import ArchivedPage from '@/components/Page/ArchivedPage.vue'
@@ -125,8 +125,13 @@ const simpleRoutes: RouteRecordRaw[] = [
         meta: {
           isReadPage: false,
           isViewPage: true,
-          basicString: null,
-          baseName: 'share'
+          baseName: 'share',
+          getParentPage: function (): PageReturnType {
+            throw new Error('Function not implemented.')
+          },
+          getChildPage: function (): PageReturnType {
+            throw new Error('Function not implemented.')
+          }
         }
       }
     ]
@@ -145,11 +150,7 @@ const simpleRoutes: RouteRecordRaw[] = [
  * @param name - The unique name for the route.
  * @returns An array containing the RouteRecordRaw object.
  */
-function createRoute(
-  baseName: BaseName,
-  component: Component,
-  basicString: string | null
-): RouteRecordRaw[] {
+function createRoute(baseName: BaseName, component: Component): RouteRecordRaw[] {
   const mainRoute: RouteRecordRaw = {
     path: `/${baseName}`,
     component: component,
@@ -157,7 +158,6 @@ function createRoute(
     meta: {
       isReadPage: false,
       isViewPage: false,
-      basicString: basicString,
       baseName: baseName,
       getParentPage: (route) => {
         return {
@@ -182,7 +182,6 @@ function createRoute(
         meta: {
           isReadPage: false,
           isViewPage: true,
-          basicString: basicString,
           baseName: baseName,
           getParentPage: (route) => {
             return {
@@ -207,7 +206,6 @@ function createRoute(
             meta: {
               isReadPage: true,
               isViewPage: false,
-              basicString: basicString,
               baseName: baseName,
               getParentPage: (route) => {
                 return {
@@ -232,7 +230,6 @@ function createRoute(
                 meta: {
                   isReadPage: true,
                   isViewPage: true,
-                  basicString: basicString,
                   baseName: baseName,
                   getParentPage: (route) => {
                     return {
@@ -263,35 +260,19 @@ function createRoute(
 // 3. Create Routes Using the Helper Function
 // ======================================
 
-const homePageRoutes = createRoute(
-  'home',
-  HomeMain,
-  'and(not(tag:"_archived"), not(tag:"_trashed"))'
-)
+const homePageRoutes = createRoute('home', HomeMain)
 
-const allPageRoutes = createRoute('all', AllPage, 'not(tag:"_trashed")')
+const allPageRoutes = createRoute('all', AllPage)
 
-const favoritePageRoutes = createRoute(
-  'favorite',
-  FavoritePage,
-  'and(tag:"_favorite", not(tag:"_trashed"))'
-)
+const favoritePageRoutes = createRoute('favorite', FavoritePage)
 
-const archivedPageRoutes = createRoute(
-  'archived',
-  ArchivedPage,
-  'and(tag:"_archived", not(tag:"_trashed"))'
-)
+const archivedPageRoutes = createRoute('archived', ArchivedPage)
 
-const trashedPageRoutes = createRoute('trashed', TrashedPage, 'and(tag:"_trashed")')
+const trashedPageRoutes = createRoute('trashed', TrashedPage)
 
-const albumsPageRoutes = createRoute('albums', AlbumsPage, 'and(type:"album", not(tag:"_trashed"))')
+const albumsPageRoutes = createRoute('albums', AlbumsPage)
 
-const videosPageRoutes = createRoute(
-  'videos',
-  VideosPage,
-  'and(type:"video", not(tag:"_archived"), not(tag:"_trashed"))'
-)
+const videosPageRoutes = createRoute('videos', VideosPage)
 
 // ======================================
 // 4. Combine All Routes
@@ -322,7 +303,6 @@ declare module 'vue-router' {
     isReadPage: boolean
     isViewPage: boolean
     baseName: BaseName
-    basicString: string | null
     getParentPage: (router: RouteLocationNormalizedLoadedGeneric) => PageReturnType
     getChildPage: (router: RouteLocationNormalizedLoadedGeneric, hash: string) => PageReturnType
   }

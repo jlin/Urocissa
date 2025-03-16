@@ -1,15 +1,9 @@
 <template>
-  <Home
-    v-if="basicString !== undefined"
-    isolation-id="mainId"
-    :filter-determined-by-query="generateJsonString(basicString)"
-  >
-  </Home>
+  <Home v-if="basicString !== undefined" isolation-id="mainId" :basic-string="basicString"> </Home>
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import Home from './Home.vue'
-import { generateJsonString } from '@/script/lexer/generateJson'
 
 import { onMounted, ref, Ref } from 'vue'
 

@@ -9,7 +9,11 @@
     :close-on-back="false"
     persistent
   >
-    <Home v-if="album !== undefined" isolation-id="subId" :filter-determined-by-query="null">
+    <Home
+      v-if="album !== undefined && basicString !== null"
+      isolation-id="subId"
+      :basic-string="basicString"
+    >
       <template #reading-bar>
         <ReadingBar :album="album" />
       </template>
@@ -27,7 +31,7 @@ import { useDataStore } from '@/store/dataStore'
 const route = useRoute()
 const dataStore = useDataStore('mainId')
 const album: Ref<Album | undefined> = ref(undefined)
-
+const basicString: Ref<string | null> = ref(null)
 onMounted(() => {
   const hash = route.params.hash
   if (typeof hash === 'string') {
@@ -35,6 +39,10 @@ onMounted(() => {
     if (index !== undefined) {
       album.value = dataStore.data.get(index)?.album
     }
+  }
+  const album_id = route.params.hash
+  if (typeof album_id === 'string') {
+    basicString.value = `and(album:"${album_id}", not(tag:"_trashed"))`
   }
 })
 </script>

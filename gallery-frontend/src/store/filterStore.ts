@@ -6,32 +6,29 @@ import { RouteLocationNormalizedLoaded } from 'vue-router'
 export const useFilterStore = (isolationId: IsolationId) =>
   defineStore('filterStore' + isolationId, {
     state: (): {
-      // Records the type of gallery area: default, favorite, archived, etc.
-      basicString: string | null
       // Records the gallery search filter
       searchString: string | null
     } => ({
-      basicString: null,
       searchString: null
     }),
     actions: {
       // Generates the filter JSON string using basicString and searchString
       // This JSON info is used to send to the backend
-      generateFilterJsonString(): string | null {
+      generateFilterJsonString(basicString: string | null): string | null {
         try {
-          if (this.basicString !== null && this.searchString === null) {
-            return generateJsonString(this.basicString)
-          } else if (this.basicString === null && this.searchString !== null) {
+          if (basicString !== null && this.searchString === null) {
+            return generateJsonString(basicString)
+          } else if (basicString === null && this.searchString !== null) {
             try {
               return generateJsonString(this.searchString)
             } catch {
               return generateJsonString(`any: "${this.searchString}"`)
             }
-          } else if (this.basicString !== null && this.searchString !== null) {
+          } else if (basicString !== null && this.searchString !== null) {
             try {
-              return generateJsonString(`and(${this.basicString},${this.searchString})`)
+              return generateJsonString(`and(${basicString},${this.searchString})`)
             } catch {
-              return generateJsonString(`and(${this.basicString}, any: "${this.searchString}")`)
+              return generateJsonString(`and(${basicString}, any: "${this.searchString}")`)
             }
           } else {
             return null
@@ -41,23 +38,23 @@ export const useFilterStore = (isolationId: IsolationId) =>
           return null
         }
       },
-      handleFilterString(route: RouteLocationNormalizedLoaded) {
+      recordSearchString(route: RouteLocationNormalizedLoaded) {
         const searchString = route.query.search as string
         this.searchString = searchString ? searchString : null
-      },
-      handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: IsolationId) {
+      }
+      /*   handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: IsolationId) {
         if (route.meta.isReadPage) {
           if (isolationId === 'mainId') {
-            this.basicString = route.meta.basicString
+            basicString = route.meta.basicString
           } else {
             const album_id = route.params.hash
             if (typeof album_id === 'string') {
-              this.basicString = `and(album:"${album_id}", not(tag:"_trashed"))`
+              basicString = `and(album:"${album_id}", not(tag:"_trashed"))`
             }
           }
         } else {
-          this.basicString = route.meta.basicString
+          basicString = route.meta.basicString
         }
-      }
+      } */
     }
   })()

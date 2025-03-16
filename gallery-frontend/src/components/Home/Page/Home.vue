@@ -74,7 +74,7 @@ import { useAlbumStore } from '@/store/albumStore'
 
 const props = defineProps<{
   isolationId: IsolationId
-  filterDeterminedByQuery: string | null
+  basicString: string | null
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)
@@ -153,14 +153,14 @@ const albumHomeIsolatedKey = computed(() => {
 })
 
 onMounted(() => {
-  if (props.filterDeterminedByQuery === null) {
-    filterStore.handleFilterString(route)
-    filterStore.handleBasicString(route, props.isolationId)
+  filterStore.recordSearchString(route)
 
-    usePrefetch(filterStore.generateFilterJsonString(), windowWidth, route, props.isolationId)
-  } else {
-    usePrefetch(props.filterDeterminedByQuery, windowWidth, route, props.isolationId)
-  }
+  usePrefetch(
+    filterStore.generateFilterJsonString(props.basicString),
+    windowWidth,
+    route,
+    props.isolationId
+  )
   useInitializeScrollPosition(
     imageContainerRef,
     bufferHeight,
@@ -177,7 +177,6 @@ onBeforeUnmount(() => {
   dataStore.clearAll()
   prefetchStore.clearAll()
   queueStore.clearAll()
-  filterStore.basicString = null
   filterStore.searchString = null
   collectionStore.editModeCollection.clear()
   imgStore.clearAll()
