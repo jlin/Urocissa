@@ -42,19 +42,5 @@ export const useFilterStore = (isolationId: IsolationId) =>
         const searchString = route.query.search as string
         this.searchString = searchString ? searchString : null
       }
-      /*   handleBasicString(route: RouteLocationNormalizedLoaded, isolationId: IsolationId) {
-        if (route.meta.isReadPage) {
-          if (isolationId === 'mainId') {
-            basicString = route.meta.basicString
-          } else {
-            const album_id = route.params.hash
-            if (typeof album_id === 'string') {
-              basicString = `and(album:"${album_id}", not(tag:"_trashed"))`
-            }
-          }
-        } else {
-          basicString = route.meta.basicString
-        }
-      } */
     }
   })()

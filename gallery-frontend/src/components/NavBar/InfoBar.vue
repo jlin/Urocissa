@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, watchEffect } from 'vue'
+import { inject, Ref, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
@@ -83,12 +83,10 @@ const filterStore = useFilterStore('mainId')
 
 const route = useRoute()
 const router = useRouter()
-const searchQuery = ref('')
+const searchQuery: Ref<string | null> = ref(null)
 const loading = ref(false)
 
 const handleSearch = async () => {
-  console.log('searchQuery.value is', searchQuery.value)
-
   filterStore.searchString = searchQuery.value
   await router.replace({
     path: route.path,
@@ -97,6 +95,6 @@ const handleSearch = async () => {
 }
 
 watchEffect(() => {
-  searchQuery.value = route.query.search as string
+  searchQuery.value = filterStore.searchString
 })
 </script>

@@ -14,7 +14,6 @@
 
 <script setup lang="ts">
 import { ref, type Ref, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
 
 import { useCollectionStore } from '@/store/collectionStore'
 import EditBar from '@/components/NavBar/EditBar.vue'
@@ -24,16 +23,10 @@ import { useUploadStore } from '@/store/uploadStore'
 
 const uploadStore = useUploadStore('mainId')
 const collectionStore = useCollectionStore('mainId')
-const route = useRoute()
 
-const searchQuery = ref('')
 const fileInput: Ref<HTMLInputElement | null> = ref(null)
 
 watchEffect(() => {
   uploadStore.uploadButton = fileInput.value
-})
-
-watchEffect(() => {
-  searchQuery.value = route.query.search as string
 })
 </script>

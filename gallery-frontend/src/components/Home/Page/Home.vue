@@ -154,7 +154,6 @@ const albumHomeIsolatedKey = computed(() => {
 
 onMounted(() => {
   filterStore.recordSearchString(route)
-
   usePrefetch(
     filterStore.generateFilterJsonString(props.basicString),
     windowWidth,
