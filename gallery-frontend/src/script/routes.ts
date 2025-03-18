@@ -20,7 +20,13 @@ import HomeShare from '@/components/Home/Page/HomeShare.vue'
 
 interface PageReturnType {
   name: string
-  params: { hash: string | string[] | undefined; subhash: string | string[] | undefined }
+  params: {
+    hash?: string | string[] | undefined
+    subhash?: string | string[] | undefined
+    albumId?: string | string[]
+    shareId?: string | string[]
+  }
+
   query: LocationQuery
 }
 
@@ -126,8 +132,13 @@ const simpleRoutes: RouteRecordRaw[] = [
           isReadPage: false,
           isViewPage: true,
           baseName: 'share',
-          getParentPage: function (): PageReturnType {
-            throw new Error('Function not implemented.')
+          getParentPage: (route, albumId, shareId) => {
+            console.log('123')
+            return {
+              name: 'share',
+              params: { albumId: albumId, shareId: shareId },
+              query: route.query
+            }
           },
           getChildPage: function (): PageReturnType {
             throw new Error('Function not implemented.')
@@ -303,7 +314,11 @@ declare module 'vue-router' {
     isReadPage: boolean
     isViewPage: boolean
     baseName: BaseName
-    getParentPage: (router: RouteLocationNormalizedLoadedGeneric) => PageReturnType
+    getParentPage: (
+      router: RouteLocationNormalizedLoadedGeneric,
+      albumId?: string,
+      shareId?: string
+    ) => PageReturnType
     getChildPage: (router: RouteLocationNormalizedLoadedGeneric, hash: string) => PageReturnType
   }
 }
