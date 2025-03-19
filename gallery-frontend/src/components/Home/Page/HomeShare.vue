@@ -1,10 +1,12 @@
 <template>
-  <Home v-if="basicString !== undefined" isolation-id="mainId" :basic-string="basicString"> </Home>
+  <Home v-if="basicString !== undefined" isolation-id="mainId" :basic-string="basicString">
+    <template #reading-bar> <InfoBar /> </template
+  ></Home>
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import Home from './Home.vue'
-
+import InfoBar from '@/components/NavBar/InfoBar.vue'
 import { onMounted, ref, Ref } from 'vue'
 
 const route = useRoute()
