@@ -68,8 +68,20 @@ impl<'r> FromRequest<'r> for GuardAuth {
                     warn!("JWT validation failed.");
                 }
             }
+        } else if let (Some(album_cookie), Some(share_cookie)) =
+            (cookies.get("albumId"), cookies.get("shareId"))
+        {
+            let album_id = album_cookie.value();
+            let share_id = share_cookie.value();
+            info!(
+                "Extracted album_id: {} and share_id: {}",
+                album_id, share_id
+            );
+            let mut claims = Claims::new();
+            claims.album_id = ArrayString::from(album_id).ok();
+            return Outcome::Success(GuardAuth { claims });
         }
 
-        Outcome::Forward(Status::Unauthorized)
+        return Outcome::Forward(Status::Unauthorized);
     }
 }
