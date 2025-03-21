@@ -4,7 +4,6 @@ import { useMessageStore } from '@/store/messageStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { bindActionDispatch } from 'typesafe-agent-events'
 import { toImgWorker } from '@/worker/workerApi'
-import { getCookiesJwt } from '@utils/getter'
 import { watch } from 'vue'
 export function refreshAlbumMetadata(albumId: string) {
   const dataStore = useDataStore('mainId')
@@ -46,8 +45,7 @@ export function refreshAlbumMetadata(albumId: string) {
       postToWorker.processImage({
         index: albumIndex,
         hash: coverHash,
-        devicePixelRatio: window.devicePixelRatio,
-        jwt: getCookiesJwt()
+        devicePixelRatio: window.devicePixelRatio
       })
 
       postToWorker.processSmallImage({
@@ -56,7 +54,6 @@ export function refreshAlbumMetadata(albumId: string) {
         width: 300,
         height: 300,
         devicePixelRatio: window.devicePixelRatio,
-        jwt: getCookiesJwt(),
         albumMode: true
       })
 

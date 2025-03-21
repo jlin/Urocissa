@@ -5,7 +5,7 @@ import { AbstractData, DisplayElement, IsolationId } from '@type/types'
 import { useImgStore } from '@/store/imgStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import { getArrayValue, getCookiesJwt } from '@utils/getter'
+import { getArrayValue } from '@utils/getter'
 
 interface SmallImageContainerProps {
   abstractData: AbstractData
@@ -121,8 +121,7 @@ function checkAndFetch(
         hash: abstractData.database.hash,
         width: displayWidth,
         height: displayHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        jwt: getCookiesJwt()
+        devicePixelRatio: window.devicePixelRatio
       })
     } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
       getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
@@ -131,7 +130,6 @@ function checkAndFetch(
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
-        jwt: getCookiesJwt(),
         albumMode: true
       })
     }

@@ -23,7 +23,6 @@ export interface processSmallImagePayload {
   width: number
   height: number
   devicePixelRatio: number
-  jwt: string
   albumMode?: boolean
 }
 
@@ -31,7 +30,6 @@ export interface processImagePayload {
   index: number
   hash: string
   devicePixelRatio: number
-  jwt: string
 }
 
 export interface processAbortPayload {

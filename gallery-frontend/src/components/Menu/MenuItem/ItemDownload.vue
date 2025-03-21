@@ -9,7 +9,7 @@ import { useDataStore } from '@/store/dataStore'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
 import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
-import { getCookiesJwt, getIsolationIdByRoute } from '@utils/getter'
+import { getIsolationIdByRoute } from '@utils/getter'
 import { AbstractData } from '@type/types'
 import { getSrc } from '@/../config'
 
@@ -69,13 +69,7 @@ const downloadAllFiles = async () => {
         }
 
         if (metadata.database) {
-          const url = getSrc(
-            metadata.database.hash,
-            true,
-            metadata.database.ext,
-            getCookiesJwt(),
-            undefined
-          )
+          const url = getSrc(metadata.database.hash, true, metadata.database.ext, '', undefined)
           try {
             const response = await axios.get<Blob>(url, { responseType: 'blob' })
             const fileName = `${metadata.database.hash}.${metadata.database.ext}`

@@ -19,7 +19,7 @@ export function handleImgWorker(imgWorker: Worker, isolationId: IsolationId) {
       imgStore.imgOriginal.set(index, url)
     },
     unauthorized: async () => {
-      redirectionStore.redirectionToLogin()
+      await redirectionStore.redirectionToLogin()
     },
     notification: function (payload: { message: string; messageType: 'info' | 'warn' }): void {
       messageStore.message = payload.message

@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
 import axios from 'axios'
-import { getCookiesJwt, getIsolationIdByRoute } from '@utils/getter'
+import { getIsolationIdByRoute } from '@utils/getter'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { getSrc } from '@/../config'
 import { useMessageStore } from '@/store/messageStore'
@@ -37,7 +37,7 @@ const regenerateThumbnailByFrame = async () => {
         }
       })
 
-      const blobHeader = await fetch(getSrc(hash, false, 'jpg', getCookiesJwt(), undefined), {
+      const blobHeader = await fetch(getSrc(hash, false, 'jpg', '', undefined), {
         method: 'GET',
         cache: 'reload'
       })
