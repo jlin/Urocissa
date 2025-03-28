@@ -1,12 +1,12 @@
 <template>
   <Home v-if="basicString !== undefined" isolation-id="mainId" :basic-string="basicString">
-    <template #reading-bar> <InfoBar /> </template
+    <template #reading-bar> <ShareBar /> </template
   ></Home>
 </template>
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import Home from './Home.vue'
-import InfoBar from '@/components/NavBar/InfoBar.vue'
+import ShareBar from '@/components/NavBar/ShareBar.vue'
 import { onMounted, ref, Ref } from 'vue'
 import Cookies from 'js-cookie'
 const route = useRoute()
