@@ -63,14 +63,14 @@ pub async fn prefetch(
 
         let mut expression_opt = query_data.map(|query| query.into_inner());
 
+        // Modify pression_opt for album share mode
         if let Some(album_id) = auth.claims.album_id {
-            let expression_1 = Expression::Album(album_id);
+            let album_expression = Expression::Album(album_id);
             match expression_opt {
                 Some(expression) => {
-                    let expression_2 = expression;
-                    expression_opt = Some(Expression::And(vec![expression_1, expression_2]));
+                    expression_opt = Some(Expression::And(vec![album_expression, expression]));
                 }
-                None => expression_opt = Some(expression_1),
+                None => expression_opt = Some(album_expression),
             }
         };
 
