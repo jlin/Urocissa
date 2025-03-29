@@ -1,5 +1,10 @@
 <template>
-  <Home v-if="basicString !== undefined" isolation-id="mainId" :basic-string="basicString">
+  <Home
+    v-if="basicString !== undefined"
+    isolation-id="mainId"
+    :basic-string="basicString"
+    :search-string="null"
+  >
     <template #reading-bar> <ShareBar /> </template
   ></Home>
 </template>

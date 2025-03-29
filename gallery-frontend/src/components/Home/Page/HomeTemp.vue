@@ -9,7 +9,7 @@
     :close-on-back="false"
     persistent
   >
-    <Home isolation-id="tempId" :basic-string="basicString">
+    <Home isolation-id="tempId" :basic-string="basicString" :search-string="null">
       <template #reading-bar>
         <SelectionBar :album="album" />
       </template>
