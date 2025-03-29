@@ -49,7 +49,7 @@ import { useFilterStore } from '@/store/filterStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { useQueueStore } from '@/store/queueStore'
-import { useRoute } from 'vue-router'
+import { LocationQueryValue, useRoute } from 'vue-router'
 import { useElementSize } from '@vueuse/core'
 import { usePrefetch } from '@/components/hook/usePrefetch'
 import { handleScroll } from '@/components/hook/useHandleScroll'
@@ -75,6 +75,7 @@ import { useAlbumStore } from '@/store/albumStore'
 const props = defineProps<{
   isolationId: IsolationId
   basicString: string | null
+  searchString: LocationQueryValue | LocationQueryValue[] | undefined
 }>()
 
 const scrollTopStore = useScrollTopStore(props.isolationId)
@@ -153,7 +154,7 @@ const albumHomeIsolatedKey = computed(() => {
 })
 
 onMounted(() => {
-  filterStore.recordSearchString(route)
+  filterStore.searchString = props.searchString
   usePrefetch(
     filterStore.generateFilterJsonString(props.basicString),
     windowWidth,

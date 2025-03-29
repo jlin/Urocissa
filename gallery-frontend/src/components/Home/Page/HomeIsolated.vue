@@ -13,6 +13,7 @@
       v-if="album !== undefined && basicString !== null"
       isolation-id="subId"
       :basic-string="basicString"
+      :search-string="null"
     >
       <template #reading-bar>
         <ReadingBar :album="album" />
@@ -24,7 +25,7 @@
 import Home from './Home.vue'
 import ReadingBar from '@/components/NavBar/ReadingBar.vue'
 import { Album } from '@type/types'
-import { onMounted, Ref, ref } from 'vue'
+import { onBeforeMount, Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 
@@ -32,7 +33,8 @@ const route = useRoute()
 const dataStore = useDataStore('mainId')
 const album: Ref<Album | undefined> = ref(undefined)
 const basicString: Ref<string | null> = ref(null)
-onMounted(() => {
+
+onBeforeMount(() => {
   const hash = route.params.hash
   if (typeof hash === 'string') {
     const index = dataStore.hashMapData.get(hash)

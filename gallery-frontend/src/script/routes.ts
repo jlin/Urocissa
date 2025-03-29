@@ -319,7 +319,10 @@ declare module 'vue-router' {
       albumId?: string,
       shareId?: string
     ) => PageReturnType
-    getChildPage: (router: RouteLocationNormalizedLoadedGeneric, hash: string) => PageReturnType
+    getChildPage: (
+      router: RouteLocationNormalizedLoadedGeneric,
+      hash: string | undefined
+    ) => PageReturnType
   }
 }
 

@@ -54,8 +54,6 @@ export function useHandleClick(
           : undefined
         if (hashOrId !== undefined) {
           const page = route.meta.getChildPage(route, hashOrId)
-          console.log('page is', page)
-
           router
             .push(page)
             .then(() => ({}))

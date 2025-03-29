@@ -1,13 +1,13 @@
 import { IsolationId } from '@type/types'
 import { generateJsonString } from '@/script/lexer/generateJson'
 import { defineStore } from 'pinia'
-import { RouteLocationNormalizedLoaded } from 'vue-router'
+import { LocationQueryValue } from 'vue-router'
 
 export const useFilterStore = (isolationId: IsolationId) =>
   defineStore('filterStore' + isolationId, {
     state: (): {
       // Records the gallery search filter
-      searchString: string | null
+      searchString: LocationQueryValue | LocationQueryValue[] | undefined
     } => ({
       searchString: null
     }),
@@ -16,15 +16,15 @@ export const useFilterStore = (isolationId: IsolationId) =>
       // This JSON info is used to send to the backend
       generateFilterJsonString(basicString: string | null): string | null {
         try {
-          if (basicString !== null && this.searchString === null) {
+          if (typeof basicString === 'string' && typeof this.searchString !== 'string') {
             return generateJsonString(basicString)
-          } else if (basicString === null && this.searchString !== null) {
+          } else if (typeof basicString !== 'string' && typeof this.searchString === 'string') {
             try {
               return generateJsonString(this.searchString)
             } catch {
               return generateJsonString(`any: "${this.searchString}"`)
             }
-          } else if (basicString !== null && this.searchString !== null) {
+          } else if (typeof basicString === 'string' && typeof this.searchString === 'string') {
             try {
               return generateJsonString(`and(${basicString},${this.searchString})`)
             } catch {
@@ -37,10 +37,6 @@ export const useFilterStore = (isolationId: IsolationId) =>
           console.error(err)
           return null
         }
-      },
-      recordSearchString(route: RouteLocationNormalizedLoaded) {
-        const searchString = route.query.search as string
-        this.searchString = searchString ? searchString : null
       }
     }
   })()
