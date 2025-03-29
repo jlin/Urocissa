@@ -89,7 +89,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
       messageStore.showMessage = true
     },
     unauthorized: async () => {
-      redirectionStore.redirectionToLogin()
+      await redirectionStore.redirectionToLogin()
     }
   })
 
