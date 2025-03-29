@@ -55,14 +55,14 @@
 <script setup lang="ts">
 import ProgessBar from '@/components/NavBar/ProgessBar.vue'
 import { Ref, ref, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { LocationQueryValue, useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 
 const filterStore = useFilterStore('mainId')
 
 const route = useRoute()
 const router = useRouter()
-const searchQuery: Ref<string | null> = ref(null)
+const searchQuery: Ref<LocationQueryValue | LocationQueryValue[] | undefined> = ref(null)
 
 const handleSearch = async () => {
   filterStore.searchString = searchQuery.value

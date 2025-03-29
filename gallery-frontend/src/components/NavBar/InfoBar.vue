@@ -69,7 +69,7 @@
 
 <script setup lang="ts">
 import { inject, Ref, ref, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { LocationQueryValue, useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { useAlbumStore } from '@/store/albumStore'
@@ -83,7 +83,7 @@ const filterStore = useFilterStore('mainId')
 
 const route = useRoute()
 const router = useRouter()
-const searchQuery: Ref<string | null> = ref(null)
+const searchQuery: Ref<LocationQueryValue | LocationQueryValue[] | undefined> = ref(null)
 const loading = ref(false)
 
 const handleSearch = async () => {
