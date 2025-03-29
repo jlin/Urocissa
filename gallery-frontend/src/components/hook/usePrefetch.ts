@@ -27,8 +27,11 @@ export function usePrefetch(
         const reverse = route.query.reverse as string
         let locate: string | null = null
 
-        if (route.meta.isViewPage) {
-          locate = route.params.hash as string
+        // add locate to query string if user enter view page directly
+        if (isolationId === 'subId' && route.meta.isViewPage && route.meta.isReadPage) {
+          locate = typeof route.params.subhash === 'string' ? route.params.subhash : null
+        } else if (isolationId === 'mainId' && route.meta.isViewPage) {
+          locate = typeof route.params.hash === 'string' ? route.params.hash : null
         } else {
           const queryLocate = route.query.locate
           if (typeof queryLocate === 'string') {
