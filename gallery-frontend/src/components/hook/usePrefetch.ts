@@ -28,12 +28,17 @@ export function usePrefetch(
         let locate: string | null = null
 
         // add locate to query string if user enter view page directly
-        if (isolationId === 'subId' && route.meta.isViewPage && route.meta.isReadPage) {
-          locate = typeof route.params.subhash === 'string' ? route.params.subhash : null
-        } else if (isolationId === 'mainId') {
-          locate = typeof route.params.hash === 'string' ? route.params.hash : null
-        } else {
-          locate = typeof route.query.locate === 'string' ? route.query.locate : null
+        if (
+          isolationId === 'subId' &&
+          route.meta.isViewPage &&
+          route.meta.isReadPage &&
+          typeof route.params.subhash === 'string'
+        ) {
+          locate = route.params.subhash
+        } else if (isolationId === 'mainId' && typeof route.params.hash === 'string') {
+          locate = route.params.hash
+        } else if (typeof route.query.locate === 'string') {
+          locate = route.query.locate
         }
 
         const prefetchReturn = await prefetch(filterJsonString, priorityId, reverse, locate)
