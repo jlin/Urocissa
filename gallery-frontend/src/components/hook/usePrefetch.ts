@@ -33,10 +33,7 @@ export function usePrefetch(
         } else if (isolationId === 'mainId') {
           locate = typeof route.params.hash === 'string' ? route.params.hash : null
         } else {
-          const queryLocate = route.query.locate
-          if (typeof queryLocate === 'string') {
-            locate = queryLocate
-          }
+          locate = typeof route.query.locate === 'string' ? route.query.locate : null
         }
 
         const prefetchReturn = await prefetch(filterJsonString, priorityId, reverse, locate)
