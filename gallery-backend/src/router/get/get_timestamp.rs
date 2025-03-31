@@ -16,7 +16,7 @@ use std::time::Instant;
 
 #[get("/get/get-data?<timestamp>&<start>&<end>")]
 pub async fn get_data(
-    _auth: GuardTimestamp,
+    guard_timestamp: GuardTimestamp,
     timestamp: u128,
     start: usize,
     end: usize,
@@ -39,14 +39,28 @@ pub async fn get_data(
             .map(|index| {
                 let hash = tree_snapshot.get_hash(index);
                 if let Some(database) = table.get(&*hash).unwrap() {
+                    let mut database = database.value();
+                    if let Some(share) = &guard_timestamp.claims.share {
+                        if !share.show_metadata {
+                            database.tag.clear();
+                            database.album.clear();
+                            database.alias.clear();
+                        }
+                    };
                     DataBaseTimestampReturn::new(
-                        AbstractData::Database(database.value()),
+                        AbstractData::Database(database),
                         &DEFAULT_PRIORITY_LIST,
                         timestamp,
                     )
                 } else if let Some(album) = album_table.get(&*hash).unwrap() {
+                    let mut album = album.value();
+                    if let Some(share) = &guard_timestamp.claims.share {
+                        if !share.show_metadata {
+                            album.tag.clear();
+                        }
+                    };
                     DataBaseTimestampReturn::new(
-                        AbstractData::Album(album.value()),
+                        AbstractData::Album(album),
                         &DEFAULT_PRIORITY_LIST,
                         timestamp,
                     )

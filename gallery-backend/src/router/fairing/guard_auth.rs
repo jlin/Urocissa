@@ -1,3 +1,4 @@
+use arrayvec::ArrayString;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, decode, encode};
 use rocket::Request;
 use rocket::http::{CookieJar, Status};
@@ -15,7 +16,7 @@ use super::VALIDATION;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Claims {
-    pub share: Option<Share>,
+    pub album_share: Option<(ArrayString<64>, Share)>,
     pub exp: u64,
 }
 
@@ -27,7 +28,10 @@ impl Claims {
             .as_secs()
             + 86400 * 14; // 14 days
 
-        Self { share: None, exp }
+        Self {
+            album_share: None,
+            exp,
+        }
     }
     pub fn encode(&self) -> String {
         encode(
@@ -79,10 +83,12 @@ impl<'r> FromRequest<'r> for GuardAuth {
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
             if let Some(album) = table.get(album_id).unwrap() {
-                if let Some(share) = album.value().share_list.remove(album_id) {
+                if let Some(share) = album.value().share_list.remove(share_id) {
                     let mut claims = Claims::new();
-                    claims.share = Some(share);
+                    claims.album_share = Some((ArrayString::<64>::from(album_id).unwrap(), share));
                     return Outcome::Success(GuardAuth { claims });
+                } else {
+                    println!("{:#?}", album.value().share_list);
                 }
             }
         }

@@ -64,8 +64,11 @@ pub async fn prefetch(
         let mut expression_opt = query_data.map(|query| query.into_inner());
 
         // Modify pression_opt for album share mode
-        if let Some(share) = &auth.claims.share {
-            let album_id = share.url;
+
+        let mut share_opt = None;
+
+        if let Some((album_id, share)) = auth.claims.album_share {
+            share_opt = Some(share);
             let album_expression = Expression::Album(album_id);
             match expression_opt {
                 Some(expression) => {
@@ -87,7 +90,7 @@ pub async fn prefetch(
             Ok(Some(prefetch)) => {
                 let duration = format!("{:?}", find_cache_start_time.elapsed());
                 info!(duration = &*duration; "Query cache found");
-                let claims = TimestampClaims::new(auth.claims.share, prefetch.timestamp);
+                let claims = TimestampClaims::new(share_opt, prefetch.timestamp);
                 let token = claims.encode();
                 let prefetch_return = PrefetchReturn::new(prefetch, token);
 
@@ -166,7 +169,7 @@ pub async fn prefetch(
 
         // Step 6: Create and return JSON response
         let json_start_time = Instant::now();
-        let claims = TimestampClaims::new(auth.claims.share, timestamp);
+        let claims = TimestampClaims::new(share_opt, timestamp);
         let token = claims.encode();
 
         let prefetch = Prefetch::new(timestamp, locate_to, data_length);

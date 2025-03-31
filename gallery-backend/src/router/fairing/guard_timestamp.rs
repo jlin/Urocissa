@@ -47,7 +47,9 @@ impl TimestampClaims {
     }
 }
 
-pub struct GuardTimestamp;
+pub struct GuardTimestamp {
+    pub claims: TimestampClaims,
+}
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for GuardTimestamp {
@@ -106,7 +108,7 @@ impl<'r> FromRequest<'r> for GuardTimestamp {
             return Outcome::Forward(Status::Unauthorized);
         }
 
-        Outcome::Success(GuardTimestamp)
+        Outcome::Success(GuardTimestamp { claims })
     }
 }
 
