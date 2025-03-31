@@ -7,28 +7,34 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::public::album::Share;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
-use super::guard_auth::GuardAuth;
 use super::VALIDATION_ALLOW_EXPIRED;
+use super::guard_auth::GuardAuth;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TimestampClaims {
+    pub share: Option<Share>,
     pub timestamp: u128,
     pub exp: u64,
 }
 
 impl TimestampClaims {
-    pub fn new(timestamp: u128) -> Self {
+    pub fn new(share: Option<Share>, timestamp: u128) -> Self {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs()
             + 1;
 
-        Self { timestamp, exp }
+        Self {
+            share,
+            timestamp,
+            exp,
+        }
     }
 
     pub fn encode(&self) -> String {
@@ -143,7 +149,7 @@ pub async fn renew_timestamp_token(
         };
 
         let claims = token_data.claims;
-        let new_claims = TimestampClaims::new(claims.timestamp);
+        let new_claims = TimestampClaims::new(claims.share, claims.timestamp);
         let new_token = new_claims.encode();
 
         Ok(Json(RenewTimestampTokenReturn { token: new_token }))
