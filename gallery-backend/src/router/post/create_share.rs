@@ -82,7 +82,7 @@ fn create_and_insert_share(
                     .unwrap()
                     .as_secs(),
             };
-            album.share_list.push(share);
+            album.share_list.insert(share);
             album_table.insert(&*create_share.album_id, album).unwrap();
             return Ok(link);
         }

@@ -20,7 +20,7 @@ impl Album {
             cover: None,
             thumbhash: None,
             user_defined_metadata: HashMap::new(),
-            share_list: vec![],
+            share_list: HashSet::new(),
             tag: HashSet::new(),
             width: 300,
             height: 300,

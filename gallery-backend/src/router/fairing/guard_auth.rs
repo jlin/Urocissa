@@ -7,6 +7,8 @@ use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use serde::{Deserialize, Serialize};
 
+use crate::public::redb::ALBUM_TABLE;
+use crate::public::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
 use super::VALIDATION;
@@ -68,6 +70,7 @@ impl<'r> FromRequest<'r> for GuardAuth {
                     warn!("JWT validation failed.");
                 }
             }
+        // Check for share mode
         } else if let (Some(album_cookie), Some(share_cookie)) =
             (cookies.get("albumId"), cookies.get("shareId"))
         {
@@ -77,6 +80,14 @@ impl<'r> FromRequest<'r> for GuardAuth {
                 "Extracted album_id: {} and share_id: {}",
                 album_id, share_id
             );
+            let read_txn = TREE.in_disk.begin_read().unwrap();
+            let table = read_txn.open_table(ALBUM_TABLE).unwrap();
+            /* if let Some(album) = table.get(&*album_id).unwrap() {
+                let share = album.value().share_list
+                let mut claims = Claims::new();
+                claims.album_id = ArrayString::from(album_id).ok();
+                return Outcome::Success(GuardAuth { claims });
+            } */
             let mut claims = Claims::new();
             claims.album_id = ArrayString::from(album_id).ok();
             return Outcome::Success(GuardAuth { claims });
