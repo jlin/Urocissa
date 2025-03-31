@@ -64,7 +64,8 @@ pub async fn prefetch(
         let mut expression_opt = query_data.map(|query| query.into_inner());
 
         // Modify pression_opt for album share mode
-        if let Some(album_id) = auth.claims.album_id {
+        if let Some(share) = auth.claims.share {
+            let album_id = share.url;
             let album_expression = Expression::Album(album_id);
             match expression_opt {
                 Some(expression) => {

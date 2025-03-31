@@ -1,12 +1,11 @@
-use std::time::{SystemTime, UNIX_EPOCH};
-
-use arrayvec::ArrayString;
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, decode, encode};
 use rocket::Request;
 use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome};
 use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::public::album::Share;
 use crate::public::redb::ALBUM_TABLE;
 use crate::public::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
@@ -16,7 +15,7 @@ use super::VALIDATION;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Claims {
-    pub album_id: Option<ArrayString<64>>,
+    pub share: Option<Share>,
     pub exp: u64,
 }
 
@@ -28,10 +27,7 @@ impl Claims {
             .as_secs()
             + 86400 * 14; // 14 days
 
-        Self {
-            album_id: None,
-            exp,
-        }
+        Self { share: None, exp }
     }
     pub fn encode(&self) -> String {
         encode(
@@ -82,17 +78,14 @@ impl<'r> FromRequest<'r> for GuardAuth {
             );
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
-            /* if let Some(album) = table.get(&*album_id).unwrap() {
-                let share = album.value().share_list
-                let mut claims = Claims::new();
-                claims.album_id = ArrayString::from(album_id).ok();
-                return Outcome::Success(GuardAuth { claims });
-            } */
-            let mut claims = Claims::new();
-            claims.album_id = ArrayString::from(album_id).ok();
-            return Outcome::Success(GuardAuth { claims });
+            if let Some(album) = table.get(album_id).unwrap() {
+                if let Some(share) = album.value().share_list.remove(album_id) {
+                    let mut claims = Claims::new();
+                    claims.share = Some(share);
+                    return Outcome::Success(GuardAuth { claims });
+                }
+            }
         }
-
         return Outcome::Forward(Status::Unauthorized);
     }
 }
