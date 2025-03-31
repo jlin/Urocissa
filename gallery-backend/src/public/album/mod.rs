@@ -31,7 +31,7 @@ pub struct Album {
     pub cover: Option<ArrayString<64>>,
     pub thumbhash: Option<Vec<u8>>,
     pub user_defined_metadata: HashMap<String, Vec<String>>,
-    pub share_list: HashSet<Share>,
+    pub share_list: HashMap<ArrayString<64>, Share>,
     pub tag: HashSet<String>,
     pub width: u32,
     pub height: u32,

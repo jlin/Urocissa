@@ -70,8 +70,9 @@ fn create_and_insert_share(
                 .take(64)
                 .map(char::from)
                 .collect();
+            let share_id = ArrayString::<64>::from(&link).unwrap();
             let share = Share {
-                url: ArrayString::<64>::from(&link).unwrap(),
+                url: share_id,
                 description: create_share.description,
                 password: create_share.password,
                 show_metadata: create_share.show_metadata,
@@ -82,7 +83,7 @@ fn create_and_insert_share(
                     .unwrap()
                     .as_secs(),
             };
-            album.share_list.insert(share);
+            album.share_list.insert(share_id, share);
             album_table.insert(&*create_share.album_id, album).unwrap();
             return Ok(link);
         }

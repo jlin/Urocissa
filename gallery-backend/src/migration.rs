@@ -221,16 +221,22 @@ pub fn migration_album(txn: &WriteTransaction) {
                 share_list: old_album
                     .share_list
                     .into_iter()
-                    .map(|share| crate::public::album::Share {
-                        url: share.url,
-                        description: share.description,
-                        password: share.password,
-                        show_metadata: share.show_metadata,
-                        show_download: share.show_download,
-                        show_upload: share.show_upload,
-                        exp: share.exp,
+                    .map(|share| {
+                        let share_id = share.url;
+                        (
+                            share_id,
+                            crate::public::album::Share {
+                                url: share_id,
+                                description: share.description,
+                                password: share.password,
+                                show_metadata: share.show_metadata,
+                                show_download: share.show_download,
+                                show_upload: share.show_upload,
+                                exp: share.exp,
+                            },
+                        )
                     })
-                    .collect(),
+                    .collect::<std::collections::HashMap<_, _>>(),
                 tag: old_album.tag,
                 width: old_album.width,
                 height: old_album.height,
