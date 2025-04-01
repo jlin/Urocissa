@@ -28,15 +28,20 @@ pub struct DataBaseTimestampReturn {
 }
 
 impl DataBaseTimestampReturn {
-    pub fn new(abstract_data: AbstractData, priority_list: &[&str], token_timestamp: u128) -> Self {
+    pub fn new(
+        abstract_data: AbstractData,
+        priority_list: &[&str],
+        token_timestamp: u128,
+        allow_original: bool,
+    ) -> Self {
         let timestamp = abstract_data.compute_timestamp(priority_list);
         let token = match &abstract_data {
             AbstractData::Database(database) => {
-                HashClaims::new(database.hash, token_timestamp).encode()
+                HashClaims::new(database.hash, token_timestamp, allow_original).encode()
             }
             AbstractData::Album(album) => {
                 if let Some(cover_hash) = album.cover {
-                    HashClaims::new(cover_hash, token_timestamp).encode()
+                    HashClaims::new(cover_hash, token_timestamp, allow_original).encode()
                 } else {
                     String::new()
                 }

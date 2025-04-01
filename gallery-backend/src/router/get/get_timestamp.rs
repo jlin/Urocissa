@@ -38,6 +38,11 @@ pub async fn get_data(
             .into_par_iter()
             .map(|index| {
                 let hash = tree_snapshot.get_hash(index);
+                let show_download = guard_timestamp
+                    .claims
+                    .share
+                    .as_ref()
+                    .map_or(true, |s| s.show_download);
                 if let Some(database) = table.get(&*hash).unwrap() {
                     let mut database = database.value();
                     if let Some(share) = &guard_timestamp.claims.share {
@@ -46,11 +51,12 @@ pub async fn get_data(
                             database.album.clear();
                             database.alias.clear();
                         }
-                    };
+                    }
                     DataBaseTimestampReturn::new(
                         AbstractData::Database(database),
                         &DEFAULT_PRIORITY_LIST,
                         timestamp,
+                        show_download,
                     )
                 } else if let Some(album) = album_table.get(&*hash).unwrap() {
                     let mut album = album.value();
@@ -63,6 +69,7 @@ pub async fn get_data(
                         AbstractData::Album(album),
                         &DEFAULT_PRIORITY_LIST,
                         timestamp,
+                        show_download,
                     )
                 } else {
                     panic!("Entry not found for hash: {:?}", hash);

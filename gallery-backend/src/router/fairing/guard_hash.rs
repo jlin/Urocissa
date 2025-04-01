@@ -18,13 +18,14 @@ use super::guard_timestamp::TimestampClaims;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HashClaims {
+    pub allow_original: bool,
     pub hash: ArrayString<64>,
     pub timestamp: u128,
     pub exp: u64,
 }
 
 impl HashClaims {
-    pub fn new(hash: ArrayString<64>, timestamp: u128) -> Self {
+    pub fn new(hash: ArrayString<64>, timestamp: u128, allow_original: bool) -> Self {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -32,6 +33,7 @@ impl HashClaims {
             + 1;
 
         Self {
+            allow_original,
             hash,
             timestamp,
             exp,
@@ -114,6 +116,78 @@ impl<'r> FromRequest<'r> for GuardHash {
     }
 }
 
+pub struct GuardHashOriginal;
+
+#[async_trait]
+impl<'r> FromRequest<'r> for GuardHashOriginal {
+    type Error = ();
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let auth_header = match req.headers().get_one("Authorization") {
+            Some(header) => header,
+            None => {
+                warn!("Request is missing the Authorization header.");
+                return Outcome::Forward(Status::Unauthorized);
+            }
+        };
+
+        let token = match auth_header.strip_prefix("Bearer ") {
+            Some(token) => token,
+            None => {
+                warn!("Authorization header format is invalid. Expected 'Bearer <token>'.");
+                return Outcome::Forward(Status::Unauthorized);
+            }
+        };
+
+        // Decode the token
+        let token_data = match decode::<HashClaims>(
+            token,
+            &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+            &VALIDATION,
+        ) {
+            Ok(data) => data,
+            Err(err) => {
+                warn!("Failed to decode token: {:#?}", err);
+                return Outcome::Forward(Status::Unauthorized);
+            }
+        };
+
+        let claims = token_data.claims;
+
+        if !claims.allow_original {
+            warn!("Original hash access is not allowed.");
+            return Outcome::Forward(Status::Unauthorized);
+        }
+
+        // Extract hash from the request URL path
+        let hash_opt = req
+            .uri()
+            .path()
+            .segments()
+            .last()
+            .and_then(|hash_with_ext| hash_with_ext.rsplit_once('.'))
+            .map(|(hash, _ext)| hash.to_string());
+
+        let data_hash = match hash_opt {
+            Some(hash) => hash,
+            None => {
+                warn!("No valid 'hash' parameter found in the uri.");
+                return Outcome::Forward(Status::Unauthorized);
+            }
+        };
+
+        // Compare hash in the token with the hash in the request path
+        if data_hash != *claims.hash {
+            warn!(
+                "Hash does not match. Received: {}, Expected: {}.",
+                data_hash, claims.hash
+            );
+            return Outcome::Forward(Status::Unauthorized);
+        }
+        Outcome::Success(GuardHashOriginal)
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RenewHashToken {
@@ -157,7 +231,7 @@ pub async fn renew_hash_token(
         }
 
         let claims = token_data.claims;
-        let new_hash_claims = HashClaims::new(claims.hash, claims.timestamp);
+        let new_hash_claims = HashClaims::new(claims.hash, claims.timestamp, claims.allow_original);
         let new_hash_token = new_hash_claims.encode();
 
         Ok(Json(RenewHashTokenReturn {
