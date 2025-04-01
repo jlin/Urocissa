@@ -95,3 +95,60 @@ impl<'r> FromRequest<'r> for GuardAuth {
         return Outcome::Forward(Status::Unauthorized);
     }
 }
+
+pub struct GuardAuthUpload {
+    pub claims: Claims,
+}
+
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for GuardAuthUpload {
+    type Error = ();
+
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        // Check for JWT cookie
+        let cookies: &CookieJar = req.cookies();
+        if let Some(jwt_cookie) = cookies.get("jwt") {
+            let token = jwt_cookie.value();
+
+            match decode::<Claims>(
+                token,
+                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+                &VALIDATION,
+            ) {
+                Ok(token_data_claims) => {
+                    let claims = token_data_claims.claims;
+                    return Outcome::Success(GuardAuthUpload { claims });
+                }
+                _ => {
+                    warn!("JWT validation failed.");
+                }
+            }
+        // Check for share mode
+        } else if let (Some(album_cookie), Some(share_cookie)) =
+            (cookies.get("albumId"), cookies.get("shareId"))
+        {
+            let album_id = album_cookie.value();
+            let share_id = share_cookie.value();
+            info!(
+                "Extracted album_id: {} and share_id: {}",
+                album_id, share_id
+            );
+            let read_txn = TREE.in_disk.begin_read().unwrap();
+            let table = read_txn.open_table(ALBUM_TABLE).unwrap();
+            if let Some(album) = table.get(album_id).unwrap() {
+                if let Some(share) = album.value().share_list.remove(share_id) {
+                    if !share.show_upload {
+                        println!("Share upload is not allowed.");
+                        return Outcome::Forward(Status::Unauthorized);
+                    }
+                    let mut claims = Claims::new();
+                    claims.album_share = Some((ArrayString::<64>::from(album_id).unwrap(), share));
+                    return Outcome::Success(GuardAuthUpload { claims });
+                } else {
+                    println!("{:#?}", album.value().share_list);
+                }
+            }
+        }
+        return Outcome::Forward(Status::Unauthorized);
+    }
+}
