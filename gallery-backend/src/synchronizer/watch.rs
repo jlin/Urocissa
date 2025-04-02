@@ -1,6 +1,7 @@
 use log::info;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
+use std::collections::HashSet;
 use std::thread;
 use std::{panic::Location, path::PathBuf};
 
@@ -11,7 +12,7 @@ use super::event::EVENTS_SENDER;
 pub fn start_watcher() -> tokio::task::JoinHandle<()> {
     tokio::task::spawn(async {
         tokio::task::spawn_blocking(|| {
-            let sync_path_list: &Vec<PathBuf> = &PRIVATE_CONFIG.sync_path;
+            let sync_path_list: &HashSet<PathBuf> = &PRIVATE_CONFIG.sync_path;
             let mut watcher = get_watcher();
 
             for path in sync_path_list.iter() {

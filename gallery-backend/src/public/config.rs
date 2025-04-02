@@ -1,6 +1,6 @@
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io, path::PathBuf, sync::LazyLock};
+use std::{collections::HashSet, fs::File, io, path::PathBuf, sync::LazyLock};
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PublicConfig {
@@ -29,10 +29,10 @@ pub static PUBLIC_CONFIG: LazyLock<PublicConfig> = LazyLock::new(|| {
     }
 });
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct PrivateConfig {
     pub password: String,
-    pub sync_path: Vec<PathBuf>,
+    pub sync_path: HashSet<PathBuf>,
     pub auth_key: Option<String>,
     pub discord_hook_url: Option<String>,
 }
@@ -50,6 +50,8 @@ pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
             result.discord_hook_url = None;
         }
     };
+
+    result.sync_path.insert(PathBuf::from("./upload"));
 
     result
 });
