@@ -5,6 +5,7 @@ import { createRouter, createWebHistory, LocationQuery, RouteRecordRaw } from 'v
 import 'vue-router'
 
 import TagsPage from '@/components/Page/TagsPage.vue'
+import LinksPage from '@/components/Page/LinksPage.vue'
 import LoginPage from '@/components/LoginPage.vue'
 import HomeMain from '@/components/Page/HomePage.vue'
 import AllPage from '@/components/Page/AllPage.vue'
@@ -42,6 +43,7 @@ type BaseName =
   | 'tags'
   | 'login'
   | 'share'
+  | 'links'
 
 // ======================================
 // 1. Define Simple Static Routes
@@ -68,6 +70,31 @@ const simpleRoutes: RouteRecordRaw[] = [
       getChildPage: (route) => {
         return {
           name: 'tags',
+          params: { hash: undefined, subhash: undefined },
+          query: route.query
+        }
+      }
+    }
+  },
+  {
+    path: '/links',
+    component: LinksPage,
+    name: 'links',
+    meta: {
+      isReadPage: false,
+      isViewPage: false,
+      basicString: null,
+      baseName: 'links',
+      getParentPage: (route) => {
+        return {
+          name: 'home',
+          params: { hash: undefined, subhash: undefined },
+          query: route.query
+        }
+      },
+      getChildPage: (route) => {
+        return {
+          name: 'links',
           params: { hash: undefined, subhash: undefined },
           query: route.query
         }
