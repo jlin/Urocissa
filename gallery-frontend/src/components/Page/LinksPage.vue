@@ -15,8 +15,8 @@
           <v-table hover>
             <thead ref="tableRef">
               <tr>
-                <th>tag</th>
-                <th>number of items</th>
+                <th>album</th>
+                <th>link</th>
               </tr>
             </thead>
             <tbody>
