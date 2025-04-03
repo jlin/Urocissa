@@ -1,11 +1,13 @@
+use crate::public::album::Share;
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
 use crate::public::tree::TREE;
 use crate::public::tree::read_tags::TagInfo;
 use crate::router::fairing::guard_auth::GuardAuth;
 
+use arrayvec::ArrayString;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
-use std::hash::Hash;
+use std::collections::HashMap;
 
 #[get("/get/get-config.json")]
 pub async fn get_config(_auth: GuardAuth) -> Json<&'static PublicConfig> {
@@ -22,11 +24,12 @@ pub async fn get_tags(_auth: GuardAuth) -> Json<Vec<TagInfo>> {
     .unwrap()
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct AlbumInfo {
     pub album_id: String,
     pub album_name: Option<String>,
+    pub share_list: HashMap<ArrayString<64>, Share>,
 }
 
 #[get("/get/get-albums")]
@@ -38,6 +41,7 @@ pub async fn get_albums(_auth: GuardAuth) -> Json<Vec<AlbumInfo>> {
             .map(|album| AlbumInfo {
                 album_id: album.id.to_string(),
                 album_name: album.title,
+                share_list: album.share_list,
             })
             .collect();
         Json(album_info_list)

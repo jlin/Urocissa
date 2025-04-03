@@ -24,13 +24,14 @@ export const useAlbumStore = (isolationId: IsolationId) =>
             throw new Error('Network response was not ok')
           }
 
-          const albumsArraySchema = z.array(albumInfoSchema)
-          const albums = albumsArraySchema.parse(response.data)
+          const albums = z.array(albumInfoSchema).parse(response.data)
 
           albums.forEach((album) => {
             album.displayName = album.albumName ?? 'Untitled'
             this.albums.set(album.albumId, album)
           })
+
+          console.log(albums)
 
           this.fetched = true
         } catch (error) {
