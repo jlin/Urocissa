@@ -1,7 +1,7 @@
 <template>
   <NavBar />
   <v-container
-    v-if="tagStore.fetched"
+    v-if="albumStore.fetched"
     id="table-container"
     class="pa-1 bg-grey-darken-3 d-flex align-start"
     :style="{
@@ -20,19 +20,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="tagsData in tagStore.tags" :key="tagsData.tag">
-                <td class="key-cell">
-                  <v-btn
-                    @click="searchByTag(tagsData.tag, router)"
-                    slim
-                    class="text-caption"
-                    variant="tonal"
-                  >
-                    {{ displayTagName(tagsData.tag) }}</v-btn
-                  >
-                </td>
-                <td>{{ tagsData.number }}</td>
-              </tr>
+              <template v-for="album in albumStore.albums.values()" :key="album.albumId">
+                <tr v-for="[key, share] in album.shareList" :key="album.albumId + '-' + key">
+                  <td>{{ album.albumId }}</td>
+                  <td>{{ share.url }}</td>
+                </tr>
+              </template>
             </tbody>
           </v-table>
         </v-card>
@@ -43,35 +36,20 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useTagStore } from '@/store/tagStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
-import { searchByTag } from '@utils/getter'
 import { navBarHeight } from '@/type/constants'
 import NavBar from '@/components/NavBar/NavBar.vue'
+import { useAlbumStore } from '@/store/albumStore'
 const initializedStore = useInitializedStore('mainId')
-const tagStore = useTagStore('mainId')
-const router = useRouter()
+const albumStore = useAlbumStore('mainId')
+
 const dynamicWidth = ref<number>(0)
 const tableRef = ref<HTMLElement | null>(null)
 const updateDynamicWidth = () => {
   const tableWidth = tableRef.value?.offsetWidth ?? 0
   dynamicWidth.value = tableWidth <= 300 ? 300 : tableWidth
-}
-
-function displayTagName(tagName: string): string {
-  switch (tagName) {
-    case '_archived':
-      return 'archived'
-    case '_favorite':
-      return 'favorite'
-    case '_trashed':
-      return 'trashed'
-    default:
-      return tagName
-  }
 }
 
 watch(
@@ -84,8 +62,8 @@ watch(
 )
 
 onMounted(async () => {
-  if (!tagStore.fetched) {
-    await tagStore.fetchTags()
+  if (!albumStore.fetched) {
+    await albumStore.fetchAlbums()
   }
   initializedStore.initialized = true
 })
