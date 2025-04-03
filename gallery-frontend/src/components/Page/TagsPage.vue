@@ -10,7 +10,7 @@
     fluid
   >
     <v-row justify="center" class="ma-0">
-      <v-col cols="auto" sm="10" md="8" lg="6" class="d-flex justify-center xs">
+      <v-col cols="12" sm="12" md="10" lg="8" class="d-flex justify-center">
         <v-card tile flat class="overflow-y-auto">
           <v-table hover>
             <thead ref="tableRef">
