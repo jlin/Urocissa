@@ -22,7 +22,7 @@
             <tbody>
               <template v-for="album in albumStore.albums.values()" :key="album.albumId">
                 <tr v-for="[key, share] in album.shareList" :key="album.albumId + '-' + key">
-                  <td>{{ album.albumId }}</td>
+                  <td>{{ album.displayName }}</td>
                   <td>{{ share.url }}</td>
                 </tr>
               </template>

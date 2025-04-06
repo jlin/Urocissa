@@ -117,12 +117,18 @@ export const tagInfoSchema = z.object({
   number: z.number()
 })
 
-export const albumInfoSchema = z.object({
-  albumId: z.string(),
-  albumName: z.string().nullable(),
-  displayName: z.string().optional(),
-  shareList: z.record(ShareSchema).transform((obj) => new Map(Object.entries(obj)))
-})
+export const albumInfoSchema = z
+  .object({
+    albumId: z.string(),
+    albumName: z.string().nullable(),
+    shareList: z.record(ShareSchema).transform((obj) => new Map(Object.entries(obj)))
+  })
+  .transform((albumData) => {
+    return {
+      ...albumData,
+      displayName: albumData.albumName ?? 'Untitled'
+    }
+  })
 
 export const databaseTimestampSchema = z.object({
   abstractData: AbstractDataParseSchema,
