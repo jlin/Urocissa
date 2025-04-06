@@ -17,6 +17,9 @@
               <tr>
                 <th>album</th>
                 <th>link</th>
+                <th>Metadata</th>
+                <th>Download</th>
+                <th>Password</th>
               </tr>
             </thead>
             <tbody>
@@ -24,6 +27,9 @@
                 <tr v-for="[key, share] in album.shareList" :key="album.albumId + '-' + key">
                   <td>{{ album.displayName }}</td>
                   <td>{{ share.url }}</td>
+                  <td>{{ share.showMetadata }}</td>
+                  <td>{{ share.showDownload }}</td>
+                  <td>{{ share.password || 'none' }}</td>
                 </tr>
               </template>
             </tbody>
