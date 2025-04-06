@@ -61,7 +61,7 @@
             </v-list-item-action>
           </template>
         </v-list-item>
-        <v-list-item density="compact" slim>
+        <v-list-item v-if="false" density="compact" slim>
           <template #prepend>
             <v-list-item-action start>
               <v-switch
