@@ -4,44 +4,44 @@
     v-if="albumStore.fetched"
     id="table-container"
     class="pa-1 bg-grey-darken-3 d-flex align-start"
-    :style="{
-      height: `calc(100% - ${navBarHeight}px)`
-    }"
+    :style="{ height: `calc(100% - ${navBarHeight}px)` }"
     fluid
   >
     <v-row justify="center" class="ma-0">
       <v-col cols="12" sm="12" md="10" lg="8" class="d-flex justify-center">
-        <v-card tile flat class="overflow-y-auto">
-          <v-table hover>
-            <thead ref="tableRef">
+        <v-card tile flat class="overflow-y-auto w-100">
+          <v-data-table
+            :headers="headers"
+            :items="tableItems"
+            :group-by="[{ key: 'displayName' }]"
+            item-value="url"
+          >
+            <!-- 自訂 group header -->
+            <template #group-header="{ item, columns, toggleGroup, isGroupOpen }">
               <tr>
-                <th>album</th>
-                <th>link</th>
-                <th>Metadata</th>
-                <th>Download</th>
-                <th>Password</th>
+                <td :colspan="columns.length">
+                  <div class="d-flex align-center">
+                    <v-btn
+                      :icon="isGroupOpen(item) ? '$expand' : '$next'"
+                      color="medium-emphasis"
+                      density="comfortable"
+                      size="small"
+                      variant="outlined"
+                      @click="toggleGroup(item)"
+                    ></v-btn>
+                    <span class="ms-4 font-weight-bold"> Album: {{ item.value }} </span>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <template v-for="album in albumStore.albums.values()" :key="album.albumId">
-                <tr v-for="[key, share] in album.shareList" :key="album.albumId + '-' + key">
-                  <td>{{ album.displayName }}</td>
-                  <td>{{ share.url }}</td>
-                  <td>{{ share.showMetadata }}</td>
-                  <td>{{ share.showDownload }}</td>
-                  <td>{{ share.password || 'none' }}</td>
-                </tr>
-              </template>
-            </tbody>
-          </v-table>
+            </template>
+          </v-data-table>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
-
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
@@ -57,6 +57,38 @@ const updateDynamicWidth = () => {
   const tableWidth = tableRef.value?.offsetWidth ?? 0
   dynamicWidth.value = tableWidth <= 300 ? 300 : tableWidth
 }
+
+const headers = [
+  { title: 'Link', key: 'url' },
+  { title: 'Metadata', key: 'showMetadata' },
+  { title: 'Download', key: 'showDownload' },
+  { title: 'Password', key: 'password' }
+]
+
+// 將 albums 資料展平成 item 陣列
+const tableItems = computed(() => {
+  const result: {
+    displayName: string
+    url: string
+    showMetadata: boolean
+    showDownload: boolean
+    password: string | null
+  }[] = []
+
+  for (const album of albumStore.albums.values()) {
+    for (const [, share] of album.shareList) {
+      result.push({
+        displayName: album.displayName,
+        url: share.url,
+        showMetadata: share.showMetadata,
+        showDownload: share.showDownload,
+        password: share.password
+      })
+    }
+  }
+
+  return result
+})
 
 watch(
   () => initializedStore.initialized,
@@ -90,10 +122,5 @@ onBeforeUnmount(() => {
   overflow-y: scroll;
   height: 100dvh;
   width: 100%;
-}
-
-#metadata {
-  height: 100%;
-  width: 300px;
 }
 </style>

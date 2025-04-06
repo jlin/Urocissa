@@ -107,9 +107,4 @@ onBeforeUnmount(() => {
   height: 100dvh;
   width: 100%;
 }
-
-#metadata {
-  height: 100%;
-  width: 300px;
-}
 </style>
