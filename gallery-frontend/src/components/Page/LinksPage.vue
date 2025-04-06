@@ -15,8 +15,8 @@
             :items="tableItems"
             :group-by="[{ key: 'displayName' }]"
             item-value="url"
+            :items-per-page="-1"
           >
-            <!-- 自訂 group header -->
             <template #group-header="{ item, columns, toggleGroup, isGroupOpen }">
               <tr>
                 <td :colspan="columns.length">
@@ -41,7 +41,7 @@
   </v-container>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
 import { onMounted } from 'vue'
 import { onBeforeUnmount } from 'vue'
@@ -104,8 +104,18 @@ onMounted(async () => {
     await albumStore.fetchAlbums()
   }
   initializedStore.initialized = true
-})
 
+  await nextTick()
+
+  // Find all buttons containing mdi-chevron-right (unexpanded groups)
+  const groupButtons = Array.from(document.querySelectorAll('button.v-btn')).filter((btn) =>
+    btn.querySelector('.mdi-chevron-right')
+  ) as HTMLButtonElement[]
+
+  for (const btn of groupButtons) {
+    btn.click()
+  }
+})
 onBeforeUnmount(() => {
   initializedStore.initialized = false
 })
