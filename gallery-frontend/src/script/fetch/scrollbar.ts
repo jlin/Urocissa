@@ -12,6 +12,10 @@ export async function fetchScrollbar(isolationId: IsolationId) {
   const scrollbarStore = useScrollbarStore(isolationId)
 
   const timestamp = prefetchStore.timestamp
+  if (timestamp === null) {
+    console.error('timestamp is null, cannot fetch scrollbar')
+    return
+  }
   const timestampToken = await getTimestampToken()
   const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`, {
     headers: {
