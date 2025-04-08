@@ -6,6 +6,7 @@
       <v-list-item slim to="/home" prepend-icon="mdi-home" title="Home"></v-list-item>
       <v-divider></v-divider>
       <v-list-item slim to="/tags" prepend-icon="mdi-tag-multiple" title="Tags"></v-list-item>
+      <v-divider></v-divider>
       <v-list-item slim to="/albums" prepend-icon="mdi-image-album" title="Albums"></v-list-item>
       <v-list-item
         v-if="false"
@@ -14,13 +15,13 @@
         prepend-icon="mdi-link"
         title="Links"
       ></v-list-item>
-      <v-divider></v-divider>
       <v-list-item
         slim
         to="/videos"
         prepend-icon="mdi-play-circle-outline"
         title="Videos"
       ></v-list-item>
+      <v-divider></v-divider>
       <v-list-item slim to="/favorite" prepend-icon="mdi-star" title="Favorite"></v-list-item>
       <v-list-item
         slim
