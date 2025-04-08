@@ -52,7 +52,12 @@ export async function getHashToken(hash: string): Promise<string | null> {
     const request = store.get(hash)
 
     request.onsuccess = () => {
-      resolve(request.result as string | null)
+      const rawResult: unknown = request.result
+      if (typeof rawResult === 'string') {
+        resolve(rawResult)
+      } else {
+        resolve(null)
+      }
     }
 
     request.onerror = () => {
