@@ -26,7 +26,7 @@ axios.interceptors.response.use(
   async (error: AxiosError) => {
     if (error.response && error.response.status === 401) {
       const redirectionStore = useRedirectionStore('mainId')
-      redirectionStore.redirectionToLogin()
+      await redirectionStore.redirectionToLogin()
     }
     return Promise.reject(error) // Always reject the error to maintain default behavior
   }
