@@ -72,6 +72,23 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 | External Libraries         | ❌     |
 | Existing Folders           | ❌     |
 
+## Memory Usage Estimate
+
+Urocissa uses an in-memory cached database to ensure instant access and blazing-fast search. Based on real-world measurements, the following table estimates the RAM needed to handle large numbers of photos:
+
+| Photo Count | Estimated RAM Usage |
+|-------------|---------------------|
+| 1 million   | ~1.2 GiB            |
+| 2 million   | ~2.4 GiB            |
+| 3 million   | ~3.6 GiB            |
+| 4 million   | ~4.8 GiB            |
+| 5 million   | ~6.0 GiB            |
+| 6 million   | ~7.2 GiB            |
+| 8 million   | ~9.6 GiB            |
+| 10 million  | ~12 GiB             |
+
+These values are based on actual runtime RSS (resident memory) usage of the `urocissa` process, measured during full data generation. In-memory usage may vary slightly depending on runtime allocator behavior, indexing options, or memory reuse patterns, but the scaling is approximately linear.
+
 ## Quick Setup
 To instantly set up and try Urocissa using Docker on Linux, follow these steps:
 
