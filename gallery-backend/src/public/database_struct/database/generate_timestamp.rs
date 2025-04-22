@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use rand::Rng;
 use regex::Regex;
 
@@ -12,7 +12,7 @@ static FILE_NAME_TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 
 impl Database {
     pub fn compute_timestamp(&self, priority_list: &[&str]) -> u128 {
-        let now_time = Utc::now().naive_utc();
+        let now_time = chrono::Local::now().naive_local();
         for &field in priority_list {
             match field {
                 "DateTimeOriginal" => {
