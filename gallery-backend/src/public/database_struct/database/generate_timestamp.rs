@@ -27,11 +27,12 @@ impl Database {
                     }
                 }
                 "filename" => {
-                    if let Some(file_name_full_path) = self.alias.get(0) {
-                        let path = PathBuf::from(&file_name_full_path.file);
+                    let mut max_time: Option<NaiveDateTime> = None;
+                    for alias in &self.alias {
+                        let path = PathBuf::from(&alias.file);
                         if let Some(file_name) = path.file_name() {
                             if let Some(captures) =
-                                &FILE_NAME_TIME_REGEX.captures(file_name.to_str().unwrap())
+                                FILE_NAME_TIME_REGEX.captures(file_name.to_str().unwrap())
                             {
                                 if let (
                                     Ok(year),
@@ -48,17 +49,24 @@ impl Database {
                                     captures[5].parse::<u32>(),
                                     captures[6].parse::<u32>(),
                                 ) {
-                                    if let Some(data) = NaiveDate::from_ymd_opt(year, month, day) {
+                                    if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
                                         if let Some(time) =
                                             NaiveTime::from_hms_opt(hour, minute, second)
                                         {
-                                            let date = NaiveDateTime::new(data, time);
-                                            return date.and_utc().timestamp_millis() as u128;
+                                            let datetime = NaiveDateTime::new(date, time);
+                                            if datetime <= now_time {
+                                                max_time = Some(
+                                                    max_time.map_or(datetime, |t| t.max(datetime)),
+                                                );
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
+                    if let Some(datetime) = max_time {
+                        return datetime.and_utc().timestamp_millis() as u128;
                     }
                 }
                 "scan_time" => {
