@@ -45,13 +45,6 @@ pub async fn home_view(_path: PathBuf) -> Option<NamedFile> {
         .ok()
 }
 
-#[get("/tags")]
-pub async fn tags() -> Option<NamedFile> {
-    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
-        .await
-        .ok()
-}
-
 #[get("/favorite")]
 pub async fn favorite() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
@@ -93,13 +86,6 @@ pub async fn album_page(dynamic_album_id: String) -> Option<NamedFile> {
 
 #[get("/share/<_path..>")]
 pub async fn share(_path: PathBuf) -> Option<NamedFile> {
-    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
-        .await
-        .ok()
-}
-
-#[get("/links")]
-pub async fn links() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
@@ -156,6 +142,20 @@ pub async fn videos() -> Option<NamedFile> {
 
 #[get("/videos/view/<_path..>")]
 pub async fn videos_view(_path: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
+        .await
+        .ok()
+}
+
+#[get("/tags")]
+pub async fn tags() -> Option<NamedFile> {
+    NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
+        .await
+        .ok()
+}
+
+#[get("/links")]
+pub async fn links() -> Option<NamedFile> {
     NamedFile::open(Path::new("../gallery-frontend/dist/index.html"))
         .await
         .ok()
