@@ -122,7 +122,6 @@ const shareModel = ref<ShareModel>({
 const submit = ref<(() => void) | undefined>()
 
 onMounted(() => {
-  /* 以 void 包裝 Promise → 消除 @typescript-eslint/no-misused-promises */
   submit.value = () => {
     void axios
       .put('/put/edit_share', {
