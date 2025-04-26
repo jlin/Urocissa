@@ -50,6 +50,12 @@
             <template #[`item.actions`]="{ item }">
               <div class="d-flex flex-row justify-center ga-1">
                 <v-btn
+                  icon="mdi-delete"
+                  variant="text"
+                  size="small"
+                  @click="openDeleteConfirm(item)"
+                />
+                <v-btn
                   icon="mdi-pencil"
                   variant="text"
                   size="small"
@@ -68,12 +74,6 @@
                   variant="text"
                   size="small"
                   @click="performCopy(item)"
-                />
-                <v-btn
-                  icon="mdi-delete"
-                  variant="text"
-                  size="small"
-                  @click="openDeleteConfirm(item)"
                 />
               </div>
             </template>
