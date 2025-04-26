@@ -9,6 +9,7 @@ use crate::public::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuthShare;
 use crate::router::fairing::guard_timestamp::TimestampClaims;
 
+use arrayvec::ArrayString;
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::serde::json::Json;
@@ -85,7 +86,7 @@ fn build_query_hash(expression_option: &Option<Expression>, locate_option: &Opti
 }
 
 /// Produce a vector of [`ReducedData`] that matches the expression (if any).
-fn collect_reduced_data(expression_option: Option<Expression>) -> Vec<ReducedData> {
+fn collect_reduced_data_edit(expression_option: Option<Expression>) -> Vec<ReducedData> {
     let tree_guard = TREE.in_memory.read().unwrap();
 
     match expression_option {
@@ -101,6 +102,25 @@ fn collect_reduced_data(expression_option: Option<Expression>) -> Vec<ReducedDat
             .par_iter()
             .map(|database_timestamp| database_timestamp.into())
             .collect(),
+    }
+}
+
+fn collect_reduced_data_share(
+    expression_option: Option<Expression>,
+    shared_album_id: ArrayString<64>,
+) -> Vec<ReducedData> {
+    let tree_guard = TREE.in_memory.read().unwrap();
+
+    match expression_option {
+        Some(expr) => {
+            let filter_fn = expr.generate_filter_hide_metadata(shared_album_id);
+            tree_guard
+                .par_iter()
+                .filter(|db_ts| filter_fn(&db_ts.abstract_data))
+                .map(|db_ts| db_ts.into())
+                .collect()
+        }
+        None => tree_guard.par_iter().map(|db_ts| db_ts.into()).collect(),
     }
 }
 
@@ -187,7 +207,7 @@ fn execute_edit_path(
     }
 
     // B. fresh computation
-    let reduced_data_vector = collect_reduced_data(expression_option);
+    let reduced_data_vector = collect_reduced_data_edit(expression_option);
     let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
     let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
 
@@ -198,6 +218,7 @@ fn execute_edit_path(
 fn execute_share_path(
     expression_option: Option<Expression>,
     locate_option: Option<String>,
+    album_id: ArrayString<64>,
     share_token: Share,
 ) -> Json<PrefetchReturn> {
     let query_hash = build_query_hash(&expression_option, &locate_option);
@@ -206,7 +227,7 @@ fn execute_share_path(
         return build_share_response(prefetch, prefetch.timestamp, share_token);
     }
 
-    let reduced_data_vector = collect_reduced_data(expression_option);
+    let reduced_data_vector = collect_reduced_data_share(expression_option, album_id);
     let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
     let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
 
@@ -239,7 +260,7 @@ pub async fn prefetch(
 
         // heavy work on blocking thread – share path
         tokio::task::spawn_blocking(move || {
-            execute_share_path(combined_expression_option, locate, share_token)
+            execute_share_path(combined_expression_option, locate, album_id, share_token)
         })
     } else {
         // edit path
