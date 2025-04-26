@@ -1,9 +1,11 @@
 <template>
   <NavBar />
+
   <EditShareModal
     v-if="modalStore.showEditShareModal && currentEditShareData !== undefined"
     :edit-share-data="currentEditShareData"
   />
+
   <v-container
     v-if="albumStore.fetched"
     id="table-container"
@@ -22,12 +24,10 @@
             :items-per-page="-1"
             :sort-by="[{ key: 'share.url', order: 'asc' }]"
           >
-            <!-- 純顯示網址 -->
             <template #[`item.share.url`]="{ item }">
               {{ item.share.url }}
             </template>
 
-            <!-- 描述加 Tooltip -->
             <template #[`item.share.description`]="{ item }">
               <v-tooltip location="top" :open-on-click="true">
                 <template #activator="{ props }">
@@ -39,7 +39,6 @@
               </v-tooltip>
             </template>
 
-            <!-- 所有操作按鈕集中這裡 -->
             <template #[`item.actions`]="{ item }">
               <div class="d-flex flex-row justify-center ga-1">
                 <v-btn
@@ -62,10 +61,10 @@
                   size="small"
                   @click="performCopy(item)"
                 />
+                <v-btn icon="mdi-delete" variant="text" size="small" @click="deleteShare(item)" />
               </div>
             </template>
 
-            <!-- 群組標頭 -->
             <template #group-header="{ item, columns, toggleGroup, isGroupOpen }">
               <tr>
                 <td :colspan="columns.length">
@@ -77,7 +76,7 @@
                       size="small"
                       variant="outlined"
                       @click="toggleGroup(item)"
-                    ></v-btn>
+                    />
                     <span class="ms-4 font-weight-bold">
                       {{ albumStore.albums.get(item.value)?.displayName }}
                     </span>
@@ -103,6 +102,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch, onMounted, onBeforeUnmount, watchEffect } from 'vue'
+import axios from 'axios'
 import { useInitializedStore } from '@/store/initializedStore'
 import { navBarHeight } from '@/type/constants'
 import NavBar from '@/components/NavBar/NavBar.vue'
@@ -132,23 +132,14 @@ const headers = [
     maxWidth: '200px',
     nowrap: true
   },
-  {
-    title: 'Actions',
-    key: 'actions',
-    align: 'center' as const,
-    sortable: false
-  }
+  { title: 'Actions', key: 'actions', align: 'center' as const, sortable: false }
 ]
 
 const tableItems = computed<EditShareData[]>(() => {
   const result: EditShareData[] = []
   for (const album of albumStore.albums.values()) {
     for (const [, share] of album.shareList) {
-      result.push({
-        albumId: album.albumId,
-        displayName: album.displayName,
-        share: share
-      })
+      result.push({ albumId: album.albumId, displayName: album.displayName, share })
     }
   }
   return result
@@ -159,43 +150,55 @@ function clickEditShare(data: EditShareData) {
   modalStore.showEditShareModal = true
 }
 
+async function deleteShare(item: EditShareData) {
+  try {
+    await axios.put('/put/delete_share', {
+      albumId: item.albumId,
+      shareId: item.share.url
+    })
+    messageStore.success('Share deleted')
+    await albumStore.fetchAlbums() // refresh list
+  } catch (e) {
+    messageStore.error('Failed to delete share')
+    console.error(e)
+  }
+}
+
 watchEffect(() => {
-  console.log('modalStore.showEditShareModal is', modalStore.showEditShareModal)
-  console.log('currentEditShareData is', currentEditShareData.value)
+  /* dev log */
+  console.log('modalStore.showEditShareModal', modalStore.showEditShareModal)
+  console.log('currentEditShareData', currentEditShareData.value)
 })
 
 watch(
   () => initializedStore.initialized,
   () => {
     if (initializedStore.initialized) {
-      // layout update hook
+      /* layout hook placeholder */
     }
   }
 )
 
 onMounted(async () => {
-  if (!albumStore.fetched) {
-    await albumStore.fetchAlbums()
-  }
+  if (!albumStore.fetched) await albumStore.fetchAlbums()
   initializedStore.initialized = true
   await nextTick()
 
   const groupButtons = Array.from(document.querySelectorAll('button.v-btn')).filter((btn) =>
     btn.querySelector('.mdi-chevron-right')
   ) as HTMLButtonElement[]
-
-  for (const btn of groupButtons) {
+  groupButtons.forEach((btn) => {
     btn.click()
-  }
+  })
 })
 
 onBeforeUnmount(() => {
   initializedStore.initialized = false
 })
+
 async function performCopy(item: EditShareData) {
-  const text = `${locationOrigin}/share/${item.albumId}-${item.share.url}`
-  await copy(text)
-  messageStore.success('Url copied')
+  await copy(`${locationOrigin}/share/${item.albumId}-${item.share.url}`)
+  messageStore.success('URL copied')
 }
 </script>
 
@@ -205,7 +208,6 @@ async function performCopy(item: EditShareData) {
   justify-content: center;
   position: relative;
   padding: 4px;
-  padding-top: 4px;
   background-color: #3d3d3d;
   overflow-y: scroll;
   height: 100dvh;
