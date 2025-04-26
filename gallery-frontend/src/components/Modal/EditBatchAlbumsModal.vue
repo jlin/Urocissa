@@ -1,176 +1,188 @@
 <template>
   <v-dialog
+    v-if="submit !== undefined"
     v-model="modalStore.showBatchEditAlbumsModal"
     variant="flat"
     persistent
     id="batch-edit-album-overlay"
   >
-    <v-card class="mx-auto w-100" max-width="400" variant="elevated">
-      <v-card-title class="text-h5"> Edit Albums </v-card-title>
-      <v-form ref="formRef" v-model="formIsValid" @submit.prevent="submit">
-        <v-container>
-          <v-combobox
-            clearable
-            v-model="addAlbumsArray"
-            chips
-            multiple
-            label="Add to Albumss"
-            item-title="displayName"
-            :rules="[addAlbumsRule]"
-            :items="[...albumStore.albums.values()]"
-            item-value="albumId"
-            :hide-no-data="false"
-            return-object
-            :menu-props="{ maxWidth: 0 }"
-            closable-chips
-          >
-            <template #prepend-item v-if="albumStore.albums.size > 0">
-              <v-list-item value="">
-                <template #prepend>
-                  <v-list-item-action>
-                    <v-btn
-                      v-if="!loading"
-                      color="transparent"
-                      icon="mdi-plus"
-                      density="comfortable"
-                      flat
-                    ></v-btn>
-                    <v-btn v-else color="transparent" icon density="comfortable" flat
-                      ><v-progress-circular size="24" indeterminate></v-progress-circular
-                    ></v-btn>
-                  </v-list-item-action>
-                  <v-list-item-title class="wrap" @click="createNonEmptyAlbum()"
-                    >Create New Album</v-list-item-title
-                  >
-                </template>
-              </v-list-item>
-              <v-divider></v-divider>
-            </template>
+    <v-confirm-edit
+      v-model="changedAlbums"
+      :disabled="false"
+      @save="submit"
+      @cancel="modalStore.showBatchEditAlbumsModal = false"
+    >
+      <template #default="{ model: proxyModel, actions }">
+        <v-card class="mx-auto w-100" max-width="400" variant="elevated" retain-focus>
+          <template #title>Edit&nbsp;Albums</template>
+          <template #text>
+            <v-form
+              ref="formRef"
+              v-model="formIsValid"
+              @submit.prevent="submit"
+              validate-on="input"
+            >
+              <v-container>
+                <v-combobox
+                  clearable
+                  v-model="proxyModel.value.add"
+                  chips
+                  multiple
+                  item-title="displayName"
+                  item-value="albumId"
+                  :items="albumItems"
+                  :rules="[addAlbumsRule]"
+                  label="Add to Albums"
+                  return-object
+                  closable-chips
+                  :menu-props="{ maxWidth: 0 }"
+                >
+                  <template #prepend-item v-if="albumStore.albums.size > 0">
+                    <v-list-item value="">
+                      <template #prepend>
+                        <v-list-item-action>
+                          <v-btn
+                            v-if="!loading"
+                            color="transparent"
+                            icon="mdi-plus"
+                            density="comfortable"
+                            flat
+                          />
+                          <v-btn v-else color="transparent" icon density="comfortable" flat>
+                            <v-progress-circular indeterminate size="24" />
+                          </v-btn>
+                        </v-list-item-action>
+                        <v-list-item-title class="wrap" @click="createNonEmptyAlbum()">
+                          Create New Album
+                        </v-list-item-title>
+                      </template>
+                    </v-list-item>
+                    <v-divider />
+                  </template>
 
-            <template #no-data v-else>
-              <v-list-item value="">
-                <template #prepend>
-                  <v-list-item-action>
-                    <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat></v-btn>
-                  </v-list-item-action>
-                  <v-list-item-title class="wrap" @click="createNonEmptyAlbum()"
-                    >Create New Album</v-list-item-title
-                  >
-                </template>
-              </v-list-item>
-              <v-divider></v-divider>
-            </template>
-          </v-combobox>
-        </v-container>
-        <v-container>
-          <v-combobox
-            v-model="removeAlbumsArray"
-            chips
-            multiple
-            label="Remove from Albums"
-            item-title="displayName"
-            :rules="[removeAlbumsRule]"
-            :items="[...albumStore.albums.values()]"
-            item-value="albumId"
-            return-objects
-            :menu-props="{ maxWidth: 0 }"
-            closable-chips
-          ></v-combobox>
-        </v-container>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="teal-accent-4"
-            variant="outlined"
-            class="ma-2 button button-submit"
-            @click="modalStore.showBatchEditAlbumsModal = false"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="teal-accent-4"
-            variant="outlined"
-            class="ma-2 button button-submit"
-            :disabled="!formIsValid"
-            type="submit"
-          >
-            Submit
-          </v-btn>
-        </v-card-actions>
-      </v-form>
-    </v-card>
+                  <template #no-data v-else>
+                    <v-list-item value="">
+                      <template #prepend>
+                        <v-list-item-action>
+                          <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat />
+                        </v-list-item-action>
+                        <v-list-item-title class="wrap" @click="createNonEmptyAlbum()">
+                          Create New Album
+                        </v-list-item-title>
+                      </template>
+                    </v-list-item>
+                    <v-divider />
+                  </template>
+                </v-combobox>
+              </v-container>
+
+              <v-container>
+                <v-combobox
+                  v-model="proxyModel.value.remove"
+                  chips
+                  multiple
+                  item-title="displayName"
+                  item-value="albumId"
+                  :items="albumItems"
+                  :rules="[removeAlbumsRule]"
+                  label="Remove from Albums"
+                  return-object
+                  closable-chips
+                  :menu-props="{ maxWidth: 0 }"
+                />
+              </v-container>
+            </v-form>
+          </template>
+
+          <v-divider />
+
+          <template #actions>
+            <v-spacer />
+            <component :is="actions" />
+          </template>
+        </v-card>
+      </template>
+    </v-confirm-edit>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-/**
- * This modal is used for editing the albums of multiple photos on the home page.
- */
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { AlbumInfo } from '@type/types'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
 import { createAlbum } from '@utils/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
-import { VForm } from 'vuetify/components/VForm'
+import type { AlbumInfo } from '@type/types'
+import type { VForm } from 'vuetify/components'
+
 const route = useRoute()
 const router = useRouter()
 const isolationId = getIsolationIdByRoute(route)
+
+const modalStore = useModalStore('mainId')
+const collectionStore = useCollectionStore(isolationId)
+const albumStore = useAlbumStore(isolationId)
 
 const formRef = ref<VForm | null>(null)
 const formIsValid = ref(false)
 const loading = ref(false)
 
-const collectionStore = useCollectionStore(isolationId)
-const albumStore = useAlbumStore(isolationId)
-const modalStore = useModalStore('mainId')
-
-const addAlbumsArray = ref<AlbumInfo[]>([])
-const removeAlbumsArray = ref<AlbumInfo[]>([])
-
-// Rule for Add Albums to ensure no album is added that's already in Remove Albums
-const addAlbumsRule = (inputArray: AlbumInfo[]) => {
-  return (
-    inputArray.every(
-      (album) =>
-        !removeAlbumsArray.value.map((removeAlbum) => removeAlbum.albumId).includes(album.albumId)
-    ) || 'Some albums are already selected in Remove Albums'
-  )
+interface ChangedAlbums {
+  add: AlbumInfo[]
+  remove: AlbumInfo[]
 }
+const changedAlbums = ref<ChangedAlbums>({ add: [], remove: [] })
 
-// Rule for Remove Albums to ensure no album is added that's already in Add Albums
+const albumItems = computed<AlbumInfo[]>(() => [...albumStore.albums.values()])
+
+const addAlbumsRule = (inputArray: AlbumInfo[]) =>
+  inputArray.every(
+    (album) => !changedAlbums.value.remove.map((a) => a.albumId).includes(album.albumId)
+  ) || 'Some albums are already selected in Remove Albums'
+
 const removeAlbumsRule = (inputArray: AlbumInfo[]) =>
   inputArray.every(
-    (album) => !addAlbumsArray.value.map((addAlbum) => addAlbum.albumId).includes(album.albumId)
+    (album) => !changedAlbums.value.add.map((a) => a.albumId).includes(album.albumId)
   ) || 'Some albums are already selected in Add Albums'
 
-const submit = () => {
-  const hashArray = Array.from(collectionStore.editModeCollection)
-  editAlbumsInWorker(
-    hashArray,
-    addAlbumsArray.value.map((album) => album.albumId),
-    removeAlbumsArray.value.map((album) => album.albumId),
-    isolationId
-  )
-  modalStore.showBatchEditAlbumsModal = false
-}
+const submit = ref<(() => void) | undefined>()
+
+onMounted(() => {
+  submit.value = () => {
+    const hashArray = Array.from(collectionStore.editModeCollection)
+
+    editAlbumsInWorker(
+      hashArray,
+      changedAlbums.value.add.map((a) => a.albumId),
+      changedAlbums.value.remove.map((a) => a.albumId),
+      isolationId
+    )
+
+    modalStore.showBatchEditAlbumsModal = false
+  }
+})
 
 const createNonEmptyAlbum = async () => {
   loading.value = true
   const newAlbumId = await createAlbum([...collectionStore.editModeCollection], isolationId)
+
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
     modalStore.showBatchEditAlbumsModal = false
     collectionStore.editModeOn = false
-    loading.value = false
   }
+  loading.value = false
 }
 
-watch([addAlbumsArray, removeAlbumsArray], async () => {
-  await formRef.value?.validate()
-})
+watch(
+  () => [changedAlbums.value.add, changedAlbums.value.remove],
+  async () => {
+    await formRef.value?.validate()
+  },
+  { deep: true }
+)
 </script>

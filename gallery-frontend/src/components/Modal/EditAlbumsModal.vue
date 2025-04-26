@@ -6,9 +6,8 @@
     persistent
     id="edit-album-overlay"
   >
-    <!-- v‑model 綁字串陣列 -->
     <v-confirm-edit
-      v-model="changedAlbumIds"
+      v-model="changedAlbums"
       :disabled="false"
       @save="submit"
       @cancel="modalStore.showEditAlbumsModal = false"
@@ -19,7 +18,6 @@
 
           <template #text>
             <v-form v-model="formIsValid" @submit.prevent="submit" validate-on="input">
-              <!-- item-value=albumId (string)，不再 return-object -->
               <v-select
                 v-model="proxyModel.value"
                 chips
@@ -28,10 +26,14 @@
                 item-title="displayName"
                 item-value="albumId"
                 label="Albums"
+                variant="outlined"
                 closable-chips
+                return-object
               />
             </v-form>
           </template>
+
+          <v-divider />
 
           <template #actions>
             <v-spacer />
@@ -44,70 +46,60 @@
 </template>
 
 <script setup lang="ts">
-/**
- * Modal for editing the album list of one photo (single‑photo view).
- * 改動重點：
- *   • albumId → string
- *   • interface AlbumItem 取代 type
- */
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
-
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
-
-import { AlbumInfo } from '@type/types'
+import type { AlbumInfo } from '@type/types'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@utils/getter'
 
-/* ── state ───────────────────────────────────────────────────────── */
 const formIsValid = ref(false)
-const changedAlbumIds = ref<string[]>([]) // ← 字串陣列
+const changedAlbums = ref<AlbumInfo[]>([])
 const submit = ref<(() => void) | undefined>()
 
-/* ── stores & route ──────────────────────────────────────────────── */
 const route = useRoute()
 const modalStore = useModalStore('mainId')
 const albumStore = useAlbumStore('mainId')
 
-/* ── item 型別 ───────────────────────────────────────────────────── */
-interface AlbumItem extends AlbumInfo {
-  /** 供 <v-select> chips 顯示用字串 */
-  displayName: string
-}
+const albumItems = computed<AlbumInfo[]>(() =>
+  [...albumStore.albums.values()].map((a) => structuredClone(toRaw(a)))
+)
 
-/* ── 給 v-select 的 items ───────────────────────────────────────── */
-const albumItems = computed<AlbumItem[]>(() => [...albumStore.albums.values()])
-
-/* ── lifecycle ───────────────────────────────────────────────────── */
 onMounted(() => {
   const initSubmit = (): (() => void) | undefined => {
-    const init = getHashIndexDataFromRoute(route)
-    if (!init) {
+    const parsed = getHashIndexDataFromRoute(route)
+    if (!parsed) {
       console.error('initSubmit: failed to parse route.')
       return
     }
 
-    const { index, data } = init
+    const { index, data } = parsed
     if (!data.database) {
       console.error("initSubmit: 'data.database' is undefined.")
       return
     }
 
-    /* 目前照片預設相簿 (string[]) */
-    const defaultAlbumIds: string[] = [...data.database.album]
-    changedAlbumIds.value = [...defaultAlbumIds]
+    const defaultAlbumIds = [...data.database.album]
+
+    const initialAlbums = defaultAlbumIds
+      .map((id) => albumStore.albums.get(id))
+      .filter((a): a is AlbumInfo => a !== undefined)
+      .map((a) => structuredClone(toRaw(a)))
+    // Temporary workaround: VConfirmEdit internally uses structuredClone,
+    // which cannot clone Vue reactive proxies directly.
+    // We use toRaw() + structuredClone() here to ensure plain objects.
+    // This workaround is expected to be removed after Vuetify 3.9.0 fixes the issue.
+
+    changedAlbums.value = initialAlbums
 
     const innerSubmit = () => {
-      const addAlbumIds = changedAlbumIds.value.filter((id) => !defaultAlbumIds.includes(id))
-      const removeAlbumIds = defaultAlbumIds.filter((id) => !changedAlbumIds.value.includes(id))
+      const selectedIds = changedAlbums.value.map((a) => a.albumId)
 
-      editAlbumsInWorker(
-        [index], // 目前照片 hashIndex
-        addAlbumIds, // string[]
-        removeAlbumIds, // string[]
-        getIsolationIdByRoute(route)
-      )
+      const addAlbumIds = selectedIds.filter((id) => !defaultAlbumIds.includes(id))
+      const removeAlbumIds = defaultAlbumIds.filter((id) => !selectedIds.includes(id))
+
+      editAlbumsInWorker([index], addAlbumIds, removeAlbumIds, getIsolationIdByRoute(route))
 
       modalStore.showEditAlbumsModal = false
     }

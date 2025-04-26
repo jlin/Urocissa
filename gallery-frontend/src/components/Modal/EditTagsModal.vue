@@ -26,9 +26,11 @@
                 :items="filteredTagList"
                 label="Tags"
                 closable-chips
+                variant="outlined"
               />
             </v-form>
           </template>
+          <v-divider />
           <template #actions>
             <v-spacer />
             <component :is="actions" />
