@@ -22,7 +22,7 @@
       <v-col v-if="metadata.database" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="metadata.database" />
-          <ItemPath :database="metadata.database" />
+          <ItemPath v-if="route.meta.baseName !== 'share'" :database="metadata.database" />
           <ItemDate :database="metadata.database" />
           <ItemExif
             v-if="
@@ -33,6 +33,7 @@
           />
           <v-divider></v-divider>
           <ItemTag
+            v-if="route.meta.baseName !== 'share'"
             :isolation-id="props.isolationId"
             :index="props.index"
             :tags="metadata.database.tag"
