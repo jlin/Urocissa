@@ -46,6 +46,11 @@
               </v-tooltip>
             </template>
 
+            <!-- Allow Download -->
+            <template #[`item.share.showDownload`]="{ item }">
+              {{ item.share.showDownload }}
+            </template>
+
             <!-- Actions -->
             <template #[`item.actions`]="{ item }">
               <div class="d-flex flex-row justify-center ga-1">
@@ -148,7 +153,11 @@ const headers = [
     maxWidth: '200px',
     nowrap: true
   },
-  { title: 'Actions', key: 'actions', align: 'center' as const, sortable: false }
+  {
+    title: 'Allow Download',
+    key: 'share.showDownload'
+  },
+  { title: 'Actions', key: 'actions', sortable: false }
 ]
 
 const tableItems = computed<EditShareData[]>(() => {
