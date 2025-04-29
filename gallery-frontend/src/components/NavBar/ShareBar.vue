@@ -15,7 +15,7 @@
     }"
   >
     <v-card elevation="0" class="w-50">
-      <v-card-title> test </v-card-title>
+      <v-card-title> {{ prefetchStore.resolvedShare?.albumTitle }} </v-card-title>
     </v-card>
     <v-card
       elevation="0"
@@ -57,8 +57,10 @@ import ProgessBar from '@/components/NavBar/ProgessBar.vue'
 import { Ref, ref, watchEffect } from 'vue'
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
+import { usePrefetchStore } from '@/store/prefetchStore'
 
 const filterStore = useFilterStore('mainId')
+const prefetchStore = usePrefetchStore('mainId')
 
 const route = useRoute()
 const router = useRouter()
@@ -74,5 +76,6 @@ const handleSearch = async () => {
 
 watchEffect(() => {
   searchQuery.value = filterStore.searchString
+  console.log('prefetchStore.resolvedShare?.albumTitle is', prefetchStore.resolvedShare?.albumTitle)
 })
 </script>

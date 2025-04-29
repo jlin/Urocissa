@@ -6,7 +6,7 @@ use rocket::request::{FromRequest, Outcome};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::public::album::Share;
+use crate::public::album::{ResolvedShare, Share};
 use crate::public::redb::ALBUM_TABLE;
 use crate::public::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
@@ -16,7 +16,7 @@ use super::VALIDATION;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Claims {
-    pub album_share: Option<(ArrayString<64>, Share)>,
+    pub resolved_share_opt: Option<ResolvedShare>,
     pub exp: u64,
 }
 
@@ -26,13 +26,14 @@ impl Claims {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs()
-            + 86400 * 14; // 14 days
+            + 14 * 86_400; // 14 days
 
         Self {
-            album_share: None,
+            resolved_share_opt: None,
             exp,
         }
     }
+
     pub fn encode(&self) -> String {
         encode(
             &Header::default(),
@@ -82,14 +83,23 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
             );
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
-            if let Some(album) = table.get(album_id).unwrap() {
-                if let Some(share) = album.value().share_list.remove(share_id) {
-                    let mut claims = Claims::new();
-                    claims.album_share = Some((ArrayString::<64>::from(album_id).unwrap(), share));
-                    return Outcome::Success(GuardAuthShare { claims });
-                } else {
-                    println!("{:#?}", album.value().share_list);
-                }
+            if let Some(album_guard) = table.get(album_id).unwrap() {
+                let mut album = album_guard.value();
+
+                let share = match album.share_list.remove(share_id) {
+                    Some(s) => s,
+                    None => return Outcome::Forward(Status::Unauthorized),
+                };
+
+                let mut claims = Claims::new();
+                let resolve_share = ResolvedShare::new(
+                    ArrayString::<64>::from(album_id).unwrap(),
+                    album.title,
+                    share,
+                );
+                claims.resolved_share_opt = Some(resolve_share);
+
+                return Outcome::Success(GuardAuthShare { claims });
             }
         }
         return Outcome::Forward(Status::Unauthorized);
@@ -138,8 +148,6 @@ impl<'r> FromRequest<'r> for GuardAuthUpload {
                         println!("Share upload is not allowed.");
                         return Outcome::Forward(Status::Unauthorized);
                     }
-                    let mut claims = Claims::new();
-                    claims.album_share = Some((ArrayString::<64>::from(album_id).unwrap(), share));
                     return Outcome::Success(GuardAuthUpload);
                 } else {
                     println!("{:#?}", album.value().share_list);

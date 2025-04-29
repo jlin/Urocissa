@@ -45,11 +45,23 @@ export const ShareSchema = z.object({
   exp: z.number()
 })
 
-export const prefetchReturnSchema = z.object({
-  prefetch: prefetchSchema,
-  token: z.string(),
-  share: ShareSchema.nullable()
+export const ResolvedShareSchema = z.object({
+  share: ShareSchema,
+  albumId: z.string().max(64),
+  albumTitle: z.string().nullable()
 })
+
+export const prefetchReturnSchema = z
+  .object({
+    prefetch: prefetchSchema,
+    token: z.string(),
+    resolvedShareOpt: ResolvedShareSchema.nullable()
+  })
+  .transform((data) => ({
+    prefetch: data.prefetch,
+    token: data.token,
+    resolvedShare: data.resolvedShareOpt
+  }))
 
 export const DataBaseParse = z.object({
   album: z.array(z.string()),

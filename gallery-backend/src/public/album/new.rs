@@ -5,7 +5,7 @@ use std::{
 
 use arrayvec::ArrayString;
 
-use super::Album;
+use super::{Album, ResolvedShare, Share};
 
 impl Album {
     pub fn new(id: ArrayString<64>, title: Option<String>) -> Self {
@@ -30,6 +30,16 @@ impl Album {
             item_count: 0,
             item_size: 0,
             pending: false,
+        }
+    }
+}
+
+impl ResolvedShare {
+    pub fn new(album_id: ArrayString<64>, album_title: Option<String>, share: Share) -> Self {
+        Self {
+            share,
+            album_id,
+            album_title,
         }
     }
 }

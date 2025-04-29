@@ -40,13 +40,13 @@ pub async fn get_data(
                 let hash = tree_snapshot.get_hash(index);
                 let show_download = guard_timestamp
                     .claims
-                    .share
+                    .resolved_share_opt
                     .as_ref()
-                    .map_or(true, |s| s.show_download);
+                    .map_or(true, |resolved_share| resolved_share.share.show_download);
                 if let Some(database) = table.get(&*hash).unwrap() {
                     let mut database = database.value();
-                    if let Some(share) = &guard_timestamp.claims.share {
-                        if !share.show_metadata {
+                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt {
+                        if !resolved_share.share.show_metadata {
                             database.tag.clear();
                             database.album.clear();
                             database.alias.clear();
@@ -60,8 +60,8 @@ pub async fn get_data(
                     )
                 } else if let Some(album) = album_table.get(&*hash).unwrap() {
                     let mut album = album.value();
-                    if let Some(share) = &guard_timestamp.claims.share {
-                        if !share.show_metadata {
+                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt {
+                        if !resolved_share.share.show_metadata {
                             album.tag.clear();
                         }
                     };

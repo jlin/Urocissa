@@ -19,6 +19,15 @@ pub struct Share {
     pub exp: u64,
 }
 
+#[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct ResolvedShare {
+    pub share: Share,
+    pub album_id: ArrayString<64>,
+    pub album_title: Option<String>,
+}
+
+
 #[derive(Debug, Clone, Deserialize, Default, Serialize, Decode, Encode, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct Album {

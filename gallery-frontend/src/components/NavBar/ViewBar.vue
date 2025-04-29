@@ -63,7 +63,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 
 const route = useRoute()
 const prefetchStore = usePrefetchStore('mainId')
-const share = prefetchStore.share
+const share = prefetchStore.resolvedShare?.share ?? null
 
 defineProps<{
   isolationId: IsolationId

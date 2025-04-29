@@ -1,4 +1,4 @@
-use crate::public::album::Share;
+use crate::public::album::{ResolvedShare, Share};
 use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::public::expression::Expression;
 use crate::public::query_snapshot::QUERY_SNAPSHOT;
@@ -43,15 +43,15 @@ impl Prefetch {
 pub struct PrefetchReturn {
     pub prefetch: Prefetch,
     pub token: String,
-    pub share: Option<Share>,
+    pub resolved_share_opt: Option<ResolvedShare>,
 }
 
 impl PrefetchReturn {
-    fn new(prefetch: Prefetch, token: String, share: Option<Share>) -> Self {
+    fn new(prefetch: Prefetch, token: String, resolved_share_opt: Option<ResolvedShare>) -> Self {
         Self {
             prefetch,
             token,
-            share,
+            resolved_share_opt,
         }
     }
 }
@@ -178,17 +178,17 @@ fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
 /// Assemble the JSON response for the **edit** path.
 fn build_edit_response(prefetch: Prefetch, timestamp_millis: u128) -> Json<PrefetchReturn> {
     let claims = TimestampClaims::new(None, timestamp_millis);
-    Json(PrefetchReturn::new(prefetch, claims.encode(), claims.share))
+    Json(PrefetchReturn::new(prefetch, claims.encode(), None))
 }
 
 /// Assemble the JSON response for the **share** path.
 fn build_share_response(
     prefetch: Prefetch,
     timestamp_millis: u128,
-    share_token: Share,
+    resolved_share: ResolvedShare,
 ) -> Json<PrefetchReturn> {
-    let claims = TimestampClaims::new(Some(share_token), timestamp_millis);
-    Json(PrefetchReturn::new(prefetch, claims.encode(), claims.share))
+    let claims = TimestampClaims::new(Some(resolved_share), timestamp_millis);
+    Json(PrefetchReturn::new(prefetch, claims.encode(), claims.resolved_share_opt))
 }
 
 // -----------------------------------------------------------------------------
@@ -218,21 +218,20 @@ fn execute_edit_path(
 fn execute_share_path(
     expression_option: Option<Expression>,
     locate_option: Option<String>,
-    album_id: ArrayString<64>,
-    share_token: Share,
+    resolved_share: ResolvedShare,
 ) -> Json<PrefetchReturn> {
     let query_hash = build_query_hash(&expression_option, &locate_option);
 
     if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
-        return build_share_response(prefetch, prefetch.timestamp, share_token);
+        return build_share_response(prefetch, prefetch.timestamp, resolved_share);
     }
 
-    let reduced_data_vector = collect_reduced_data_share(expression_option, album_id);
+    let reduced_data_vector = collect_reduced_data_share(expression_option, resolved_share.album_id);
     let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
     let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
 
     cache_prefetch(query_hash, prefetch);
-    build_share_response(prefetch, timestamp_millis, share_token)
+    build_share_response(prefetch, timestamp_millis, resolved_share)
 }
 
 // -----------------------------------------------------------------------------
@@ -248,8 +247,8 @@ pub async fn prefetch(
     // Combine album filter (if any) with the client‑supplied query.
     let mut combined_expression_option = query_data.map(|wrapper| wrapper.into_inner());
 
-    let job_handle = if let Some((album_id, share_token)) = auth_guard.claims.album_share {
-        let album_filter_expression = Expression::Album(album_id);
+    let job_handle = if let Some(resolved_share) = auth_guard.claims.resolved_share_opt {
+        let album_filter_expression = Expression::Album(resolved_share.album_id);
 
         combined_expression_option = Some(match combined_expression_option {
             Some(client_expression) => {
@@ -260,7 +259,7 @@ pub async fn prefetch(
 
         // heavy work on blocking thread – share path
         tokio::task::spawn_blocking(move || {
-            execute_share_path(combined_expression_option, locate, album_id, share_token)
+            execute_share_path(combined_expression_option, locate, resolved_share)
         })
     } else {
         // edit path

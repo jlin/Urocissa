@@ -15,7 +15,8 @@ import {
   PublicConfigSchema,
   prefetchReturnSchema,
   tokenReturnSchema,
-  ShareSchema
+  ShareSchema,
+  ResolvedShareSchema
 } from '@type/schemas'
 
 export type Sorting = 'ascending' | 'descending' | 'random' | 'similar'
@@ -60,3 +61,4 @@ export type FetchDataMethod = 'batch' | 'single'
 export type TokenReturn = z.infer<typeof tokenReturnSchema>
 export type MessageColor = 'error' | 'success' | 'info'
 export type Share = z.infer<typeof ShareSchema>
+export type ResolvedShare = z.infer<typeof ResolvedShareSchema>

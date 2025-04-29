@@ -7,7 +7,7 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::public::album::Share;
+use crate::public::album::{ResolvedShare, Share};
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
@@ -17,13 +17,13 @@ use super::guard_auth::GuardAuthShare;
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TimestampClaims {
-    pub share: Option<Share>,
+    pub resolved_share_opt: Option<ResolvedShare>,
     pub timestamp: u128,
     pub exp: u64,
 }
 
 impl TimestampClaims {
-    pub fn new(share: Option<Share>, timestamp: u128) -> Self {
+    pub fn new(resolved_share_opt: Option<ResolvedShare>, timestamp: u128) -> Self {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -31,7 +31,7 @@ impl TimestampClaims {
             + 1;
 
         Self {
-            share,
+            resolved_share_opt,
             timestamp,
             exp,
         }
@@ -151,7 +151,7 @@ pub async fn renew_timestamp_token(
         };
 
         let claims = token_data.claims;
-        let new_claims = TimestampClaims::new(claims.share, claims.timestamp);
+        let new_claims = TimestampClaims::new(claims.resolved_share_opt, claims.timestamp);
         let new_token = new_claims.encode();
 
         Ok(Json(RenewTimestampTokenReturn { token: new_token }))
