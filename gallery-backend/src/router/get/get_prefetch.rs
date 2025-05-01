@@ -1,4 +1,4 @@
-use crate::public::album::{ResolvedShare, Share};
+use crate::public::album::ResolvedShare;
 use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::public::expression::Expression;
 use crate::public::query_snapshot::QUERY_SNAPSHOT;
@@ -188,7 +188,11 @@ fn build_share_response(
     resolved_share: ResolvedShare,
 ) -> Json<PrefetchReturn> {
     let claims = TimestampClaims::new(Some(resolved_share), timestamp_millis);
-    Json(PrefetchReturn::new(prefetch, claims.encode(), claims.resolved_share_opt))
+    Json(PrefetchReturn::new(
+        prefetch,
+        claims.encode(),
+        claims.resolved_share_opt,
+    ))
 }
 
 // -----------------------------------------------------------------------------
@@ -226,7 +230,8 @@ fn execute_share_path(
         return build_share_response(prefetch, prefetch.timestamp, resolved_share);
     }
 
-    let reduced_data_vector = collect_reduced_data_share(expression_option, resolved_share.album_id);
+    let reduced_data_vector =
+        collect_reduced_data_share(expression_option, resolved_share.album_id);
     let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
     let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
 

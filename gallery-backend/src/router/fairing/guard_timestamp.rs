@@ -7,7 +7,7 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::public::album::{ResolvedShare, Share};
+use crate::public::album::ResolvedShare;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
