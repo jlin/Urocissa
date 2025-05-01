@@ -103,13 +103,11 @@ const clientHeight = ref<number>(0)
 
 const lastScrollTop = ref(0)
 const stopScroll = ref(false)
-const share = prefetchStore.share
 
 provide('imageContainerRef', imageContainerRef)
 provide('windowWidth', windowWidth)
 provide('windowHeight', windowHeight)
 provide('mobile', mobile)
-provide('share', share)
 
 const throttledHandleScroll = handleScroll(
   imageContainerRef,
