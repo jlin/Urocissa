@@ -11,9 +11,10 @@ export const useRedirectionStore = (isolationId: IsolationId) =>
     }),
     actions: {
       async redirectionToLogin() {
-        console.warn('401 Unauthorized detected, redirecting to /login')
-        this.redirection = router.currentRoute.value.fullPath
-        await router.push('/login')
+        if (router.currentRoute.value.name !== 'login') {
+          this.redirection = router.currentRoute.value.fullPath
+          await router.push({ name: 'login' })
+        }
       }
     }
   })()
