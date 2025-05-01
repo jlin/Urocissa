@@ -6,7 +6,7 @@ use rocket::request::{FromRequest, Outcome};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::public::album::{ResolvedShare, Share};
+use crate::public::album::ResolvedShare;
 use crate::public::redb::ALBUM_TABLE;
 use crate::public::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
@@ -71,8 +71,10 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
                     warn!("JWT validation failed.");
                 }
             }
-        // Check for share mode
-        } else if let (Some(album_cookie), Some(share_cookie)) =
+            // Check for share mode
+        }
+
+        if let (Some(album_cookie), Some(share_cookie)) =
             (cookies.get("albumId"), cookies.get("shareId"))
         {
             let album_id = album_cookie.value();
@@ -130,8 +132,9 @@ impl<'r> FromRequest<'r> for GuardAuthUpload {
                     warn!("JWT validation failed.");
                 }
             }
-        // Check for share mode
-        } else if let (Some(album_cookie), Some(share_cookie)) =
+            // Check for share mode
+        }
+        if let (Some(album_cookie), Some(share_cookie)) =
             (cookies.get("albumId"), cookies.get("shareId"))
         {
             let album_id = album_cookie.value();
