@@ -23,7 +23,5 @@ export async function fetchScrollbar(isolationId: IsolationId) {
     }
   })
   const scrollbarDataArray = z.array(scrollbarDataSchema).parse(response.data)
-
-  console.log('payload.scrollbarDataArray is ', scrollbarDataArray)
   scrollbarStore.initialize(scrollbarDataArray)
 }

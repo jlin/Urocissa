@@ -80,8 +80,6 @@ async function handlePrefetchReturn(
   prefetchStore.calculateLength(prefetch.dataLength)
   prefetchStore.locateTo = prefetch.locateTo
 
-  console.log('prefetchStore.resolvedShare is', prefetchStore.resolvedShare)
-
   await storeTimestampToken(token)
 
   initializedStore.initialized = true

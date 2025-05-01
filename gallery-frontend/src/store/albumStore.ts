@@ -30,8 +30,6 @@ export const useAlbumStore = (isolationId: IsolationId) =>
             this.albums.set(album.albumId, album)
           })
 
-          console.log(albums)
-
           this.fetched = true
         } catch (error) {
           if (error instanceof ZodError) {

@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, onMounted, onBeforeUnmount, watchEffect } from 'vue'
+import { computed, nextTick, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useClipboard } from '@vueuse/core'
 import NavBar from '@/components/NavBar/NavBar.vue'
 import EditShareModal from '@/components/Modal/EditShareModal.vue'
@@ -184,12 +184,6 @@ async function performCopy(item: EditShareData) {
   await copy(`${locationOrigin}/share/${item.albumId}-${item.share.url}`)
   messageStore.success('URL copied')
 }
-
-/* -- Dev logs, optional -- */
-watchEffect(() => {
-  console.log('showEditShareModal', modalStore.showEditShareModal)
-  console.log('showDeleteShareModal', modalStore.showDeleteShareModal)
-})
 
 watch(
   () => initializedStore.initialized,
