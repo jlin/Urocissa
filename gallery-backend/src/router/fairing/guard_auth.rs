@@ -53,25 +53,28 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Check for JWT cookie
         let cookies: &CookieJar = req.cookies();
-        if let Some(jwt_cookie) = cookies.get("jwt") {
-            let token = jwt_cookie.value();
+        let uri_path = req.uri().path().as_str();
 
-            match decode::<Claims>(
-                token,
-                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
-                &VALIDATION,
-            ) {
-                Ok(token_data_claims) => {
-                    let claims = token_data_claims.claims;
-                    return Outcome::Success(GuardAuthShare { claims });
-                }
-                _ => {
-                    warn!("JWT validation failed.");
+        // Only check JWT if the URL path does not start with "/share/"
+        if !uri_path.starts_with("/share/") {
+            if let Some(jwt_cookie) = cookies.get("jwt") {
+                let token = jwt_cookie.value();
+
+                match decode::<Claims>(
+                    token,
+                    &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+                    &VALIDATION,
+                ) {
+                    Ok(token_data_claims) => {
+                        let claims = token_data_claims.claims;
+                        return Outcome::Success(GuardAuthShare { claims });
+                    }
+                    _ => {
+                        warn!("JWT validation failed.");
+                    }
                 }
             }
-            // Check for share mode
         }
 
         if let (Some(album_cookie), Some(share_cookie)) =
