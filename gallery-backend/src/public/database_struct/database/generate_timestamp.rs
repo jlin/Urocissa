@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
 use rand::Rng;
 use regex::Regex;
 
@@ -17,11 +17,15 @@ impl Database {
             match field {
                 "DateTimeOriginal" => {
                     if let Some(value) = self.exif_vec.get("DateTimeOriginal") {
-                        if let Ok(date_time) =
+                        if let Ok(naive_dt) =
                             NaiveDateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S")
                         {
-                            if date_time <= now_time {
-                                return date_time.and_utc().timestamp_millis() as u128;
+                            if let Some(local_dt) =
+                                chrono::Local.from_local_datetime(&naive_dt).single()
+                            {
+                                if local_dt.naive_local() <= now_time {
+                                    return local_dt.timestamp_millis() as u128;
+                                }
                             }
                         }
                     }
@@ -66,7 +70,8 @@ impl Database {
                         }
                     }
                     if let Some(datetime) = max_time {
-                        return datetime.and_utc().timestamp_millis() as u128;
+                        let local_dt = chrono::Local.from_local_datetime(&datetime).unwrap();
+                        return local_dt.timestamp_millis() as u128;
                     }
                 }
                 "scan_time" => {
@@ -76,7 +81,6 @@ impl Database {
                     }
                 }
                 "modified" => {
-                    // Find the alias with the maximum `scan_time`
                     if let Some(max_scan_alias) =
                         self.alias.iter().max_by_key(|alias| alias.scan_time)
                     {
