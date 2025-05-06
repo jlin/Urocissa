@@ -12,6 +12,7 @@ import { useTagStore } from '@/store/tagStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { fetchScrollbar } from '@/script/fetch/scrollbar'
 import { storeTimestampToken } from '@/indexedDb/timestampToken'
+import { useShareStore } from '@/store/shareStore'
 
 export function usePrefetch(
   filterJsonString: string | null,
@@ -58,8 +59,9 @@ async function handlePrefetchReturn(
 ) {
   const configStore = useConfigStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
-  const albumStore = useAlbumStore('mainId')
   const initializedStore = useInitializedStore(isolationId)
+  const shareStore = useShareStore('mainId')
+  const albumStore = useAlbumStore('mainId')
   const tagStore = useTagStore('mainId')
 
   try {
@@ -74,7 +76,7 @@ async function handlePrefetchReturn(
   const prefetch = prefetchReturn.prefetch
   const token = prefetchReturn.token
 
-  prefetchStore.resolvedShare = prefetchReturn.resolvedShare
+  shareStore.resolvedShare = prefetchReturn.resolvedShare
   prefetchStore.timestamp = prefetch.timestamp
   prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
   prefetchStore.calculateLength(prefetch.dataLength)

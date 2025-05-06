@@ -59,11 +59,12 @@ import ShareMenu from '@Menu/Page/ShareMenu.vue'
 import LeaveView from '@Menu/MenuButton/BtnLeaveView.vue'
 import ShowInfo from '@Menu/MenuButton/BtnShowInfo.vue'
 import { useRoute } from 'vue-router'
-import { usePrefetchStore } from '@/store/prefetchStore'
+import { useShareStore } from '@/store/shareStore'
 
 const route = useRoute()
-const prefetchStore = usePrefetchStore('mainId')
-const share = prefetchStore.resolvedShare?.share ?? null
+const shareStore = useShareStore('mainId')
+
+const share = shareStore.resolvedShare?.share ?? null
 
 defineProps<{
   isolationId: IsolationId
