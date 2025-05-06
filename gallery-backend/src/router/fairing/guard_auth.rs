@@ -52,22 +52,7 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // 優先處理 JWT cookie
-        if let Some(jwt_cookie) = req.cookies().get("jwt") {
-            let token = jwt_cookie.value();
-            if let Ok(token_data_claims) = decode::<Claims>(
-                token,
-                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
-                &VALIDATION,
-            ) {
-                return Outcome::Success(GuardAuthShare {
-                    claims: token_data_claims.claims,
-                });
-            }
-            warn!("JWT validation failed.");
-        }
-
-        // 改從 headers 讀取 albumId / shareId
+        // 先處理 header
         let album_id = req.headers().get_one("x-album-id");
         let share_id = req.headers().get_one("x-share-id");
 
@@ -94,6 +79,21 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
             }
         }
 
+        // 再處理 cookie
+        if let Some(jwt_cookie) = req.cookies().get("jwt") {
+            let token = jwt_cookie.value();
+            if let Ok(token_data_claims) = decode::<Claims>(
+                token,
+                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+                &VALIDATION,
+            ) {
+                return Outcome::Success(GuardAuthShare {
+                    claims: token_data_claims.claims,
+                });
+            }
+            warn!("JWT validation failed.");
+        }
+
         Outcome::Forward(Status::Unauthorized)
     }
 }
@@ -104,20 +104,7 @@ impl<'r> FromRequest<'r> for GuardAuthUpload {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        if let Some(jwt_cookie) = req.cookies().get("jwt") {
-            let token = jwt_cookie.value();
-            if decode::<Claims>(
-                token,
-                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
-                &VALIDATION,
-            )
-            .is_ok()
-            {
-                return Outcome::Success(GuardAuthUpload);
-            }
-            warn!("JWT validation failed.");
-        }
-
+        // 優先處理 header 中的 x-album-id 和 x-share-id
         let album_id = req.headers().get_one("x-album-id");
         let share_id = req.headers().get_one("x-share-id");
 
@@ -138,6 +125,21 @@ impl<'r> FromRequest<'r> for GuardAuthUpload {
                     }
                 }
             }
+        }
+
+        // 再處理 cookie 中的 jwt
+        if let Some(jwt_cookie) = req.cookies().get("jwt") {
+            let token = jwt_cookie.value();
+            if decode::<Claims>(
+                token,
+                &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
+                &VALIDATION,
+            )
+            .is_ok()
+            {
+                return Outcome::Success(GuardAuthUpload);
+            }
+            warn!("JWT validation failed.");
         }
 
         Outcome::Forward(Status::Unauthorized)
