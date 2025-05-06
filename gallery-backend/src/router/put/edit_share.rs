@@ -2,8 +2,8 @@ use crate::public::album::Share;
 use crate::public::tree::TREE;
 
 use crate::public::redb::ALBUM_TABLE;
-use crate::router::fairing::guard_auth::GuardAuthEdit;
-use crate::router::fairing::guard_read_only_mod::GuardReadOnlyMode;
+use crate::router::fairing::guard_auth::GuardAuth;
+use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 
 use arrayvec::ArrayString;
 use redb::ReadableTable;
@@ -17,7 +17,7 @@ pub struct EditShare {
 
 #[put("/put/edit_share", format = "json", data = "<json_data>")]
 pub async fn edit_share(
-    _auth: GuardAuthEdit,
+    _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     json_data: Json<EditShare>,
 ) {
@@ -57,7 +57,7 @@ pub struct DeleteShare {
 
 #[put("/put/delete_share", format = "json", data = "<json_data>")]
 pub async fn delete_share(
-    _auth: GuardAuthEdit,
+    _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     json_data: Json<DeleteShare>,
 ) {

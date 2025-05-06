@@ -5,7 +5,7 @@ use rocket_seek_stream::SeekStream;
 use std::path::{Path, PathBuf};
 
 use crate::router::fairing::{
-    guard_auth::GuardAuthShare,
+    guard_share::GuardShare,
     guard_hash::{GuardHash, GuardHashOriginal},
 };
 #[derive(Responder)]
@@ -16,7 +16,7 @@ pub enum CompressedFileResponse<'a> {
 
 #[get("/object/compressed/<file_path..>")]
 pub async fn compressed_file(
-    _auth_guard: GuardAuthShare,
+    _auth_guard: GuardShare,
     _hash_guard: GuardHash,
     file_path: PathBuf,
 ) -> Result<CompressedFileResponse<'static>, Status> {
@@ -45,7 +45,7 @@ pub async fn compressed_file(
 
 #[get("/object/imported/<file_path..>")]
 pub async fn imported_file(
-    _auth: GuardAuthShare,
+    _auth: GuardShare,
     _hash_guard: GuardHashOriginal,
     file_path: PathBuf,
 ) -> Result<CompressedFileResponse<'static>, Status> {

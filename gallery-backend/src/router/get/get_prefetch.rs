@@ -6,7 +6,7 @@ use crate::public::reduced_data::ReducedData;
 use crate::public::tree::TREE;
 use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::public::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::fairing::guard_auth::GuardAuthShare;
+use crate::router::fairing::guard_share::GuardShare;
 use crate::router::fairing::guard_timestamp::TimestampClaims;
 
 use arrayvec::ArrayString;
@@ -245,7 +245,7 @@ fn execute_share_path(
 
 #[post("/get/prefetch?<locate>", format = "json", data = "<query_data>")]
 pub async fn prefetch(
-    auth_guard: GuardAuthShare,
+    auth_guard: GuardShare,
     query_data: Option<Json<Expression>>,
     locate: Option<String>,
 ) -> Json<PrefetchReturn> {
