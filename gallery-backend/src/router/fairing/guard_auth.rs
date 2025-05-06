@@ -52,13 +52,10 @@ impl<'r> FromRequest<'r> for GuardAuthShare {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // 先處理 header
         let album_id = req.headers().get_one("x-album-id");
         let share_id = req.headers().get_one("x-share-id");
 
         if let (Some(album_id), Some(share_id)) = (album_id, share_id) {
-            info!("Received album_id={} and share_id={}", album_id, share_id);
-
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
 
@@ -104,13 +101,10 @@ impl<'r> FromRequest<'r> for GuardAuthUpload {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // 優先處理 header 中的 x-album-id 和 x-share-id
         let album_id = req.headers().get_one("x-album-id");
         let share_id = req.headers().get_one("x-share-id");
 
         if let (Some(album_id), Some(share_id)) = (album_id, share_id) {
-            info!("Received album_id={} and share_id={}", album_id, share_id);
-
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
 
