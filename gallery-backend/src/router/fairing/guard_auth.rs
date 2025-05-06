@@ -47,117 +47,100 @@ impl Claims {
 pub struct GuardAuthShare {
     pub claims: Claims,
 }
-
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for GuardAuthShare {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Check for JWT cookie
-        let cookies: &CookieJar = req.cookies();
-        if let Some(jwt_cookie) = cookies.get("jwt") {
+        // 優先處理 JWT cookie
+        if let Some(jwt_cookie) = req.cookies().get("jwt") {
             let token = jwt_cookie.value();
-
-            match decode::<Claims>(
+            if let Ok(token_data_claims) = decode::<Claims>(
                 token,
                 &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
                 &VALIDATION,
             ) {
-                Ok(token_data_claims) => {
-                    let claims = token_data_claims.claims;
-                    return Outcome::Success(GuardAuthShare { claims });
-                }
-                _ => {
-                    warn!("JWT validation failed.");
-                }
+                return Outcome::Success(GuardAuthShare {
+                    claims: token_data_claims.claims,
+                });
             }
-            // Check for share mode
+            warn!("JWT validation failed.");
         }
 
-        if let (Some(album_cookie), Some(share_cookie)) =
-            (cookies.get("albumId"), cookies.get("shareId"))
-        {
-            let album_id = album_cookie.value();
-            let share_id = share_cookie.value();
-            info!(
-                "Extracted album_id: {} and share_id: {}",
-                album_id, share_id
-            );
+        // 改從 headers 讀取 albumId / shareId
+        let album_id = req.headers().get_one("x-album-id");
+        let share_id = req.headers().get_one("x-share-id");
+
+        if let (Some(album_id), Some(share_id)) = (album_id, share_id) {
+            info!("Received album_id={} and share_id={}", album_id, share_id);
+
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
+
             if let Some(album_guard) = table.get(album_id).unwrap() {
                 let mut album = album_guard.value();
 
-                let share = match album.share_list.remove(share_id) {
-                    Some(s) => s,
-                    None => return Outcome::Forward(Status::Unauthorized),
-                };
+                if let Some(share) = album.share_list.remove(share_id) {
+                    let mut claims = Claims::new();
+                    let resolved_share = ResolvedShare::new(
+                        ArrayString::<64>::from(album_id).unwrap(),
+                        album.title,
+                        share,
+                    );
+                    claims.resolved_share_opt = Some(resolved_share);
 
-                let mut claims = Claims::new();
-                let resolve_share = ResolvedShare::new(
-                    ArrayString::<64>::from(album_id).unwrap(),
-                    album.title,
-                    share,
-                );
-                claims.resolved_share_opt = Some(resolve_share);
-
-                return Outcome::Success(GuardAuthShare { claims });
+                    return Outcome::Success(GuardAuthShare { claims });
+                }
             }
         }
-        return Outcome::Forward(Status::Unauthorized);
+
+        Outcome::Forward(Status::Unauthorized)
     }
 }
 
 pub struct GuardAuthUpload;
-
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for GuardAuthUpload {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Check for JWT cookie
-        let cookies: &CookieJar = req.cookies();
-        if let Some(jwt_cookie) = cookies.get("jwt") {
+        if let Some(jwt_cookie) = req.cookies().get("jwt") {
             let token = jwt_cookie.value();
-
-            match decode::<Claims>(
+            if decode::<Claims>(
                 token,
                 &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
                 &VALIDATION,
-            ) {
-                Ok(_) => {
-                    return Outcome::Success(GuardAuthUpload);
-                }
-                _ => {
-                    warn!("JWT validation failed.");
-                }
+            )
+            .is_ok()
+            {
+                return Outcome::Success(GuardAuthUpload);
             }
-            // Check for share mode
+            warn!("JWT validation failed.");
         }
-        if let (Some(album_cookie), Some(share_cookie)) =
-            (cookies.get("albumId"), cookies.get("shareId"))
-        {
-            let album_id = album_cookie.value();
-            let share_id = share_cookie.value();
-            info!(
-                "Extracted album_id: {} and share_id: {}",
-                album_id, share_id
-            );
+
+        let album_id = req.headers().get_one("x-album-id");
+        let share_id = req.headers().get_one("x-share-id");
+
+        if let (Some(album_id), Some(share_id)) = (album_id, share_id) {
+            info!("Received album_id={} and share_id={}", album_id, share_id);
+
             let read_txn = TREE.in_disk.begin_read().unwrap();
             let table = read_txn.open_table(ALBUM_TABLE).unwrap();
-            if let Some(album) = table.get(album_id).unwrap() {
-                if let Some(share) = album.value().share_list.remove(share_id) {
-                    if !share.show_upload {
-                        println!("Share upload is not allowed.");
-                        return Outcome::Forward(Status::Unauthorized);
+
+            if let Some(album_guard) = table.get(album_id).unwrap() {
+                let album = album_guard.value();
+
+                if let Some(share) = album.share_list.get(share_id) {
+                    if share.show_upload {
+                        return Outcome::Success(GuardAuthUpload);
+                    } else {
+                        warn!("Share exists, but upload not allowed.");
                     }
-                    return Outcome::Success(GuardAuthUpload);
-                } else {
-                    println!("{:#?}", album.value().share_list);
                 }
             }
         }
-        return Outcome::Forward(Status::Unauthorized);
+
+        Outcome::Forward(Status::Unauthorized)
     }
 }
 

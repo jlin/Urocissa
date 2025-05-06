@@ -44,11 +44,21 @@ const handler = createHandler<typeof toImgWorker>({
       const controller = new AbortController()
       controllerMap.set(event.index, controller)
 
+      const headers: Record<string, string> = {}
+
+      if (event.albumId !== null) {
+        headers['x-album-id'] = event.albumId
+      }
+      if (event.shareId !== null) {
+        headers['x-share-id'] = event.shareId
+      }
+
       const response = await workerAxios.get<Blob>(
         getSrc(event.hash, false, 'jpg', '', undefined),
         {
           signal: controller.signal,
-          responseType: 'blob'
+          responseType: 'blob',
+          headers
         }
       )
       controllerMap.delete(event.index)
@@ -84,10 +94,20 @@ const handler = createHandler<typeof toImgWorker>({
   },
   async processImage(event: ProcessImagePayload) {
     try {
+      const headers: Record<string, string> = {}
+
+      if (event.albumId !== null) {
+        headers['x-album-id'] = event.albumId
+      }
+      if (event.shareId !== null) {
+        headers['x-share-id'] = event.shareId
+      }
+
       const response = await workerAxios.get<Blob>(
         getSrc(event.hash, false, 'jpg', '', undefined),
         {
-          responseType: 'blob'
+          responseType: 'blob',
+          headers
         }
       )
       const blob = response.data

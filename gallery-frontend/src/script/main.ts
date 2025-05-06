@@ -17,21 +17,36 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useRedirectionStore } from '@/store/redirectionStore'
+import { useShareStore } from '@/store/shareStore'
 
-// Response interceptor to handle 401 Unauthorized
+// Request interceptor
+axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const shareStore = useShareStore('mainId')
+
+  if (
+    typeof shareStore.albumId === 'string' &&
+    typeof shareStore.shareId === 'string'
+  ) {
+    config.headers.set('x-album-id', shareStore.albumId)
+    config.headers.set('x-share-id', shareStore.shareId)
+  }
+
+  return config
+})
+
+// Response interceptor
 axios.interceptors.response.use(
-  (response) => response, // Pass through valid responses
+  (response) => response,
   async (error: AxiosError) => {
     if (error.response && error.response.status === 401) {
       const redirectionStore = useRedirectionStore('mainId')
       await redirectionStore.redirectionToLogin()
     }
-    return Promise.reject(error) // Always reject the error to maintain default behavior
+    return Promise.reject(error)
   }
 )
-
 // Create Vue application instance
 const app = createApp(App)
 

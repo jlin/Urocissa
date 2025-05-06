@@ -14,12 +14,16 @@ export interface ProcessSmallImagePayload {
   height: number
   devicePixelRatio: number
   albumMode?: boolean
+  albumId: null | string
+  shareId: null | string
 }
 
 export interface ProcessImagePayload {
   index: number
   hash: string
   devicePixelRatio: number
+  albumId: null | string
+  shareId: null | string
 }
 
 export interface ProcessAbortPayload {

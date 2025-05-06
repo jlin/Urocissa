@@ -6,6 +6,7 @@ import { useImgStore } from '@/store/imgStore'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue } from '@utils/getter'
+import { useShareStore } from '@/store/shareStore'
 
 interface SmallImageContainerProps {
   abstractData: AbstractData
@@ -113,6 +114,7 @@ function checkAndFetch(
   isolationId: IsolationId
 ) {
   const workerStore = useWorkerStore(isolationId)
+  const shareStore = useShareStore('mainId')
   const workerIndex = index % workerStore.concurrencyNumber
   if (workerStore.postToWorkerList !== undefined) {
     if (abstractData.database) {
@@ -121,7 +123,9 @@ function checkAndFetch(
         hash: abstractData.database.hash,
         width: displayWidth,
         height: displayHeight,
-        devicePixelRatio: window.devicePixelRatio
+        devicePixelRatio: window.devicePixelRatio,
+        albumId: shareStore.albumId,
+        shareId: shareStore.shareId
       })
     } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
       getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
@@ -130,7 +134,9 @@ function checkAndFetch(
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
-        albumMode: true
+        albumMode: true,
+        albumId: shareStore.albumId,
+        shareId: shareStore.shareId
       })
     }
   } else {

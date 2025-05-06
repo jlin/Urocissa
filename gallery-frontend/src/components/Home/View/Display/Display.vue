@@ -68,6 +68,7 @@ import ViewPageDisplayDatabase from './DisplayDatabase.vue'
 import ViewPageDisplayAlbum from './DisplayAlbum.vue'
 import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
+import { useShareStore } from '@/store/shareStore'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -87,6 +88,7 @@ const imgStore = useImgStore(props.isolationId)
 const initializedStore = useInitializedStore(props.isolationId)
 const modalStore = useModalStore('mainId')
 const infoStore = useInfoStore('mainId')
+const shareStore = useShareStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
@@ -184,7 +186,9 @@ const checkAndFetch = (index: number): boolean => {
     postToWorker.processImage({
       index,
       hash,
-      devicePixelRatio: window.devicePixelRatio
+      devicePixelRatio: window.devicePixelRatio,
+      albumId: shareStore.albumId,
+      shareId: shareStore.shareId
     })
   }
 
