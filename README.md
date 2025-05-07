@@ -62,10 +62,10 @@ Both demos are currently in read-only mode, and uploading files or editing tags 
 | Find in Timeline           | ✅     |
 | Responsive Layout          | ✅     |
 | Docker Installation        | ✅     |
-| Shareable Albums           | 🛠️     |
-| Basic Editing              | ⏳     |
-| Multi-User Support         | ⏳     |
+| Shareable Albums           | ✅     |
+| Basic Editing              | 🛠️     |
 | Discovery                  | ⏳     |
+| Multi-User Support         | ❌     |
 | Object/Face Recognition    | ❌     |
 | Geolocation/Map            | ❌     |
 | Android App                | ❌     |
