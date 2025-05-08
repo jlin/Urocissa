@@ -35,7 +35,9 @@
             :class="{ 'hover-cursor': computedHoverAndMessage.hasHoverEffect }"
             :style="{
               border:
-                computedHoverAndMessage.hasHoverEffect && isHovering ? '2px solid #BDBDBD' : '2px solid transparent'
+                computedHoverAndMessage.hasHoverEffect && isHovering
+                  ? '2px solid #BDBDBD'
+                  : '2px solid transparent'
             }"
             :elevation="computedHoverAndMessage.hasHoverEffect && isHovering ? 12 : 2"
             rounded="lg"
@@ -91,6 +93,7 @@ import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { navigateToAlbum } from '@/script/navigator'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -154,7 +157,10 @@ const clickEmptyCard = async () => {
   if (route.meta.isReadPage) {
     modalStore.showHomeTempModal = true
   } else if (path.startsWith('/albums')) {
-    await createEmptyAlbum(props.isolationId, router)
+    const newAlbumId = await createEmptyAlbum()
+    if (typeof newAlbumId === 'string') {
+      await navigateToAlbum(newAlbumId, router)
+    }
   } else {
     uploadStore.triggerFileInput()
   }

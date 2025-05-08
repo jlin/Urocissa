@@ -20,7 +20,7 @@ watchEffect(() => {
 
 const createEmptyAlbumWithLoading = async () => {
   loading.value = true
-  let newAlbumId = await createEmptyAlbum()
+  const newAlbumId = await createEmptyAlbum()
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
   }
