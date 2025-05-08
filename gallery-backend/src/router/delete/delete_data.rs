@@ -45,6 +45,11 @@ pub async fn delete_data(
                         std::fs::remove_file(&imported_path).unwrap_or_else(|err| {
                             error!("Failed to delete file at {:?}: {:#?}", imported_path, err);
                         });
+
+                        for album_id in data.album {
+                            deleted_album_id.push(album_id);
+                        }
+
                         true
                     }
                     None => false,
