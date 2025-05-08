@@ -19,13 +19,13 @@ pub async fn delete_data(
     _read_only_mode: GuardReadOnlyMode,
     json_data: Json<DeleteList>,
 ) {
-    let id_vec = tokio::task::spawn_blocking(move || {
+    let deleted_album_id = tokio::task::spawn_blocking(move || {
         let timestamp = &json_data.timestamp;
 
         let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
         let txn = TREE.in_disk.begin_write().unwrap();
-        let mut id_vec = vec![];
+        let mut deleted_album_id = vec![];
         {
             let mut table = txn.open_table(DATA_TABLE).unwrap();
             let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
@@ -56,7 +56,7 @@ pub async fn delete_data(
                 let found_album = match album_table.get(hash.as_str()).unwrap() {
                     Some(album) => {
                         let album = album.value();
-                        id_vec.push(album.id);
+                        deleted_album_id.push(album.id);
                         true
                     }
                     None => false,
@@ -68,10 +68,10 @@ pub async fn delete_data(
         }
 
         txn.commit().unwrap();
-        id_vec
+        deleted_album_id
     })
     .await
     .unwrap();
     TREE.should_update_async().await;
-    album_self_update_async(id_vec).await;
+    album_self_update_async(deleted_album_id).await;
 }
