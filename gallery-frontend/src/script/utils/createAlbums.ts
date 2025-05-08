@@ -4,10 +4,8 @@ import { useAlbumStore } from '@/store/albumStore'
 import { Album, IsolationId } from '@type/types'
 import { useDataStore } from '@/store/dataStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { Router } from 'vue-router'
-import { navigateToAlbum } from '@/script/navigator'
 
-export async function createAlbum(
+export async function createNonEmptyAlbum(
   elementsIndex: number[],
   isolationId: IsolationId
 ): Promise<string | undefined> {
@@ -15,13 +13,38 @@ export async function createAlbum(
   const albumStore = useAlbumStore('mainId')
   const prefetchStore = usePrefetchStore(isolationId)
   try {
-    const createAlbumData = {
+    const createNonEmptyAlbumData = {
       title: null,
       elementsIndex: elementsIndex,
       timestamp: prefetchStore.timestamp
     }
 
-    const response = await axios.post<string>('/post/create_album', createAlbumData, {
+    const response = await axios.post<string>(
+      '/post/create_non_empty_album',
+      createNonEmptyAlbumData,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    messageStore.success('Album created successfully.')
+
+    const newAlbumId = response.data
+    await albumStore.fetchAlbums()
+    return newAlbumId
+  } catch (error) {
+    console.error('Error creating album:', error)
+    messageStore.error('Failed to create album.')
+  }
+}
+
+export async function createEmptyAlbum(): Promise<string | undefined> {
+  const messageStore = useMessageStore('mainId')
+  const albumStore = useAlbumStore('mainId')
+  try {
+    const response = await axios.post<string>('/post/create_empty_album', {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -63,12 +86,5 @@ export async function editTitle(album: Album, titleModelValue: string) {
         console.error(`Cannot find album with id ${id}`)
       }
     }
-  }
-}
-
-export async function createEmptyAlbum(isolationId: IsolationId, router: Router) {
-  const newAlbumId = await createAlbum([], isolationId)
-  if (typeof newAlbumId === 'string') {
-    await navigateToAlbum(newAlbumId, router)
   }
 }

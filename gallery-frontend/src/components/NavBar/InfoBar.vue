@@ -53,17 +53,13 @@
       </v-card-text>
     </v-card>
 
-    <v-menu v-if="!route.meta.isReadPage">
-      <template #activator="{ props }">
-        <v-btn v-bind="props" icon="mdi-plus" :loading="loading"></v-btn>
-      </template>
-      <v-list>
-        <v-list-item prepend-icon="mdi-upload" value="upload" @click="uploadStore.triggerFileInput">
-          <v-list-item-title class="wrap">{{ 'Upload' }}</v-list-item-title>
-        </v-list-item>
-        <ItemCreateAlbum v-model="loading" />
-      </v-list>
-    </v-menu>
+    <BtnCreateAlbum v-if="!route.meta.isReadPage" v-model="loading" />
+    <v-btn
+      v-if="!route.meta.isReadPage"
+      icon="mdi-upload"
+      :loading="loading"
+      @click="uploadStore.triggerFileInput"
+    />
   </v-toolbar>
 </template>
 
@@ -73,7 +69,7 @@ import { LocationQueryValue, useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { useAlbumStore } from '@/store/albumStore'
-import ItemCreateAlbum from '@Menu/MenuItem/ItemCreateAlbum.vue'
+import BtnCreateAlbum from '@Menu/MenuButton/BtnCreateAlbum.vue'
 
 const showDrawer = inject('showDrawer')
 

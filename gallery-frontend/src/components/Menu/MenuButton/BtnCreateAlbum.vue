@@ -1,18 +1,12 @@
 <template>
-  <v-list-item
-    prepend-icon="mdi-book-plus"
-    value="create-album"
-    @click="createEmptyAlbumWithLoading()"
-  >
-    <v-list-item-title class="wrap">{{ 'Create Album' }}</v-list-item-title>
-  </v-list-item>
+  <v-btn icon="mdi-book-plus" :loading="loading" @click="createEmptyAlbumWithLoading()" />
 </template>
 
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createEmptyAlbum } from '@utils/createAlbums'
-import { getIsolationIdByRoute } from '@utils/getter'
+import { navigateToAlbum } from '@/script/navigator'
 
 const loading = defineModel<boolean>()
 
@@ -20,15 +14,16 @@ const route = useRoute()
 const router = useRouter()
 const searchQuery = ref('')
 
-const isolationId = getIsolationIdByRoute(route)
-
 watchEffect(() => {
   searchQuery.value = route.query.search as string
 })
 
 const createEmptyAlbumWithLoading = async () => {
   loading.value = true
-  await createEmptyAlbum(isolationId, router)
+  let newAlbumId = await createEmptyAlbum()
+  if (typeof newAlbumId === 'string') {
+    await navigateToAlbum(newAlbumId, router)
+  }
   loading.value = false
 }
 </script>

@@ -52,7 +52,7 @@
                             <v-progress-circular indeterminate size="24" />
                           </v-btn>
                         </v-list-item-action>
-                        <v-list-item-title class="wrap" @click="createNonEmptyAlbum()">
+                        <v-list-item-title class="wrap" @click="createNonEmptyAlbumWithLoading()">
                           Create New Album
                         </v-list-item-title>
                       </template>
@@ -66,7 +66,7 @@
                         <v-list-item-action>
                           <v-btn color="transparent" icon="mdi-plus" density="comfortable" flat />
                         </v-list-item-action>
-                        <v-list-item-title class="wrap" @click="createNonEmptyAlbum()">
+                        <v-list-item-title class="wrap" @click="createNonEmptyAlbumWithLoading()">
                           Create New Album
                         </v-list-item-title>
                       </template>
@@ -114,7 +114,7 @@ import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
-import { createAlbum } from '@utils/createAlbums'
+import { createNonEmptyAlbum } from '@utils/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
 import type { AlbumInfo } from '@type/types'
 import type { VForm } from 'vuetify/components'
@@ -166,9 +166,9 @@ onMounted(() => {
   }
 })
 
-const createNonEmptyAlbum = async () => {
+const createNonEmptyAlbumWithLoading = async () => {
   loading.value = true
-  const newAlbumId = await createAlbum([...collectionStore.editModeCollection], isolationId)
+  const newAlbumId = await createNonEmptyAlbum([...collectionStore.editModeCollection], isolationId)
 
   if (typeof newAlbumId === 'string') {
     await navigateToAlbum(newAlbumId, router)
