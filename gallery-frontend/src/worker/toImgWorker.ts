@@ -36,8 +36,6 @@ const handler = createHandler<typeof toImgWorker>({
       if (event.albumId !== null) headers['x-album-id'] = event.albumId
       if (event.shareId !== null) headers['x-share-id'] = event.shareId
 
-      console.log('event.hashToken is', event.hashToken)
-
       headers.Authorization = `Bearer ${event.hashToken}`
 
       const config = {
