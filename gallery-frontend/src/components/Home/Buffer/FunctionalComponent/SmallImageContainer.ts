@@ -116,9 +116,9 @@ function checkAndFetch(
   const workerStore = useWorkerStore(isolationId)
   const shareStore = useShareStore('mainId')
   const workerIndex = index % workerStore.concurrencyNumber
-  if (workerStore.postToWorkerList !== undefined) {
+  if (workerStore.postToImgWorkerList !== undefined) {
     if (abstractData.database) {
-      getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
+      getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
         index: index,
         hash: abstractData.database.hash,
         width: displayWidth,
@@ -128,7 +128,7 @@ function checkAndFetch(
         shareId: shareStore.shareId
       })
     } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
-      getArrayValue(workerStore.postToWorkerList, workerIndex).processSmallImage({
+      getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
         index: index,
         hash: abstractData.album.cover,
         width: displayWidth,
@@ -140,7 +140,7 @@ function checkAndFetch(
       })
     }
   } else {
-    console.error('workerStore.postToWorkerList is undefined')
+    console.error('workerStore.postToImgWorkerList is undefined')
   }
 }
 

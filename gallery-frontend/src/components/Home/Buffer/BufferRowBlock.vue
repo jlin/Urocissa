@@ -169,12 +169,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   for (let abortIndex = props.row.start; abortIndex <= props.row.end; abortIndex++) {
     const workerIndex = abortIndex % workerStore.concurrencyNumber
-    if (workerStore.postToWorkerList !== undefined) {
-      getArrayValue(workerStore.postToWorkerList, workerIndex).processAbort({
+    if (workerStore.postToImgWorkerList !== undefined) {
+      getArrayValue(workerStore.postToImgWorkerList, workerIndex).processAbort({
         index: abortIndex
       })
     } else {
-      console.error('workerStore.postToWorkerList is undefined')
+      console.error('workerStore.postToImgWorkerList is undefined')
     }
     queueStore.img.delete(abortIndex)
   }

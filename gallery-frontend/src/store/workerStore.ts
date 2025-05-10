@@ -16,12 +16,12 @@ import {
 import { defineStore } from 'pinia'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
-interface postToWorkerType {
+interface PostToImgWorkerType {
   processSmallImage: (payload: ProcessSmallImagePayload) => void
   processImage: (payload: ProcessImagePayload) => void
   processAbort: (payload: ProcessAbortPayload) => void
 }
-interface postToWorkerTypeB {
+interface PostToDataWorkerType {
   fetchData: (payload: FetchDataParams) => void
   fetchRow: (payload: FetchRowParams) => void
   editTags: (payload: EditTagsParams) => void
@@ -35,14 +35,14 @@ export const useWorkerStore = (isolationId: IsolationId) =>
       concurrencyNumber: number
       worker: null | Worker
       imgWorker: Worker[]
-      postToWorker: postToWorkerTypeB | undefined
-      postToWorkerList: postToWorkerType[] | undefined
+      postToDataWorker: PostToDataWorkerType | undefined
+      postToImgWorkerList: PostToImgWorkerType[] | undefined
     } => ({
       concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1),
       worker: null,
       imgWorker: [],
-      postToWorker: undefined,
-      postToWorkerList: undefined
+      postToDataWorker: undefined,
+      postToImgWorkerList: undefined
     }),
     actions: {
       initializeWorker(isolationId: IsolationId) {
@@ -51,7 +51,7 @@ export const useWorkerStore = (isolationId: IsolationId) =>
             type: 'module'
           })
           handleDataWorkerReturn(this.worker, isolationId)
-          this.postToWorker = bindActionDispatch(toDataWorker, (action) => {
+          this.postToDataWorker = bindActionDispatch(toDataWorker, (action) => {
             this.worker?.postMessage(action)
           })
         } else {
@@ -59,16 +59,16 @@ export const useWorkerStore = (isolationId: IsolationId) =>
         }
 
         if (this.imgWorker.length === 0) {
-          this.postToWorkerList = []
+          this.postToImgWorkerList = []
           for (let i = 0; i <= this.concurrencyNumber; i++) {
             const worker = new Worker(new URL('../worker/toImgWorker.ts', import.meta.url), {
               type: 'module'
             })
             this.imgWorker.push(worker)
-            const postToWorker = bindActionDispatch(toImgWorker, (action) => {
+            const postToDataWorker = bindActionDispatch(toImgWorker, (action) => {
               worker.postMessage(action)
             })
-            this.postToWorkerList.push(postToWorker)
+            this.postToImgWorkerList.push(postToDataWorker)
           }
           this.imgWorker.forEach((worker) => {
             handleImgWorker(worker, isolationId)

@@ -24,7 +24,7 @@ export function editTagsInWorker(
       removeTagsArray: [...removeTagsArray],
       timestamp: timestamp
     }
-    const postToWorker = workerStore.postToWorker
+    const postToWorker = workerStore.postToDataWorker
     if (postToWorker !== undefined) {
       postToWorker.editTags(payload)
       optimisticUpdateTags.optimisticUpdateTags(payload, true)
