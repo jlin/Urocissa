@@ -69,6 +69,7 @@ import ViewPageDisplayAlbum from './DisplayAlbum.vue'
 import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
+import { useTokenStore } from '@/store/tokenStore'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -86,6 +87,7 @@ const workerStore = useWorkerStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const imgStore = useImgStore(props.isolationId)
 const initializedStore = useInitializedStore(props.isolationId)
+const tokenStore = useTokenStore(props.isolationId)
 const modalStore = useModalStore('mainId')
 const infoStore = useInfoStore('mainId')
 const shareStore = useShareStore('mainId')
@@ -181,6 +183,11 @@ const checkAndFetch = (index: number): boolean => {
   // Determine the hash from database or album cover
   const hash = abstractData.database?.hash ?? abstractData.album?.cover
 
+  const timestampToken = tokenStore.timestampToken
+  if (timestampToken === null) {
+    throw new Error('timestampToken is null')
+  }
+
   // If a valid hash exists, initiate the image processing
   if (hash != null) {
     postToWorker.processImage({
@@ -188,7 +195,8 @@ const checkAndFetch = (index: number): boolean => {
       hash,
       devicePixelRatio: window.devicePixelRatio,
       albumId: shareStore.albumId,
-      shareId: shareStore.shareId
+      shareId: shareStore.shareId,
+      timestampToken
     })
   }
 

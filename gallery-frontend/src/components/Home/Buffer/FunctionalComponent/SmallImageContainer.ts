@@ -7,6 +7,7 @@ import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue } from '@utils/getter'
 import { useShareStore } from '@/store/shareStore'
+import { useTokenStore } from '@/store/tokenStore'
 
 interface SmallImageContainerProps {
   abstractData: AbstractData
@@ -114,29 +115,38 @@ function checkAndFetch(
   isolationId: IsolationId
 ) {
   const workerStore = useWorkerStore(isolationId)
+  const tokenStore = useTokenStore(isolationId)
   const shareStore = useShareStore('mainId')
   const workerIndex = index % workerStore.concurrencyNumber
+
+  const timestampToken = tokenStore.timestampToken
+  if (timestampToken === null) {
+    throw new Error('timestampToken is null')
+  }
+
   if (workerStore.postToImgWorkerList !== undefined) {
     if (abstractData.database) {
       getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
-        index: index,
+        index,
         hash: abstractData.database.hash,
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
         albumId: shareStore.albumId,
-        shareId: shareStore.shareId
+        shareId: shareStore.shareId,
+        timestampToken
       })
     } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
       getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
-        index: index,
+        index,
         hash: abstractData.album.cover,
         width: displayWidth,
         height: displayHeight,
         devicePixelRatio: window.devicePixelRatio,
         albumMode: true,
         albumId: shareStore.albumId,
-        shareId: shareStore.shareId
+        shareId: shareStore.shareId,
+        timestampToken
       })
     }
   } else {

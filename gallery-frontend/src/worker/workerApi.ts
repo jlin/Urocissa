@@ -14,6 +14,7 @@ export interface ProcessSmallImagePayload {
   albumMode?: boolean
   albumId: null | string
   shareId: null | string
+  timestampToken: string
 }
 
 export interface ProcessImagePayload {
@@ -22,6 +23,7 @@ export interface ProcessImagePayload {
   devicePixelRatio: number
   albumId: null | string
   shareId: null | string
+  timestampToken: string
 }
 
 export interface ProcessAbortPayload {
@@ -43,6 +45,10 @@ export interface ImageProcessedPayload {
 export interface NotificationPayload {
   text: string
   color: MessageColor
+}
+
+export interface RefreshTimestampTokenPayload {
+  timestampToken: string
 }
 
 // === To DataWorker Payloads ===
@@ -123,7 +129,8 @@ export const fromDataWorker = createActionCreators({
   fetchRowReturn: (payload: FetchRowReturnPayload) => payload,
   editTagsReturn: (payload: EditTagsReturnPayload) => payload,
   notification: (payload: NotificationPayload) => payload,
-  unauthorized: () => ({})
+  unauthorized: () => ({}),
+  refreshTimestampToken: (payload: RefreshTimestampTokenPayload) => payload
 })
 
 // ================== Main Thread -> Worker ==================
@@ -157,4 +164,5 @@ export interface PostFromDataWorker {
   editTagsReturn: (payload: EditTagsReturnPayload) => void
   notification: (payload: NotificationPayload) => void
   unauthorized: () => void
+  refreshTimestampToken: (payload: RefreshTimestampTokenPayload) => void
 }

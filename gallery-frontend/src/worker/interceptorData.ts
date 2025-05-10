@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { tokenReturnSchema } from '@type/schemas'
-import { storeTimestampToken } from '@/indexedDb/timestampToken'
 import { PostFromDataWorker } from './workerApi'
 
 interface QueuedRequest {
@@ -71,7 +70,7 @@ export function interceptorData(
 
             if (tokenResponse.status === 200) {
               const newToken = tokenReturnSchema.parse(tokenResponse.data)
-              await storeTimestampToken(newToken.token)
+              postToMainData.refreshTimestampToken({ timestampToken: newToken.token })
 
               // Update original failed request and retry
               if (config) {

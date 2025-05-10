@@ -6,11 +6,13 @@ import { bindActionDispatch } from 'typesafe-agent-events'
 import { toImgWorker } from '@/worker/workerApi'
 import { watch } from 'vue'
 import { useShareStore } from '@/store/shareStore'
+import { useTokenStore } from '@/store/tokenStore'
 export function refreshAlbumMetadata(albumId: string) {
   const dataStore = useDataStore('mainId')
   const workerStore = useWorkerStore('mainId')
   const messageStore = useMessageStore('mainId')
   const shareStore = useShareStore('mainId')
+  const tokenStore = useTokenStore('mainId')
 
   const albumIndex = dataStore.hashMapData.get(albumId)
   if (albumIndex === undefined) {
@@ -44,12 +46,18 @@ export function refreshAlbumMetadata(albumId: string) {
         return
       }
 
+      const timestampToken = tokenStore.timestampToken
+      if (timestampToken === null) {
+        throw new Error('timestampToken is null')
+      }
+
       postToWorker.processImage({
         index: albumIndex,
         hash: coverHash,
         devicePixelRatio: window.devicePixelRatio,
         albumId: shareStore.albumId,
-        shareId: shareStore.shareId
+        shareId: shareStore.shareId,
+        timestampToken
       })
 
       postToWorker.processSmallImage({
@@ -60,7 +68,8 @@ export function refreshAlbumMetadata(albumId: string) {
         devicePixelRatio: window.devicePixelRatio,
         albumMode: true,
         albumId: shareStore.albumId,
-        shareId: shareStore.shareId
+        shareId: shareStore.shareId,
+        timestampToken
       })
 
       messageStore.success(`Album cover updated successfully`)

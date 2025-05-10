@@ -11,6 +11,7 @@ import { useLocationStore } from '@/store/locationStore'
 import { useModalStore } from '@/store/modalStore'
 import { useOptimisticStore } from '@/store/optimisticUpateStore'
 import { useRedirectionStore } from '@/store/redirectionStore'
+import { useTokenStore } from '@/store/tokenStore'
 
 const workerHandlerMap = new Map<Worker, (e: MessageEvent) => void>()
 
@@ -18,10 +19,10 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
   const messageStore = useMessageStore('mainId')
   const modalStore = useModalStore('mainId')
   const redirectionStore = useRedirectionStore('mainId')
-
+  const tagStore = useTagStore('mainId')
+  const tokenStore = useTokenStore(isolationId)
   const dataStore = useDataStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
-  const tagStore = useTagStore('mainId')
   const offsetStore = useOffsetStore(isolationId)
   const rowStore = useRowStore(isolationId)
   const locationStore = useLocationStore(isolationId)
@@ -87,6 +88,9 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
     },
     unauthorized: async () => {
       await redirectionStore.redirectionToLogin()
+    },
+    refreshTimestampToken: (payload) => {
+      tokenStore.timestampToken = payload.timestampToken
     }
   })
 

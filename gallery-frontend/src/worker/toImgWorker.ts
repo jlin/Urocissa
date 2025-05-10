@@ -18,23 +18,11 @@ interceptorImg(workerAxios, postToMainImg)
 
 axiosRetry(workerAxios, {
   retries: 0,
-  retryDelay: () => {
-    return 200
-  },
+  retryDelay: () => 200,
   retryCondition: (error) => {
-    // Check if the error is a cancellation
-    if (axios.isCancel(error)) {
-      return false // Do not retry
-    }
-
-    // Check if the error is an AxiosError and has a response property
+    if (axios.isCancel(error)) return false
     const response = (error as AxiosError).response
-    if (response) {
-      return response.status !== 200
-    }
-
-    // Handle other unknown situations
-    return true
+    return response ? response.status !== 200 : true
   }
 })
 
@@ -45,28 +33,26 @@ const handler = createHandler<typeof toImgWorker>({
       controllerMap.set(event.index, controller)
 
       const headers: Record<string, string> = {}
+      if (event.albumId !== null) headers['x-album-id'] = event.albumId
+      if (event.shareId !== null) headers['x-share-id'] = event.shareId
 
-      if (event.albumId !== null) {
-        headers['x-album-id'] = event.albumId
-      }
-      if (event.shareId !== null) {
-        headers['x-share-id'] = event.shareId
+      const config = {
+        signal: controller.signal,
+        responseType: 'blob' as const,
+        headers,
+        timestampToken: event.timestampToken
       }
 
       const response = await workerAxios.get<Blob>(
         getSrc(event.hash, false, 'jpg', '', undefined),
-        {
-          signal: controller.signal,
-          responseType: 'blob',
-          headers
-        }
+        config
       )
+
       controllerMap.delete(event.index)
       const blob = response.data
       const img = await createImageBitmap(blob)
 
       const albumMode = event.albumMode === true
-
       const converted: Blob = await readAndCompressImage(img, {
         argorithm: 'bilinear',
         quality: 1,
@@ -85,40 +71,34 @@ const handler = createHandler<typeof toImgWorker>({
       const objectUrl = URL.createObjectURL(converted)
       postToMainImg.smallImageProcessed({ index: event.index, url: objectUrl })
     } catch (error) {
-      if (axios.isCancel(error)) {
-        // Do nothing if the error is due to cancellation
-        return
-      }
+      if (axios.isCancel(error)) return
       console.error(error)
     }
   },
+
   async processImage(event: ProcessImagePayload) {
     try {
       const headers: Record<string, string> = {}
+      if (event.albumId !== null) headers['x-album-id'] = event.albumId
+      if (event.shareId !== null) headers['x-share-id'] = event.shareId
 
-      if (event.albumId !== null) {
-        headers['x-album-id'] = event.albumId
-      }
-      if (event.shareId !== null) {
-        headers['x-share-id'] = event.shareId
+      const config = {
+        responseType: 'blob' as const,
+        headers,
+        timestampToken: event.timestampToken
       }
 
       const response = await workerAxios.get<Blob>(
         getSrc(event.hash, false, 'jpg', '', undefined),
-        {
-          responseType: 'blob',
-          headers
-        }
+        config
       )
       const blob = response.data
       const img = await createImageBitmap(blob)
 
-      // Create an OffscreenCanvas
       const offscreenCanvas = new OffscreenCanvas(img.width, img.height)
       const context = offscreenCanvas.getContext('2d')
       context?.drawImage(img, 0, 0)
 
-      // Convert the canvas to a blob
       const orientedImgBlob = await offscreenCanvas.convertToBlob()
       const objectUrl = URL.createObjectURL(orientedImgBlob)
 
@@ -127,6 +107,7 @@ const handler = createHandler<typeof toImgWorker>({
       console.error(error)
     }
   },
+
   processAbort(event: ProcessAbortPayload) {
     const controller = controllerMap.get(event.index)
     if (controller !== undefined) {

@@ -53,9 +53,9 @@ export function interceptorImg(
               throw new Error('No hash token found in query parameters')
             }
 
-            const timestampToken = await getTimestampToken()
-            if (timestampToken === null) {
-              throw new Error('No timestampToken found in query parameters')
+            const timestampToken = config?.timestampToken
+            if (typeof timestampToken !== 'string') {
+              throw new Error('No timestampToken found in request config')
             }
 
             const tokenResponse = await subAxios.post(
