@@ -5,7 +5,7 @@ import { getTimestampToken } from '@/indexedDb/timestampToken'
 import { interceptorData } from './interceptorData'
 import { getHashToken, storeHashToken } from '@/indexedDb/hashToken'
 import { extractHashFromPath } from '@/script/utils/getter'
-import { fromDataWorker, PostToMainDataTypeImg } from './workerApi'
+import { fromDataWorker, PostFromImgWorker } from './workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
 
 const subAxios = axios.create()
@@ -14,7 +14,7 @@ interceptorData(subAxios, postToMainData)
 
 export function interceptorImg(
   axiosInstance: AxiosInstance,
-  postToMainImg: PostToMainDataTypeImg
+  postToMainImg: PostFromImgWorker
 ): void {
   axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,

@@ -1,33 +1,9 @@
 import { IsolationId } from '@type/types'
 import { handleDataWorkerReturn, removeHandleDataWorkerReturn } from '@/worker/fromDataWorker'
 import { handleImgWorker, removeHandleImgWorkerReturn } from '@/worker/fromImgWorker'
-import {
-  DeleteDataParams,
-  EditAlbumsParams,
-  EditTagsParams,
-  FetchDataParams,
-  FetchRowParams,
-  ProcessAbortPayload,
-  ProcessImagePayload,
-  ProcessSmallImagePayload,
-  toDataWorker,
-  toImgWorker
-} from '@/worker/workerApi'
+import { PostToDataWorker, PostToImgWorker, toDataWorker, toImgWorker } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { bindActionDispatch } from 'typesafe-agent-events'
-
-interface PostToImgWorkerType {
-  processSmallImage: (payload: ProcessSmallImagePayload) => void
-  processImage: (payload: ProcessImagePayload) => void
-  processAbort: (payload: ProcessAbortPayload) => void
-}
-interface PostToDataWorkerType {
-  fetchData: (payload: FetchDataParams) => void
-  fetchRow: (payload: FetchRowParams) => void
-  editTags: (payload: EditTagsParams) => void
-  editAlbums: (payload: EditAlbumsParams) => void
-  deleteData: (payload: DeleteDataParams) => void
-}
 
 export const useWorkerStore = (isolationId: IsolationId) =>
   defineStore('workerStore' + isolationId, {
@@ -35,8 +11,8 @@ export const useWorkerStore = (isolationId: IsolationId) =>
       concurrencyNumber: number
       worker: null | Worker
       imgWorker: Worker[]
-      postToDataWorker: PostToDataWorkerType | undefined
-      postToImgWorkerList: PostToImgWorkerType[] | undefined
+      postToDataWorker: PostToDataWorker | undefined
+      postToImgWorkerList: PostToImgWorker[] | undefined
     } => ({
       concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1),
       worker: null,

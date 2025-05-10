@@ -2,7 +2,7 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { tokenReturnSchema } from '@type/schemas'
 import { storeTimestampToken } from '@/indexedDb/timestampToken'
-import { PostToMainDataType } from './workerApi'
+import { PostFromDataWorker } from './workerApi'
 
 interface QueuedRequest {
   config: InternalAxiosRequestConfig | undefined
@@ -15,7 +15,7 @@ const queueList: QueuedRequest[] = []
 
 export function interceptorData(
   axiosInstance: AxiosInstance,
-  postToMainData: PostToMainDataType
+  postToMainData: PostFromDataWorker
 ): void {
   axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,
