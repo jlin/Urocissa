@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/return-await */
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import { tokenReturnSchema } from '@type/schemas'
-import { getTimestampToken } from '@/indexedDb/timestampToken'
 import { interceptorData } from './interceptorData'
 import { getHashToken, storeHashToken } from '@/indexedDb/hashToken'
 import { extractHashFromPath } from '@/script/utils/getter'

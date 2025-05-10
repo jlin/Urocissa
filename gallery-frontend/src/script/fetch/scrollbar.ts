@@ -3,12 +3,12 @@ import { IsolationId, ScrollbarData } from '@type/types'
 import { scrollbarDataSchema } from '@type/schemas'
 import { useScrollbarStore } from '@/store/scrollbarStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
-import { getTimestampToken } from '@/indexedDb/timestampToken'
 import { z } from 'zod'
+import { useTokenStore } from '@/store/tokenStore'
 
 export async function fetchScrollbar(isolationId: IsolationId) {
   const prefetchStore = usePrefetchStore(isolationId)
-
+  const tokenStore = useTokenStore(isolationId)
   const scrollbarStore = useScrollbarStore(isolationId)
 
   const timestamp = prefetchStore.timestamp
@@ -16,7 +16,11 @@ export async function fetchScrollbar(isolationId: IsolationId) {
     console.error('timestamp is null, cannot fetch scrollbar')
     return
   }
-  const timestampToken = await getTimestampToken()
+  const timestampToken = tokenStore.timestampToken
+  if (timestampToken === null) {
+    console.error('timestampToken is null, cannot fetch scrollbar')
+    return
+  }
   const response = await axios.get<ScrollbarData[]>(`/get/get-scroll-bar?timestamp=${timestamp}`, {
     headers: {
       Authorization: `Bearer ${timestampToken}`

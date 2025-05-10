@@ -11,8 +11,8 @@ import { useInitializedStore } from '@/store/initializedStore'
 import { useTagStore } from '@/store/tagStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { fetchScrollbar } from '@/script/fetch/scrollbar'
-import { storeTimestampToken } from '@/indexedDb/timestampToken'
 import { useShareStore } from '@/store/shareStore'
+import { useTokenStore } from '@/store/tokenStore'
 
 export function usePrefetch(
   filterJsonString: string | null,
@@ -60,6 +60,7 @@ async function handlePrefetchReturn(
   const configStore = useConfigStore(isolationId)
   const prefetchStore = usePrefetchStore(isolationId)
   const initializedStore = useInitializedStore(isolationId)
+  const tokenStore = useTokenStore(isolationId)
   const shareStore = useShareStore('mainId')
   const albumStore = useAlbumStore('mainId')
   const tagStore = useTagStore('mainId')
@@ -81,8 +82,7 @@ async function handlePrefetchReturn(
   prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
   prefetchStore.calculateLength(prefetch.dataLength)
   prefetchStore.locateTo = prefetch.locateTo
-
-  await storeTimestampToken(token)
+  tokenStore.timestampToken = token
 
   initializedStore.initialized = true
 
