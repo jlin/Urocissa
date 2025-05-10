@@ -1,5 +1,3 @@
-// workerApi.ts
-
 // ================== Imports ==================
 import { FetchDataMethod, MessageColor, RowWithOffset, SlicedData, TagInfo } from '@type/types'
 import { createActionCreators } from 'typesafe-agent-events'
@@ -41,20 +39,21 @@ export interface ImageProcessedPayload {
   url: string
 }
 
-export interface NotificationReturnParams {
+// === Common Payloads ===
+export interface NotificationPayload {
   text: string
   color: MessageColor
 }
 
 // === To DataWorker Payloads ===
-export interface FetchDataParams {
+export interface FetchDataPayload {
   fetchMethod: FetchDataMethod
   batch: number
   timestamp: number
   timestampToken: string
 }
 
-export interface FetchRowParams {
+export interface FetchRowPayload {
   index: number
   timestamp: number
   windowWidth: number
@@ -62,37 +61,37 @@ export interface FetchRowParams {
   timestampToken: string
 }
 
-export interface EditTagsParams {
+export interface EditTagsPayload {
   indexSet: Set<number>
   addTagsArray: string[]
   removeTagsArray: string[]
   timestamp: number
 }
 
-export interface EditAlbumsParams {
+export interface EditAlbumsPayload {
   indexSet: Set<number>
   addAlbumsArray: string[]
   removeAlbumsArray: string[]
   timestamp: number
 }
 
-export interface DeleteDataParams {
+export interface DeleteDataPayload {
   indexArray: number[]
   timestamp: number
 }
 
 // === From DataWorker Payloads ===
-export interface ReturnDataParams {
+export interface ReturnDataPayload {
   batch: number
   slicedDataArray: SlicedData[]
 }
 
-export interface FetchRowReturnParams {
+export interface FetchRowReturnPayload {
   rowWithOffset: RowWithOffset
   timestamp: number
 }
 
-export interface EditTagsReturnParams {
+export interface EditTagsReturnPayload {
   returnedTagsArray: TagInfo[] | undefined
 }
 
@@ -108,34 +107,26 @@ export const fromImgWorker = createActionCreators({
   smallImageProcessed: (payload: SmallImageProcessedPayload) => payload,
   imageProcessed: (payload: ImageProcessedPayload) => payload,
   unauthorized: () => ({}),
-  notification: (payload: NotificationReturnParams) => payload
+  notification: (payload: NotificationPayload) => payload
 })
 
 export const toDataWorker = createActionCreators({
-  fetchData: (payload: FetchDataParams) => payload,
-  fetchRow: (payload: FetchRowParams) => payload,
-  editTags: (payload: EditTagsParams) => payload,
-  editAlbums: (payload: EditAlbumsParams) => payload,
-  deleteData: (payload: DeleteDataParams) => payload
+  fetchData: (payload: FetchDataPayload) => payload,
+  fetchRow: (payload: FetchRowPayload) => payload,
+  editTags: (payload: EditTagsPayload) => payload,
+  editAlbums: (payload: EditAlbumsPayload) => payload,
+  deleteData: (payload: DeleteDataPayload) => payload
 })
 
 export const fromDataWorker = createActionCreators({
-  returnData: (payload: ReturnDataParams) => payload,
-  fetchRowReturn: (payload: FetchRowReturnParams) => payload,
-  editTagsReturn: (payload: EditTagsReturnParams) => payload,
-  notification: (payload: NotificationReturnParams) => payload,
+  returnData: (payload: ReturnDataPayload) => payload,
+  fetchRowReturn: (payload: FetchRowReturnPayload) => payload,
+  editTagsReturn: (payload: EditTagsReturnPayload) => payload,
+  notification: (payload: NotificationPayload) => payload,
   unauthorized: () => ({})
 })
 
 // ================== Main Thread -> Worker ==================
-
-export interface PostToDataWorker {
-  fetchData: (payload: FetchDataParams) => void
-  fetchRow: (payload: FetchRowParams) => void
-  editTags: (payload: EditTagsParams) => void
-  editAlbums: (payload: EditAlbumsParams) => void
-  deleteData: (payload: DeleteDataParams) => void
-}
 
 export interface PostToImgWorker {
   processSmallImage: (payload: ProcessSmallImagePayload) => void
@@ -143,19 +134,27 @@ export interface PostToImgWorker {
   processAbort: (payload: ProcessAbortPayload) => void
 }
 
-// ================== Worker -> Main Thread ==================
-
-export interface PostFromDataWorker {
-  returnData: (payload: ReturnDataParams) => void
-  fetchRowReturn: (payload: FetchRowReturnParams) => void
-  editTagsReturn: (payload: EditTagsReturnParams) => void
-  notification: (payload: NotificationReturnParams) => void
-  unauthorized: () => void
+export interface PostToDataWorker {
+  fetchData: (payload: FetchDataPayload) => void
+  fetchRow: (payload: FetchRowPayload) => void
+  editTags: (payload: EditTagsPayload) => void
+  editAlbums: (payload: EditAlbumsPayload) => void
+  deleteData: (payload: DeleteDataPayload) => void
 }
+
+// ================== Worker -> Main Thread ==================
 
 export interface PostFromImgWorker {
   smallImageProcessed: (payload: SmallImageProcessedPayload) => void
   imageProcessed: (payload: ImageProcessedPayload) => void
   unauthorized: () => void
-  notification: (payload: NotificationReturnParams) => void
+  notification: (payload: NotificationPayload) => void
+}
+
+export interface PostFromDataWorker {
+  returnData: (payload: ReturnDataPayload) => void
+  fetchRowReturn: (payload: FetchRowReturnPayload) => void
+  editTagsReturn: (payload: EditTagsReturnPayload) => void
+  notification: (payload: NotificationPayload) => void
+  unauthorized: () => void
 }

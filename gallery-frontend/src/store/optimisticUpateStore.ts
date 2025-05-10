@@ -1,5 +1,5 @@
 import { AbstractData, IsolationId } from '@type/types'
-import { EditAlbumsParams, EditTagsParams } from '@/worker/workerApi'
+import { EditAlbumsPayload, EditTagsPayload } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { useDataStore } from './dataStore'
 
@@ -7,8 +7,8 @@ export const useOptimisticStore = (isolationId: IsolationId) =>
   defineStore('optimisticUpdateStore' + isolationId, {
     state: (): {
       backupData: Map<number, AbstractData> // dataIndex -> data
-      queueTagsUpdate: EditTagsParams[]
-      queueAlbumsUpdate: EditAlbumsParams[]
+      queueTagsUpdate: EditTagsPayload[]
+      queueAlbumsUpdate: EditAlbumsPayload[]
     } => ({
       backupData: new Map(),
       queueTagsUpdate: [],
@@ -20,7 +20,7 @@ export const useOptimisticStore = (isolationId: IsolationId) =>
         this.queueTagsUpdate = []
         this.queueAlbumsUpdate = []
       },
-      optimisticUpdateTags(payload: EditTagsParams, pushIntoQueue: boolean) {
+      optimisticUpdateTags(payload: EditTagsPayload, pushIntoQueue: boolean) {
         const dataStore = useDataStore(isolationId)
         for (const index of dataStore.data.keys()) {
           if (payload.indexSet.has(index)) {
@@ -41,7 +41,7 @@ export const useOptimisticStore = (isolationId: IsolationId) =>
           this.queueTagsUpdate.push(payload)
         }
       },
-      optimisticUpdateAlbums(payload: EditAlbumsParams, pushIntoQueue: boolean) {
+      optimisticUpdateAlbums(payload: EditAlbumsPayload, pushIntoQueue: boolean) {
         const dataStore = useDataStore(isolationId)
         for (const index of dataStore.data.keys()) {
           if (payload.indexSet.has(index)) {
