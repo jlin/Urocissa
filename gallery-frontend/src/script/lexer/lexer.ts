@@ -13,7 +13,7 @@ import {
   PathExpressionCstChildren,
   TagExpressionCstChildren,
   TypeExpressionCstChildren
-} from './MyParserCst'
+} from '@type/MyParserCst'
 import { getArrayValue } from '@utils/getter'
 import { unescapeAndUnwrap } from '@utils/escape'
 const WhiteSpace = createToken({
