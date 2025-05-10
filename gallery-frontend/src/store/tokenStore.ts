@@ -5,8 +5,10 @@ export const useTokenStore = (isolationId: IsolationId) =>
   defineStore('tokenStore' + isolationId, {
     state: (): {
       timestampToken: string | null
+      hashTokenMap: Map<string, string>
     } => ({
-      timestampToken: null
+      timestampToken: null,
+      hashTokenMap: new Map<string, string>()
     }),
     actions: {}
   })()

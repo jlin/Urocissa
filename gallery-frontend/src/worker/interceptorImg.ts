@@ -2,7 +2,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 import { tokenReturnSchema } from '@type/schemas'
 import { interceptorData } from './interceptorData'
-import { getHashToken, storeHashToken } from '@/indexedDb/hashToken'
 import { extractHashFromPath } from '@/script/utils/getter'
 import { fromDataWorker, PostFromImgWorker } from './workerApi'
 import { bindActionDispatch } from 'typesafe-agent-events'
@@ -46,11 +45,10 @@ export function interceptorImg(
             if (hash === null) {
               throw new Error('Failed to extract hash from URL')
             }
+            const expiredToken = config?.hashToken
 
-            const expiredToken = await getHashToken(hash)
-
-            if (expiredToken == null) {
-              throw new Error('No hash token found in query parameters')
+            if (expiredToken === undefined) {
+              throw new Error('No hash token found')
             }
 
             const timestampToken = config?.timestampToken
@@ -72,8 +70,7 @@ export function interceptorImg(
 
             if (tokenResponse.status === 200) {
               const newToken = tokenReturnSchema.parse(tokenResponse.data)
-
-              await storeHashToken(hash, newToken.token)
+              postToMainData.refreshHashToken({ hash: hash, hashToken: newToken.token })
 
               if (config) {
                 return axiosInstance.request(config)

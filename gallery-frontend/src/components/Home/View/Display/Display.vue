@@ -190,13 +190,18 @@ const checkAndFetch = (index: number): boolean => {
 
   // If a valid hash exists, initiate the image processing
   if (hash != null) {
+    const hashToken = tokenStore.hashTokenMap.get(hash)
+    if (hashToken === undefined) {
+      throw new Error(`hashToken is undefined for hash: ${hash}`)
+    }
     postToWorker.processImage({
       index,
       hash,
       devicePixelRatio: window.devicePixelRatio,
       albumId: shareStore.albumId,
       shareId: shareStore.shareId,
-      timestampToken
+      timestampToken,
+      hashToken
     })
   }
 

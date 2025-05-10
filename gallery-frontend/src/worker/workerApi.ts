@@ -15,6 +15,7 @@ export interface ProcessSmallImagePayload {
   albumId: null | string
   shareId: null | string
   timestampToken: string
+  hashToken: string
 }
 
 export interface ProcessImagePayload {
@@ -24,6 +25,7 @@ export interface ProcessImagePayload {
   albumId: null | string
   shareId: null | string
   timestampToken: string
+  hashToken: string
 }
 
 export interface ProcessAbortPayload {
@@ -49,6 +51,11 @@ export interface NotificationPayload {
 
 export interface RefreshTimestampTokenPayload {
   timestampToken: string
+}
+
+export interface RefreshHashTokenPayload {
+  hash: string
+  hashToken: string
 }
 
 // === To DataWorker Payloads ===
@@ -130,7 +137,8 @@ export const fromDataWorker = createActionCreators({
   editTagsReturn: (payload: EditTagsReturnPayload) => payload,
   notification: (payload: NotificationPayload) => payload,
   unauthorized: () => ({}),
-  refreshTimestampToken: (payload: RefreshTimestampTokenPayload) => payload
+  refreshTimestampToken: (payload: RefreshTimestampTokenPayload) => payload,
+  refreshHashToken: (payload: RefreshHashTokenPayload) => payload
 })
 
 // ================== Main Thread -> Worker ==================
@@ -165,4 +173,5 @@ export interface PostFromDataWorker {
   notification: (payload: NotificationPayload) => void
   unauthorized: () => void
   refreshTimestampToken: (payload: RefreshTimestampTokenPayload) => void
+  refreshHashToken: (payload: RefreshHashTokenPayload) => void
 }

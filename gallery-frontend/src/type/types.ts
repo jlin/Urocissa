@@ -21,14 +21,10 @@ import {
 
 export type Sorting = 'ascending' | 'descending' | 'random' | 'similar'
 
-export interface SlicedDataItem {
-  index: number
-  data: AbstractData
-}
-
 export interface SlicedData {
   index: number
   data: AbstractData
+  hashToken: string
 }
 
 export interface Message {

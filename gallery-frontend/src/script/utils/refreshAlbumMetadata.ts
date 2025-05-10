@@ -51,13 +51,19 @@ export function refreshAlbumMetadata(albumId: string) {
         throw new Error('timestampToken is null')
       }
 
+      const hashToken = tokenStore.hashTokenMap.get(coverHash)
+      if (hashToken === undefined) {
+        throw new Error('hashToken is undefined')
+      }
+
       postToWorker.processImage({
         index: albumIndex,
         hash: coverHash,
         devicePixelRatio: window.devicePixelRatio,
         albumId: shareStore.albumId,
         shareId: shareStore.shareId,
-        timestampToken
+        timestampToken,
+        hashToken
       })
 
       postToWorker.processSmallImage({
@@ -69,7 +75,8 @@ export function refreshAlbumMetadata(albumId: string) {
         albumMode: true,
         albumId: shareStore.albumId,
         shareId: shareStore.shareId,
-        timestampToken
+        timestampToken,
+        hashToken
       })
 
       messageStore.success(`Album cover updated successfully`)

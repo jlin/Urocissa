@@ -1,5 +1,5 @@
 import { useDataStore } from '@/store/dataStore'
-import { IsolationId, MessageColor, SlicedDataItem } from '@type/types'
+import { IsolationId, MessageColor, SlicedData } from '@type/types'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useTagStore } from '@/store/tagStore'
@@ -30,13 +30,17 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
 
   const handler = createHandler<typeof fromDataWorker>({
     returnData: (payload) => {
-      const slicedDataArray: SlicedDataItem[] = payload.slicedDataArray
-      slicedDataArray.forEach(({ index, data }) => {
+      const slicedDataArray: SlicedData[] = payload.slicedDataArray
+      slicedDataArray.forEach(({ index, data, hashToken }) => {
         dataStore.data.set(index, data)
         if (data.database) {
           dataStore.hashMapData.set(data.database.hash, index)
+          tokenStore.hashTokenMap.set(data.database.hash, hashToken)
         } else if (data.album) {
           dataStore.hashMapData.set(data.album.id, index)
+          if (data.album.cover !== null) {
+            tokenStore.hashTokenMap.set(data.album.cover, hashToken)
+          }
         }
       })
       dataStore.batchFetched.set(payload.batch, true)
@@ -91,6 +95,9 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
     },
     refreshTimestampToken: (payload) => {
       tokenStore.timestampToken = payload.timestampToken
+    },
+    refreshHashToken: (payload) => {
+      tokenStore.hashTokenMap.set(payload.hash, payload.hashToken)
     }
   })
 

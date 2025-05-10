@@ -120,12 +120,17 @@ function checkAndFetch(
   const workerIndex = index % workerStore.concurrencyNumber
 
   const timestampToken = tokenStore.timestampToken
+
   if (timestampToken === null) {
     throw new Error('timestampToken is null')
   }
 
   if (workerStore.postToImgWorkerList !== undefined) {
     if (abstractData.database) {
+      const hashToken = tokenStore.hashTokenMap.get(abstractData.database.hash)
+      if (hashToken === undefined) {
+        throw new Error('hashToken is undefined')
+      }
       getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
         index,
         hash: abstractData.database.hash,
@@ -134,9 +139,14 @@ function checkAndFetch(
         devicePixelRatio: window.devicePixelRatio,
         albumId: shareStore.albumId,
         shareId: shareStore.shareId,
-        timestampToken
+        timestampToken,
+        hashToken
       })
     } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
+      const hashToken = tokenStore.hashTokenMap.get(abstractData.album.cover)
+      if (hashToken === undefined) {
+        throw new Error('hashToken is undefined')
+      }
       getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
         index,
         hash: abstractData.album.cover,
@@ -146,7 +156,8 @@ function checkAndFetch(
         albumMode: true,
         albumId: shareStore.albumId,
         shareId: shareStore.shareId,
-        timestampToken
+        timestampToken,
+        hashToken
       })
     }
   } else {

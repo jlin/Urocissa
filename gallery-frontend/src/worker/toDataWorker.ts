@@ -25,7 +25,6 @@ import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
 import { fromDataWorker, toDataWorker } from './workerApi'
 import { z } from 'zod'
 import { interceptorData } from './interceptorData'
-import { storeHashToken } from '@/indexedDb/hashToken'
 
 const shouldProcessBatch: number[] = []
 const fetchedRowData = new Map<number, Row>()
@@ -59,9 +58,13 @@ self.addEventListener('message', (e) => {
         //Push the result Map into a SlicedData[]
         const slicedDataArray: SlicedData[] = []
         for (const index of indices) {
-          const getResult = result.get(index)
-          if (getResult !== undefined) {
-            slicedDataArray.push({ index, data: getResult })
+          const getData = result.get(index)
+          if (getData !== undefined) {
+            slicedDataArray.push({
+              index,
+              data: getData.abstractData,
+              hashToken: getData.hashToken
+            })
           }
         }
 
@@ -120,7 +123,11 @@ async function fetchData(
   index: number,
   timestamp: number,
   timestampToken: string
-): Promise<{ result: Map<number, AbstractData>; startIndex: number; endIndex: number }> {
+): Promise<{
+  result: Map<number, { abstractData: AbstractData; hashToken: string }>
+  startIndex: number
+  endIndex: number
+}> {
   let start: number
   let end: number
   switch (fetchMethod) {
@@ -146,7 +153,7 @@ async function fetchData(
   })
   const databaseTimestampArray = z.array(databaseTimestampSchema).parse(response.data)
 
-  const data = new Map<number, AbstractData>()
+  const data = new Map<number, { abstractData: AbstractData; hashToken: string }>()
 
   for (let i = 0; i < databaseTimestampArray.length; i++) {
     // Determine the current batch index based on the fetch method
@@ -171,15 +178,11 @@ async function fetchData(
     if ('Database' in item.abstractData) {
       const databaseInstance = createDataBase(item.abstractData.Database, item.timestamp)
       const abstractData = createAbstractData(databaseInstance)
-      data.set(key, abstractData)
-      await storeHashToken(item.abstractData.Database.hash, item.token)
+      data.set(key, { abstractData, hashToken: item.token })
     } else if ('Album' in item.abstractData) {
       const albumInstance = createAlbum(item.abstractData.Album, item.timestamp)
       const abstractData = createAbstractData(albumInstance)
-      data.set(key, abstractData)
-      if (item.abstractData.Album.cover !== null) {
-        await storeHashToken(item.abstractData.Album.cover, item.token)
-      }
+      data.set(key, { abstractData, hashToken: item.token })
     }
 
     if (i % 100 === 0) {
