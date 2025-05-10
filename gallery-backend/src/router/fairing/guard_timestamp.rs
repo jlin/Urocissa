@@ -28,7 +28,7 @@ impl TimestampClaims {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs()
-            + 1;
+            + 300;
 
         Self {
             resolved_share_opt,
