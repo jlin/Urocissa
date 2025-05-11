@@ -50,13 +50,13 @@ import { ref, computed, onMounted, toRaw } from 'vue'
 import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import type { AlbumInfo } from '@type/types'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@utils/getter'
+import { editAlbums } from '@/api/editAlbums'
 
 const formIsValid = ref(false)
 const changedAlbums = ref<AlbumInfo[]>([])
-const submit = ref<(() => void) | undefined>()
+const submit = ref<(() => Promise<void>) | undefined>()
 
 const route = useRoute()
 const modalStore = useModalStore('mainId')
@@ -67,7 +67,7 @@ const albumItems = computed<AlbumInfo[]>(() =>
 )
 
 onMounted(() => {
-  const initSubmit = (): (() => void) | undefined => {
+  const initSubmit = (): (() => Promise<void>) | undefined => {
     const parsed = getHashIndexDataFromRoute(route)
     if (!parsed) {
       console.error('initSubmit: failed to parse route.')
@@ -93,13 +93,13 @@ onMounted(() => {
 
     changedAlbums.value = initialAlbums
 
-    const innerSubmit = () => {
+    const innerSubmit = async () => {
       const selectedIds = changedAlbums.value.map((a) => a.albumId)
 
       const addAlbumIds = selectedIds.filter((id) => !defaultAlbumIds.includes(id))
       const removeAlbumIds = defaultAlbumIds.filter((id) => !selectedIds.includes(id))
 
-      editAlbumsInWorker([index], addAlbumIds, removeAlbumIds, getIsolationIdByRoute(route))
+      await editAlbums([index], addAlbumIds, removeAlbumIds, getIsolationIdByRoute(route))
 
       modalStore.showEditAlbumsModal = false
     }

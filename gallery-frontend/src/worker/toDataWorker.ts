@@ -90,16 +90,9 @@ self.addEventListener('message', (e) => {
         removeTagsArray,
         timestamp
       )
-
       postToMainData.editTagsReturn({
         returnedTagsArray: returnedTagsArray
       })
-    },
-    editAlbums: async (payload) => {
-      const { indexSet, addAlbumsArray, removeAlbumsArray, timestamp } = payload
-      await editAlbums(Array.from(indexSet), addAlbumsArray, removeAlbumsArray, timestamp)
-
-      postToMainData.notification({ text: 'Successfully edited albums.', color: 'success' })
     }
   })
   handler(e.data as ReturnType<(typeof toDataWorker)[keyof typeof toDataWorker]>)
@@ -432,20 +425,4 @@ const editTags = async (
 
   postToMainData.notification({ text: 'Successfully edited tags.', color: 'success' })
   return { returnedTagsArray: response }
-}
-
-export const editAlbums = async (
-  indexArray: number[],
-  addAlbumsArray: string[],
-  removeAlbumsArray: string[],
-  timestamp: number
-) => {
-  await workerAxios.put('/put/edit_album', {
-    indexArray,
-    addAlbumsArray,
-    removeAlbumsArray,
-    timestamp
-  })
-
-  console.log('Successfully edited albums.')
 }

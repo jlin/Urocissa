@@ -112,12 +112,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useAlbumStore } from '@/store/albumStore'
-import { editAlbumsInWorker } from '@/script/inWorker/editAlbumsInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
 import { createNonEmptyAlbum } from '@utils/createAlbums'
 import { navigateToAlbum } from '@/script/navigator'
 import type { AlbumInfo } from '@type/types'
 import type { VForm } from 'vuetify/components'
+import { editAlbums } from '@/api/editAlbums'
 
 const route = useRoute()
 const router = useRouter()
@@ -149,13 +149,13 @@ const removeAlbumsRule = (inputArray: AlbumInfo[]) =>
     (album) => !changedAlbums.value.add.map((a) => a.albumId).includes(album.albumId)
   ) || 'Some albums are already selected in Add Albums'
 
-const submit = ref<(() => void) | undefined>()
+const submit = ref<(() => Promise<void>) | undefined>()
 
 onMounted(() => {
-  submit.value = () => {
+  submit.value = async () => {
     const hashArray = Array.from(collectionStore.editModeCollection)
 
-    editAlbumsInWorker(
+    await editAlbums(
       hashArray,
       changedAlbums.value.add.map((a) => a.albumId),
       changedAlbums.value.remove.map((a) => a.albumId),
