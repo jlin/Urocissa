@@ -2,12 +2,12 @@ import { useMessageStore } from '@/store/messageStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { IsolationId } from '@/type/types'
 import axios from 'axios'
-export const editAlbums = async (
+export async function editAlbums(
   indexArray: number[],
   addAlbumsArray: string[],
   removeAlbumsArray: string[],
   isolationId: IsolationId
-) => {
+) {
   const prefetchStore = usePrefetchStore(isolationId)
   const timestamp = prefetchStore.timestamp
   const messageStore = useMessageStore('mainId')
