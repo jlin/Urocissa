@@ -1,7 +1,7 @@
 // useFetchRows.ts
 import { Ref, watch } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
-import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import { fetchRowInWorker } from '@/api/fetchRow'
 import debounce from 'lodash/debounce'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { useRowStore } from '@/store/rowStore'

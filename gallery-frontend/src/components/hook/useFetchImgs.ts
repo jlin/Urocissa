@@ -1,5 +1,5 @@
 import { computed, Ref, watch } from 'vue'
-import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
+import { fetchDataInWorker } from '@/api/fetchData'
 import { useDataStore } from '@/store/dataStore'
 import debounce from 'lodash/debounce'
 import { getArrayValue } from '@utils/getter'

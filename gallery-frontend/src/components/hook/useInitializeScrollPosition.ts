@@ -2,7 +2,7 @@ import { watch, type Ref, type ComputedRef } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { fixedBigRowHeight, layoutBatchNumber } from '@/type/constants'
-import { fetchRowInWorker } from '@/script/inWorker/fetchRowInWorker'
+import { fetchRowInWorker } from '@/api/fetchRow'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { IsolationId } from '@type/types'
 

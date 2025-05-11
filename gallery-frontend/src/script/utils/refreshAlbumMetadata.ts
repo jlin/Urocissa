@@ -1,4 +1,4 @@
-import { fetchDataInWorker } from '@/script/inWorker/fetchDataInWorker'
+import { fetchDataInWorker } from '@/api/fetchData'
 import { useDataStore } from '@/store/dataStore'
 import { useMessageStore } from '@/store/messageStore'
 import { useWorkerStore } from '@/store/workerStore'
