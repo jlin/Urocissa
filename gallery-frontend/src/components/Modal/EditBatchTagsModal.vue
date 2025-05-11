@@ -69,9 +69,9 @@ import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useCollectionStore } from '@/store/collectionStore'
 import { useTagStore } from '@/store/tagStore'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
 import type { VForm } from 'vuetify/components'
+import { editTags } from '@/api/editTags'
 
 interface ChangedTags {
   add: string[]
@@ -100,12 +100,12 @@ const removeTagsRule = (arr: string[]) =>
   arr.every((t) => !changedTags.value.add.includes(t)) ||
   'Some tags are already selected in Add Tags'
 
-const submit = ref<(() => void) | undefined>()
+const submit = ref<() => Promise<void> | undefined>()
 
 onMounted(() => {
-  submit.value = () => {
+  submit.value = async () => {
     const hashes = Array.from(collectionStore.editModeCollection)
-    editTagsInWorker(hashes, changedTags.value.add, changedTags.value.remove, isolationId)
+    await editTags(hashes, changedTags.value.add, changedTags.value.remove, isolationId)
     modalStore.showBatchEditTagsModal = false
   }
 })

@@ -1,9 +1,4 @@
-import {
-  rowSchema,
-  rowWithOffsetSchema,
-  tagInfoSchema,
-  databaseTimestampSchema
-} from '@type/schemas'
+import { rowSchema, rowWithOffsetSchema, databaseTimestampSchema } from '@type/schemas'
 import {
   AbstractData,
   Database,
@@ -12,7 +7,6 @@ import {
   Row,
   RowWithOffset,
   SlicedData,
-  TagInfo,
   SubRow
 } from '@type/types'
 import { batchNumber, fixedBigRowHeight, paddingPixel } from '@/type/constants'
@@ -79,19 +73,6 @@ self.addEventListener('message', (e) => {
       postToMainData.fetchRowReturn({
         rowWithOffset: rowWithOffset,
         timestamp: timestamp
-      })
-    },
-
-    editTags: async (payload) => {
-      const { indexSet, addTagsArray, removeTagsArray, timestamp } = payload
-      const { returnedTagsArray } = await editTags(
-        Array.from(indexSet),
-        addTagsArray,
-        removeTagsArray,
-        timestamp
-      )
-      postToMainData.editTagsReturn({
-        returnedTagsArray: returnedTagsArray
       })
     }
   })
@@ -393,36 +374,4 @@ function normalizeSubrows(
   })
 
   return scaledTotalHeight
-}
-
-/**
- * Edits tags for specified data entries by adding and removing tags.
- *
- * @param indexArray - An array of indices identifying the data entries to edit.
- * @param addTagsArray - An array of tags to add to the specified data entries.
- * @param removeTagsArray - An array of tags to remove from the specified data entries.
- * @param timestamp - The timestamp associated with the data fetch.
- * @returns A promise that resolves to an object containing the result message, a warning flag,
- *          and optionally an array of returned tags if successful.
- */
-const editTags = async (
-  indexArray: number[],
-  addTagsArray: string[],
-  removeTagsArray: string[],
-  timestamp: number
-): Promise<{ returnedTagsArray?: TagInfo[] }> => {
-  const axiosResponse = await workerAxios.put<TagInfo[]>('/put/edit_tag', {
-    indexArray,
-    addTagsArray,
-    removeTagsArray,
-    timestamp
-  })
-
-  const tagsArraySchema = z.array(tagInfoSchema)
-  const response = tagsArraySchema.parse(axiosResponse.data)
-
-  console.log('Successfully edited tags.')
-
-  postToMainData.notification({ text: 'Successfully edited tags.', color: 'success' })
-  return { returnedTagsArray: response }
 }

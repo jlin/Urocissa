@@ -49,12 +49,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useTagStore } from '@/store/tagStore'
-import { editTagsInWorker } from '@/script/inWorker/editTagsInWorker'
 import { getHashIndexDataFromRoute, getIsolationIdByRoute } from '@utils/getter'
+import { editTags } from '@/api/editTags'
 
 const formIsValid = ref(false)
 const changedTagsArray = ref<string[]>([])
-const submit = ref<(() => void) | undefined>(undefined)
+const submit = ref<(() => Promise<void>) | undefined>(undefined)
 
 const route = useRoute()
 const modalStore = useModalStore('mainId')
@@ -70,7 +70,7 @@ const specialTag = (tag: string): boolean => {
 }
 
 onMounted(() => {
-  const useSubmit = (): undefined | (() => void) => {
+  const useSubmit = (): undefined | (() => Promise<void>) => {
     const initializeResult = getHashIndexDataFromRoute(route)
     if (initializeResult === undefined) {
       console.error(
@@ -90,7 +90,7 @@ onMounted(() => {
     }
     changedTagsArray.value = defaultTags.filter((tag) => !specialTag(tag))
 
-    const innerSubmit = () => {
+    const innerSubmit = async () => {
       const hashArray: number[] = [index]
       const addTagsArrayComputed = changedTagsArray.value.filter(
         (tag) => !specialTag(tag) && !defaultTags.includes(tag)
@@ -101,7 +101,7 @@ onMounted(() => {
 
       const isolationId = getIsolationIdByRoute(route)
 
-      editTagsInWorker(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
+      await editTags(hashArray, addTagsArrayComputed, removeTagsArrayComputed, isolationId)
     }
     return innerSubmit
   }

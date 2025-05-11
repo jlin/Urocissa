@@ -1,7 +1,20 @@
 import { AbstractData, IsolationId } from '@type/types'
-import { EditAlbumsPayload, EditTagsPayload } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { useDataStore } from './dataStore'
+
+export interface EditTagsPayload {
+  indexSet: Set<number>
+  addTagsArray: string[]
+  removeTagsArray: string[]
+  timestamp: number
+}
+
+export interface EditAlbumsPayload {
+  indexSet: Set<number>
+  addAlbumsArray: string[]
+  removeAlbumsArray: string[]
+  timestamp: number
+}
 
 export const useOptimisticStore = (isolationId: IsolationId) =>
   defineStore('optimisticUpdateStore' + isolationId, {
