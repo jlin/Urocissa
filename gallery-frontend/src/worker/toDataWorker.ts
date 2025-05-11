@@ -100,10 +100,6 @@ self.addEventListener('message', (e) => {
       await editAlbums(Array.from(indexSet), addAlbumsArray, removeAlbumsArray, timestamp)
 
       postToMainData.notification({ text: 'Successfully edited albums.', color: 'success' })
-    },
-    deleteData: async (payload) => {
-      const { indexArray, timestamp } = payload
-      await deleteData(indexArray, timestamp)
     }
   })
   handler(e.data as ReturnType<(typeof toDataWorker)[keyof typeof toDataWorker]>)
@@ -452,20 +448,4 @@ export const editAlbums = async (
   })
 
   console.log('Successfully edited albums.')
-}
-
-/**
- * Deletes data entries based on the provided indices.
- *
- * @param indexArray - An array of indices identifying the data entries to delete.
- * @param timestamp - The timestamp associated with the data fetch.
- * @returns A promise that resolves to an object containing the result message and a warning flag.
- */
-async function deleteData(indexArray: number[], timestamp: number) {
-  await workerAxios.delete('/delete/delete-data', {
-    data: { deleteList: indexArray, timestamp }
-  })
-  console.log('Successfully deleted data.')
-
-  postToMainData.notification({ text: 'Successfully deleted data.', color: 'success' })
 }

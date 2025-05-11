@@ -6,16 +6,30 @@
 
 <script lang="ts" setup>
 import { useRoute } from 'vue-router'
-import { deleteDataInWorker } from '@/script/inWorker/deleteDataInWorker'
 import { getIsolationIdByRoute } from '@utils/getter'
+import { usePrefetchStore } from '@/store/prefetchStore'
+import axios from 'axios'
+import { useMessageStore } from '@/store/messageStore'
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
-
+const prefetchStore = usePrefetchStore(isolationId)
+const messageStore = useMessageStore('mainId')
 const props = defineProps<{
   indexList: number[]
 }>()
 
-const deleteData = () => {
-  deleteDataInWorker(props.indexList, isolationId)
+const deleteData = async () => {
+  const timestamp = prefetchStore.timestamp
+  if (timestamp === null) return
+
+  try {
+    await axios.delete('/delete/delete-data', {
+      data: { deleteList: props.indexList, timestamp }
+    })
+    messageStore.success('Successfully deleted data.')
+  } catch (error) {
+    console.error('Failed to delete data:', error)
+    messageStore.error('Failed to delete data.')
+  }
 }
 </script>

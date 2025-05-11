@@ -88,11 +88,6 @@ export interface EditAlbumsPayload {
   timestamp: number
 }
 
-export interface DeleteDataPayload {
-  indexArray: number[]
-  timestamp: number
-}
-
 // === From DataWorker Payloads ===
 export interface ReturnDataPayload {
   batch: number
@@ -127,8 +122,7 @@ export const toDataWorker = createActionCreators({
   fetchData: (payload: FetchDataPayload) => payload,
   fetchRow: (payload: FetchRowPayload) => payload,
   editTags: (payload: EditTagsPayload) => payload,
-  editAlbums: (payload: EditAlbumsPayload) => payload,
-  deleteData: (payload: DeleteDataPayload) => payload
+  editAlbums: (payload: EditAlbumsPayload) => payload
 })
 
 export const fromDataWorker = createActionCreators({
@@ -154,7 +148,6 @@ export interface PostToDataWorker {
   fetchRow: (payload: FetchRowPayload) => void
   editTags: (payload: EditTagsPayload) => void
   editAlbums: (payload: EditAlbumsPayload) => void
-  deleteData: (payload: DeleteDataPayload) => void
 }
 
 // ================== Worker -> Main Thread ==================
