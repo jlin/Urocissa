@@ -53,9 +53,9 @@
 <script setup lang="ts">
 import { quickRemoveTags, quickAddTags } from '@utils/quickEditTags'
 import { AbstractData, IsolationId } from '@type/types'
-import DatabaseMenu from '@Menu/Page/SingleMenu.vue'
-import AlbumMenu from '@Menu/Page/AlbumMenu.vue'
-import ShareMenu from '@Menu/Page/ShareMenu.vue'
+import DatabaseMenu from '@Menu/SingleMenu.vue'
+import AlbumMenu from '@Menu/AlbumMenu.vue'
+import ShareMenu from '@Menu/ShareMenu.vue'
 import LeaveView from '@Menu/MenuButton/BtnLeaveView.vue'
 import ShowInfo from '@Menu/MenuButton/BtnShowInfo.vue'
 import { useRoute } from 'vue-router'

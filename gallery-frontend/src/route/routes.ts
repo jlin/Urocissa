@@ -13,11 +13,11 @@ import FavoritePage from '@/components/Page/FavoritePage.vue'
 import ArchivedPage from '@/components/Page/ArchivedPage.vue'
 import TrashedPage from '@/components/Page/TrashedPage.vue'
 import AlbumsPage from '@/components/Page/AlbumsPage.vue'
-import ViewPageMain from '@/components/Home/View/Page/ViewPageMain.vue'
-import HomeIsolated from '@/components/Home/Page/HomeIsolated.vue'
-import ViewPageIsolated from '@/components/Home/View/Page/ViewPageIsolated.vue'
+import ViewPageMain from '@/components/View/ViewPageMain.vue'
+import HomeIsolated from '@/components/Home/HomeIsolated.vue'
+import ViewPageIsolated from '@/components/View/ViewPageIsolated.vue'
 import VideosPage from '@/components/Page/VideosPage.vue'
-import HomeShare from '@/components/Home/Page/HomeShare.vue'
+import HomeShare from '@/components/Home/HomeShare.vue'
 
 interface PageReturnType {
   name: string

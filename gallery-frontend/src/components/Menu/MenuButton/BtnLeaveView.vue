@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-import { leave } from '@/script/navigator'
+import { leave } from '@/route/navigator'
 
 const router = useRouter()
 </script>

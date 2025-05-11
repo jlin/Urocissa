@@ -37,7 +37,7 @@ import { useRouter } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
 import { useAlbumStore } from '@/store/albumStore'
 import { IsolationId } from '@type/types'
-import { navigateToAlbum } from '@/script/navigator'
+import { navigateToAlbum } from '@/route/navigator'
 
 const props = defineProps<{
   isolationId: IsolationId

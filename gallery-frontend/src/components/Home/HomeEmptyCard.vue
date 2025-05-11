@@ -93,7 +93,7 @@ import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { navigateToAlbum } from '@/script/navigator'
+import { navigateToAlbum } from '@/route/navigator'
 
 const props = defineProps<{
   isolationId: IsolationId

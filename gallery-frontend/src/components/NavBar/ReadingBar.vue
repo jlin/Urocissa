@@ -37,10 +37,10 @@
 </template>
 <script setup lang="ts">
 import { useCollectionStore } from '@/store/collectionStore'
-import { leave } from '@/script/navigator'
+import { leave } from '@/route/navigator'
 import EditBar from '@/components/NavBar/EditBar.vue'
 import ProgessBar from '@/components/NavBar/ProgessBar.vue'
-import HomeTemp from '@/components/Home/Page/HomeTemp.vue'
+import HomeTemp from '@/components/Home/HomeTemp.vue'
 import CreateShareModal from '@/components/Modal/CreateShareModal.vue'
 import { Album } from '@type/types'
 import { useModalStore } from '@/store/modalStore'

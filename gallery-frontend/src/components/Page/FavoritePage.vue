@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import HomeMain from '@/components/Home/Page/HomeMain.vue'
+import HomeMain from '@/components/Home/HomeMain.vue'
 
 const basicString = 'and(tag:"_favorite", not(tag:"_trashed"))'
 </script>

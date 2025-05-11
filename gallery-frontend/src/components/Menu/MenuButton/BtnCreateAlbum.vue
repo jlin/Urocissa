@@ -6,7 +6,7 @@
 import { ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createEmptyAlbum } from '@utils/createAlbums'
-import { navigateToAlbum } from '@/script/navigator'
+import { navigateToAlbum } from '@/route/navigator'
 
 const loading = defineModel<boolean>()
 

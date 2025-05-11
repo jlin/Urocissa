@@ -48,8 +48,8 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-import ViewPageDisplay from '@/components/Home/View/Display/Display.vue'
-import MetadataCol from '@/components/Home/View/Metadata/ViewPageMetadata.vue'
+import ViewPageDisplay from '@/components/View/Display/Display.vue'
+import MetadataCol from '@/components/View/Metadata/ViewPageMetadata.vue'
 import { IsolationId } from '@type/types'
 
 const props = defineProps<{

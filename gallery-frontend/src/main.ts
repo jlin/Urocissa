@@ -6,7 +6,7 @@ import { createApp } from 'vue'
 import App from '@/components/App.vue'
 
 // Importing router and state management
-import router from '@/script/routes'
+import router from '@/route/routes'
 import { createPinia } from 'pinia'
 
 // Importing global styles and icons

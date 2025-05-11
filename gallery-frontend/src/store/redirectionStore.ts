@@ -1,4 +1,4 @@
-import router from '@/script/routes'
+import router from '@/route/routes'
 import { IsolationId } from '@type/types'
 import { defineStore } from 'pinia'
 
