@@ -1,7 +1,5 @@
-use crate::public::{
-    constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
-    error_data::{handle_error, ErrorData},
-};
+use crate::public::error_data::{ErrorData, handle_error};
+use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use rayon::prelude::*;
 use std::{ffi::OsStr, panic::Location, path::PathBuf};
 

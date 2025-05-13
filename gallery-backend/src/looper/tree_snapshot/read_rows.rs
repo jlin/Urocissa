@@ -1,5 +1,5 @@
 use super::TreeSnapshot;
-use crate::{public::constant::ROW_BATCH_NUMBER, structure::row::{DisplayElement, Row}};
+use crate::{constant::ROW_BATCH_NUMBER, structure::row::{DisplayElement, Row}};
 use rocket::http::Status;
 
 impl TreeSnapshot {

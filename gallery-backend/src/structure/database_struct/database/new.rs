@@ -1,5 +1,5 @@
 use crate::{
-    public::constant::VALID_IMAGE_EXTENSIONS, structure::database_struct::file_modify::FileModify,
+    constant::VALID_IMAGE_EXTENSIONS, structure::database_struct::file_modify::FileModify,
 };
 
 use super::definition::Database;

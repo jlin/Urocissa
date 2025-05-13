@@ -4,7 +4,7 @@ pub mod databaser;
 mod filter;
 mod importer;
 use crate::looper::tree::TREE;
-use crate::{executor, public::constant::PROCESS_BATCH_NUMBER};
+use crate::{executor, constant::PROCESS_BATCH_NUMBER};
 use batcher::merge_file_paths;
 
 pub fn executor(list_of_sync_files: Vec<PathBuf>) {

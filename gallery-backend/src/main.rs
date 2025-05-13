@@ -18,15 +18,16 @@ use router::{
 
 use std::thread;
 use std::time::Instant;
+mod constant;
 mod executor;
 mod initialization;
 mod looper;
 mod migration;
 mod public;
 mod router;
+mod structure;
 mod synchronizer;
 mod utils;
-mod structure;
 #[launch]
 async fn rocket() -> _ {
     initialize_logger();

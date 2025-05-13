@@ -5,7 +5,7 @@ use rocket::http::Status;
 use crate::executor::databaser::processor::{
     regenerate_metadata_for_image, regenerate_metadata_for_video,
 };
-use crate::public::constant::PROCESS_BATCH_NUMBER;
+use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;

@@ -1,5 +1,5 @@
+use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::executor::executor;
-use crate::public::constant::PROCESS_BATCH_NUMBER;
 
 use log::info;
 use std::mem;

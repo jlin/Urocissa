@@ -1,5 +1,5 @@
 use crate::structure::abstract_data::AbstractData;
-use crate::public::constant::DEFAULT_PRIORITY_LIST;
+use crate::constant::DEFAULT_PRIORITY_LIST;
 use crate::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::structure::row::{Row, ScrollBarData};
