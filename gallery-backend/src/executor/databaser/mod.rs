@@ -2,7 +2,7 @@ use self::processor::{process_image_info, process_video_info};
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 use crate::structure::database_struct::database::definition::Database;
 use crate::public::error_data::{handle_error, ErrorData};
-use crate::public::redb::DATA_TABLE;
+use crate::constant::redb::DATA_TABLE;
 use crate::looper::tree::TREE;
 use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use arrayvec::ArrayString;

@@ -1,3 +1,6 @@
+pub mod redb;
+pub mod ser_de;
+
 pub const ROW_BATCH_NUMBER: usize = 20;
 
 pub const PROCESS_BATCH_NUMBER: usize = 100;

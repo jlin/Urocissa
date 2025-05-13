@@ -10,7 +10,7 @@ use rocket::{http::Status, post};
 use serde::{Deserialize, Serialize};
 
 use crate::structure::album::Album;
-use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;

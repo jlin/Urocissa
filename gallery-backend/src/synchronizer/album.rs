@@ -1,5 +1,5 @@
 use crate::structure::abstract_data::AbstractData;
-use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::looper::tree::TREE;
 
 use arrayvec::ArrayString;

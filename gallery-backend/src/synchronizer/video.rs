@@ -1,6 +1,6 @@
 use crate::executor::databaser::generate_compressed_video::generate_compressed_video;
 use crate::public::error_data::{handle_error, ErrorData};
-use crate::public::redb::DATA_TABLE;
+use crate::constant::redb::DATA_TABLE;
 use crate::looper::tree::TREE;
 
 use arrayvec::ArrayString;

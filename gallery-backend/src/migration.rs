@@ -1,4 +1,4 @@
-use crate::public::redb::SCHEMA_TABLE;
+use crate::constant::redb::SCHEMA_TABLE;
 use indicatif::ProgressBar;
 use indicatif::ProgressStyle;
 use log::{error, info, warn};
@@ -91,7 +91,7 @@ pub fn migration() {
 
 pub fn migration_database(txn: &WriteTransaction) {
     let mut new_table = txn
-        .open_table(crate::public::redb::DATA_TABLE)
+        .open_table(crate::constant::redb::DATA_TABLE)
         .expect("Migration failed: Unable to open the new data table");
     let old_table = txn
         .open_table(urocissa::DATA_TABLE)
@@ -157,14 +157,14 @@ pub fn migration_database(txn: &WriteTransaction) {
 
 pub fn migration_album(txn: &WriteTransaction) {
     let mut new_table = txn
-        .open_table(crate::public::redb::ALBUM_TABLE)
+        .open_table(crate::constant::redb::ALBUM_TABLE)
         .expect("Migration failed: Unable to open the new album table");
     let old_table = txn
         .open_table(urocissa::ALBUM_TABLE)
         .expect("Migration failed: Unable to open the old album table");
 
     let database_table = txn
-        .open_table(crate::public::redb::DATA_TABLE)
+        .open_table(crate::constant::redb::DATA_TABLE)
         .expect("Migration failed: Unable to open the data table");
 
     let progress_bar = ProgressBar::new(

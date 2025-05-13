@@ -1,4 +1,4 @@
-use crate::{public::redb::{ALBUM_TABLE, DATA_TABLE}, structure::{album::Album, database_struct::database::definition::Database}};
+use crate::{constant::redb::{ALBUM_TABLE, DATA_TABLE}, structure::{album::Album, database_struct::database::definition::Database}};
 
 use redb::ReadOnlyTable;
 use std::error::Error;
