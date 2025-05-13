@@ -1,7 +1,7 @@
 use crate::public::album::Share;
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
-use crate::public::tree::TREE;
-use crate::public::tree::read_tags::TagInfo;
+use crate::looper::tree::TREE;
+use crate::looper::tree::read_tags::TagInfo;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_share::GuardShare;
 

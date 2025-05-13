@@ -1,6 +1,6 @@
 use crate::public::database_struct::database::definition::Database;
 use crate::public::error_data::{ErrorData, handle_error};
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 use arrayvec::ArrayString;
 use blake3::Hasher;
 use dashmap::DashMap;

@@ -1,7 +1,6 @@
 use super::QuerySnapshot;
-use crate::public::{
-    query_snapshot::Prefetch, tree::start_loop::VERSION_COUNT_TIMESTAMP, utils::start_loop_util,
-};
+use crate::looper::{query_snapshot::Prefetch, tree::start_loop::VERSION_COUNT_TIMESTAMP};
+use crate::public::utils::start_loop_util;
 use redb::TableDefinition;
 use std::{
     sync::{Arc, OnceLock, atomic::Ordering},

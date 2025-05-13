@@ -1,6 +1,6 @@
 use crate::executor::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::executor::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use arrayvec::ArrayString;

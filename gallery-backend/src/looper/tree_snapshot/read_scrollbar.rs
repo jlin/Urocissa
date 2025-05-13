@@ -1,7 +1,8 @@
 use std::time::Instant;
 
 use super::TreeSnapshot;
-use crate::public::{row::ScrollBarData, tree_snapshot::read_tree_snapshot::MyCow};
+use crate::looper::tree_snapshot::read_tree_snapshot::MyCow;
+use crate::public::row::ScrollBarData;
 use chrono::{Datelike, TimeZone, Utc};
 use redb::ReadableTable;
 

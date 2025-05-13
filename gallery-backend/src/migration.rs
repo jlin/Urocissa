@@ -13,7 +13,7 @@ pub fn check_database_schema_version() {
     // Check if the database directory or file exists
     if !fs::metadata("./db/index.redb").is_ok() {
         warn!("Database not found. Creating a new one.");
-        let txn = crate::public::tree::TREE.in_disk.begin_write().unwrap();
+        let txn = crate::looper::tree::TREE.in_disk.begin_write().unwrap();
         migration_version(&txn);
         txn.commit()
             .expect("Migration failed: Unable to commit transaction; database rolled back.");

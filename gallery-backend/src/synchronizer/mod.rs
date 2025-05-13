@@ -4,7 +4,7 @@ use rocket::Shutdown;
 use video::start_video_channel;
 use watch::start_watcher;
 
-use crate::public::{
+use crate::looper::{
     expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
 };
 

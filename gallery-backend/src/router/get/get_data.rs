@@ -3,8 +3,8 @@ use crate::public::constant::DEFAULT_PRIORITY_LIST;
 use crate::public::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::row::{Row, ScrollBarData};
-use crate::public::tree::TREE;
-use crate::public::tree_snapshot::TREE_SNAPSHOT;
+use crate::looper::tree::TREE;
+use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 
 use crate::router::fairing::guard_timestamp::GuardTimestamp;
 use log::info;

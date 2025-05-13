@@ -1,4 +1,5 @@
-use crate::public::{database_struct::database::definition::Database, tree::TREE};
+use crate::TREE;
+use crate::public::database_struct::database::definition::Database;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};

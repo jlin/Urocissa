@@ -1,11 +1,11 @@
 use crate::public::album::ResolvedShare;
 use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::public::expression::Expression;
-use crate::public::query_snapshot::QUERY_SNAPSHOT;
+use crate::looper::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::reduced_data::ReducedData;
-use crate::public::tree::TREE;
-use crate::public::tree::start_loop::VERSION_COUNT_TIMESTAMP;
-use crate::public::tree_snapshot::TREE_SNAPSHOT;
+use crate::looper::tree::TREE;
+use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
+use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_share::GuardShare;
 use crate::router::fairing::guard_timestamp::TimestampClaims;
 

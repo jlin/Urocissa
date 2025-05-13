@@ -1,11 +1,11 @@
 #[macro_use]
 extern crate rocket;
+use crate::looper::tree::TREE;
 use initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
 use migration::check_database_schema_version;
 use public::redb::{ALBUM_TABLE, DATA_TABLE};
-use public::tree::TREE;
 use redb::ReadableTableMetadata;
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
@@ -15,10 +15,12 @@ use router::{
     delete::generate_delete_routes, get::generate_get_routes, post::generate_post_routes,
     put::generate_put_routes,
 };
+
 use std::thread;
 use std::time::Instant;
 mod executor;
 mod initialization;
+mod looper;
 mod migration;
 mod public;
 mod router;

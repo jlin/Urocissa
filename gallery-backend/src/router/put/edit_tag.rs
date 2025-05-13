@@ -1,7 +1,7 @@
-use crate::public::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
+use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::read_tags::TagInfo;
+use crate::looper::tree::read_tags::TagInfo;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 

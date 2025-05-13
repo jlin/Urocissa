@@ -9,7 +9,7 @@ use rocket::{http::Status, post};
 
 use crate::public::album::Share;
 use crate::public::redb::ALBUM_TABLE;
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use serde::{Deserialize, Serialize};

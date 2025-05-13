@@ -1,5 +1,5 @@
 use crate::public::album::Share;
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 
 use crate::public::redb::ALBUM_TABLE;
 use crate::router::fairing::guard_auth::GuardAuth;

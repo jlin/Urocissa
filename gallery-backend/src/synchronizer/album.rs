@@ -1,6 +1,6 @@
 use crate::public::abstract_data::AbstractData;
 use crate::public::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 
 use arrayvec::ArrayString;
 use log::info;

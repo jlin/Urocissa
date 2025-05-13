@@ -8,7 +8,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::public::album::ResolvedShare;
 use crate::public::redb::ALBUM_TABLE;
-use crate::public::tree::TREE;
+use crate::looper::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
 use super::VALIDATION;
