@@ -6,7 +6,7 @@ import 'vue-router'
 
 import TagsPage from '@/components/Page/TagsPage.vue'
 import LinksPage from '@/components/Page/LinksPage.vue'
-import LoginPage from '@/components/LoginPage.vue'
+import LoginPage from '@/components/Page/LoginPage.vue'
 import HomeMain from '@/components/Page/HomePage.vue'
 import AllPage from '@/components/Page/AllPage.vue'
 import FavoritePage from '@/components/Page/FavoritePage.vue'
