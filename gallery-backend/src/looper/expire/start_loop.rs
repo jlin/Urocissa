@@ -3,7 +3,7 @@ use crate::{
     looper::{
         query_snapshot::QUERY_SNAPSHOT, tree::start_loop::VERSION_COUNT_TIMESTAMP,
         tree_snapshot::TREE_SNAPSHOT,
-    }, public::utils::start_loop_util, router::get::get_prefetch::Prefetch
+    }, utils::start_loop_util, router::get::get_prefetch::Prefetch
 };
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};

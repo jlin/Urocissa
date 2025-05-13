@@ -10,5 +10,3 @@ pub mod redb;
 pub mod reduced_data;
 pub mod row;
 pub mod ser_de;
-
-pub mod utils;

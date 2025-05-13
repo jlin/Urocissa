@@ -1,7 +1,7 @@
 use crate::looper::expire::EXPIRE_TABLE_DEFINITION;
 use crate::looper::expire::start_loop::NEXT_EXPIRE_TIME;
 use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
-use crate::public::utils::get_current_timestamp_u64;
+use crate::utils::get_current_timestamp_u64;
 
 use log::info;
 use std::sync::atomic::Ordering;
