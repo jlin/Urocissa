@@ -5,9 +5,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::public::config::PRIVATE_CONFIG;
-
-use super::database_struct::database::definition::Database;
+use crate::{public::config::PRIVATE_CONFIG, structure::database_struct::database::definition::Database};
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub struct JsonData(pub &'static str, pub &'static std::path::Path);

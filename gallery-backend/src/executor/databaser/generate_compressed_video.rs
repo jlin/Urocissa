@@ -1,7 +1,7 @@
 use super::video_ffprobe::video_duration;
 use crate::{
     executor::databaser::processor::process_image_info,
-    public::database_struct::database::definition::Database,
+    structure::database_struct::database::definition::Database,
 };
 use anyhow::{Context, Result};
 use regex::Regex;

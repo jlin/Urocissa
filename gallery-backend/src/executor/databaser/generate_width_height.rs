@@ -1,5 +1,5 @@
 use super::video_ffprobe::video_width_height;
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use image::DynamicImage;
 use std::error::Error;
 

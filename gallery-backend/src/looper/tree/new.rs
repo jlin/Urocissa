@@ -1,5 +1,5 @@
 use super::Tree;
-use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use std::sync::{Arc, LazyLock, RwLock};
 
 static TREE_SNAPSHOT_IN_MEMORY: LazyLock<Arc<RwLock<Vec<DatabaseTimestamp>>>> =

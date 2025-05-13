@@ -1,4 +1,4 @@
-use crate::public::album::Share;
+use crate::structure::album::Share;
 use crate::looper::tree::TREE;
 
 use crate::public::redb::ALBUM_TABLE;

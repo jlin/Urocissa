@@ -26,6 +26,7 @@ mod public;
 mod router;
 mod synchronizer;
 mod utils;
+mod structure;
 #[launch]
 async fn rocket() -> _ {
     initialize_logger();

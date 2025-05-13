@@ -1,4 +1,4 @@
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use image::{DynamicImage, ImageBuffer, Rgb};
 use std::error::Error;
 use std::fs::read;

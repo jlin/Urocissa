@@ -7,7 +7,7 @@ use super::{
     generate_thumbnail::generate_thumbnail_for_video,
     generate_width_height::{generate_image_width_height, generate_video_width_height},
 };
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use std::{error::Error, fs::metadata};
 
 pub fn process_image_info(database: &mut Database) -> Result<(), Box<dyn Error>> {

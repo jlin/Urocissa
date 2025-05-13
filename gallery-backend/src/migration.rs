@@ -118,7 +118,7 @@ pub fn migration_database(txn: &WriteTransaction) {
             let (_, value_guard) =
                 result.expect("Migration failed: Unable to retrieve value from the old data table");
             let old_data = value_guard.value();
-            let converted = crate::public::database_struct::database::definition::Database {
+            let converted = crate::structure::database_struct::database::definition::Database {
                 hash: old_data.hash,
                 size: old_data.size,
                 width: old_data.width,
@@ -133,7 +133,7 @@ pub fn migration_database(txn: &WriteTransaction) {
                     .alias
                     .into_iter()
                     .map(
-                        |old_alias| crate::public::database_struct::file_modify::FileModify {
+                        |old_alias| crate::structure::database_struct::file_modify::FileModify{
                             file: old_alias.file,
                             modified: old_alias.modified,
                             scan_time: old_alias.scan_time,
@@ -208,7 +208,7 @@ pub fn migration_album(txn: &WriteTransaction) {
                         }
                     });
 
-            let converted = crate::public::album::Album {
+            let converted = crate::structure::album::Album {
                 id: old_album.id,
                 title: old_album.title,
                 created_time: old_album.created_time,
@@ -225,7 +225,7 @@ pub fn migration_album(txn: &WriteTransaction) {
                         let share_id = share.url;
                         (
                             share_id,
-                            crate::public::album::Share {
+                            crate::structure::album::Share {
                                 url: share_id,
                                 description: share.description,
                                 password: share.password,

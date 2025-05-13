@@ -1,6 +1,6 @@
 use super::Tree;
-use crate::public::abstract_data::AbstractData;
-use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::structure::abstract_data::AbstractData;
+use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::looper::expire::EXPIRE;
 use crate::utils::start_loop_util;
 

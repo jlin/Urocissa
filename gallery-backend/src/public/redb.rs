@@ -1,8 +1,6 @@
 use redb::TableDefinition;
 
-use crate::public::database_struct::database::definition::Database;
-
-use super::album::Album;
+use crate::structure::{album::Album, database_struct::database::definition::Database};
 
 pub const DATA_TABLE: TableDefinition<&str, Database> = TableDefinition::new("database");
 

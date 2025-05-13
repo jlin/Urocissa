@@ -1,5 +1,5 @@
 use super::small_width_height;
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
 use image::{DynamicImage, ImageFormat};
 use std::{error::Error, process::Command};

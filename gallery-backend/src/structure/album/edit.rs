@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::looper::tree::TREE;
-use crate::public::{abstract_data::AbstractData, database_struct::database::definition::Database};
+use crate::structure::{abstract_data::AbstractData, database_struct::database::definition::Database};
 
 use super::Album;
 

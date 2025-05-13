@@ -7,7 +7,7 @@ use redb::{ReadableTable, WriteTransaction};
 use rocket::serde::json::Json;
 use rocket::{http::Status, post};
 
-use crate::public::album::Share;
+use crate::structure::album::Share;
 use crate::public::redb::ALBUM_TABLE;
 use crate::looper::tree::TREE;
 use crate::router::fairing::guard_auth::GuardAuth;

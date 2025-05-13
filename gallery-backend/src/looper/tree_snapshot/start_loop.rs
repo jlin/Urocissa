@@ -1,5 +1,5 @@
 use super::TreeSnapshot;
-use crate::{public::reduced_data::ReducedData, utils::start_loop_util};
+use crate::{structure::reduced_data::ReducedData, utils::start_loop_util};
 use redb::TableDefinition;
 use std::{
     collections::HashSet,

@@ -6,7 +6,7 @@ use rocket::request::{FromRequest, Outcome};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::public::album::ResolvedShare;
+use crate::structure::album::ResolvedShare;
 use crate::public::redb::ALBUM_TABLE;
 use crate::looper::tree::TREE;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;

@@ -1,4 +1,6 @@
-use crate::public::{constant::VALID_IMAGE_EXTENSIONS, database_struct::file_modify::FileModify};
+use crate::{
+    public::constant::VALID_IMAGE_EXTENSIONS, structure::database_struct::file_modify::FileModify,
+};
 
 use super::definition::Database;
 use arrayvec::ArrayString;

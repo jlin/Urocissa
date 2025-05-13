@@ -3,7 +3,7 @@ pub mod read_tags;
 pub mod read_tree;
 pub mod start_loop;
 
-use crate::public::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use std::sync::{Arc, LazyLock, RwLock};
 
 pub struct Tree {

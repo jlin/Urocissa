@@ -1,4 +1,4 @@
-use crate::public::album::Share;
+use crate::structure::album::Share;
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
 use crate::looper::tree::TREE;
 use crate::looper::tree::read_tags::TagInfo;

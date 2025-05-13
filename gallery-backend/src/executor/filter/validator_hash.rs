@@ -1,4 +1,4 @@
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use crate::public::error_data::{ErrorData, handle_error};
 use crate::looper::tree::TREE;
 use arrayvec::ArrayString;

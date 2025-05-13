@@ -1,7 +1,7 @@
 mod validator_extension;
 mod validator_hash;
 mod validator_modified;
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use std::path::PathBuf;

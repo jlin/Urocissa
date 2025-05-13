@@ -1,4 +1,4 @@
-use crate::public::database_struct::database::definition::Database;
+use crate::structure::database_struct::database::definition::Database;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
 use futures::TryStreamExt;
