@@ -1,15 +1,14 @@
-use crate::structure::album::ResolvedShare;
-use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use crate::structure::expression::Expression;
 use crate::looper::query_snapshot::QUERY_SNAPSHOT;
-use crate::structure::reduced_data::ReducedData;
 use crate::looper::tree::TREE;
 use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_share::GuardShare;
 use crate::router::fairing::guard_timestamp::TimestampClaims;
+use crate::structure::album::ResolvedShare;
+use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::structure::expression::Expression;
+use crate::structure::reduced_data::ReducedData;
 
-use arrayvec::ArrayString;
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::serde::json::Json;
@@ -107,13 +106,18 @@ fn collect_reduced_data_edit(expression_option: Option<Expression>) -> Vec<Reduc
 
 fn collect_reduced_data_share(
     expression_option: Option<Expression>,
-    shared_album_id: ArrayString<64>,
+    resolved_share: &ResolvedShare,
 ) -> Vec<ReducedData> {
     let tree_guard = TREE.in_memory.read().unwrap();
 
     match expression_option {
         Some(expr) => {
-            let filter_fn = expr.generate_filter_hide_metadata(shared_album_id);
+            let filter_fn = if resolved_share.share.show_metadata {
+                expr.generate_filter()
+            } else {
+                expr.generate_filter_hide_metadata(resolved_share.album_id)
+            };
+
             tree_guard
                 .par_iter()
                 .filter(|db_ts| filter_fn(&db_ts.abstract_data))
@@ -230,8 +234,7 @@ fn execute_share_path(
         return build_share_response(prefetch, prefetch.timestamp, resolved_share);
     }
 
-    let reduced_data_vector =
-        collect_reduced_data_share(expression_option, resolved_share.album_id);
+    let reduced_data_vector = collect_reduced_data_share(expression_option, &resolved_share);
     let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
     let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
 

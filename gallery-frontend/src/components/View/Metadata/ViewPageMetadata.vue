@@ -22,7 +22,7 @@
       <v-col v-if="metadata.database" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="metadata.database" />
-          <ItemPath v-if="route.meta.baseName !== 'share'" :database="metadata.database" />
+          <ItemPath v-if="showMetadata" :database="metadata.database" />
           <ItemDate :database="metadata.database" />
           <ItemExif
             v-if="
@@ -33,7 +33,7 @@
           />
           <v-divider></v-divider>
           <ItemTag
-            v-if="route.meta.baseName !== 'share'"
+            v-if="showMetadata"
             :isolation-id="props.isolationId"
             :index="props.index"
             :tags="metadata.database.tag"
@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useInfoStore } from '@/store/infoStore'
 
 import { AbstractData, IsolationId } from '@type/types'
@@ -78,6 +78,7 @@ import ItemAlbum from './ItemAlbum.vue'
 import ItemTitle from './ItemTitle.vue'
 import ItemCount from './ItemCount.vue'
 import { useRoute } from 'vue-router'
+import { useShareStore } from '@/store/shareStore'
 
 const route = useRoute()
 
@@ -88,7 +89,11 @@ const props = defineProps<{
   metadata: AbstractData
 }>()
 
+const showMetadata = computed(() => {
+  return route.meta.baseName !== 'share' || shareStore.resolvedShare?.share.showMetadata
+})
 const infoStore = useInfoStore('mainId')
+const shareStore = useShareStore('mainId')
 
 function toggleInfo() {
   infoStore.showInfo = !infoStore.showInfo
