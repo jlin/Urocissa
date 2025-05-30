@@ -95,30 +95,24 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useModalStore } from '@/store/modalStore'
-import type { EditShareData } from '@/type/types'
+import type { EditShareData, Share } from '@/type/types'
 import { useMessageStore } from '@/store/messageStore'
+import { useAlbumStore } from '@/store/albumStore'
 
 const props = defineProps<{ editShareData: EditShareData }>()
 
-interface ShareModel {
-  url: string
-  description: string
-  showDownload: boolean
-  showUpload: boolean
-  showMetadata: boolean
-  exp: number | null
-}
-
 const modalStore = useModalStore('mainId')
 const messageStore = useMessageStore('mainId')
+const albumStore = useAlbumStore('mainId')
 
-const shareModel = ref<ShareModel>({
+const shareModel = ref<Share>({
   url: props.editShareData.share.url,
   description: props.editShareData.share.description,
   showDownload: props.editShareData.share.showDownload,
   showUpload: props.editShareData.share.showUpload,
   showMetadata: props.editShareData.share.showMetadata,
-  exp: props.editShareData.share.exp
+  exp: props.editShareData.share.exp,
+  password: props.editShareData.share.password
 })
 
 const submit = ref<(() => Promise<void>) | undefined>()
@@ -130,6 +124,14 @@ onMounted(() => {
         albumId: props.editShareData.albumId,
         share: shareModel.value
       })
+
+      const album = albumStore.albums.get(props.editShareData.albumId)
+      if (!album) {
+        messageStore.error('Album not found — failed to update local share state')
+      } else {
+        album.shareList.set(props.editShareData.share.url, shareModel.value)
+      }
+
       messageStore.success('Updated share settings successfully')
       modalStore.showEditShareModal = false
     } catch (e) {
