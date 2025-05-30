@@ -74,7 +74,7 @@
           </template>
         </v-list-item>
 
-        <v-list-item v-if="false" density="compact" slim>
+        <v-list-item density="compact" slim>
           <template #prepend>
             <v-list-item-action start>
               <v-switch
@@ -163,7 +163,7 @@ const password = ref('')
 const expireEnabled = ref(false)
 const showUpload = ref(false)
 const showDownload = ref(true)
-const showMetadata = ref(true)
+const showMetadata = ref(false)
 const exp: Ref<number | null> = ref(null)
 const shareLink: Ref<string | null> = ref(null)
 
