@@ -96,6 +96,7 @@ import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useModalStore } from '@/store/modalStore'
 import type { EditShareData } from '@/type/types'
+import { useMessageStore } from '@/store/messageStore'
 
 const props = defineProps<{ editShareData: EditShareData }>()
 
@@ -109,6 +110,7 @@ interface ShareModel {
 }
 
 const modalStore = useModalStore('mainId')
+const messageStore = useMessageStore('mainId')
 
 const shareModel = ref<ShareModel>({
   url: props.editShareData.share.url,
@@ -119,21 +121,21 @@ const shareModel = ref<ShareModel>({
   exp: props.editShareData.share.exp
 })
 
-const submit = ref<(() => void) | undefined>()
+const submit = ref<(() => Promise<void>) | undefined>()
 
 onMounted(() => {
-  submit.value = () => {
-    void axios
-      .put('/put/edit_share', {
+  submit.value = async () => {
+    try {
+      await axios.put('/put/edit_share', {
         albumId: props.editShareData.albumId,
         share: shareModel.value
       })
-      .then(() => {
-        modalStore.showEditShareModal = false
-      })
-      .catch((e: unknown) => {
-        console.error('Failed to update share', e)
-      })
+      messageStore.success('Updated share settings successfully')
+      modalStore.showEditShareModal = false
+    } catch (e) {
+      console.error('Failed to update share', e)
+      messageStore.error('Failed to update share settings')
+    }
   }
 })
 </script>
