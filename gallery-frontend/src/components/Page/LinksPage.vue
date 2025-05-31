@@ -157,6 +157,10 @@ const headers = [
     title: 'Allow Download',
     key: 'share.showDownload'
   },
+  {
+    title: 'Show Metadata',
+    key: 'share.showMetadata'
+  },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
 
