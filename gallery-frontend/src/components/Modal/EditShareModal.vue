@@ -120,18 +120,19 @@ const submit = ref<(() => Promise<void>) | undefined>()
 onMounted(() => {
   submit.value = async () => {
     modalStore.showEditShareModal = false
+
+    const album = albumStore.albums.get(props.editShareData.albumId)
+    if (!album) {
+      messageStore.error('Album not found — failed to update local share state')
+    } else {
+      album.shareList.set(props.editShareData.share.url, shareModel.value)
+    }
+
     try {
       await axios.put('/put/edit_share', {
         albumId: props.editShareData.albumId,
         share: shareModel.value
       })
-
-      const album = albumStore.albums.get(props.editShareData.albumId)
-      if (!album) {
-        messageStore.error('Album not found — failed to update local share state')
-      } else {
-        album.shareList.set(props.editShareData.share.url, shareModel.value)
-      }
 
       messageStore.success('Updated share settings successfully')
     } catch (e) {
