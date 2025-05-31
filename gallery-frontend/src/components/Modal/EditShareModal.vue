@@ -83,7 +83,7 @@
 
           <template #actions>
             <v-spacer />
-            <component :is="actions" />
+            <component :is="actions"></component>
           </template>
         </v-card>
       </template>
@@ -119,6 +119,7 @@ const submit = ref<(() => Promise<void>) | undefined>()
 
 onMounted(() => {
   submit.value = async () => {
+    modalStore.showEditShareModal = false
     try {
       await axios.put('/put/edit_share', {
         albumId: props.editShareData.albumId,
@@ -133,7 +134,6 @@ onMounted(() => {
       }
 
       messageStore.success('Updated share settings successfully')
-      modalStore.showEditShareModal = false
     } catch (e) {
       console.error('Failed to update share', e)
       messageStore.error('Failed to update share settings')
