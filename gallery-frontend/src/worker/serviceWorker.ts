@@ -1,3 +1,5 @@
+import { getHashToken } from '@/db/db'
+
 self.addEventListener('fetch', (event: unknown) => {
   if (!(event instanceof FetchEvent)) return
 
@@ -8,17 +10,21 @@ self.addEventListener('fetch', (event: unknown) => {
 })
 
 async function handleMediaRequest(request: Request): Promise<Response> {
-  const cache = await caches.open('auth-cache')
-  const tokenResponse = await cache.match('token')
-  const token = await tokenResponse?.text()
-
-  if (!token || token.trim() === '') {
-    return new Response('Unauthorized', { status: 401 })
-  }
-
   const match = request.url.match(/\/media-proxy\/(.+)$/)
   if (!match || !match[1]) {
     return new Response('Bad request', { status: 400 })
+  }
+
+  // 從 IndexedDB 取得 token
+  let token: string | null = null
+  try {
+    token = await getHashToken('token') // 假設 key 是 'token'
+  } catch (err) {
+    return new Response('Internal error while accessing IndexedDB', { status: 500 })
+  }
+
+  if (!token || token.trim() === '') {
+    return new Response('Unauthorized', { status: 401 })
   }
 
   const realUrl = `https://your.origin.com/${match[1]}`
