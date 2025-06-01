@@ -81,24 +81,38 @@ export function getScrollUpperBound(totalHeight: number, windowHeight: number): 
 }
 
 export async function searchByTag(tag: string, router: Router) {
+  const { meta, params } = router.currentRoute.value
+  const searchQuery = { search: `tag:${escapeAndWrap(tag)}` }
+
   switch (tag) {
     case '_favorite':
-      await router.push({ path: '/favorite' })
-      break
+      await router.push({ name: 'favorite' })
+      return
     case '_archived':
-      await router.push({ path: '/archived' })
-      break
+      await router.push({ name: 'archived' })
+      return
     case '_trashed':
-      await router.push({ path: '/trashed' })
-      break
+      await router.push({ name: 'trashed' })
+      return
     default:
-      await router.push({
-        path: '/all',
-        query: { search: `tag:${escapeAndWrap(tag)}` }
-      })
-      break
+      // if the current baseName is 'share', navigate back to the share root page ──
+      if (meta.baseName === 'share') {
+        const albumId = params.albumId as string
+        const shareId = params.shareId as string
+        await router.push({
+          name: 'share',
+          params: { albumId, shareId }, // Reconstruct /share/:albumId-:shareId
+          query: searchQuery
+        })
+      } else {
+        await router.push({
+          name: 'all',
+          query: searchQuery
+        })
+      }
   }
 }
+
 // 適用於完整 URL（包含 http:// 或 https://）
 export function extractHashFromAbsoluteUrl(url: URL): string | null {
   const segments = url.pathname.split('/').filter(Boolean) // 移除空字串
