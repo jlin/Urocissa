@@ -12,6 +12,7 @@ import { fetchDataInWorker } from '@/api/fetchData'
 import { getIsolationIdByRoute } from '@utils/getter'
 import { AbstractData } from '@type/types'
 import { getSrc } from '@/../config'
+import { useTokenStore } from '@/store/tokenStore'
 
 const props = defineProps<{
   indexList: number[]
@@ -20,6 +21,7 @@ const props = defineProps<{
 const route = useRoute()
 const isolationId = getIsolationIdByRoute(route)
 const dataStore = useDataStore(isolationId)
+const tokenStore = useTokenStore(isolationId)
 
 const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise<AbstractData> => {
   console.log(`data with index ${index} not fetch; waiting...`)
@@ -69,11 +71,24 @@ const downloadAllFiles = async () => {
         }
 
         if (metadata.database) {
-          const url = getSrc(metadata.database.hash, true, metadata.database.ext, '', undefined)
-          try {
-            const response = await axios.get<Blob>(url, { responseType: 'blob' })
-            const fileName = `${metadata.database.hash}.${metadata.database.ext}`
+          const hash = metadata.database.hash
+          const url = getSrc(hash, true, metadata.database.ext, '', undefined)
 
+          const hashToken = tokenStore.hashTokenMap.get(hash)
+          if (hashToken === undefined) {
+            console.error(`hashToken is undefined for hash: ${hash}`)
+            return
+          }
+
+          try {
+            const response = await axios.get<Blob>(url, {
+              responseType: 'blob',
+              headers: {
+                Authorization: `Bearer ${hashToken}`
+              }
+            })
+
+            const fileName = `${hash}.${metadata.database.ext}`
             saveAs(response.data, fileName)
           } catch (downloadError) {
             console.error(`Failed to download file for index ${index}:`, downloadError)
