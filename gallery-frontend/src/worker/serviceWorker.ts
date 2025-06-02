@@ -15,9 +15,9 @@ self.addEventListener('fetch', (event: unknown) => {
 async function handleMediaRequest(request: Request): Promise<Response> {
   const url = new URL(request.url)
 
-  const parts = url.pathname.split('/')
-  const filename = parts.at(-1) ?? ''
-  const hash = filename.replace(/\.[^.]+$/, '') // remove file extension
+  const parts = url.pathname.split('/') // '/media-proxy/imported/abc123.mp4' → ['', 'media-proxy', 'imported', 'abc123.mp4']
+  const filename = parts.at(-1) ?? '' // 'abc123.mp4'
+  const hash = filename.replace(/\.[^.]+$/, '') // 'abc123'
 
   let token: string | null
   try {
