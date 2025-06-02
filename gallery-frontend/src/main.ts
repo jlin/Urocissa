@@ -21,14 +21,6 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useRedirectionStore } from '@/store/redirectionStore'
 import { useShareStore } from '@/store/shareStore'
 
-if ('serviceWorker' in navigator) {
-  void navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      void registration.unregister()
-    }
-  })
-}
-
 // Request interceptor
 axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const shareStore = useShareStore('mainId')
