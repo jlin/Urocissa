@@ -6,6 +6,8 @@
     <v-list>
       <ItemViewOriginalFile
         :src="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!, undefined)"
+        :hash="database.hash"
+        :isolation-id="props.isolationId"
       />
       <ItemDownload :index-list="[props.index]" />
     </v-list>

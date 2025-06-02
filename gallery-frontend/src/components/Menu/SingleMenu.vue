@@ -5,7 +5,10 @@
     </template>
     <v-list>
       <ItemViewOriginalFile
-        :src="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!, undefined)"
+        :src="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!,
+      undefined)"
+        :isolation-id="props.isolationId"
+        :hash="database.hash"
       />
       <ItemDownload :index-list="[props.index]" />
       <ItemFindInTimeline :hash="props.hash" />
