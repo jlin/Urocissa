@@ -19,7 +19,6 @@ self.addEventListener('activate', (event: unknown) => {
   event.waitUntil(
     (async () => {
       try {
-        // 讓新的 SW 立即接管所有頁面
         await result.clients.claim()
         console.log('[Service Worker] Clients claimed.')
       } catch (err) {
@@ -34,8 +33,8 @@ self.addEventListener('fetch', (event: unknown) => {
 
   const url = new URL(event.request.url)
 
-  // Only handle if path includes "/imported" or ends with ".mp4"
   const shouldHandle = url.pathname.includes('/imported') || url.pathname.endsWith('.mp4')
+
   if (!shouldHandle) return
 
   event.respondWith(handleMediaRequest(event.request))
@@ -43,27 +42,32 @@ self.addEventListener('fetch', (event: unknown) => {
 
 async function handleMediaRequest(request: Request): Promise<Response> {
   const url = new URL(request.url)
-
-  const parts = url.pathname.split('/') // '/media-proxy/imported/abc123.mp4' → ['', 'media-proxy', 'imported', 'abc123.mp4']
-  const filename = parts.at(-1) ?? '' // 'abc123.mp4'
-  const hash = filename.replace(/\.[^.]+$/, '') // 'abc123'
+  const parts = url.pathname.split('/') // e.g., ['', 'media-proxy', 'imported', 'abc123.mp4']
+  const filename = parts.at(-1) ?? ''
+  const hash = filename.replace(/\.[^.]+$/, '') // remove extension
+  console.log('intercepting: hash is', hash)
 
   let token: string | null
   try {
     token = await getHashToken(hash)
-    console.log('token is', token)
-  } catch {
+  } catch (err: unknown) {
+    console.error('Failed to get token from IndexedDB:', err)
     return new Response('Internal error while accessing IndexedDB', { status: 500 })
   }
 
   if (typeof token !== 'string' || token.trim() === '') {
+    console.error('Token is missing or invalid:', token)
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const realUrl = `https://your.origin.com/${hash}`
-  return fetch(realUrl, {
-    headers: { Authorization: `Bearer ${token}` },
-    mode: 'cors',
-    credentials: 'omit'
+  // Inject the Authorization header into the original request headers
+  const headers = new Headers(request.headers)
+  headers.set('Authorization', `Bearer ${token}`)
+
+  // Only override the mode and headers to preserve all other browser-generated settings (e.g., Range)
+  const modifiedRequest = new Request(request, {
+    mode: 'same-origin', // Use 'cors' instead if cross-origin requests are needed
+    headers
   })
+  return fetch(modifiedRequest)
 }
