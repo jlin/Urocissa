@@ -66,7 +66,7 @@ async function handleMediaRequest(request: Request): Promise<Response> {
 
   // Only override the mode and headers to preserve all other browser-generated settings (e.g., Range)
   const modifiedRequest = new Request(request, {
-    mode: 'same-origin', // Use 'cors' instead if cross-origin requests are needed
+    mode: 'cors', // Use 'cors' instead if cross-origin requests are needed
     headers
   })
   return fetch(modifiedRequest)
