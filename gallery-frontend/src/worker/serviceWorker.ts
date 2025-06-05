@@ -3,7 +3,7 @@ import { getHashToken } from '@/db/db'
 self.addEventListener('install', () => {
   console.log('[Service Worker] Installing...')
   const result = self as unknown as ServiceWorkerGlobalScope
-  result.skipWaiting().catch((err: unknown) => {
+  void result.skipWaiting().catch((err: unknown) => {
     console.error('[Service Worker] skipWaiting() failed:', err)
   })
 })
@@ -21,7 +21,7 @@ self.addEventListener('activate', (event: unknown) => {
       try {
         await result.clients.claim()
         console.log('[Service Worker] Clients claimed.')
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('[Service Worker] Failed during activation:', err)
       }
     })()
@@ -32,9 +32,7 @@ self.addEventListener('fetch', (event: unknown) => {
   if (!(event instanceof FetchEvent)) return
 
   const url = new URL(event.request.url)
-
   const shouldHandle = url.pathname.includes('/imported') || url.pathname.endsWith('.mp4')
-
   if (!shouldHandle) return
 
   event.respondWith(handleMediaRequest(event.request))
@@ -42,9 +40,9 @@ self.addEventListener('fetch', (event: unknown) => {
 
 async function handleMediaRequest(request: Request): Promise<Response> {
   const url = new URL(request.url)
-  const parts = url.pathname.split('/') // e.g., ['', 'media-proxy', 'imported', 'abc123.mp4']
+  const parts = url.pathname.split('/')
   const filename = parts.at(-1) ?? ''
-  const hash = filename.replace(/\.[^.]+$/, '') // remove extension
+  const hash = filename.replace(/\.[^.]+$/, '')
   console.log('intercepting: hash is', hash)
 
   let token: string | null
@@ -60,14 +58,26 @@ async function handleMediaRequest(request: Request): Promise<Response> {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  // Inject the Authorization header into the original request headers
-  const headers = new Headers(request.headers)
-  headers.set('Authorization', `Bearer ${token}`)
+  // 複製原始 headers（例如 Range、Accept-Encoding...），並注入 Authorization
+  const originalHeaders = new Headers(request.headers)
+  originalHeaders.set('Authorization', `Bearer ${token}`)
 
-  // Only override the mode and headers to preserve all other browser-generated settings (e.g., Range)
-  const modifiedRequest = new Request(request, {
-    mode: 'cors', // Use 'cors' instead if cross-origin requests are needed
-    headers
+  // 建立一個全新的 Request，強制 mode: 'cors'
+  const newRequest = new Request(url.toString(), {
+    method: request.method,
+    headers: originalHeaders,
+    mode: 'cors',
+    // 若有需要帶 cookie，就改成 'include'
+    credentials: 'include',
+    // 如果是 GET/HEAD 就不帶 body
+    body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body
   })
-  return fetch(modifiedRequest)
+
+  try {
+    return await fetch(newRequest)
+  } catch (err: unknown) {
+    console.error('Fetch failed:', err)
+    // 回一個 502 Bad Gateway 或其他適合的錯誤
+    return new Response('Bad Gateway', { status: 502 })
+  }
 }
