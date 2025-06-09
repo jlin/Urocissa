@@ -7,9 +7,9 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use crate::structure::album::ResolvedShare;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
+use crate::structure::album::ResolvedShare;
 
 use super::VALIDATION_ALLOW_EXPIRED;
 use super::guard_share::GuardShare;
@@ -28,7 +28,7 @@ impl TimestampClaims {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs()
-            + 300;
+            + 0;
 
         Self {
             resolved_share_opt,
