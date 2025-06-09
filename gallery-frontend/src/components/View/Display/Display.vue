@@ -160,7 +160,7 @@ const postToWorker = bindActionDispatch(toImgWorker, (action) => {
   }
 })
 
-const checkAndFetch = (index: number): boolean => {
+async function checkAndFetch(index: number): Promise<boolean> {
   // If the image is already fetched, return true
   if (imgStore.imgOriginal.has(index)) {
     return true
@@ -183,27 +183,41 @@ const checkAndFetch = (index: number): boolean => {
   // Determine the hash from database or album cover
   const hash = abstractData.database?.hash ?? abstractData.album?.cover
 
+  if (hash == null) {
+    return false
+  }
+
+  // Refresh tokens before using them
+  try {
+    await tokenStore.refreshTimestampTokenIfExpired()
+    await tokenStore.refreshHashTokenIfExpired(hash)
+  } catch (err) {
+    console.error('Failed to refresh tokens:', err)
+    return false
+  }
+
   const timestampToken = tokenStore.timestampToken
   if (timestampToken === null) {
-    throw new Error('timestampToken is null')
+    console.error('timestampToken is null after refresh')
+    return false
+  }
+
+  const hashToken = tokenStore.hashTokenMap.get(hash)
+  if (hashToken === undefined) {
+    console.error(`hashToken is undefined after refresh for hash: ${hash}`)
+    return false
   }
 
   // If a valid hash exists, initiate the image processing
-  if (hash != null) {
-    const hashToken = tokenStore.hashTokenMap.get(hash)
-    if (hashToken === undefined) {
-      throw new Error(`hashToken is undefined for hash: ${hash}`)
-    }
-    postToWorker.processImage({
-      index,
-      hash,
-      devicePixelRatio: window.devicePixelRatio,
-      albumId: shareStore.albumId,
-      shareId: shareStore.shareId,
-      timestampToken,
-      hashToken
-    })
-  }
+  postToWorker.processImage({
+    index,
+    hash,
+    devicePixelRatio: window.devicePixelRatio,
+    albumId: shareStore.albumId,
+    shareId: shareStore.shareId,
+    timestampToken,
+    hashToken
+  })
 
   // Fetching has been initiated but not completed
   return false
@@ -218,10 +232,10 @@ async function prefetch(index: number, isolationId: IsolationId) {
     const nextAbstractData = dataStore.data.get(nextIndex)
     if (nextAbstractData) {
       if (nextAbstractData.database && nextAbstractData.database.ext_type === 'image') {
-        checkAndFetch(nextIndex)
+        await checkAndFetch(nextIndex)
       } else {
         // is album
-        checkAndFetch(nextIndex)
+        await checkAndFetch(nextIndex)
       }
     } else {
       // dataStore.data.get(nextIndex) is undefined then fetch that data
@@ -234,10 +248,10 @@ async function prefetch(index: number, isolationId: IsolationId) {
     const previousAbstractData = dataStore.data.get(previousIndex)
     if (previousAbstractData) {
       if (previousAbstractData.database && previousAbstractData.database.ext_type === 'image') {
-        checkAndFetch(previousIndex)
+        await checkAndFetch(previousIndex)
       } else {
         // is album
-        checkAndFetch(previousIndex)
+        await checkAndFetch(previousIndex)
       }
     } else {
       // dataStore.data.get(previousIndex) is undefined then fetch that data
@@ -257,7 +271,7 @@ watch(
       if (configStore.disableImg) {
         return
       }
-      checkAndFetch(props.index)
+      await checkAndFetch(props.index)
       // Prefetch next and previous 10 hashes if they exist
       await prefetch(props.index, props.isolationId)
     }

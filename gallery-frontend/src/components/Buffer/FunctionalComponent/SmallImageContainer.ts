@@ -36,7 +36,9 @@ const SmallImageContainer: FunctionalComponent<SmallImageContainerProps> = (prop
         props.displayElement.displayWidth,
         props.displayElement.displayHeight,
         props.isolationId
-      )
+      ).catch((err: unknown) => {
+        console.error('checkAndFetch failed:', err)
+      })
     }
     return null
   }
@@ -106,8 +108,7 @@ SmallImageContainer.props = {
     required: true
   }
 }
-
-function checkAndFetch(
+async function checkAndFetch(
   abstractData: AbstractData,
   index: number,
   displayWidth: number,
@@ -119,49 +120,56 @@ function checkAndFetch(
   const shareStore = useShareStore('mainId')
   const workerIndex = index % workerStore.concurrencyNumber
 
+  await tokenStore.refreshTimestampTokenIfExpired()
   const timestampToken = tokenStore.timestampToken
-
   if (timestampToken === null) {
-    throw new Error('timestampToken is null')
+    throw new Error('timestampToken is null after refresh')
   }
 
-  if (workerStore.postToImgWorkerList !== undefined) {
-    if (abstractData.database) {
-      const hashToken = tokenStore.hashTokenMap.get(abstractData.database.hash)
-      if (hashToken === undefined) {
-        throw new Error('hashToken is undefined')
-      }
-      getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
-        index,
-        hash: abstractData.database.hash,
-        width: displayWidth,
-        height: displayHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        albumId: shareStore.albumId,
-        shareId: shareStore.shareId,
-        timestampToken,
-        hashToken
-      })
-    } else if (abstractData.album?.cover !== null && abstractData.album?.cover !== undefined) {
-      const hashToken = tokenStore.hashTokenMap.get(abstractData.album.cover)
-      if (hashToken === undefined) {
-        throw new Error('hashToken is undefined')
-      }
-      getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
-        index,
-        hash: abstractData.album.cover,
-        width: displayWidth,
-        height: displayHeight,
-        devicePixelRatio: window.devicePixelRatio,
-        albumMode: true,
-        albumId: shareStore.albumId,
-        shareId: shareStore.shareId,
-        timestampToken,
-        hashToken
-      })
-    }
-  } else {
+  if (workerStore.postToImgWorkerList === undefined) {
     console.error('workerStore.postToImgWorkerList is undefined')
+    return
+  }
+
+  if (abstractData.database) {
+    const hash = abstractData.database.hash
+    await tokenStore.refreshHashTokenIfExpired(hash)
+    const hashToken = tokenStore.hashTokenMap.get(hash)
+    if (hashToken === undefined) {
+      throw new Error(`hashToken is undefined after refresh for hash: ${hash}`)
+    }
+
+    getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
+      index,
+      hash,
+      width: displayWidth,
+      height: displayHeight,
+      devicePixelRatio: window.devicePixelRatio,
+      albumId: shareStore.albumId,
+      shareId: shareStore.shareId,
+      timestampToken,
+      hashToken
+    })
+  } else if (abstractData.album?.cover != null) {
+    const hash = abstractData.album.cover
+    await tokenStore.refreshHashTokenIfExpired(hash)
+    const hashToken = tokenStore.hashTokenMap.get(hash)
+    if (hashToken === undefined) {
+      throw new Error(`hashToken is undefined after refresh for cover: ${hash}`)
+    }
+
+    getArrayValue(workerStore.postToImgWorkerList, workerIndex).processSmallImage({
+      index,
+      hash,
+      width: displayWidth,
+      height: displayHeight,
+      devicePixelRatio: window.devicePixelRatio,
+      albumMode: true,
+      albumId: shareStore.albumId,
+      shareId: shareStore.shareId,
+      timestampToken,
+      hashToken
+    })
   }
 }
 

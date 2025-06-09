@@ -23,7 +23,7 @@ export function refreshAlbumMetadata(albumId: string) {
   // perform after fetchDataInWorker
   const stopWatch = watch(
     () => dataStore.data.get(albumIndex),
-    () => {
+    async () => {
       const postToWorker = bindActionDispatch(toImgWorker, (action) => {
         const worker = workerStore.imgWorker[0]
         if (worker) {
@@ -34,26 +34,33 @@ export function refreshAlbumMetadata(albumId: string) {
       })
 
       const album = dataStore.data.get(albumIndex)?.album
-
       if (!album) {
         console.error(`cannot find album with albumIndex = ${albumIndex}`)
         return
       }
 
       const coverHash = album.cover
+      if (coverHash === null) return
 
-      if (coverHash === null) {
+      try {
+        await tokenStore.refreshTimestampTokenIfExpired()
+        await tokenStore.refreshHashTokenIfExpired(coverHash)
+      } catch (err) {
+        console.error('Failed to refresh token(s):', err)
         return
       }
 
       const timestampToken = tokenStore.timestampToken
+      const hashToken = tokenStore.hashTokenMap.get(coverHash)
+
       if (timestampToken === null) {
-        throw new Error('timestampToken is null')
+        console.error('timestampToken is null after refresh')
+        return
       }
 
-      const hashToken = tokenStore.hashTokenMap.get(coverHash)
       if (hashToken === undefined) {
-        throw new Error('hashToken is undefined')
+        console.error('hashToken is undefined after refresh')
+        return
       }
 
       postToWorker.processImage({
