@@ -79,6 +79,7 @@ async function handlePrefetchReturn(
 
   shareStore.resolvedShare = prefetchReturn.resolvedShare
   prefetchStore.timestamp = prefetch.timestamp
+
   prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
   prefetchStore.calculateLength(prefetch.dataLength)
   prefetchStore.locateTo = prefetch.locateTo

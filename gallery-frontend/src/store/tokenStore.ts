@@ -1,5 +1,11 @@
 import { IsolationId } from '@type/types'
+import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
+
+interface JwtPayload {
+  timestamp: number
+  [key: string]: unknown
+}
 
 export const useTokenStore = (isolationId: IsolationId) =>
   defineStore('tokenStore' + isolationId, {
@@ -10,5 +16,16 @@ export const useTokenStore = (isolationId: IsolationId) =>
       timestampToken: null,
       hashTokenMap: new Map<string, string>()
     }),
-    actions: {}
+    actions: {
+      decodeTimestamp(): number | null {
+        if (this.timestampToken == null) return null
+        try {
+          const decoded = jwtDecode<JwtPayload>(this.timestampToken)
+          return typeof decoded.timestamp === 'number' ? decoded.timestamp : null
+        } catch (err) {
+          console.warn('Invalid JWT:', err)
+          return null
+        }
+      }
+    }
   })()
