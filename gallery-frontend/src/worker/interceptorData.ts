@@ -1,19 +1,14 @@
-import { IsolationId } from '@type/types'
+import { IsolationId, TokenResponse } from '@type/types'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { z } from 'zod'
+import { TokenResponseSchema } from '@/type/schemas'
 
 interface JwtPayload {
   timestamp: number
   exp?: number
   [key: string]: unknown
 }
-
-const TokenResponseSchema = z.object({
-  token: z.string()
-})
-type TokenResponse = z.infer<typeof TokenResponseSchema>
 
 export const useTokenStore = (isolationId: IsolationId) =>
   defineStore('tokenStore' + isolationId, {
