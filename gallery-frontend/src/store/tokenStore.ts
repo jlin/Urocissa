@@ -57,7 +57,7 @@ export const useTokenStore = (isolationId: IsolationId) =>
         const nowInSec = Math.floor(Date.now() / 1000)
         if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
           try {
-            const response = await axios.post('/post/renew-timestamp-token', { token })
+            const response = await axios.post('/post/renew-timestamp-token', { token: token })
             const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
             this.timestampToken = parsed.token
           } catch (err) {
@@ -67,14 +67,14 @@ export const useTokenStore = (isolationId: IsolationId) =>
       },
 
       async refreshHashTokenIfExpired(hash: string): Promise<void> {
-        const token = this.hashTokenMap.get(hash)
-        if (token === undefined) {
+        const expiredToken = this.hashTokenMap.get(hash)
+        if (expiredToken === undefined) {
           throw new Error(`No token found for hash: ${hash}`)
         }
 
         let decoded: JwtPayload
         try {
-          decoded = jwtDecode<JwtPayload>(token)
+          decoded = jwtDecode<JwtPayload>(expiredToken)
         } catch (err) {
           console.warn(`Invalid JWT for hash: ${hash}`, err)
           return
@@ -83,7 +83,23 @@ export const useTokenStore = (isolationId: IsolationId) =>
         const nowInSec = Math.floor(Date.now() / 1000)
         if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
           try {
-            const response = await axios.post('/post/renew-hash-token', { token })
+            const timestampToken = this.timestampToken
+            if (timestampToken == null) {
+              throw new Error('Missing timestampToken for authorization')
+            }
+
+            const response = await axios.post(
+              '/post/renew-hash-token',
+              {
+                expiredHashToken: expiredToken
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${timestampToken}`
+                }
+              }
+            )
+
             const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
             this.hashTokenMap.set(hash, parsed.token)
           } catch (err) {
