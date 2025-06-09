@@ -2,12 +2,18 @@ import { IsolationId } from '@type/types'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import { z } from 'zod'
 
 interface JwtPayload {
   timestamp: number
   exp?: number
   [key: string]: unknown
 }
+
+const TokenResponseSchema = z.object({
+  token: z.string()
+})
+type TokenResponse = z.infer<typeof TokenResponseSchema>
 
 export const useTokenStore = (isolationId: IsolationId) =>
   defineStore('tokenStore' + isolationId, {
@@ -29,6 +35,7 @@ export const useTokenStore = (isolationId: IsolationId) =>
           return null
         }
       },
+
       _getTimestampFromHashToken(hash: string): number | undefined {
         const token = this.hashTokenMap.get(hash)
         if (token === undefined) return undefined
@@ -40,6 +47,7 @@ export const useTokenStore = (isolationId: IsolationId) =>
           return undefined
         }
       },
+
       async refreshTimestampTokenIfExpired(): Promise<void> {
         const token = this.timestampToken
         if (token == null) return
@@ -55,20 +63,15 @@ export const useTokenStore = (isolationId: IsolationId) =>
         const nowInSec = Math.floor(Date.now() / 1000)
         if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
           try {
-            const response = await axios.post<{ token?: string }>('/post/renew-timestamp-token', {
-              token
-            })
-            const newToken: unknown = response.data.token
-            if (typeof newToken === 'string') {
-              this.timestampToken = newToken
-            } else {
-              console.warn('No valid token returned in response')
-            }
+            const response = await axios.post('/post/renew-timestamp-token', { token })
+            const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
+            this.timestampToken = parsed.token
           } catch (err) {
-            console.error('Failed to renew token:', err)
+            console.error('Failed to renew timestamp token:', err)
           }
         }
       },
+
       async refreshHashTokenIfExpired(hash: string): Promise<void> {
         const token = this.hashTokenMap.get(hash)
         if (token === undefined) {
@@ -86,15 +89,9 @@ export const useTokenStore = (isolationId: IsolationId) =>
         const nowInSec = Math.floor(Date.now() / 1000)
         if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
           try {
-            const response = await axios.post<{ token?: string }>('/post/renew-hash-token', {
-              token
-            })
-            const newToken: unknown = response.data.token
-            if (typeof newToken === 'string') {
-              this.hashTokenMap.set(hash, newToken)
-            } else {
-              console.warn(`No valid token returned for hash: ${hash}`)
-            }
+            const response = await axios.post('/post/renew-hash-token', { token })
+            const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
+            this.hashTokenMap.set(hash, parsed.token)
           } catch (err) {
             console.error(`Failed to renew token for hash: ${hash}`, err)
           }

@@ -161,3 +161,7 @@ export const PublicConfigSchema = z.object({
 export const tokenReturnSchema = z.object({
   token: z.string()
 })
+
+export const TokenResponseSchema = z.object({
+  token: z.string()
+})
