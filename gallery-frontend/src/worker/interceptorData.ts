@@ -1,127 +1,104 @@
-/* eslint-disable @typescript-eslint/return-await */
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { tokenReturnSchema } from '@type/schemas'
-import { PostFromDataWorker } from './workerApi'
+import { IsolationId } from '@type/types'
+import { jwtDecode } from 'jwt-decode'
+import { defineStore } from 'pinia'
+import axios from 'axios'
 
-interface QueuedRequest {
-  config: InternalAxiosRequestConfig | undefined
-  resolve: (value: AxiosResponse) => void
-  reject: (error: unknown) => void
+interface JwtPayload {
+  timestamp: number
+  exp?: number
+  [key: string]: unknown
 }
 
-let isRefreshing = false
-const queueList: QueuedRequest[] = []
+export const useTokenStore = (isolationId: IsolationId) =>
+  defineStore('tokenStore' + isolationId, {
+    state: (): {
+      timestampToken: string | null
+      hashTokenMap: Map<string, string>
+    } => ({
+      timestampToken: null,
+      hashTokenMap: new Map<string, string>()
+    }),
+    actions: {
+      _getTimestampFromToken(): number | null {
+        if (this.timestampToken == null) return null
+        try {
+          const decoded = jwtDecode<JwtPayload>(this.timestampToken)
+          return typeof decoded.timestamp === 'number' ? decoded.timestamp : null
+        } catch (err) {
+          console.warn('Invalid JWT:', err)
+          return null
+        }
+      },
+      _getTimestampFromHashToken(hash: string): number | undefined {
+        const token = this.hashTokenMap.get(hash)
+        if (token === undefined) return undefined
+        try {
+          const decoded = jwtDecode<JwtPayload>(token)
+          return typeof decoded.timestamp === 'number' ? decoded.timestamp : undefined
+        } catch (err) {
+          console.warn(`Invalid JWT for hash: ${hash}`, err)
+          return undefined
+        }
+      },
+      async refreshTimestampTokenIfExpired(): Promise<void> {
+        const token = this.timestampToken
+        if (token == null) return
 
-export function interceptorData(
-  axiosInstance: AxiosInstance,
-  postToMainData: PostFromDataWorker
-): void {
-  axiosInstance.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    async (error) => {
-      if (!axios.isAxiosError(error)) {
-        console.error('Unexpected error:', error)
-        postToMainData.notification({
-          text: 'An unexpected error occurred',
-          color: 'error'
-        })
-        return Promise.reject(error instanceof Error ? error : new Error(String(error)))
-      }
-
-      const { config, response } = error
-
-      if (response?.status === 401) {
-        const requestUrl = config?.url
-
-        if (requestUrl == null) {
-          postToMainData.unauthorized()
-          return Promise.reject(error)
+        let decoded: JwtPayload
+        try {
+          decoded = jwtDecode<JwtPayload>(token)
+        } catch (err) {
+          console.warn('Invalid JWT:', err)
+          return
         }
 
-        if (
-          requestUrl.startsWith('/get/get-data') ||
-          requestUrl.startsWith('/get/get-rows') ||
-          requestUrl.startsWith('/get/get-scroll-bar') ||
-          requestUrl.startsWith('/post/renew-hash-token')
-        ) {
-          const authHeader = config?.headers.Authorization
-          const expiredToken =
-            typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-              ? authHeader.split(' ')[1]
-              : null
-
-          if (expiredToken == null) {
-            return Promise.reject(new Error('No expired token found'))
-          }
-
-          if (isRefreshing) {
-            // Return a promise that queues this retried request
-            return new Promise((resolve, reject) => {
-              queueList.push({ config, resolve, reject })
-            })
-          }
-
-          isRefreshing = true
-
+        const nowInSec = Math.floor(Date.now() / 1000)
+        if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
           try {
-            const tokenResponse = await axios.post('/post/renew-timestamp-token', {
-              token: expiredToken
+            const response = await axios.post<{ token?: string }>('/post/renew-timestamp-token', {
+              token
             })
-
-            if (tokenResponse.status === 200) {
-              const newToken = tokenReturnSchema.parse(tokenResponse.data)
-              postToMainData.refreshTimestampToken({ timestampToken: newToken.token })
-
-              // Update original failed request and retry
-              if (config) {
-                config.headers.Authorization = `Bearer ${newToken.token}`
-
-                // Retry queued requests with the new token
-                queueList.forEach((queued) => {
-                  if (queued.config) {
-                    queued.config.headers.Authorization = `Bearer ${newToken.token}`
-                    axios
-                      .request(queued.config)
-                      .then((response) => {
-                        // 請求成功時，執行 resolve，把 response 傳回去
-                        queued.resolve(response)
-                      })
-                      .catch((error: unknown) => {
-                        // 請求失敗時，執行 reject，把錯誤傳回去
-                        queued.reject(error)
-                      })
-                  }
-                })
-                // Clear the queue
-                queueList.length = 0
-
-                return axios.request(config)
-              }
+            const newToken: unknown = response.data.token
+            if (typeof newToken === 'string') {
+              this.timestampToken = newToken
+            } else {
+              console.warn('No valid token returned in response')
             }
           } catch (err) {
-            console.error('Token renewal failed:', err)
-            // Reject all queued requests on error
-            queueList.forEach((queued) => {
-              queued.reject(err)
-            })
-            queueList.length = 0
-          } finally {
-            isRefreshing = false
+            console.error('Failed to renew token:', err)
           }
-        } else {
-          postToMainData.unauthorized()
         }
-        postToMainData.notification({
-          text: 'Unauthorized. Please log in.',
-          color: 'error'
-        })
-      } else if (response) {
-        postToMainData.notification({ text: 'An error occurred', color: 'error' })
-      } else {
-        postToMainData.notification({ text: 'No response from server', color: 'error' })
-      }
+      },
+      async refreshHashTokenIfExpired(hash: string): Promise<void> {
+        const token = this.hashTokenMap.get(hash)
+        if (token === undefined) {
+          throw new Error(`No token found for hash: ${hash}`)
+        }
 
-      return Promise.reject(error)
+        let decoded: JwtPayload
+        try {
+          decoded = jwtDecode<JwtPayload>(token)
+        } catch (err) {
+          console.warn(`Invalid JWT for hash: ${hash}`, err)
+          return
+        }
+
+        const nowInSec = Math.floor(Date.now() / 1000)
+        if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
+          try {
+            const response = await axios.post<{ token?: string }>('/post/renew-hash-token', {
+              token
+            })
+            const newToken: unknown = response.data.token
+            if (typeof newToken === 'string') {
+              this.hashTokenMap.set(hash, newToken)
+            } else {
+              console.warn(`No valid token returned for hash: ${hash}`)
+            }
+          } catch (err) {
+            console.error(`Failed to renew token for hash: ${hash}`, err)
+          }
+        }
+      }
     }
-  )
-}
+  })()

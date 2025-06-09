@@ -17,7 +17,7 @@ export const useTokenStore = (isolationId: IsolationId) =>
       hashTokenMap: new Map<string, string>()
     }),
     actions: {
-      getTimestampFromToken(): number | null {
+      _getTimestampFromToken(): number | null {
         if (this.timestampToken == null) return null
         try {
           const decoded = jwtDecode<JwtPayload>(this.timestampToken)
@@ -27,7 +27,7 @@ export const useTokenStore = (isolationId: IsolationId) =>
           return null
         }
       },
-      getTimestampFromHashToken(hash: string): number | undefined {
+      _getTimestampFromHashToken(hash: string): number | undefined {
         const token = this.hashTokenMap.get(hash)
         if (token === undefined) return undefined
         try {
