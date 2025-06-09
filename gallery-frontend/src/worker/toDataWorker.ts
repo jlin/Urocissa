@@ -18,13 +18,11 @@ import axios from 'axios'
 import { bindActionDispatch, createHandler } from 'typesafe-agent-events'
 import { fromDataWorker, toDataWorker } from './workerApi'
 import { z } from 'zod'
-import { interceptorData } from './interceptorData'
 
 const shouldProcessBatch: number[] = []
 const fetchedRowData = new Map<number, Row>()
 const postToMainData = bindActionDispatch(fromDataWorker, self.postMessage.bind(self))
 const workerAxios = axios.create()
-interceptorData(workerAxios, postToMainData)
 
 self.addEventListener('message', (e) => {
   const handler = createHandler<typeof toDataWorker>({

@@ -8,13 +8,11 @@ import {
 } from '@/worker/workerApi'
 import axiosRetry from 'axios-retry'
 import axios, { AxiosError } from 'axios'
-import { interceptorImg } from './interceptorImg'
 import { getSrc } from '@/../config'
 
 const postToMainImg = bindActionDispatch(fromImgWorker, self.postMessage.bind(self))
 const controllerMap = new Map<number, AbortController>()
 const workerAxios = axios.create()
-interceptorImg(workerAxios, postToMainImg)
 
 axiosRetry(workerAxios, {
   retries: 0,
