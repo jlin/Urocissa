@@ -43,6 +43,7 @@ watch(videoRef, () => {
   currentFrameStore.video = videoRef.value
 })
 onMounted(async () => {
+  await tokenStore.refreshHashTokenIfExpired(props.database.hash)
   const token = tokenStore.hashTokenMap.get(props.database.hash)
   if (token !== undefined) {
     await storeHashToken(props.database.hash, token)
