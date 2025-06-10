@@ -118,7 +118,7 @@ const throttledHandleScroll = handleScroll(
   props.isolationId
 )
 
-watch(windowWidth, () => {
+watch(windowWidth, async () => {
   // Handles browser resizing.
 
   locationStore.triggerForResize()
@@ -134,7 +134,7 @@ watch(windowWidth, () => {
   locationStore.anchor = initializedStore.initialized ? locationRowIndex : null
 
   scrollTopStore.scrollTop = locationRowIndex * 2400
-  fetchRowInWorker(locationRowIndex, props.isolationId)
+  await fetchRowInWorker(locationRowIndex, props.isolationId)
 })
 
 const bufferHeight = computed(() => {

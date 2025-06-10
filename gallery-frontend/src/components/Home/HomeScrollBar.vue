@@ -190,7 +190,9 @@ const getTargetRowIndex = (percentage: number) => {
 }
 
 const debouncedFetchRow = debounce((index: number) => {
-  fetchRowInWorker(index, props.isolationId)
+  fetchRowInWorker(index, props.isolationId).catch((err: unknown) => {
+    console.error('fetchRowInWorker failed:', err)
+  })
 }, 100)
 
 /**

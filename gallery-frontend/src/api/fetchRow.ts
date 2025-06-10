@@ -13,7 +13,7 @@ import { useTokenStore } from '@/store/tokenStore'
  *
  * @param {number} index - The index of the row to fetch.
  */
-export function fetchRowInWorker(index: number, isolationId: IsolationId) {
+export async function fetchRowInWorker(index: number, isolationId: IsolationId) {
   const prefetchStore = usePrefetchStore(isolationId)
   const locationStore = useLocationStore(isolationId)
   const queueStore = useQueueStore(isolationId)
@@ -51,6 +51,13 @@ export function fetchRowInWorker(index: number, isolationId: IsolationId) {
       dataWorker.postMessage(action)
     }
   })
+
+  try {
+    await tokenStore.refreshTimestampTokenIfExpired()
+  } catch (err) {
+    console.error('Failed to refresh tokens:', err)
+    return false
+  }
 
   const timestamp = prefetchStore.timestamp
 

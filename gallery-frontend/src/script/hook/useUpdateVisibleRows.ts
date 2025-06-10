@@ -226,7 +226,9 @@ function updateLastRowBottom(
     lastRowBottom.value = lastRowBottomComputed
     if (lastRowBottomComputed <= endHeight && lastRow.end < prefetchStore.dataLength) {
       const lastRowIndex = lastRow.rowIndex
-      fetchRowInWorker(lastRowIndex + 1, isolationId)
+      fetchRowInWorker(lastRowIndex + 1, isolationId).catch((err: unknown) => {
+        console.error('fetchRowInWorker failed:', err)
+      })
       setTimeout(() => {
         prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
       }, 500)

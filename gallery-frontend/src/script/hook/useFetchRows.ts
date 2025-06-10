@@ -61,7 +61,7 @@ export function useFetchRows(
   const scrollTopStore = useScrollTopStore(isolationId)
 
   const debouncedFetch = debounce(
-    () => {
+    async () => {
       if (initializedStore.initialized) {
         const offSetSumOfAboveRowsIndex = computeOffSetSumOfAboveRowsIndex(
           scrollTopStore.scrollTop,
@@ -74,16 +74,16 @@ export function useFetchRows(
         const endIndex = Math.ceil(endHeightOffseted / fixedHeight)
 
         for (let i = startIndex; i <= endIndex; i++) {
-          fetchRowInWorker(i, isolationId)
+          await fetchRowInWorker(i, isolationId)
         }
 
         const prependBatch = Math.floor(startHeightOffseted / fixedHeight) - 1
 
-        fetchRowInWorker(prependBatch, isolationId)
+        await fetchRowInWorker(prependBatch, isolationId)
 
         const appendBatch = Math.ceil(endHeightOffseted / fixedHeight) + 1
 
-        fetchRowInWorker(appendBatch, isolationId)
+        await fetchRowInWorker(appendBatch, isolationId)
       }
     },
     debounceTime,
