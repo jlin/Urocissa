@@ -30,7 +30,7 @@ impl HashClaims {
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
             .as_secs()
-            + 0;
+            + 300;
 
         Self {
             allow_original,
