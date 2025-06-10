@@ -32,6 +32,13 @@ export async function fetchRowInWorker(index: number, isolationId: IsolationId) 
     return // If a specific row is anchored, this make sure to fetch only that row
   }
 
+  try {
+    await tokenStore.refreshTimestampTokenIfExpired()
+  } catch (err) {
+    console.error('Failed to refresh tokens:', err)
+    return false
+  }
+
   const timestampToken = tokenStore.timestampToken
 
   if (timestampToken === null) {
@@ -51,13 +58,6 @@ export async function fetchRowInWorker(index: number, isolationId: IsolationId) 
       dataWorker.postMessage(action)
     }
   })
-
-  try {
-    await tokenStore.refreshTimestampTokenIfExpired()
-  } catch (err) {
-    console.error('Failed to refresh tokens:', err)
-    return false
-  }
 
   const timestamp = prefetchStore.timestamp
 

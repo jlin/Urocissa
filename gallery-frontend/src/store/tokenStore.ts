@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { TokenResponseSchema } from '@/type/schemas'
 import { storeHashToken } from '@/db/db'
+
 interface JwtPayload {
   timestamp: number
   exp?: number
@@ -15,11 +16,18 @@ export const useTokenStore = (isolationId: IsolationId) =>
     state: (): {
       timestampToken: string | null
       hashTokenMap: Map<string, string>
+      _renewingTimestamp: Promise<void> | null
     } => ({
       timestampToken: null,
-      hashTokenMap: new Map<string, string>()
+      hashTokenMap: new Map<string, string>(),
+      _renewingTimestamp: null
     }),
+
     actions: {
+      _isExpired(exp?: number): boolean {
+        return typeof exp === 'number' && exp < Math.floor(Date.now() / 1000)
+      },
+
       _getTimestampFromToken(): number | null {
         if (this.timestampToken == null) return null
         try {
@@ -50,21 +58,31 @@ export const useTokenStore = (isolationId: IsolationId) =>
         let decoded: JwtPayload
         try {
           decoded = jwtDecode<JwtPayload>(token)
+          if (!this._isExpired(decoded.exp)) return
         } catch (err) {
           console.warn('Invalid JWT:', err)
           return
         }
 
-        const nowInSec = Math.floor(Date.now() / 1000)
-        if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
+        if (this._renewingTimestamp) {
+          await this._renewingTimestamp
+          return
+        }
+
+        this._renewingTimestamp = (async () => {
           try {
-            const response = await axios.post('/post/renew-timestamp-token', { token: token })
+            const response = await axios.post('/post/renew-timestamp-token', { token })
             const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
             this.timestampToken = parsed.token
           } catch (err) {
             console.error('Failed to renew timestamp token:', err)
+            throw err
+          } finally {
+            this._renewingTimestamp = null
           }
-        }
+        })()
+
+        await this._renewingTimestamp
       },
 
       async refreshHashTokenIfExpired(hash: string): Promise<void> {
@@ -81,33 +99,33 @@ export const useTokenStore = (isolationId: IsolationId) =>
           return
         }
 
-        const nowInSec = Math.floor(Date.now() / 1000)
-        if (typeof decoded.exp === 'number' && decoded.exp < nowInSec) {
-          try {
-            const timestampToken = this.timestampToken
-            if (timestampToken == null) {
-              throw new Error('Missing timestampToken for authorization')
-            }
+        if (!this._isExpired(decoded.exp)) return
 
-            const response = await axios.post(
-              '/post/renew-hash-token',
-              {
-                expiredHashToken: expiredToken
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${timestampToken}`
-                }
-              }
-            )
-
-            const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
-            this.hashTokenMap.set(hash, parsed.token)
-          } catch (err) {
-            console.error(`Failed to renew token for hash: ${hash}`, err)
+        try {
+          const timestampToken = this.timestampToken
+          if (timestampToken == null) {
+            throw new Error('Missing timestampToken for authorization')
           }
+
+          const response = await axios.post(
+            '/post/renew-hash-token',
+            {
+              expiredHashToken: expiredToken
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${timestampToken}`
+              }
+            }
+          )
+
+          const parsed: TokenResponse = TokenResponseSchema.parse(response.data)
+          this.hashTokenMap.set(hash, parsed.token)
+        } catch (err) {
+          console.error(`Failed to renew token for hash: ${hash}`, err)
         }
       },
+
       async tryRefreshAndStoreTokenToDb(hash: string): Promise<boolean> {
         try {
           await this.refreshHashTokenIfExpired(hash)
