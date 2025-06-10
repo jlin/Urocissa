@@ -231,7 +231,7 @@ function updateLastRowBottom(
       })
       setTimeout(() => {
         prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
-      }, 500)
+      }, 0)
     }
   }
 }
