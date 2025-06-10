@@ -240,7 +240,7 @@ async function prefetch(index: number, isolationId: IsolationId) {
     } else {
       // dataStore.data.get(nextIndex) is undefined then fetch that data
       if (nextIndex <= prefetchStore.dataLength - 1) {
-        fetchDataInWorker('single', nextIndex, isolationId)
+        await fetchDataInWorker('single', nextIndex, isolationId)
       }
     }
 
@@ -256,7 +256,7 @@ async function prefetch(index: number, isolationId: IsolationId) {
     } else {
       // dataStore.data.get(previousIndex) is undefined then fetch that data
       if (previousIndex >= 0) {
-        fetchDataInWorker('single', previousIndex, isolationId)
+        await fetchDataInWorker('single', previousIndex, isolationId)
       }
     }
 

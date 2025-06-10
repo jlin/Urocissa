@@ -59,7 +59,7 @@ const downloadAllFiles = async () => {
         let metadata = dataStore.data.get(index)
         if (!metadata) {
           // Initiate data fetch
-          fetchDataInWorker('single', index, isolationId)
+          await fetchDataInWorker('single', index, isolationId)
 
           // Wait for metadata to be available
           try {

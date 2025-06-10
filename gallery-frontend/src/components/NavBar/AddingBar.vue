@@ -81,7 +81,7 @@ const submit = async () => {
       return
     }
 
-    refreshAlbumMetadata(albumId)
+    await refreshAlbumMetadata(albumId)
     rerenderStore.rerenderHomeIsolated()
   }
 }

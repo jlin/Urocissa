@@ -7,7 +7,7 @@ import { toImgWorker } from '@/worker/workerApi'
 import { watch } from 'vue'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
-export function refreshAlbumMetadata(albumId: string) {
+export async function refreshAlbumMetadata(albumId: string) {
   const dataStore = useDataStore('mainId')
   const workerStore = useWorkerStore('mainId')
   const messageStore = useMessageStore('mainId')
@@ -91,5 +91,5 @@ export function refreshAlbumMetadata(albumId: string) {
     }
   )
 
-  fetchDataInWorker('single', albumIndex, 'mainId')
+  await fetchDataInWorker('single', albumIndex, 'mainId')
 }

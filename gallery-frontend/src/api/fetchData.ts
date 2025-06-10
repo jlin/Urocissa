@@ -5,7 +5,7 @@ import { toDataWorker } from '@/worker/workerApi'
 import { FetchDataMethod, IsolationId } from '@type/types'
 import { useTokenStore } from '@/store/tokenStore'
 
-export function fetchDataInWorker(
+export async function fetchDataInWorker(
   fetchMethod: FetchDataMethod,
   batch: number,
   isolationId: IsolationId
@@ -24,6 +24,14 @@ export function fetchDataInWorker(
       dataWorker.postMessage(action)
     }
   })
+
+  try {
+    await tokenStore.refreshTimestampTokenIfExpired()
+  } catch (err) {
+    console.error('Failed to refresh tokens:', err)
+    return false
+  }
+
   const timestamp = prefetchStore.timestamp
 
   const timestampToken = tokenStore.timestampToken

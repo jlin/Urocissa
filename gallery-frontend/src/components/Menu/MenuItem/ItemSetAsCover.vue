@@ -52,7 +52,7 @@ const setAsCover = async () => {
     }
   )
 
-  refreshAlbumMetadata(albumId)
+  await refreshAlbumMetadata(albumId)
   collectionStore.editModeOn = false
 }
 </script>

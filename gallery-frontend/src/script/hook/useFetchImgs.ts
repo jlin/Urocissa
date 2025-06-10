@@ -22,7 +22,7 @@ export function useFetchImgs(
   maxWait = 1000
 ) {
   const debouncedFetch = debounce(
-    () => {
+    async () => {
       const dataStore = useDataStore(isolationId)
       const length = visibleRowsLength.value
       if (length > 0) {
@@ -35,7 +35,7 @@ export function useFetchImgs(
 
         for (let batchIndex = startBatchIndex; batchIndex <= endBatchIndex; batchIndex++) {
           if (dataStore.batchFetched.get(batchIndex) !== true) {
-            fetchDataInWorker('batch', batchIndex, isolationId)
+            await fetchDataInWorker('batch', batchIndex, isolationId)
           }
         }
       }
