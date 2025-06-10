@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { TokenResponseSchema } from '@/type/schemas'
+import { storeHashToken } from '@/db/db'
 interface JwtPayload {
   timestamp: number
   exp?: number
@@ -106,6 +107,19 @@ export const useTokenStore = (isolationId: IsolationId) =>
             console.error(`Failed to renew token for hash: ${hash}`, err)
           }
         }
+      },
+      async tryRefreshAndStoreTokenToDb(hash: string): Promise<boolean> {
+        try {
+          await this.refreshHashTokenIfExpired(hash)
+          const token = this.hashTokenMap.get(hash)
+          if (token !== undefined) {
+            await storeHashToken(hash, token)
+            return true
+          }
+        } catch (err) {
+          console.error(`Failed to refresh and store token for hash: ${hash}`, err)
+        }
+        return false
       }
     }
   })()

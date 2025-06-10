@@ -25,7 +25,6 @@ import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { onMounted, ref, watch } from 'vue'
 import { getSrc } from '@/../config'
 import { useTokenStore } from '@/store/tokenStore'
-import { storeHashToken } from '@/db/db'
 const props = defineProps<{
   isolationId: IsolationId
   hash: string
@@ -43,11 +42,10 @@ watch(videoRef, () => {
   currentFrameStore.video = videoRef.value
 })
 onMounted(async () => {
-  await tokenStore.refreshHashTokenIfExpired(props.database.hash)
-  const token = tokenStore.hashTokenMap.get(props.database.hash)
-  if (token !== undefined) {
-    await storeHashToken(props.database.hash, token)
-    tokenReady.value = true
+  const success = await tokenStore.tryRefreshAndStoreTokenToDb(props.database.hash)
+  if (!success) {
+    throw new Error('Token renewal failed')
   }
+  tokenReady.value = true
 })
 </script>
