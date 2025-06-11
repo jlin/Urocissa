@@ -102,6 +102,8 @@ export const useTokenStore = (isolationId: IsolationId) =>
         if (!this._isExpired(decoded.exp)) return
 
         try {
+          await this.refreshTimestampTokenIfExpired()
+
           const timestampToken = this.timestampToken
           if (timestampToken == null) {
             throw new Error('Missing timestampToken for authorization')
