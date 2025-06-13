@@ -27,18 +27,19 @@
               <v-btn icon="mdi-close" @click="modalStore.showEditShareModal = false" />
             </template>
           </v-toolbar>
-
           <v-divider />
-
-          <v-list class="px-6" density="compact">
+          <v-list class="px-6">
             <v-list-item>
               <v-textarea
                 v-model="proxyModel.value.description"
                 label="Description of this link"
                 hide-details="auto"
+                rows="1"
               />
             </v-list-item>
-
+          </v-list>
+          <v-divider />
+          <v-list class="px-6">
             <v-list-item density="compact">
               <template #prepend>
                 <v-list-item-action start>
