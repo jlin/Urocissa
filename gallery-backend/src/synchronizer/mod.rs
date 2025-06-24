@@ -15,6 +15,7 @@ use tokio::task::JoinError;
 use tokio::task::JoinHandle;
 
 pub mod album;
+pub mod delete;
 pub mod event;
 pub mod video;
 pub mod watch;
