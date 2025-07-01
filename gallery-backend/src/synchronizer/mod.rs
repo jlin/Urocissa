@@ -7,6 +7,7 @@ use watch::start_watcher;
 use crate::looper::{
     expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
 };
+use crate::synchronizer::delete::start_delete_channel;
 
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
@@ -35,6 +36,7 @@ pub async fn start_sync(shutdown: Shutdown) {
     // Initialize a collection of tasks with their respective names
     let mut tasks = FuturesUnordered::new();
 
+    tasks.push(named_task("Delete channel", start_delete_channel()));
     tasks.push(named_task("Event channel", start_event_channel()));
     tasks.push(named_task("Video channel", start_video_channel()));
     tasks.push(named_task("Album channel", start_album_channel()));
