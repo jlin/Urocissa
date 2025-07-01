@@ -57,11 +57,30 @@ pub fn start_delete_channel() -> tokio::task::JoinHandle<()> {
     })
 }
 
-pub fn delete_paths(paths: Vec<PathBuf>) {
+pub fn delete_paths(candidates: Vec<PathBuf>) {
+    // compute once:
+    let upload_root = fs::canonicalize("./upload").expect("`./upload` directory must exist");
+
+    // filter + re-canonicalize each candidate:
+    let to_send: Vec<PathBuf> = candidates
+        .into_iter()
+        .filter_map(|p| {
+            // if the path itself is relative, canonicalize it
+            match fs::canonicalize(&p) {
+                Ok(abs) if abs.starts_with(&upload_root) => Some(abs),
+                _ => None, // drop anything outside upload or that failed
+            }
+        })
+        .collect();
+
+    if to_send.is_empty() {
+        // nothing left to delete
+        return;
+    }
+
     DELETE_QUEUE_SENDER
         .get()
         .expect("Delete channel not initialized")
-        .send(paths)
+        .send(to_send)
         .unwrap();
 }
-

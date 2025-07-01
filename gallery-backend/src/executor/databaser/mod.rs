@@ -14,7 +14,7 @@ use rayon::prelude::*;
 use std::cmp;
 use std::collections::HashSet;
 use std::panic::Location;
-use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 pub mod fix_orientation;
 pub mod generate_compressed_video;
@@ -92,24 +92,17 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, Database>) -> usize
 
         progress_bar.finish_with_message(format!("Index completed"));
 
-        let upload_root =
-            std::fs::canonicalize("./upload").expect("`./upload` directory must exist");
-
         let mut to_delete = HashSet::new();
 
         vec.iter().for_each(|database| {
             write_table.insert(&*database.hash, database).unwrap();
 
-            // Find the alias with the largest scan_time
             if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-                if let Ok(abs_path) = Path::new(&latest.file).canonicalize() {
-                    // Use starts_with to check whether the path is under ./upload
-                    if abs_path.starts_with(&upload_root) {
-                        to_delete.insert(abs_path);
-                    }
-                }
+                // store the raw path (not yet filtered)
+                to_delete.insert(PathBuf::from(&latest.file));
             }
         });
+
         if !to_delete.is_empty() {
             delete_paths(to_delete.into_iter().collect());
         }

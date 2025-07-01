@@ -1,6 +1,7 @@
-use crate::structure::database_struct::database::definition::Database;
-use crate::public::error_data::{ErrorData, handle_error};
 use crate::looper::tree::TREE;
+use crate::public::error_data::{ErrorData, handle_error};
+use crate::structure::database_struct::database::definition::Database;
+use crate::synchronizer::delete::delete_paths;
 use arrayvec::ArrayString;
 use blake3::Hasher;
 use dashmap::DashMap;
@@ -26,21 +27,29 @@ where
             Ok(hash) => {
                 let read_table = TREE.api_read_tree();
 
+                // ── A. 檔案已在資料庫 ───────────────────────────────────────────────
                 if let Some(guard) = read_table.get(&*hash).unwrap() {
-                    // File is already in database
                     let mut database_exist = guard.value();
                     let file_modify = mem::take(&mut database.alias[0]);
+                    let path_to_delete = file_modify.file.clone().into();
+
                     database_exist.alias.push(file_modify);
                     TREE.insert_tree_api(&vec![database_exist]).unwrap();
                     TREE.tree_update();
                     scaned_number.fetch_add(1, Ordering::SeqCst);
+
+                    delete_paths(vec![path_to_delete]);
                 } else if let Some(mut duplicated_database) = dashmap_of_database.get_mut(&hash) {
-                    // File is duplicated in the current batch
                     let file_modify = mem::take(&mut database.alias[0]);
+                    let path_to_delete = file_modify.file.clone().into();
+
                     duplicated_database.alias.push(file_modify);
                     duplicated_files_number.fetch_add(1, Ordering::SeqCst);
-                } else {
-                    // New file
+
+                    delete_paths(vec![path_to_delete]);
+                }
+                // ── C. 全新檔案 ────────────────────────────────────────────────
+                else {
                     database.hash = hash;
                     dashmap_of_database.insert(hash, database);
                 }
