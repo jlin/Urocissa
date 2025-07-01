@@ -56,3 +56,12 @@ pub fn start_delete_channel() -> tokio::task::JoinHandle<()> {
         }
     })
 }
+
+pub fn delete_paths(paths: Vec<PathBuf>) {
+    DELETE_QUEUE_SENDER
+        .get()
+        .expect("Delete channel not initialized")
+        .send(paths)
+        .unwrap();
+}
+

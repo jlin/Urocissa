@@ -1,9 +1,10 @@
 use self::processor::{process_image_info, process_video_info};
 use crate::constant::VALID_IMAGE_EXTENSIONS;
-use crate::structure::database_struct::database::definition::Database;
-use crate::public::error_data::{handle_error, ErrorData};
 use crate::constant::redb::DATA_TABLE;
 use crate::looper::tree::TREE;
+use crate::public::error_data::{ErrorData, handle_error};
+use crate::structure::database_struct::database::definition::Database;
+use crate::synchronizer::delete::delete_paths;
 use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use arrayvec::ArrayString;
 use dashmap::DashMap;
@@ -11,7 +12,9 @@ use dashmap::DashSet;
 use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 use std::cmp;
+use std::collections::HashSet;
 use std::panic::Location;
+use std::path::Path;
 use std::sync::Arc;
 pub mod fix_orientation;
 pub mod generate_compressed_video;
@@ -88,9 +91,28 @@ pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, Database>) -> usize
             .collect();
 
         progress_bar.finish_with_message(format!("Index completed"));
+
+        let upload_root =
+            std::fs::canonicalize("./upload").expect("`./upload` directory must exist");
+
+        let mut to_delete = HashSet::new();
+
         vec.iter().for_each(|database| {
             write_table.insert(&*database.hash, database).unwrap();
+
+            // Find the alias with the largest scan_time
+            if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
+                if let Ok(abs_path) = Path::new(&latest.file).canonicalize() {
+                    // Use starts_with to check whether the path is under ./upload
+                    if abs_path.starts_with(&upload_root) {
+                        to_delete.insert(abs_path);
+                    }
+                }
+            }
         });
+        if !to_delete.is_empty() {
+            delete_paths(to_delete.into_iter().collect());
+        }
         vec.len()
     };
     write_txn.commit().unwrap();
