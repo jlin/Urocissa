@@ -9,16 +9,21 @@
       }"
       class="ma-1"
     >
-      <div
-        class="position-relative w-100 h-100 parent"
-        :style="{
-          border:
-            collectionStore.editModeOn &&
-            collectionStore.editModeCollection.has(row.start + subIndex)
-              ? '4px solid #81D4FA'
-              : ''
-        }"
-      >
+      <div class="position-relative w-100 h-100 parent">
+        <div
+          :style="{
+            pointerEvents: 'none',
+            position: 'absolute',
+            zIndex: 100,
+            border:
+              collectionStore.editModeOn &&
+              collectionStore.editModeCollection.has(row.start + subIndex)
+                ? '4px solid #81D4FA'
+                : '4px solid transparent'
+          }"
+          @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
+          class="w-100 h-100"
+        ></div>
         <DesktopHoverIcon
           class="icon-hover child"
           v-if="!mobile"
