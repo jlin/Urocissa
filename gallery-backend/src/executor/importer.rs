@@ -58,21 +58,17 @@ async fn async_import(
             let dest_path = database.imported_path();
             let progress_bar = Arc::clone(&progress_bar);
             async move {
-                // Ensure the destination directory exists
                 if let Some(parent) = dest_path.parent() {
-                    if let Err(err) = fs::create_dir_all(parent).await {
-                        error!("Failed to create directory {:?}: {:#?}", parent, err);
-                        return Err(err);
-                    }
+                    fs::create_dir_all(parent).await.map_err(|err| {
+                        error!("create dir {:?}: {:#?}", parent, err);
+                        err
+                    })?;
                 }
 
-                if let Err(err) = fs::copy(&source_path, &dest_path).await {
-                    error!(
-                        "Failed to copy file from {:?} to {:?}: {:#?}",
-                        source_path, dest_path, err
-                    );
-                    return Err(err);
-                }
+                fs::copy(&source_path, &dest_path).await.map_err(|err| {
+                    error!("copy {:?} → {:?}: {:#?}", source_path, dest_path, err);
+                    err
+                })?;
 
                 progress_bar.inc(1);
                 Ok::<(), io::Error>(())

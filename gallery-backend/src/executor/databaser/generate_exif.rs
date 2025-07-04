@@ -10,11 +10,10 @@ pub fn generate_exif_for_image(database: &Database) -> BTreeMap<String, String> 
             let tag = field.tag.to_string();
             let value = field.display_value().with_unit(&exif).to_string();
             let ifd_num = field.ifd_num;
-            if exif_tuple.get(&tag).is_some() {
-                if ifd_num == exif::In::PRIMARY {
-                    exif_tuple.insert(tag, value);
-                }
-            } else {
+            // Insert the tag-value pair if:
+            // - the tag does not yet exist, or
+            // - it exists and the current IFD is PRIMARY (we allow overwrite only from PRIMARY)
+            if ifd_num == exif::In::PRIMARY || exif_tuple.get(&tag).is_none() {
                 exif_tuple.insert(tag, value);
             }
         }

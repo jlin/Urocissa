@@ -72,24 +72,23 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<(), Box<dyn 
     });
     let re = Regex::new(r"out_time_us=(\d+)").unwrap();
     for line in stdout_lines_filtered {
-        if let Some(captured) = re.captures(&line) {
-            if let Some(processed_time) = captured.get(1) {
-                let processed_time_str = processed_time.as_str();
-                match processed_time_str.parse::<f64>() {
-                    Ok(processed_time_f64) => {
-                        // Microseconds
-                        let x = ((processed_time_f64 / 1000000.0) / duration) * 100.0;
-                        info!(
-                            "Percentage: {:.2}% for {}",
-                            x,
-                            &database.compressed_path_string()
-                        );
-                    }
-                    Err(e) => error!("Failed to parse processed_time: {}", e),
+        if let Some(captured) = re.captures(&line)
+            && let Some(processed_time) = captured.get(1)
+        {
+            match processed_time.as_str().parse::<f64>() {
+                Ok(processed_time_f64) => {
+                    // Microseconds
+                    let x = ((processed_time_f64 / 1000000.0) / duration) * 100.0;
+                    info!(
+                        "Percentage: {:.2}% for {}",
+                        x,
+                        &database.compressed_path_string()
+                    );
                 }
-            } else {
-                error!("No digits captured for line: {}", line);
+                Err(e) => error!("Failed to parse processed_time: {}", e),
             }
+        } else {
+            error!("No digits captured for line: {}", line);
         }
     }
     cmd.wait().unwrap();

@@ -27,7 +27,7 @@ where
             Ok(hash) => {
                 let read_table = TREE.api_read_tree();
 
-                // ── A. 檔案已在資料庫 ───────────────────────────────────────────────
+                // File already in persistent database
                 if let Some(guard) = read_table.get(&*hash).unwrap() {
                     let mut database_exist = guard.value();
                     let file_modify = mem::take(&mut database.alias[0]);
@@ -39,7 +39,9 @@ where
                     scaned_number.fetch_add(1, Ordering::SeqCst);
 
                     delete_paths(vec![path_to_delete]);
-                } else if let Some(mut duplicated_database) = dashmap_of_database.get_mut(&hash) {
+                }
+                // Duplicate file in current scan
+                else if let Some(mut duplicated_database) = dashmap_of_database.get_mut(&hash) {
                     let file_modify = mem::take(&mut database.alias[0]);
                     let path_to_delete = file_modify.file.clone().into();
 
@@ -48,7 +50,7 @@ where
 
                     delete_paths(vec![path_to_delete]);
                 }
-                // ── C. 全新檔案 ────────────────────────────────────────────────
+                // New file
                 else {
                     database.hash = hash;
                     dashmap_of_database.insert(hash, database);

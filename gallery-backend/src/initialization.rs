@@ -14,14 +14,11 @@ pub fn initialize_logger() {
                 .key_values()
                 .get(Key::from("duration"))
                 .map(|v| {
-                    // If custom_value contains both numbers and units, add a space between them
                     let value_str = format!("{}", v);
-                    if let Some(index) = value_str.find(|c: char| c.is_alphabetic()) {
-                        if let Ok(value) = value_str[..index].parse::<f32>() {
-                            format!("{:.2} {}", value, &value_str[index..])
-                        } else {
-                            value_str
-                        }
+                    if let Some(index) = value_str.find(|c: char| c.is_alphabetic())
+                        && let Ok(value) = value_str[..index].parse::<f32>()
+                    {
+                        format!("{:.2} {}", value, &value_str[index..])
                     } else {
                         value_str
                     }
