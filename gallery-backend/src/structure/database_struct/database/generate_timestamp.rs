@@ -16,62 +16,49 @@ impl Database {
         for &field in priority_list {
             match field {
                 "DateTimeOriginal" => {
-                    if let Some(value) = self.exif_vec.get("DateTimeOriginal") {
-                        if let Ok(naive_dt) =
+                    if let Some(value) = self.exif_vec.get("DateTimeOriginal")
+                        && let Ok(naive_dt) =
                             NaiveDateTime::parse_from_str(value, "%Y-%m-%d %H:%M:%S")
-                        {
-                            if let Some(local_dt) =
-                                chrono::Local.from_local_datetime(&naive_dt).single()
-                            {
-                                if local_dt.naive_local() <= now_time {
-                                    return local_dt.timestamp_millis() as u128;
-                                }
-                            }
-                        }
+                        && let Some(local_dt) =
+                            chrono::Local.from_local_datetime(&naive_dt).single()
+                        && local_dt.naive_local() <= now_time
+                    {
+                        return local_dt.timestamp_millis() as u128;
                     }
                 }
                 "filename" => {
                     let mut max_time: Option<NaiveDateTime> = None;
+
                     for alias in &self.alias {
                         let path = PathBuf::from(&alias.file);
-                        if let Some(file_name) = path.file_name() {
-                            if let Some(captures) =
+
+                        if let Some(file_name) = path.file_name()
+                            && let Some(caps) =
                                 FILE_NAME_TIME_REGEX.captures(file_name.to_str().unwrap())
-                            {
-                                if let (
-                                    Ok(year),
-                                    Ok(month),
-                                    Ok(day),
-                                    Ok(hour),
-                                    Ok(minute),
-                                    Ok(second),
-                                ) = (
-                                    captures[1].parse::<i32>(),
-                                    captures[2].parse::<u32>(),
-                                    captures[3].parse::<u32>(),
-                                    captures[4].parse::<u32>(),
-                                    captures[5].parse::<u32>(),
-                                    captures[6].parse::<u32>(),
-                                ) {
-                                    if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
-                                        if let Some(time) =
-                                            NaiveTime::from_hms_opt(hour, minute, second)
-                                        {
-                                            let datetime = NaiveDateTime::new(date, time);
-                                            if datetime <= now_time {
-                                                max_time = Some(
-                                                    max_time.map_or(datetime, |t| t.max(datetime)),
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
+                            && let (Ok(year), Ok(month), Ok(day), Ok(hour), Ok(minute), Ok(second)) = (
+                                caps[1].parse::<i32>(),
+                                caps[2].parse::<u32>(),
+                                caps[3].parse::<u32>(),
+                                caps[4].parse::<u32>(),
+                                caps[5].parse::<u32>(),
+                                caps[6].parse::<u32>(),
+                            )
+                            && let Some(date) = NaiveDate::from_ymd_opt(year, month, day)
+                            && let Some(time) = NaiveTime::from_hms_opt(hour, minute, second)
+                        {
+                            let datetime = NaiveDateTime::new(date, time);
+
+                            if datetime <= now_time {
+                                max_time = Some(max_time.map_or(datetime, |t| t.max(datetime)));
                             }
                         }
                     }
+
                     if let Some(datetime) = max_time {
-                        let local_dt = chrono::Local.from_local_datetime(&datetime).unwrap();
-                        return local_dt.timestamp_millis() as u128;
+                        return chrono::Local
+                            .from_local_datetime(&datetime)
+                            .unwrap()
+                            .timestamp_millis() as u128;
                     }
                 }
                 "scan_time" => {

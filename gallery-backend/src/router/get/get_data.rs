@@ -1,10 +1,10 @@
-use crate::structure::abstract_data::AbstractData;
 use crate::constant::DEFAULT_PRIORITY_LIST;
-use crate::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::structure::row::{Row, ScrollBarData};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::structure::abstract_data::AbstractData;
+use crate::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
+use crate::structure::row::{Row, ScrollBarData};
 
 use crate::router::fairing::guard_timestamp::GuardTimestamp;
 use log::info;
@@ -45,12 +45,12 @@ pub async fn get_data(
                     .map_or(true, |resolved_share| resolved_share.share.show_download);
                 if let Some(database) = table.get(&*hash).unwrap() {
                     let mut database = database.value();
-                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt {
-                        if !resolved_share.share.show_metadata {
-                            database.tag.clear();
-                            database.album.clear();
-                            database.alias.clear();
-                        }
+                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt
+                        && !resolved_share.share.show_metadata
+                    {
+                        database.tag.clear();
+                        database.album.clear();
+                        database.alias.clear();
                     }
                     DataBaseTimestampReturn::new(
                         AbstractData::Database(database),
@@ -60,10 +60,10 @@ pub async fn get_data(
                     )
                 } else if let Some(album) = album_table.get(&*hash).unwrap() {
                     let mut album = album.value();
-                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt {
-                        if !resolved_share.share.show_metadata {
-                            album.tag.clear();
-                        }
+                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt
+                        && !resolved_share.share.show_metadata
+                    {
+                        album.tag.clear();
                     };
                     DataBaseTimestampReturn::new(
                         AbstractData::Album(album),
