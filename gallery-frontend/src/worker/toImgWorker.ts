@@ -8,7 +8,7 @@ import {
 } from '@/worker/workerApi'
 import axiosRetry from 'axios-retry'
 import axios, { AxiosError } from 'axios'
-import { getSrc } from '@/../config'
+import { getSrc } from '@utils/getter'
 
 const postToMainImg = bindActionDispatch(fromImgWorker, self.postMessage.bind(self))
 const controllerMap = new Map<number, AbortController>()
@@ -43,10 +43,7 @@ const handler = createHandler<typeof toImgWorker>({
         timestampToken: event.timestampToken
       }
 
-      const response = await workerAxios.get<Blob>(
-        getSrc(event.hash, false, 'jpg', '', undefined),
-        config
-      )
+      const response = await workerAxios.get<Blob>(getSrc(event.hash, false, 'jpg'), config)
 
       controllerMap.delete(event.index)
       const blob = response.data
@@ -89,10 +86,7 @@ const handler = createHandler<typeof toImgWorker>({
         timestampToken: event.timestampToken
       }
 
-      const response = await workerAxios.get<Blob>(
-        getSrc(event.hash, false, 'jpg', '', undefined),
-        config
-      )
+      const response = await workerAxios.get<Blob>(getSrc(event.hash, false, 'jpg'), config)
       const blob = response.data
       const img = await createImageBitmap(blob)
 

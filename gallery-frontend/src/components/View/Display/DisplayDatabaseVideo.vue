@@ -3,7 +3,7 @@
     v-if="tokenReady"
     controls
     autoplay
-    :src="getSrc(hash, false, 'mp4', Cookies.get('jwt')!, undefined)"
+    :src="getSrc(hash, false, 'mp4')"
     :style="{
       width: `${database.width}px`,
       height: `${database.height}px`,
@@ -20,10 +20,9 @@
 
 <script setup lang="ts">
 import { Database, IsolationId } from '@type/types'
-import Cookies from 'js-cookie'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { onMounted, ref, watch } from 'vue'
-import { getSrc } from '@/../config'
+import { getSrc } from '@utils/getter'
 import { useTokenStore } from '@/store/tokenStore'
 const props = defineProps<{
   isolationId: IsolationId

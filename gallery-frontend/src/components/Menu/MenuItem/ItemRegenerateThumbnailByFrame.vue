@@ -9,7 +9,7 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { getIsolationIdByRoute } from '@utils/getter'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
-import { getSrc } from '@/../config'
+import { getSrc } from '@utils/getter'
 import { useMessageStore } from '@/store/messageStore'
 
 const route = useRoute()
@@ -37,7 +37,7 @@ const regenerateThumbnailByFrame = async () => {
         }
       })
 
-      const blobHeader = await fetch(getSrc(hash, false, 'jpg', '', undefined), {
+      const blobHeader = await fetch(getSrc(hash, false, 'jpg'), {
         method: 'GET',
         cache: 'reload'
       })

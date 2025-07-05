@@ -11,7 +11,7 @@ import { saveAs } from 'file-saver'
 import { fetchDataInWorker } from '@/api/fetchData'
 import { getIsolationIdByRoute } from '@utils/getter'
 import { AbstractData } from '@type/types'
-import { getSrc } from '@/../config'
+import { getSrc } from '@utils/getter'
 import { useTokenStore } from '@/store/tokenStore'
 
 const props = defineProps<{
@@ -72,7 +72,7 @@ const downloadAllFiles = async () => {
 
         if (metadata.database) {
           const hash = metadata.database.hash
-          const url = getSrc(hash, true, metadata.database.ext, '', undefined)
+          const url = getSrc(hash, true, metadata.database.ext)
 
           const hashToken = tokenStore.hashTokenMap.get(hash)
           if (hashToken === undefined) {

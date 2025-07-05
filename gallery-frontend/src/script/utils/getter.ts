@@ -128,3 +128,8 @@ export function extractHashFromPath(path: string): string | null {
 
   return lastSegment?.split('.').shift() ?? null // 移除副檔名，保留 hash
 }
+
+export function getSrc(hash: string, original: boolean, ext: string) {
+  const compressedOrImported = original ? 'imported' : 'compressed'
+  return `/object/${compressedOrImported}/${hash.slice(0, 2)}/${hash}.${ext}`
+}

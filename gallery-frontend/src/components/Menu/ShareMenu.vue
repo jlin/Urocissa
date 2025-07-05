@@ -5,7 +5,7 @@
     </template>
     <v-list>
       <ItemViewOriginalFile
-        :src="getSrc(database.hash, true, database.ext, Cookies.get('jwt')!, undefined)"
+        :src="getSrc(database.hash, true, database.ext)"
         :hash="database.hash"
         :isolation-id="props.isolationId"
       />
@@ -15,8 +15,7 @@
 </template>
 <script setup lang="ts">
 import { Database, IsolationId } from '@type/types'
-import { getSrc } from '@/../config'
-import Cookies from 'js-cookie'
+import { getSrc } from '@utils/getter'
 import ItemViewOriginalFile from '@Menu/MenuItem/ItemViewOriginalFile.vue'
 import ItemDownload from '@Menu/MenuItem/ItemDownload.vue'
 const props = defineProps<{
