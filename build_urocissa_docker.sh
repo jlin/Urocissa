@@ -138,16 +138,6 @@ parse_arguments() {
     done
 }
 
-ensure_config_file() {
-    local source_file="$1"
-    local target_file="$2"
-    if [[ ! -f "$target_file" ]]; then
-        debug_log "$target_file not found. Attempting to restore from $source_file."
-        mv "$source_file" "$target_file"
-        cp "$target_file" "$source_file"
-    fi
-}
-
 build_docker_image() {
     debug_log "Setting up environment for multiarch builds..."
     debug_log "Building Docker image with BUILD_TYPE=$BUILD_TYPE for ARCH=$ARCH"
@@ -192,8 +182,6 @@ main() {
     BUILD_TYPE="release"
     NO_CACHE=false
     ARCH=""
-
-    ensure_config_file "./gallery-frontend/config.default.ts" "./gallery-frontend/config.ts"
 
     parse_arguments "$@"
     build_docker_image

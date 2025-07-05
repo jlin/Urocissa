@@ -22,8 +22,6 @@ gallery-backend/**
 !gallery-backend/lib/**
 
 # Include specific files in gallery-frontend
-!gallery-frontend/config.default.ts
-!gallery-frontend/config.ts
 !gallery-frontend/package.json
 !gallery-frontend/index.html
 !gallery-frontend/package-lock.json

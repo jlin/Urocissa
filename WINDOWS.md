@@ -71,25 +71,7 @@ cargo build --release
 
 ---
 
-### 5. Configure Frontend Settings
-
-1. Navigate to the `gallery-frontend` directory:
-
-   ```bash
-   cd ./Urocissa/gallery-frontend
-   ```
-
-2. Copy the default frontend config file:
-
-   ```bash
-   copy config.default.ts config.ts
-   ```
-
-   **Note:** The `config.ts` file contains advanced settings. You can leave it unchanged unless you need to customize it.
-
----
-
-### 6. Build the Frontend
+### 5. Build the Frontend
 
 In the `gallery-frontend` directory, run:
 
@@ -99,7 +81,7 @@ npm run build
 
 ---
 
-### 7. Run the Application
+### 6. Run the Application
 
 Navigate to the `gallery-backend` directory and run the following command to start the app:
 
