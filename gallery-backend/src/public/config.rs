@@ -1,6 +1,12 @@
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, fs::File, io, path::PathBuf, sync::LazyLock};
+use std::{
+    collections::HashSet,
+    fs::{self, File},
+    io,
+    path::PathBuf,
+    sync::LazyLock,
+};
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, Hash, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PublicConfig {
@@ -36,12 +42,9 @@ pub struct PrivateConfig {
     pub auth_key: Option<String>,
     pub discord_hook_url: Option<String>,
 }
-
 pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
-    // Load environment variables from .env file if it exists
     dotenv().ok();
 
-    // Deserialize environment variables into PrivateConfig
     let mut result = envy::from_env::<PrivateConfig>()
         .expect("Failed to load configuration from environment variables");
 
@@ -49,7 +52,15 @@ pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
         if url.trim().is_empty() {
             result.discord_hook_url = None;
         }
-    };
+    }
+
+    let upload_path =
+        fs::canonicalize(PathBuf::from("./upload")).expect("canonicalize(\"./upload\") failed");
+
+    result.sync_path.retain(|p| match fs::canonicalize(p) {
+        Ok(c) => c != upload_path,
+        Err(_) => p != &upload_path,
+    });
 
     result
 });
