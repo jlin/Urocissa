@@ -1,8 +1,11 @@
+use std::panic::Location;
 use std::time::Instant;
 
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
+use crate::public::error_data::{ErrorData, handle_error};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::synchronizer::event::EVENTS_SENDER;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
 use rocket::{form::Form, fs::TempFile};
@@ -80,10 +83,27 @@ pub async fn upload(
                 if VALID_IMAGE_EXTENSIONS.contains(&extension.as_str())
                     || VALID_VIDEO_EXTENSIONS.contains(&extension.as_str())
                 {
-                    if let Err(err) =
-                        save_file(&mut file, filename, extension, last_modified_time).await
-                    {
-                        return Err(err);
+                    match save_file(&mut file, filename, extension, last_modified_time).await {
+                        Ok(final_path) => {
+                            match EVENTS_SENDER.get().unwrap().send(vec![final_path.into()]) {
+                                Ok(_) => {
+                                    // Successfully sent. Nothing else needed.
+                                }
+                                Err(err) => {
+                                    // The send failed, and we get `returned_paths` back here.
+                                    let error_data = ErrorData::new(
+                                        format!("Failed to send paths: {}", err),
+                                        format!("Error occurred when sending path: {:?}", err.0),
+                                        None,
+                                        None,
+                                        Location::caller(),
+                                        None,
+                                    );
+                                    handle_error(error_data);
+                                }
+                            }
+                        }
+                        Err(err) => return Err(err),
                     }
                 } else {
                     error!("Invalid file type");
@@ -100,7 +120,7 @@ async fn save_file(
     filename: String,
     extension: String,
     last_modified_time: u64,
-) -> Result<(), Status> {
+) -> Result<String, Status> {
     let unique_id = Uuid::new_v4();
     let path_tmp = format!("./upload/{}-{}.tmp", filename, unique_id);
 
@@ -109,7 +129,7 @@ async fn save_file(
             set_last_modified_time(&path_tmp, last_modified_time)?;
             let path_final = format!("./upload/{}-{}.{}", filename, unique_id, extension);
             match std::fs::rename(&path_tmp, &path_final) {
-                Ok(_) => Ok(()),
+                Ok(_) => Ok(path_final),
                 Err(err) => {
                     error!("Failed to rename file: {}", err);
                     Err(Status::InternalServerError)

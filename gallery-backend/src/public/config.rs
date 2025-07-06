@@ -51,7 +51,5 @@ pub static PRIVATE_CONFIG: LazyLock<PrivateConfig> = LazyLock::new(|| {
         }
     };
 
-    result.sync_path.insert(PathBuf::from("./upload"));
-
     result
 });
