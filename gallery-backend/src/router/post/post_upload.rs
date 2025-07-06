@@ -1,14 +1,16 @@
 use std::panic::Location;
+use std::sync::Arc;
 use std::time::Instant;
 
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::public::error_data::{ErrorData, handle_error};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::synchronizer::event::EVENTS_SENDER;
+use crate::synchronizer::event::{EVENTS_SENDER, ScanQueue};
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
 use rocket::{form::Form, fs::TempFile};
+use tokio::sync::Notify;
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
 
@@ -85,9 +87,15 @@ pub async fn upload(
                 {
                     match save_file(&mut file, filename, extension, last_modified_time).await {
                         Ok(final_path) => {
-                            match EVENTS_SENDER.get().unwrap().send(vec![final_path.into()]) {
+                            let notify = Arc::new(Notify::new());
+                            let scan_queue = ScanQueue {
+                                scan_list: vec![final_path.into()],
+                                notify: Some(notify.clone()),
+                            };
+                            match EVENTS_SENDER.get().unwrap().send(scan_queue) {
                                 Ok(_) => {
-                                    // Successfully sent. Nothing else needed.
+                                    // Successfully sent the paths, now wait for scan to complete.
+                                    notify.notified().await;
                                 }
                                 Err(err) => {
                                     // The send failed, and we get `returned_paths` back here.

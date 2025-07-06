@@ -2,37 +2,56 @@ use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::executor::executor;
 
 use log::info;
-use std::mem;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::{collections::HashSet, path::PathBuf};
 use tokio;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::Notify;
+use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
-pub static EVENTS_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
+#[derive(Debug)]
+pub struct ScanQueue {
+    pub scan_list: Vec<PathBuf>,
+    pub notify: Option<Arc<Notify>>,
+}
+
+pub static EVENTS_SENDER: OnceLock<UnboundedSender<ScanQueue>> = OnceLock::new();
 
 pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
-    let (events_sender, mut events_receiver) = unbounded_channel::<Vec<PathBuf>>();
+    let (events_sender, mut events_receiver) = unbounded_channel::<ScanQueue>();
     EVENTS_SENDER.set(events_sender).unwrap();
 
     tokio::task::spawn(async move {
-        let mut buffer = Vec::new();
-
-        while events_receiver
-            .recv_many(&mut buffer, PROCESS_BATCH_NUMBER)
-            .await
-            > 0
-        {
-            let start_time = std::time::Instant::now();
-
-            let list_of_sync_files = mem::take(&mut buffer);
-            info!(duration = &*format!("{:?}", start_time.elapsed()); "received events");
-
+        loop {
+            let mut buffer = Vec::new();
+            events_receiver
+                .recv_many(&mut buffer, PROCESS_BATCH_NUMBER)
+                .await;
             tokio::task::spawn_blocking(move || {
-                // Deduplicate the paths
-                let unique_paths: HashSet<PathBuf> =
-                    list_of_sync_files.into_iter().flatten().collect();
+                let start_time = std::time::Instant::now();
+
+                info!(duration = &*format!("{:?}", start_time.elapsed()); "received events");
+
+                // Collect unique paths and notification objects in a single pass
+                let mut unique_paths = HashSet::new();
+                let mut notify_list = Vec::new();
+                
+                for queue in buffer {
+                    // Add paths directly to the set
+                    unique_paths.extend(queue.scan_list);
+                    // Collect notifications if present
+                    if let Some(notify) = queue.notify {
+                        notify_list.push(notify);
+                    }
+                }
+                
+                // Convert to Vec only once
                 let paths: Vec<PathBuf> = unique_paths.into_iter().collect();
                 executor(paths);
+                
+                // Notify all at once
+                for notify in notify_list {
+                    notify.notify_one();
+                }
             })
             .await
             .unwrap();

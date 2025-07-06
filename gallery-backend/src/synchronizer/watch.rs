@@ -7,6 +7,7 @@ use std::{panic::Location, path::PathBuf};
 
 use crate::public::config::PRIVATE_CONFIG;
 use crate::public::error_data::{ErrorData, handle_error};
+use crate::synchronizer::event::ScanQueue;
 
 use super::event::EVENTS_SENDER;
 pub fn start_watcher() -> tokio::task::JoinHandle<()> {
@@ -35,7 +36,10 @@ fn get_watcher() -> RecommendedWatcher {
                         EventKind::Create(_) => {
                             if !wacher_events.paths.is_empty() {
                                 // Attempt to send the paths without cloning.
-                                match EVENTS_SENDER.get().unwrap().send(wacher_events.paths) {
+                                match EVENTS_SENDER.get().unwrap().send(ScanQueue {
+                                    scan_list: wacher_events.paths,
+                                    notify: None, // No need for notification here
+                                }) {
                                     Ok(_) => {
                                         // Successfully sent. Nothing else needed.
                                     }
@@ -69,7 +73,10 @@ fn get_watcher() -> RecommendedWatcher {
                                 EVENTS_SENDER
                                     .get()
                                     .unwrap()
-                                    .send(filtered_paths)
+                                    .send(ScanQueue {
+                                        scan_list: filtered_paths,
+                                        notify: None, // No need for notification here
+                                    })
                                     .expect("events_sender send error");
                             }
                         }
