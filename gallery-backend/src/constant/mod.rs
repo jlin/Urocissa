@@ -5,6 +5,8 @@ pub const ROW_BATCH_NUMBER: usize = 20;
 
 pub const PROCESS_BATCH_NUMBER: usize = 100;
 
+pub const SNAPSHOT_MAX_LIFETIME_MS: u64 = 24 * 60 * 60 * 1_000; // 24 hours
+
 pub const SHOULD_SWAP_WIDTH_HEIGHT_ROTATION: &'static [&'static str] =
     &["90", "-90", "270", "-270"];
 

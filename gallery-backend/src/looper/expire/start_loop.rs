@@ -1,5 +1,6 @@
 use super::Expire;
 use crate::{
+    constant::SNAPSHOT_MAX_LIFETIME_MS,
     looper::{
         query_snapshot::QUERY_SNAPSHOT, tree::start_loop::VERSION_COUNT_TIMESTAMP,
         tree_snapshot::TREE_SNAPSHOT,
@@ -20,7 +21,7 @@ static EXPIRE_CHECK_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = Onc
 impl Expire {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
         start_loop_util(
-            Some((Duration::from_millis(1000), None)),
+            Some((Duration::from_millis(SNAPSHOT_MAX_LIFETIME_MS), None)),
             &EXPIRE_CHECK_SENDER,
             |buffer| {
                 let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
