@@ -37,7 +37,7 @@ pub static VERSION_COUNT_TIMESTAMP: AtomicU64 = AtomicU64::new(0);
 
 impl Tree {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&TREE_UPDATE_SENDER, |buffer| {
+        start_loop_util(None,&TREE_UPDATE_SENDER, |buffer| {
             let start_time = Instant::now();
             let table = self.api_read_tree();
 

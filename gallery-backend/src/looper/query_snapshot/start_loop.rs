@@ -13,7 +13,7 @@ static QUERY_SNAPSHOT_FLUSH_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>
 
 impl QuerySnapshot {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {
-        start_loop_util(&QUERY_SNAPSHOT_FLUSH_SENDER, |buffer| {
+        start_loop_util(None,&QUERY_SNAPSHOT_FLUSH_SENDER, |buffer| {
             loop {
                 if self.in_memory.is_empty() {
                     break;
