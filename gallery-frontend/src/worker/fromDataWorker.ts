@@ -78,6 +78,7 @@ export function handleDataWorkerReturn(dataWorker: Worker, isolationId: Isolatio
 
       prefetchStore.updateFetchRowTrigger = !prefetchStore.updateFetchRowTrigger
       prefetchStore.updateVisibleRowTrigger = !prefetchStore.updateVisibleRowTrigger
+      rowStore.firstRowFetched = true
     },
     editTagsReturn: (payload) => {
       if (payload.returnedTagsArray !== undefined) {

@@ -6,14 +6,17 @@ export const useRowStore = (isolationId: IsolationId) =>
     state: (): {
       rowData: Map<number, Row> //  Map<rowIndex, Row>
       lastVisibleRow: Map<number, Row>
+      firstRowFetched: boolean
     } => ({
       rowData: new Map(),
-      lastVisibleRow: new Map()
+      lastVisibleRow: new Map(),
+      firstRowFetched: false // prevent BufferPlaceholder showing when first row has not been fetched
     }),
     actions: {
       clearAll() {
         this.rowData.clear()
         this.lastVisibleRow.clear()
+        this.firstRowFetched = false
       },
       clearForResize() {
         this.rowData.clear()

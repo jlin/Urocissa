@@ -43,7 +43,7 @@
     <BufferPlaceholder
       id="placeholderNone"
       ref="placeholderNoneRef"
-      v-if="visibleRows.length === 0 && windowWidth > 0"
+      v-if="rowStore.firstRowFetched && visibleRows.length === 0 && windowWidth > 0"
       :top-pixel="
         ((lastRowBottom - scrollTopStore.scrollTop + windowHeight) %
           (placeholderNoneRowRefHeight + 2 * paddingPixel)) +
@@ -81,6 +81,7 @@ import RowBlock from '@/components/Buffer/BufferRowBlock.vue'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getArrayValue, getInjectValue } from '@utils/getter'
 import { IsolationId } from '@type/types'
+import { useRowStore } from '@/store/rowStore'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -89,6 +90,7 @@ const props = defineProps<{
 
 const prefetchStore = usePrefetchStore(props.isolationId)
 const scrollTopStore = useScrollTopStore(props.isolationId)
+const rowStore = useRowStore(props.isolationId)
 
 const windowWidth = getInjectValue<Ref<number>>('windowWidth')
 const windowHeight = getInjectValue<Ref<number>>('windowHeight')
