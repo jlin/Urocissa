@@ -102,7 +102,7 @@ const props = defineProps<{
 const route = useRoute()
 const router = useRouter()
 
-const uploadStore = useUploadStore(props.isolationId)
+const uploadStore = useUploadStore('mainId')
 const collectionStore = useCollectionStore(props.isolationId)
 const modalStore = useModalStore('mainId')
 

@@ -20,7 +20,8 @@
     <template #prepend>
       <v-progress-circular
         color="primary"
-        :model-value="uploadStore.percentComplete()"
+        :model-value="circularValue"
+        :indeterminate="uploadStore.status === 'Processing'"
         class="ma-4"
       >
         <v-icon color="white" icon="mdi-cloud-upload" />
@@ -54,6 +55,17 @@
 import { useModalStore } from '@/store/modalStore'
 import { useUploadStore } from '@/store/uploadStore'
 import humanizeDuration from 'humanize-duration'
+import { computed } from 'vue'
 const uploadStore = useUploadStore('mainId')
 const modalStore = useModalStore('mainId')
+
+const circularValue = computed(() => {
+  if (uploadStore.status === 'Uploading') {
+    return uploadStore.percentComplete()
+  } else if (uploadStore.status === 'Completed') {
+    return 0
+  } else {
+    return undefined // 這樣搭配 indeterminate 使用
+  }
+})
 </script>
