@@ -9,15 +9,10 @@ use crate::{
 };
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use redb::{ReadableTable, TableDefinition, TableHandle};
-use std::sync::{
-    Arc, OnceLock,
-    atomic::{AtomicU64, Ordering},
-};
+use std::sync::{Arc, OnceLock, atomic::Ordering};
 use tokio::sync::{Notify, mpsc::UnboundedSender};
 
 static EXPIRE_CHECK_SENDER: OnceLock<UnboundedSender<Option<Arc<Notify>>>> = OnceLock::new();
-
-pub static NEXT_EXPIRE_TIME: AtomicU64 = AtomicU64::new(0);
 
 impl Expire {
     pub fn start_loop(&'static self) -> tokio::task::JoinHandle<()> {

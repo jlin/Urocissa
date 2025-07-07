@@ -1,5 +1,4 @@
 use crate::looper::expire::EXPIRE_TABLE_DEFINITION;
-use crate::looper::expire::start_loop::NEXT_EXPIRE_TIME;
 use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::utils::get_current_timestamp_u64;
 
@@ -40,7 +39,6 @@ impl Expire {
             }
 
             expire_write_txn.commit().unwrap();
-            NEXT_EXPIRE_TIME.store(new_expire_time, Ordering::SeqCst);
             EXPIRE.expire_check();
         }
     }
