@@ -1,6 +1,8 @@
 use self::processor::{process_image_info, process_video_info};
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 use crate::constant::redb::DATA_TABLE;
+use crate::coordinator::video::VideoTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
 use crate::synchronizer::delete::delete_paths;
@@ -24,42 +26,43 @@ pub fn databaser(mut database: Database) -> Result<()> {
         .in_disk
         .begin_write()
         .with_context(|| "[databaser] Failed to begin write transaction")?;
+    {
+        let mut write_table = write_txn
+            .open_table(DATA_TABLE)
+            .with_context(|| "[databaser] Failed to open data table")?;
 
-    let mut write_table = write_txn
-        .open_table(DATA_TABLE)
-        .with_context(|| "[databaser] Failed to open data table")?;
+        if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
+            process_image_info(&mut database).with_context(|| {
+                format!(
+                    "[databaser] Failed to process image info: {}",
+                    database.source_path().display()
+                )
+            })?;
+        } else {
+            process_video_info(&mut database).with_context(|| {
+                format!(
+                    "[databaser] Failed to process video info: {}",
+                    database.source_path().display()
+                )
+            })?;
 
-    if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-        process_image_info(&mut database).with_context(|| {
-            format!(
-                "[databaser] Failed to process image info: {}",
-                database.source_path().display()
-            )
-        })?;
-    } else {
-        process_video_info(&mut database).with_context(|| {
-            format!(
-                "[databaser] Failed to process video info: {}",
-                database.source_path().display()
-            )
-        })?;
+            database.pending = true;
+            COORDINATOR.submit(Task::Video(VideoTask::new(database.hash)));
+        }
 
-        database.pending = true;
-        VIDEO_QUEUE_SENDER.get().unwrap().send(database).unwrap();
-    }
+        let mut to_delete = HashSet::new();
 
-    let mut to_delete = HashSet::new();
+        write_table
+            .insert(&*database.hash, database.clone())
+            .with_context(|| "[databaser] Failed to insert into data table")?;
 
-    write_table
-        .insert(&*database.hash, database.clone())
-        .with_context(|| "[databaser] Failed to insert into data table")?;
+        if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
+            to_delete.insert(PathBuf::from(&latest.file));
+        }
 
-    if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-        to_delete.insert(PathBuf::from(&latest.file));
-    }
-
-    if !to_delete.is_empty() {
-        delete_paths(to_delete.into_iter().collect());
+        if !to_delete.is_empty() {
+            delete_paths(to_delete.into_iter().collect());
+        }
     }
 
     write_txn

@@ -10,7 +10,7 @@ pub mod video;
 #[derive(Debug)]
 pub enum Task {
     Delete(DeleteTask),
-    VIDEO(VideoTask),
+    Video(VideoTask),
 }
 
 pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| Coordinator::new());
@@ -27,7 +27,7 @@ impl Coordinator {
             while let Some(task) = task_receiver.recv().await {
                 tokio::task::spawn_blocking(move || match task {
                     Task::Delete(task) => delete::delete_task(task),
-                    Task::VIDEO(task) => video::video_task(task),
+                    Task::Video(task) => video::video_task(task),
                 });
             }
         });
@@ -38,4 +38,8 @@ impl Coordinator {
     pub fn submit(&self, task: Task) {
         let _ = self.task_sender.send(task);
     }
+}
+
+pub struct StateManager {
+    // This struct can be used to manage the state of the coordinator if needed
 }
