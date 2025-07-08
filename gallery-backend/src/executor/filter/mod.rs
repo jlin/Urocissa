@@ -7,7 +7,7 @@ use std::path::PathBuf;
 
 pub fn filter(path: PathBuf) -> Result<Database> {
     validator_extension::validator(&path)?;
-    let database = validator_modified::validator(path)?;
-    let vec_of_file_modify_hash = validator_hash::validator(database);
-    vec_of_file_modify_hash
+    let mut database = validator_modified::validator(path)?;
+    validator_hash::validator(&mut database)?;
+    Ok(database)
 }

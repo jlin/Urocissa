@@ -4,7 +4,8 @@ pub mod databaser;
 mod filter;
 mod importer;
 use crate::looper::tree::TREE;
-use crate::{executor, constant::PROCESS_BATCH_NUMBER};
+use crate::{constant::PROCESS_BATCH_NUMBER, executor};
+use anyhow::Result;
 use batcher::merge_file_paths;
 
 pub fn executor(list_of_sync_files: Vec<PathBuf>) {
@@ -20,9 +21,9 @@ pub fn executor(list_of_sync_files: Vec<PathBuf>) {
     }
 }
 
-fn processor(list_of_sync_files: Vec<PathBuf>) -> usize {
-    let deduplicated_file_list = executor::filter::filter(list_of_sync_files);
-    importer::import(&deduplicated_file_list).unwrap();
-    let successfully_handled_length = executor::databaser::databaser(deduplicated_file_list);
-    successfully_handled_length
+fn processor(path: PathBuf) -> Result<()> {
+    let database = executor::filter::filter(path)?;
+    importer::import(&database).unwrap();
+    executor::databaser::databaser(database);
+    Ok(())
 }

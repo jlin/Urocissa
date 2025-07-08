@@ -7,7 +7,7 @@ use blake3::Hasher;
 use std::mem;
 use std::{fs::File, io::Read, path::Path};
 
-pub fn validator(mut database: Database) -> Result<Database> {
+pub fn validator(database: &mut Database) -> Result<()> {
     let hash = blake3_hasher(&database.source_path()).with_context(|| {
         format!(
             "[validator] Failed to compute hash for {}",
@@ -32,7 +32,7 @@ pub fn validator(mut database: Database) -> Result<Database> {
     // New file
     else {
         database.hash = hash;
-        Ok(database)
+        Ok(())
     }
 }
 

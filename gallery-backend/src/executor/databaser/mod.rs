@@ -2,20 +2,14 @@ use self::processor::{process_image_info, process_video_info};
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 use crate::constant::redb::DATA_TABLE;
 use crate::looper::tree::TREE;
-use crate::public::error_data::{ErrorData, handle_error};
 use crate::structure::database_struct::database::definition::Database;
 use crate::synchronizer::delete::delete_paths;
 use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
-use arrayvec::ArrayString;
-use dashmap::DashMap;
-use dashmap::DashSet;
-use indicatif::{ProgressBar, ProgressStyle};
-use rayon::prelude::*;
+use anyhow::{Context, Result};
 use std::cmp;
 use std::collections::HashSet;
-use std::panic::Location;
+
 use std::path::PathBuf;
-use std::sync::Arc;
 pub mod fix_orientation;
 pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
@@ -25,97 +19,54 @@ pub mod generate_thumbnail;
 pub mod generate_width_height;
 pub mod processor;
 pub mod video_ffprobe;
+pub fn databaser(mut database: Database) -> Result<()> {
+    let write_txn = TREE
+        .in_disk
+        .begin_write()
+        .with_context(|| "[databaser] Failed to begin write transaction")?;
 
-pub fn databaser(vec_of_hash_alias: DashMap<ArrayString<64>, Database>) -> usize {
-    let progress_bar = ProgressBar::new(vec_of_hash_alias.len() as u64);
-    progress_bar.set_style(
-        ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} ({eta}) {msg}")
-            .unwrap() // Added {msg} to the template
-            .progress_chars("##-"),
-    );
+    let mut write_table = write_txn
+        .open_table(DATA_TABLE)
+        .with_context(|| "[databaser] Failed to open data table")?;
 
-    progress_bar.set_message("Indexing...");
+    if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
+        process_image_info(&mut database).with_context(|| {
+            format!(
+                "[databaser] Failed to process image info: {}",
+                database.source_path().display()
+            )
+        })?;
+    } else {
+        process_video_info(&mut database).with_context(|| {
+            format!(
+                "[databaser] Failed to process video info: {}",
+                database.source_path().display()
+            )
+        })?;
 
-    let progress_bar = Arc::new(progress_bar);
+        database.pending = true;
+        VIDEO_QUEUE_SENDER.get().unwrap().send(database).unwrap();
+    }
 
-    let write_txn = TREE.in_disk.begin_write().unwrap();
-    let video_hash_dashset = DashSet::new();
-    let successfully_handled_length = {
-        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
+    let mut to_delete = HashSet::new();
 
-        let vec: Vec<_> = vec_of_hash_alias
-            .into_par_iter()
-            .filter_map(|(_, mut database)| {
-                if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-                    match process_image_info(&mut database) {
-                        Ok(_) => {
-                            // Update the progress bar
-                            progress_bar.inc(1);
-                            Some(database)
-                        }
-                        Err(e) => {
-                            handle_error(ErrorData::new(
-                                e.to_string(),
-                                format!("An error occurred while processing file",),
-                                Some(database.hash),
-                                Some(database.source_path()),
-                                Location::caller(),
-                                Some(database),
-                            ));
-                            None
-                        }
-                    }
-                } else {
-                    match process_video_info(&mut database) {
-                        Ok(_) => {
-                            progress_bar.inc(1);
-                            video_hash_dashset.insert(database.hash);
-                            database.pending = true; // Waiting to perform the next step (generate_compressed) in a worker thread
-                            Some(database)
-                        }
-                        Err(e) => {
-                            handle_error(ErrorData::new(
-                                e.to_string(),
-                                format!("An error occurred while processing file",),
-                                Some(database.hash),
-                                Some(database.source_path()),
-                                Location::caller(),
-                                Some(database),
-                            ));
-                            None
-                        }
-                    }
-                }
-            })
-            .collect();
+    write_table
+        .insert(&*database.hash, database.clone())
+        .with_context(|| "[databaser] Failed to insert into data table")?;
 
-        progress_bar.finish_with_message(format!("Index completed"));
+    if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
+        to_delete.insert(PathBuf::from(&latest.file));
+    }
 
-        let mut to_delete = HashSet::new();
+    if !to_delete.is_empty() {
+        delete_paths(to_delete.into_iter().collect());
+    }
 
-        vec.iter().for_each(|database| {
-            write_table.insert(&*database.hash, database).unwrap();
+    write_txn
+        .commit()
+        .with_context(|| "[databaser] Failed to commit transaction")?;
 
-            if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-                // store the raw path (not yet filtered)
-                to_delete.insert(PathBuf::from(&latest.file));
-            }
-        });
-
-        if !to_delete.is_empty() {
-            delete_paths(to_delete.into_iter().collect());
-        }
-        vec.len()
-    };
-    write_txn.commit().unwrap();
-    // Send video hashes to the worker thread
-    VIDEO_QUEUE_SENDER
-        .get()
-        .unwrap()
-        .send(video_hash_dashset.into_iter().collect())
-        .unwrap();
-    successfully_handled_length
+    Ok(())
 }
 
 pub fn small_width_height(width: u32, height: u32, small_height: u32) -> (u32, u32) {
