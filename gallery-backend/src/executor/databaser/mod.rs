@@ -6,7 +6,6 @@ use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
 use crate::synchronizer::delete::delete_paths;
-use crate::synchronizer::video::VIDEO_QUEUE_SENDER;
 use anyhow::{Context, Result};
 use std::cmp;
 use std::collections::HashSet;

@@ -1,13 +1,13 @@
 use super::small_width_height;
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
+use anyhow::Result;
 use image::{DynamicImage, ImageFormat};
-use std::{error::Error, process::Command};
-
+use std::process::Command;
 pub fn generate_thumbnail_for_image(
     database: &mut Database,
     dynamic_image: DynamicImage,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<()> {
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
 
@@ -17,7 +17,7 @@ pub fn generate_thumbnail_for_image(
 
     let binding = database.compressed_path();
     let parent_path = binding.parent().ok_or_else(|| {
-        format!(
+        anyhow::anyhow!(
             "image_compressor: failed to get parent directory for {:?}",
             database.compressed_path()
         )
@@ -29,7 +29,7 @@ pub fn generate_thumbnail_for_image(
     Ok(())
 }
 
-pub fn generate_thumbnail_for_video(database: &Database) -> Result<(), Box<dyn Error>> {
+pub fn generate_thumbnail_for_video(database: &Database) -> Result<()> {
     let width = database.width;
     let height = database.height;
 
@@ -66,10 +66,11 @@ pub fn generate_thumbnail_for_video(database: &Database) -> Result<(), Box<dyn E
         })?;
 
     if !status.success() {
-        return Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "ffmpeg failed to generate thumbnail",
-        )));
+        let code = status.code().unwrap_or(-1); // If None, assign -1 or handle explicitly
+        return Err(anyhow::anyhow!(
+            "ffmpeg failed to generate thumbnail with exit code {}",
+            code
+        ));
     }
     Ok(())
 }

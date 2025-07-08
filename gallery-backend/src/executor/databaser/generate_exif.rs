@@ -1,8 +1,8 @@
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
+use anyhow::Result;
 use regex::Regex;
 use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command, sync::LazyLock};
-
 pub fn generate_exif_for_image(database: &Database) -> BTreeMap<String, String> {
     let mut exif_tuple = BTreeMap::new();
     if let Ok(exif) = read_exif(&database.source_path()) {
@@ -30,9 +30,7 @@ fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
-pub fn generate_exif_for_video(
-    database: &Database,
-) -> Result<BTreeMap<String, String>, Box<dyn Error>> {
+pub fn generate_exif_for_video(database: &Database) -> Result<BTreeMap<String, String>> {
     let source_path = database.source_path_string();
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")
@@ -81,9 +79,9 @@ pub fn generate_exif_for_video(
         }
         Ok(exif_tuple)
     } else {
-        Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            "Command execution failed",
-        )))
+        Err(anyhow::anyhow!(
+            "process_video_info: ffprobe command failed with exit code {:?}",
+            output.status.code().unwrap_or(-1)
+        ))
     }
 }

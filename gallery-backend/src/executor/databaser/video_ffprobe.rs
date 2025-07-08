@@ -1,8 +1,8 @@
 use anyhow::Context;
+use anyhow::Result;
 use std::error::Error;
 use std::process::Command;
-
-pub fn video_width_height(info: &str, file_path: &str) -> Result<u32, Box<dyn Error>> {
+pub fn video_width_height(info: &str, file_path: &str) -> Result<u32> {
     let command_text = match info {
         "width" => Ok("stream=width"),
         "height" => Ok("stream=height"),
@@ -30,8 +30,11 @@ pub fn video_width_height(info: &str, file_path: &str) -> Result<u32, Box<dyn Er
     if output.status.success() {
         Ok(String::from_utf8(output.stdout)?.trim().parse::<u32>()?)
     } else {
-        Err(From::from(
-            String::from_utf8_lossy(&output.stderr).to_string(),
+        Err(anyhow::anyhow!(
+            "ffprobe failed for {:?} with status code {:?}: {}",
+            file_path,
+            output.status.code().unwrap_or(-1),
+            String::from_utf8_lossy(&output.stderr)
         ))
     }
 }

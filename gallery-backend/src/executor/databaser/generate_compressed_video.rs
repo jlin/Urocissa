@@ -7,7 +7,6 @@ use anyhow::{Context, Result};
 use regex::Regex;
 use std::{
     cmp,
-    error::Error,
     io::{BufRead, BufReader},
     process::{Command, Stdio},
 };
@@ -26,16 +25,21 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
             return process_image_info(database);
         }
         Ok(d) => d, // If no error and the duration is not 0.1 seconds, continue using this value
-        Err(e) => {
-            if e.to_string().contains("fail to parse to f32")
-                && database.ext.to_lowercase() == String::from("gif")
-            {
-                info!("This may not be a gif");
-                database.ext_type = "image".to_string();
-                return process_image_info(database);
-            } else {
-                return Err(e);
-            }
+        Err(err)
+            if err.to_string().contains("fail to parse to f32")
+                && database.ext.eq_ignore_ascii_case("gif") =>
+        {
+            info!("This may not be a gif");
+            database.ext_type = "image".to_string();
+            return process_image_info(database);
+        }
+        Err(err) => {
+            // Convert the Box<dyn Error> into anyhow::Error
+            return Err(anyhow::anyhow!(
+                "video_compressor: failed to get video duration for {:?}: {}",
+                database.imported_path_string(),
+                err
+            ));
         }
     };
     let mut cmd = Command::new("ffmpeg")
@@ -63,7 +67,12 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
                 database.imported_path_string()
             )
         })?;
-    let stdout = cmd.stdout.as_mut().ok_or("Failed to get command output")?;
+    let stdout = cmd.stdout.as_mut().ok_or_else(|| {
+        anyhow::anyhow!(
+            "video_compressor: failed to get stdout from ffmpeg command for {:?}",
+            database.imported_path_string()
+        )
+    })?;
     let stdout_reader = BufReader::new(stdout);
     let stdout_lines = stdout_reader.lines();
     let stdout_lines_filtered = stdout_lines.filter_map(|line| {
