@@ -36,6 +36,8 @@
                   return-object
                   closable-chips
                   :menu-props="{ maxWidth: 0 }"
+                  :hide-no-data="false"
+                  autocomplete="off"
                 >
                   <template #prepend-item v-if="albumStore.albums.size > 0">
                     <v-list-item value="">
@@ -71,7 +73,6 @@
                         </v-list-item-title>
                       </template>
                     </v-list-item>
-                    <v-divider />
                   </template>
                 </v-combobox>
               </v-container>
@@ -89,6 +90,7 @@
                   return-object
                   closable-chips
                   :menu-props="{ maxWidth: 0 }"
+                  autocomplete="off"
                 />
               </v-container>
             </v-form>
