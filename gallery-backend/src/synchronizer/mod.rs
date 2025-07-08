@@ -4,6 +4,7 @@ use rocket::Shutdown;
 use video::start_video_channel;
 use watch::start_watcher;
 
+use crate::coordinator::{Coordinator, COORDINATOR};
 use crate::looper::{
     expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
 };
@@ -12,6 +13,7 @@ use crate::synchronizer::delete::start_delete_channel;
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
 use std::future::Future;
+use std::sync::LazyLock;
 use tokio::task::JoinError;
 use tokio::task::JoinHandle;
 
@@ -33,6 +35,7 @@ fn named_task(
 }
 
 pub async fn start_sync(shutdown: Shutdown) {
+    let _ = LazyLock::<Coordinator>::force(&COORDINATOR);
     // Initialize a collection of tasks with their respective names
     let mut tasks = FuturesUnordered::new();
 

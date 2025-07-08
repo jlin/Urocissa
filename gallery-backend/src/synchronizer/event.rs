@@ -1,4 +1,6 @@
 use crate::constant::PROCESS_BATCH_NUMBER;
+use crate::coordinator::index::IndexTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::executor::executor;
 
 use log::info;
@@ -34,7 +36,7 @@ pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
                 // Collect unique paths and notification objects in a single pass
                 let mut unique_paths = HashSet::new();
                 let mut notify_list = Vec::new();
-                
+
                 for queue in buffer {
                     // Add paths directly to the set
                     unique_paths.extend(queue.scan_list);
@@ -43,11 +45,12 @@ pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
                         notify_list.push(notify);
                     }
                 }
-                
+
                 // Convert to Vec only once
                 let paths: Vec<PathBuf> = unique_paths.into_iter().collect();
-                executor(paths);
-                
+                for path in paths {
+                    COORDINATOR.submit(Task::Index(IndexTask::new(path)));
+                }
                 // Notify all at once
                 for notify in notify_list {
                     notify.notify_one();

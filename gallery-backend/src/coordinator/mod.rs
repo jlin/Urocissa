@@ -2,18 +2,22 @@ use std::sync::LazyLock;
 
 use tokio::sync::mpsc;
 
-use crate::coordinator::{delete::DeleteTask, video::VideoTask};
+use crate::coordinator::{delete::DeleteTask, index::IndexTask, video::VideoTask};
 
 pub mod delete;
+pub mod index;
 pub mod video;
-
 #[derive(Debug)]
 pub enum Task {
     Delete(DeleteTask),
     Video(VideoTask),
+    Index(IndexTask),
 }
 
-pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| Coordinator::new());
+pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| {
+    info!("Coordinator initialized");
+    Coordinator::new()
+});
 
 pub struct Coordinator {
     task_sender: mpsc::UnboundedSender<Task>,
@@ -28,6 +32,7 @@ impl Coordinator {
                 tokio::task::spawn_blocking(move || match task {
                     Task::Delete(task) => delete::delete_task(task),
                     Task::Video(task) => video::video_task(task),
+                    Task::Index(task) => index::index_task(task),
                 });
             }
         });
