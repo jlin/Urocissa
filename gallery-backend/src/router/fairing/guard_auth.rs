@@ -1,8 +1,8 @@
-use crate::router::fairing::guard_share::Claims;
+use crate::router::claims::claims::Claims;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 use jsonwebtoken::{DecodingKey, decode};
 use rocket::Request;
-use rocket::http::{CookieJar, Status};
+use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 
 use super::VALIDATION;
@@ -14,24 +14,20 @@ impl<'r> FromRequest<'r> for GuardAuth {
     type Error = ();
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Check for JWT cookie
-        let cookies: &CookieJar = req.cookies();
-        if let Some(jwt_cookie) = cookies.get("jwt") {
+        if let Some(jwt_cookie) = req.cookies().get("jwt") {
             let token = jwt_cookie.value();
-
             match decode::<Claims>(
                 token,
                 &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
                 &VALIDATION,
             ) {
-                Ok(_) => {
+                Ok(claims_data) if claims_data.claims.is_admin() => {
                     return Outcome::Success(GuardAuth);
                 }
                 _ => {
                     warn!("JWT validation failed.");
                 }
             }
-            // No need to check for share mode
         }
         return Outcome::Forward(Status::Unauthorized);
     }

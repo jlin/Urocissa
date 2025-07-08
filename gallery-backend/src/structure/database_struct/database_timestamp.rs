@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{router::fairing::guard_hash::HashClaims, structure::abstract_data::AbstractData};
+use crate::{router::claims::hash_claims::HashClaims, structure::abstract_data::AbstractData};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

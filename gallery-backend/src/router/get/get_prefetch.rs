@@ -2,8 +2,8 @@ use crate::looper::query_snapshot::QUERY_SNAPSHOT;
 use crate::looper::tree::TREE;
 use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::router::claims::timestamp_claims::TimestampClaims;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::router::fairing::guard_timestamp::TimestampClaims;
 use crate::structure::album::ResolvedShare;
 use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::structure::expression::Expression;
@@ -255,7 +255,7 @@ pub async fn prefetch(
     // Combine album filter (if any) with the client‑supplied query.
     let mut combined_expression_option = query_data.map(|wrapper| wrapper.into_inner());
 
-    let job_handle = if let Some(resolved_share) = auth_guard.claims.resolved_share_opt {
+    let job_handle = if let Some(resolved_share) = auth_guard.claims.get_share() {
         let album_filter_expression = Expression::Album(resolved_share.album_id);
 
         combined_expression_option = Some(match combined_expression_option {

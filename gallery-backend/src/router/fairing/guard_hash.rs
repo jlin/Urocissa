@@ -1,5 +1,4 @@
-use arrayvec::ArrayString;
-use jsonwebtoken::{DecodingKey, EncodingKey, Header, decode, encode};
+use jsonwebtoken::{DecodingKey, decode};
 use log::warn;
 use rocket::Request;
 use rocket::http::Status;
@@ -7,48 +6,14 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::serde::json::Json;
 
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::router::claims::hash_claims::HashClaims;
+use crate::router::claims::timestamp_claims::TimestampClaims;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
 use super::VALIDATION_ALLOW_EXPIRED;
-use super::guard_timestamp::TimestampClaims;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct HashClaims {
-    pub allow_original: bool,
-    pub hash: ArrayString<64>,
-    pub timestamp: u128,
-    pub exp: u64,
-}
-
-impl HashClaims {
-    pub fn new(hash: ArrayString<64>, timestamp: u128, allow_original: bool) -> Self {
-        let exp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_secs()
-            + 300;
-
-        Self {
-            allow_original,
-            hash,
-            timestamp,
-            exp,
-        }
-    }
-
-    pub fn encode(&self) -> String {
-        encode(
-            &Header::default(),
-            &self,
-            &EncodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
-        )
-        .expect("Failed to generate token")
-    }
-}
 pub struct GuardHash;
 
 #[async_trait]

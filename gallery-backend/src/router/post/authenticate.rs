@@ -3,7 +3,8 @@ use rocket::post;
 use rocket::serde::json::Json;
 use std::sync::LazyLock;
 
-use crate::{public::config::PRIVATE_CONFIG, router::fairing::guard_share::Claims};
+use crate::public::config::PRIVATE_CONFIG;
+use crate::router::claims::claims::Claims;
 
 pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<Vec<u8>> =
     LazyLock::new(|| match PRIVATE_CONFIG.auth_key.as_ref() {
@@ -20,13 +21,9 @@ pub static JSON_WEB_TOKEN_SECRET_KEY: LazyLock<Vec<u8>> =
 #[post("/post/authenticate", data = "<password>")]
 pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'static str> {
     let input_password = password.into_inner();
-
-    // Verify the password
     if input_password == PRIVATE_CONFIG.password {
-        // Generate token
-        let token = Claims::new().encode();
-
-        return Ok(Json(token)); // Return the JWT token
+        let token = Claims::new_admin().encode();
+        return Ok(Json(token));
     }
 
     Err("Invalid password")
