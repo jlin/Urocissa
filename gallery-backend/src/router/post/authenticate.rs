@@ -1,13 +1,7 @@
-use arrayvec::ArrayString;
 use rand::{TryRngCore, rngs::OsRng};
 use rocket::post;
 use rocket::serde::json::Json;
-use std::{
-    sync::LazyLock,
-    time::{SystemTime, UNIX_EPOCH},
-};
-
-use serde::{Deserialize, Serialize};
+use std::sync::LazyLock;
 
 use crate::{public::config::PRIVATE_CONFIG, router::fairing::guard_share::Claims};
 
@@ -36,33 +30,4 @@ pub async fn authenticate(password: Json<String>) -> Result<Json<String>, &'stat
     }
 
     Err("Invalid password")
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ShareClaims {
-    url: ArrayString<64>,
-    exp: usize,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ShareAuthentication {
-    url: ArrayString<64>,
-    password: Option<String>,
-}
-
-#[post("/post/authenticate-share", data = "<album_authentication>")]
-pub async fn authenticate_share(
-    album_authentication: Json<ShareAuthentication>,
-) -> Result<Json<String>, &'static str> {
-    let expiration = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_secs()
-        + 3600;
-
-    let _claims = ShareClaims {
-        url: album_authentication.url,
-        exp: expiration as usize,
-    };
-    todo!()
 }
