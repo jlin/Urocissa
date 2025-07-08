@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{router::claims::hash_claims::HashClaims, structure::abstract_data::AbstractData};
+use crate::{router::claims::claims_hash::ClaimsHash, structure::abstract_data::AbstractData};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -37,11 +37,11 @@ impl DataBaseTimestampReturn {
         let timestamp = abstract_data.compute_timestamp(priority_list);
         let token = match &abstract_data {
             AbstractData::Database(database) => {
-                HashClaims::new(database.hash, token_timestamp, allow_original).encode()
+                ClaimsHash::new(database.hash, token_timestamp, allow_original).encode()
             }
             AbstractData::Album(album) => {
                 if let Some(cover_hash) = album.cover {
-                    HashClaims::new(cover_hash, token_timestamp, allow_original).encode()
+                    ClaimsHash::new(cover_hash, token_timestamp, allow_original).encode()
                 } else {
                     String::new()
                 }

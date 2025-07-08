@@ -1,21 +1,20 @@
-use arrayvec::ArrayString;
 use jsonwebtoken::{EncodingKey, Header, encode};
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
+use crate::structure::album::ResolvedShare;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct HashClaims {
-    pub allow_original: bool,
-    pub hash: ArrayString<64>,
+pub struct ClaimsTimestamp {
+    pub resolved_share_opt: Option<ResolvedShare>,
     pub timestamp: u128,
     pub exp: u64,
 }
 
-impl HashClaims {
-    pub fn new(hash: ArrayString<64>, timestamp: u128, allow_original: bool) -> Self {
+impl ClaimsTimestamp {
+    pub fn new(resolved_share_opt: Option<ResolvedShare>, timestamp: u128) -> Self {
         let exp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -23,8 +22,7 @@ impl HashClaims {
             + 300;
 
         Self {
-            allow_original,
-            hash,
+            resolved_share_opt,
             timestamp,
             exp,
         }

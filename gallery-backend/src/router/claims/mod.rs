@@ -1,3 +1,3 @@
 pub mod claims;
-pub mod hash_claims;
-pub mod timestamp_claims;
+pub mod claims_hash;
+pub mod claims_timestamp;

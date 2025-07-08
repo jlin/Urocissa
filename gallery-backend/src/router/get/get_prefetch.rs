@@ -2,7 +2,7 @@ use crate::looper::query_snapshot::QUERY_SNAPSHOT;
 use crate::looper::tree::TREE;
 use crate::looper::tree::start_loop::VERSION_COUNT_TIMESTAMP;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
-use crate::router::claims::timestamp_claims::TimestampClaims;
+use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
 use crate::structure::album::ResolvedShare;
 use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
@@ -181,7 +181,7 @@ fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
 
 /// Assemble the JSON response for the **edit** path.
 fn build_edit_response(prefetch: Prefetch, timestamp_millis: u128) -> Json<PrefetchReturn> {
-    let claims = TimestampClaims::new(None, timestamp_millis);
+    let claims = ClaimsTimestamp::new(None, timestamp_millis);
     Json(PrefetchReturn::new(prefetch, claims.encode(), None))
 }
 
@@ -191,7 +191,7 @@ fn build_share_response(
     timestamp_millis: u128,
     resolved_share: ResolvedShare,
 ) -> Json<PrefetchReturn> {
-    let claims = TimestampClaims::new(Some(resolved_share), timestamp_millis);
+    let claims = ClaimsTimestamp::new(Some(resolved_share), timestamp_millis);
     Json(PrefetchReturn::new(
         prefetch,
         claims.encode(),

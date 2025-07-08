@@ -7,8 +7,8 @@ use rocket::serde::json::Json;
 
 use serde::{Deserialize, Serialize};
 
-use crate::router::claims::hash_claims::HashClaims;
-use crate::router::claims::timestamp_claims::TimestampClaims;
+use crate::router::claims::claims_hash::ClaimsHash;
+use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
@@ -38,7 +38,7 @@ impl<'r> FromRequest<'r> for GuardHash {
         };
 
         // Decode the token
-        let token_data = match decode::<HashClaims>(
+        let token_data = match decode::<ClaimsHash>(
             token,
             &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
             &VALIDATION,
@@ -105,7 +105,7 @@ impl<'r> FromRequest<'r> for GuardHashOriginal {
         };
 
         // Decode the token
-        let token_data = match decode::<HashClaims>(
+        let token_data = match decode::<ClaimsHash>(
             token,
             &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
             &VALIDATION,
@@ -172,7 +172,7 @@ pub async fn renew_hash_token(
 ) -> Result<Json<RenewHashTokenReturn>, Status> {
     tokio::task::spawn_blocking(move || {
         let expired_hash_token = token_request.into_inner().expired_hash_token;
-        let token_data = match decode::<HashClaims>(
+        let token_data = match decode::<ClaimsHash>(
             &expired_hash_token,
             &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
             &VALIDATION_ALLOW_EXPIRED,
@@ -196,7 +196,7 @@ pub async fn renew_hash_token(
         }
 
         let claims = token_data.claims;
-        let new_hash_claims = HashClaims::new(claims.hash, claims.timestamp, claims.allow_original);
+        let new_hash_claims = ClaimsHash::new(claims.hash, claims.timestamp, claims.allow_original);
         let new_hash_token = new_hash_claims.encode();
 
         Ok(Json(RenewHashTokenReturn {
@@ -232,7 +232,7 @@ impl<'r> FromRequest<'r> for TimestampGuardModified {
             }
         };
 
-        let token_data = match decode::<TimestampClaims>(
+        let token_data = match decode::<ClaimsTimestamp>(
             token,
             &DecodingKey::from_secret(&*JSON_WEB_TOKEN_SECRET_KEY),
             &VALIDATION,
