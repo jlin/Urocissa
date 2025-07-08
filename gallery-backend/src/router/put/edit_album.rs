@@ -23,7 +23,7 @@ pub struct EditAlbumsData {
 
 #[put("/put/edit_album", format = "json", data = "<json_data>")]
 pub async fn edit_album(
-    _auth: GuardShare,
+    _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     json_data: Json<EditAlbumsData>,
 ) -> () {
