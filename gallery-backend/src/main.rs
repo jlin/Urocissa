@@ -23,7 +23,6 @@ mod coordinator;
 mod executor;
 mod initialization;
 mod looper;
-mod migration;
 mod public;
 mod router;
 mod structure;
@@ -35,7 +34,6 @@ async fn rocket() -> _ {
     check_ffmpeg_and_ffprobe();
     initialize_folder();
     initialize_file();
-    check_database_schema_version();
     let start_time = Instant::now();
     let txn = TREE.in_disk.begin_write().unwrap();
 
