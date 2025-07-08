@@ -1,52 +1,32 @@
 use crate::structure::database_struct::database::definition::Database;
 use crate::structure::database_struct::file_modify::FileModify;
-use crate::public::error_data::{handle_error, ErrorData};
+use anyhow::{Context, Result};
 use path_clean::PathClean;
-use rayon::prelude::*;
-use std::{fs::metadata, panic::Location, path::PathBuf, time::UNIX_EPOCH};
+use std::{fs::metadata, path::PathBuf, time::UNIX_EPOCH};
 
-pub fn validator<I>(file_paths: I) -> impl ParallelIterator<Item = Database>
-where
-    I: ParallelIterator<Item = PathBuf>,
-{
-    file_paths.filter_map(|file_path| {
-        let metadata_result = metadata(&file_path);
-        match metadata_result {
-            Ok(metadata) => {
-                let modified_result = metadata.modified();
-                match modified_result {
-                    Ok(modified) => {
-                        let modified_millis =
-                            modified.duration_since(UNIX_EPOCH).unwrap().as_millis();
-                        let file_modify = FileModify::new(file_path.clean(), modified_millis);
-                        let size = metadata.len();
-                        let database = Database::new(size, file_modify);
-                        Some(database)
-                    }
-                    Err(err) => {
-                        handle_error(ErrorData::new(
-                            err.to_string(),
-                            "An error occurred while getting the file modified time".to_string(),
-                            None,
-                            Some(file_path),
-                            Location::caller(),
-                            None,
-                        ));
-                        None
-                    }
-                }
-            }
-            Err(err) => {
-                handle_error(ErrorData::new(
-                    err.to_string(),
-                    "An error occurred while getting the file metadata".to_string(),
-                    None,
-                    Some(file_path),
-                    Location::caller(),
-                    None,
-                ));
-                None
-            }
-        }
-    })
+pub fn validator(path: PathBuf) -> Result<Database> {
+    let metadata = metadata(&path)
+        .with_context(|| format!("[validator] Failed to read metadata for {}", path.display()))?;
+
+    let modified = metadata.modified().with_context(|| {
+        format!(
+            "[validator] Failed to get modification time for {}",
+            path.display()
+        )
+    })?;
+
+    let modified_millis = modified
+        .duration_since(UNIX_EPOCH)
+        .with_context(|| {
+            format!(
+                "[validator] Modification time for {} is before UNIX_EPOCH",
+                path.display()
+            )
+        })?
+        .as_millis();
+
+    let file_modify = FileModify::new(path.clean(), modified_millis);
+    let size = metadata.len();
+    let database = Database::new(size, file_modify);
+    Ok(database)
 }

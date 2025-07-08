@@ -1,34 +1,23 @@
-use crate::public::error_data::{ErrorData, handle_error};
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use rayon::prelude::*;
-use std::{ffi::OsStr, panic::Location, path::PathBuf};
+use anyhow::{Result, bail};
+use std::{ffi::OsStr, path::PathBuf};
 
-pub fn validator(all_paths: Vec<PathBuf>) -> impl ParallelIterator<Item = PathBuf> {
-    all_paths.into_par_iter().filter_map(move |file_path| {
-        let extension = file_path.extension().and_then(OsStr::to_str);
-        match extension {
-            Some(ext) => {
-                let lowercased_ext = ext.to_ascii_lowercase();
-                if VALID_IMAGE_EXTENSIONS.contains(&lowercased_ext.as_str())
-                    || VALID_VIDEO_EXTENSIONS.contains(&lowercased_ext.as_str())
-                {
-                    Some(file_path)
-                } else {
-                    error!("{} is not a valid extension", &lowercased_ext);
-                    None
-                }
-            }
-            None => {
-                handle_error(ErrorData::new(
-                    format!("Could not determine the file extension"),
-                    format!("Error occur when processing validator"),
-                    None,
-                    Some(file_path),
-                    Location::caller(),
-                    None,
-                ));
-                None
+pub fn validator(path: &PathBuf) -> Result<()> {
+    let extension = path.extension().and_then(OsStr::to_str);
+
+    match extension {
+        Some(ext) => {
+            let lowercased_ext = ext.to_ascii_lowercase();
+            if VALID_IMAGE_EXTENSIONS.contains(&lowercased_ext.as_str())
+                || VALID_VIDEO_EXTENSIONS.contains(&lowercased_ext.as_str())
+            {
+                Ok(())
+            } else {
+                bail!("{} is not a valid extension", &lowercased_ext);
             }
         }
-    })
+        None => {
+            bail!("{} has no extension", path.display());
+        }
+    }
 }
