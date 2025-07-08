@@ -12,7 +12,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub fn generate_compressed_video(database: &mut Database) -> Result<(), Box<dyn Error>> {
+pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {
