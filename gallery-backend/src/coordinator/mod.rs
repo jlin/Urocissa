@@ -1,6 +1,6 @@
 use anyhow::Context;
-use std::sync::LazyLock;
-use tokio::sync::{mpsc, oneshot};
+use std::sync::{Arc, LazyLock};
+use tokio::sync::{Notify, mpsc, oneshot};
 use tokio::task;
 
 pub mod album;
@@ -36,7 +36,7 @@ impl Coordinator {
     pub fn new() -> Self {
         let (task_tx, mut task_rx) = mpsc::unbounded_channel::<Envelope>();
 
-       // 1. 建立一個 Notifier，用 Arc 包裝以便在異步任務間共享
+        // 1. 建立一個 Notifier，用 Arc 包裝以便在異步任務間共享
         let update_notifier = Arc::new(Notify::new());
 
         std::thread::spawn(move || {
@@ -54,7 +54,7 @@ impl Coordinator {
                         info!("Update task triggered by notifier, starting execution.");
 
                         // 執行耗時的 blocking 任務
-                        let res = task::spawn_blocking(update::update_task)
+                        let res = task::spawn_blocking(|| update::update_task())
                             .await
                             .expect("blocking update task panicked");
 
@@ -74,7 +74,7 @@ impl Coordinator {
                         Task::Video(task) => spawn_worker(video::video_task, task, reply),
                         Task::Index(task) => spawn_worker(index::index_task, task, reply),
                         Task::Album(task) => spawn_worker(album::album_task, task, reply),
-                        
+
                         // 5. 對於 Update 任務的處理方式改變了
                         Task::Update() => {
                             info!("Received Update task, notifying the handler.");
@@ -95,7 +95,6 @@ impl Coordinator {
         });
 
         Coordinator { task_tx }
-    }
     }
 
     /// Fire-and-forget.

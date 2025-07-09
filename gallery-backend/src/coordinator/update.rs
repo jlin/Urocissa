@@ -26,7 +26,7 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-pub fn update_task(_: ()) -> anyhow::Result<()> {
+pub fn update_task() -> anyhow::Result<()> {
     let start_time = Instant::now();
     let table = TREE.api_read_tree();
 
