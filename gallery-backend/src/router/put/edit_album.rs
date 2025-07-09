@@ -73,7 +73,7 @@ pub async fn edit_album(
     .await
     .unwrap();
 
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
     let futures = concact_result.into_iter().map(async |album_id| {
         COORDINATOR
             .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
@@ -115,7 +115,7 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
     Ok(())
 }
 
@@ -149,7 +149,7 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
 
     Ok(())
 }

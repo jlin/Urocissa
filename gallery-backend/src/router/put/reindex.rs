@@ -91,6 +91,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
     Status::Ok
 }

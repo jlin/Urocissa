@@ -1,7 +1,8 @@
-use crate::TREE;
-use crate::structure::database_struct::database::definition::Database;
+use crate::coordinator::Task;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::structure::database_struct::database::definition::Database;
+use crate::{TREE, coordinator::COORDINATOR};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[get("/put/generate_random_data?<number>")]
@@ -15,6 +16,6 @@ pub async fn generate_random_data(
         .map(|_| Database::generate_random_data())
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
-    TREE.tree_update();
+    COORDINATOR.submit(Task::Update());
     info!("Insert random data complete")
 }

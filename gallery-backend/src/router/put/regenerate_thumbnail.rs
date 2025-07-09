@@ -1,3 +1,4 @@
+use crate::coordinator::{COORDINATOR, Task};
 use crate::indexer::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::indexer::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::looper::tree::TREE;
@@ -63,7 +64,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                TREE.should_update_async().await;
+                COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
             }
         }
     }

@@ -1,7 +1,7 @@
 use rocket::Shutdown;
 use watch::start_watcher;
 
-use crate::coordinator::{COORDINATOR, Coordinator};
+use crate::coordinator::{COORDINATOR, Coordinator, Task};
 use crate::looper::{
     expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
 };
@@ -31,7 +31,6 @@ pub async fn start_sync(shutdown: Shutdown) {
     // Initialize a collection of tasks with their respective names
     let mut tasks = FuturesUnordered::new();
 
-    tasks.push(named_task("Tree loop", TREE.start_loop()));
     tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
     tasks.push(named_task(
         "Query snapshot loop",
@@ -49,7 +48,7 @@ pub async fn start_sync(shutdown: Shutdown) {
 
     info!("All channels started.");
 
-    TREE.tree_update();
+    COORDINATOR.submit(Task::Update()).unwrap();
 
     // Await the first task to complete
     if let Some((name, result)) = tasks.next().await {

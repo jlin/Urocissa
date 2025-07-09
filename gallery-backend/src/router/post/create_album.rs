@@ -1,10 +1,10 @@
-use std::time::Instant;
 use arrayvec::ArrayString;
 use rand::Rng;
 use rand::distr::Alphanumeric;
 use redb::ReadableTable;
 use rocket::post;
 use rocket::serde::json::Json;
+use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
@@ -78,7 +78,7 @@ pub async fn create_non_empty_album(
     })
     .await
     .unwrap();
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await?;
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;
@@ -117,7 +117,7 @@ pub async fn create_empty_album(
     })
     .await
     .unwrap();
-    TREE.should_update_async().await;
+    COORDINATOR.submit_with_ack(Task::Update()).await?;
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;
