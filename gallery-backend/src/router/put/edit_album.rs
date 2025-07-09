@@ -1,12 +1,14 @@
+use crate::coordinator::album::AlbumTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::synchronizer::album::album_self_update_async;
 use std::collections::HashSet;
 
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
+use futures::future::join_all;
 use redb::ReadableTable;
 use rocket::http::Status;
 use rocket::serde::{Deserialize, json::Json};
@@ -72,7 +74,12 @@ pub async fn edit_album(
     .unwrap();
 
     TREE.should_update_async().await;
-    album_self_update_async(concact_result).await;
+    let futures = concact_result.into_iter().map(|album_id| {
+        COORDINATOR
+            .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
+            .unwrap()
+    });
+    join_all(futures).await;
 }
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]

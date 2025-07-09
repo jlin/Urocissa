@@ -2,9 +2,11 @@ use std::sync::LazyLock;
 use tokio::sync::{mpsc, oneshot};
 use tokio::task;
 
+pub mod album;
 pub mod delete;
 pub mod index;
 pub mod video;
+use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{delete::DeleteTask, index::IndexTask, video::VideoTask};
 
 #[derive(Debug)]
@@ -12,6 +14,7 @@ pub enum Task {
     Delete(DeleteTask),
     Video(VideoTask),
     Index(IndexTask),
+    Album(AlbumTask),
 }
 
 pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| {
@@ -38,6 +41,7 @@ impl Coordinator {
                         Task::Delete(task) => spawn_worker(delete::delete_task, task, reply),
                         Task::Video(task) => spawn_worker(video::video_task, task, reply),
                         Task::Index(task) => spawn_worker(index::index_task, task, reply),
+                        Task::Album(task) => spawn_worker(album::album_task, task, reply),
                     }
                 }
             });

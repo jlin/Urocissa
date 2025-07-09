@@ -2,15 +2,17 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
+use crate::constant::PROCESS_BATCH_NUMBER;
+use crate::coordinator::album::AlbumTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::indexer::databaser::processor::{
     regenerate_metadata_for_image, regenerate_metadata_for_video,
 };
-use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::synchronizer::album::album_self_update;
+
 use rocket::serde::json::Json;
 use serde::Deserialize;
 #[derive(Debug, Deserialize)]
@@ -67,7 +69,9 @@ pub async fn reindex(
                             match album_table.get(&*hash).unwrap() {
                                 Some(_) => {
                                     // album_self_update already will commit
-                                    album_self_update(vec![hash]);
+                                    COORDINATOR
+                                        .submit(Task::Album(AlbumTask::new(hash)))
+                                        .unwrap();
                                     None
                                 }
                                 _ => {

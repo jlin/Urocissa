@@ -9,13 +9,14 @@ use rocket::{http::Status, post};
 
 use serde::{Deserialize, Serialize};
 
-use crate::structure::album::Album;
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::coordinator::album::AlbumTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::synchronizer::album::album_self_update_async;
+use crate::structure::album::Album;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -78,7 +79,10 @@ pub async fn create_non_empty_album(
     .await
     .unwrap();
     TREE.should_update_async().await;
-    album_self_update_async(vec![id]).await;
+    COORDINATOR
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))
+        .unwrap()
+        .await;
     Ok(id.to_string())
 }
 
@@ -115,6 +119,9 @@ pub async fn create_empty_album(
     .await
     .unwrap();
     TREE.should_update_async().await;
-    album_self_update_async(vec![id]).await;
+    COORDINATOR
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))
+        .unwrap()
+        .await;
     Ok(id.to_string())
 }

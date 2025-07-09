@@ -6,7 +6,7 @@ use crate::coordinator::video::VideoTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
-use anyhow::{Context,};
+use anyhow::Context;
 use std::cmp;
 
 use std::path::PathBuf;

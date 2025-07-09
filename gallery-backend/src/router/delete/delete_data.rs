@@ -1,10 +1,11 @@
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::coordinator::album::AlbumTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::synchronizer::album::album_self_update_async;
-
+use futures::future::join_all;
 use redb::ReadableTable;
 use rocket::serde::{Deserialize, json::Json};
 #[derive(Debug, Deserialize)]
@@ -78,5 +79,10 @@ pub async fn delete_data(
     .await
     .unwrap();
     TREE.should_update_async().await;
-    album_self_update_async(deleted_album_id).await;
+    let futures = deleted_album_id.into_iter().map(|album_id| {
+        COORDINATOR
+            .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
+            .unwrap()
+    });
+    join_all(futures).await;
 }

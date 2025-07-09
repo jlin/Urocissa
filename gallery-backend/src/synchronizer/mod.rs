@@ -1,4 +1,3 @@
-use album::start_album_channel;
 use event::start_event_channel;
 use rocket::Shutdown;
 use video::start_video_channel;
@@ -16,7 +15,6 @@ use std::sync::LazyLock;
 use tokio::task::JoinError;
 use tokio::task::JoinHandle;
 
-pub mod album;
 pub mod event;
 pub mod video;
 pub mod watch;
@@ -39,7 +37,6 @@ pub async fn start_sync(shutdown: Shutdown) {
 
     tasks.push(named_task("Event channel", start_event_channel()));
     tasks.push(named_task("Video channel", start_video_channel()));
-    tasks.push(named_task("Album channel", start_album_channel()));
     tasks.push(named_task("Tree loop", TREE.start_loop()));
     tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
     tasks.push(named_task(
