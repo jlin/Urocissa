@@ -1,4 +1,4 @@
-use crate::coordinator::{Task, COORDINATOR};
+use crate::looper::{LOOPER, Signal};
 use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
@@ -76,6 +76,6 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     Json(vec_tags_info)
 }

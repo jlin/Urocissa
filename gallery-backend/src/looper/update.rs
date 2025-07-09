@@ -66,6 +66,5 @@ pub fn update_task() -> anyhow::Result<()> {
     *TREE.in_memory.write().unwrap() = data_vec;
 
     EXPIRE.update_expire_time(start_time);
-
     Ok(())
 }

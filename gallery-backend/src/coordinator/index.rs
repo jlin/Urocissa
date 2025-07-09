@@ -13,6 +13,7 @@ impl IndexTask {
 }
 
 pub fn index_task(task: IndexTask) -> anyhow::Result<()> {
+    println!("indexing");
     indexer(task.path)?;
     Ok(())
 }

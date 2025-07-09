@@ -10,6 +10,7 @@ use crate::indexer::databaser::processor::{
 };
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 
@@ -91,6 +92,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     Status::Ok
 }

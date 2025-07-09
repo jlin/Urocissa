@@ -1,5 +1,6 @@
 use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
+use crate::looper::{LOOPER, Signal};
 use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
@@ -73,7 +74,7 @@ pub async fn edit_album(
     .await
     .unwrap();
 
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     let futures = concact_result.into_iter().map(async |album_id| {
         COORDINATOR
             .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
@@ -115,7 +116,7 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     Ok(())
 }
 
@@ -149,7 +150,7 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
 
     Ok(())
 }

@@ -1,6 +1,7 @@
 use crate::coordinator::delete::DeleteTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
+use crate::looper::{LOOPER, Signal};
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::{Context, Result, bail};
 use arrayvec::ArrayString;
@@ -25,7 +26,7 @@ pub fn validator(database: &mut Database) -> anyhow::Result<()> {
         let path_to_delete = PathBuf::from(&file_modify.file);
         database_exist.alias.push(file_modify);
         TREE.insert_tree_api(&vec![database_exist]).unwrap();
-        COORDINATOR.submit(Task::Update).unwrap();
+        LOOPER.notify(Signal::Update);
         COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)))?;
         bail!("File already exists in the database");
     }

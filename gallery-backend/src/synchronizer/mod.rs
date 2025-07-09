@@ -1,10 +1,9 @@
 use rocket::Shutdown;
 use watch::start_watcher;
 
-use crate::coordinator::{COORDINATOR, Coordinator, Task};
-use crate::looper::{
-    expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::TREE, tree_snapshot::TREE_SNAPSHOT,
-};
+use crate::coordinator::{COORDINATOR, Coordinator};
+use crate::looper::{LOOPER, Looper, Signal};
+use crate::looper::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree_snapshot::TREE_SNAPSHOT};
 
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
@@ -28,6 +27,7 @@ fn named_task(
 
 pub async fn start_sync(shutdown: Shutdown) {
     let _ = LazyLock::<Coordinator>::force(&COORDINATOR);
+    let _ = LazyLock::<Looper>::force(&LOOPER);
     // Initialize a collection of tasks with their respective names
     let mut tasks = FuturesUnordered::new();
 
@@ -45,10 +45,8 @@ pub async fn start_sync(shutdown: Shutdown) {
         TREE_SNAPSHOT.start_loop_flush(),
     ));
     tasks.push(named_task("Watcher", start_watcher()));
-
+    LOOPER.notify(Signal::Update);
     info!("All channels started.");
-
-    COORDINATOR.submit(Task::Update).unwrap();
 
     // Await the first task to complete
     if let Some((name, result)) = tasks.next().await {

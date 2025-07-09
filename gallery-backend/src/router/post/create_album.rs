@@ -13,6 +13,7 @@ use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::looper::{LOOPER, Signal};
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
@@ -78,7 +79,7 @@ pub async fn create_non_empty_album(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await?;
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;
@@ -117,7 +118,7 @@ pub async fn create_empty_album(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await?;
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;

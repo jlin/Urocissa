@@ -1,7 +1,7 @@
-use crate::coordinator::{COORDINATOR, Task};
 use crate::indexer::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::indexer::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::looper::tree::TREE;
+use crate::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use arrayvec::ArrayString;
@@ -64,7 +64,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+                LOOPER.notify_with_ack(Signal::Update).await.unwrap();
             }
         }
     }

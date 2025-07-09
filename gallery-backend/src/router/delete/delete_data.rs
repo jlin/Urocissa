@@ -3,6 +3,7 @@ use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use futures::future::join_all;
@@ -78,7 +79,8 @@ pub async fn delete_data(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
     let futures = deleted_album_id.into_iter().map(async |album_id| {
         COORDINATOR
             .submit_with_ack(Task::Album(AlbumTask::new(album_id)))

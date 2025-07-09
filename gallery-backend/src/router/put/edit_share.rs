@@ -1,6 +1,6 @@
-use crate::coordinator::Task;
 use crate::looper::tree::TREE;
-use crate::{coordinator::COORDINATOR, structure::album::Share};
+use crate::looper::{LOOPER, Signal};
+use crate::structure::album::Share;
 
 use crate::constant::redb::ALBUM_TABLE;
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -46,7 +46,7 @@ pub async fn edit_share(
     .await
     .unwrap();
 
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,6 +83,5 @@ pub async fn delete_share(
     })
     .await
     .unwrap();
-
-    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
 }

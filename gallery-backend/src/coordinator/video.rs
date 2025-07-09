@@ -2,7 +2,10 @@ use anyhow::Context;
 use arrayvec::ArrayString;
 
 use crate::{
-    constant::redb::DATA_TABLE, coordinator::{Task, COORDINATOR}, indexer::databaser::generate_compressed_video::generate_compressed_video, looper::tree::TREE
+    constant::redb::DATA_TABLE,
+    coordinator::{COORDINATOR, Task},
+    indexer::databaser::generate_compressed_video::generate_compressed_video,
+    looper::{LOOPER, Signal, tree::TREE},
 };
 
 #[derive(Debug)]
@@ -36,7 +39,7 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
                 write_table.insert(&*database.hash, &database).unwrap();
             }
             write_txn.commit().unwrap();
-            COORDINATOR.submit(Task::Update).unwrap();
+            LOOPER.notify(Signal::Update);
             Ok(())
         }
         Err(err) => Err(err)
