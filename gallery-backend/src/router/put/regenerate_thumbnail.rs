@@ -64,7 +64,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
+                COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
             }
         }
     }

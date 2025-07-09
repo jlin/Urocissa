@@ -91,6 +91,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
+    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
     Status::Ok
 }

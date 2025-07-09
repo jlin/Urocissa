@@ -78,7 +78,7 @@ pub async fn create_non_empty_album(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update()).await?;
+    COORDINATOR.submit_with_ack(Task::Update).await?;
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;
@@ -117,7 +117,7 @@ pub async fn create_empty_album(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update()).await?;
+    COORDINATOR.submit_with_ack(Task::Update).await?;
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;

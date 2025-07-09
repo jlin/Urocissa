@@ -76,6 +76,6 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
+    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
     Json(vec_tags_info)
 }

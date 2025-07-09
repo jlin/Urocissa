@@ -46,7 +46,7 @@ pub async fn edit_share(
     .await
     .unwrap();
 
-    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
+    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
 }
 
 #[derive(Debug, Deserialize)]
@@ -84,5 +84,5 @@ pub async fn delete_share(
     .await
     .unwrap();
 
-    COORDINATOR.submit_with_ack(Task::Update()).await.unwrap();
+    COORDINATOR.submit_with_ack(Task::Update).await.unwrap();
 }

@@ -48,7 +48,7 @@ pub async fn start_sync(shutdown: Shutdown) {
 
     info!("All channels started.");
 
-    COORDINATOR.submit(Task::Update()).unwrap();
+    COORDINATOR.submit(Task::Update).unwrap();
 
     // Await the first task to complete
     if let Some((name, result)) = tasks.next().await {

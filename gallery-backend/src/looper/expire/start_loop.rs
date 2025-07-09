@@ -2,8 +2,7 @@ use super::Expire;
 use crate::{
     constant::SNAPSHOT_MAX_LIFETIME_MS,
     looper::{
-        query_snapshot::QUERY_SNAPSHOT, tree::start_loop::VERSION_COUNT_TIMESTAMP,
-        tree_snapshot::TREE_SNAPSHOT,
+        query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP, tree_snapshot::TREE_SNAPSHOT,
     },
     router::get::get_prefetch::Prefetch,
     utils::start_loop_util,

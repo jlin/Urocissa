@@ -16,6 +16,6 @@ pub async fn generate_random_data(
         .map(|_| Database::generate_random_data())
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
-    COORDINATOR.submit(Task::Update());
+    COORDINATOR.submit(Task::Update).unwrap();
     info!("Insert random data complete")
 }

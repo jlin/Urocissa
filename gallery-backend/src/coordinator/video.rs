@@ -36,7 +36,7 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
                 write_table.insert(&*database.hash, &database).unwrap();
             }
             write_txn.commit().unwrap();
-            COORDINATOR.submit(Task::Update()).unwrap();
+            COORDINATOR.submit(Task::Update).unwrap();
             Ok(())
         }
         Err(err) => Err(err)
