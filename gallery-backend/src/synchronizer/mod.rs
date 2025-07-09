@@ -2,8 +2,8 @@ use rocket::Shutdown;
 use watch::start_watcher;
 
 use crate::coordinator::{COORDINATOR, Coordinator};
+use crate::db::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT};
 use crate::looper::{LOOPER, Looper, Signal};
-use crate::looper::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT};
 
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};

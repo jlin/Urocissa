@@ -1,8 +1,8 @@
+use crate::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::looper::{LOOPER, Signal};
-use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::looper::tree::read_tags::TagInfo;
+use crate::db::tree::read_tags::TagInfo;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 

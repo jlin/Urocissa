@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate rocket;
-use crate::looper::tree::TREE;
+use crate::db::tree::TREE;
 use constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
@@ -19,6 +19,7 @@ use std::thread;
 use std::time::Instant;
 mod constant;
 mod coordinator;
+mod db;
 mod indexer;
 mod initialization;
 mod looper;

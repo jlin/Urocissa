@@ -1,10 +1,6 @@
 //! looper.rs  – long-lived background workers with ACK support
 
-pub mod expire;
 pub mod flush;
-pub mod query_snapshot;
-pub mod tree;
-pub mod tree_snapshot;
 pub mod update;
 use anyhow::Result;
 use std::{

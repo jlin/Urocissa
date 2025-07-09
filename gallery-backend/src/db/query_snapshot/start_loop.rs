@@ -1,5 +1,5 @@
 use super::QuerySnapshot;
-use crate::looper::{query_snapshot::Prefetch, tree::VERSION_COUNT_TIMESTAMP};
+use crate::db::{query_snapshot::Prefetch, tree::VERSION_COUNT_TIMESTAMP};
 use crate::utils::start_loop_util;
 use redb::TableDefinition;
 use std::{

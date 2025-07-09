@@ -1,7 +1,7 @@
 use crate::constant::DEFAULT_PRIORITY_LIST;
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::looper::tree::TREE;
-use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::db::tree::TREE;
+use crate::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::structure::abstract_data::AbstractData;
 use crate::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::structure::row::{Row, ScrollBarData};

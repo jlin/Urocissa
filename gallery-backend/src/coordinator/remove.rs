@@ -1,6 +1,6 @@
 use redb::TableDefinition;
 
-use crate::{looper::tree_snapshot::TREE_SNAPSHOT, structure::reduced_data::ReducedData};
+use crate::{db::tree_snapshot::TREE_SNAPSHOT, structure::reduced_data::ReducedData};
 
 #[derive(Debug)]
 pub struct RemoveTask {

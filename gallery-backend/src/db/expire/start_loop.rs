@@ -2,7 +2,7 @@ use super::Expire;
 use crate::{
     constant::SNAPSHOT_MAX_LIFETIME_MS,
     coordinator::{COORDINATOR, Task, remove::RemoveTask},
-    looper::{query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
+    db::{query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
     router::get::get_prefetch::Prefetch,
     utils::start_loop_util,
 };

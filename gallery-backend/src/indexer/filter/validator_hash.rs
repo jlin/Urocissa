@@ -1,6 +1,6 @@
 use crate::coordinator::delete::DeleteTask;
 use crate::coordinator::{COORDINATOR, Task};
-use crate::looper::tree::TREE;
+use crate::db::tree::TREE;
 use crate::looper::{LOOPER, Signal};
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::{Context, Result, bail};

@@ -1,7 +1,7 @@
 use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
+use crate::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::looper::{LOOPER, Signal};
-use crate::looper::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::fairing::guard_share::GuardShare;

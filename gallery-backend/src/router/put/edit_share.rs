@@ -1,4 +1,4 @@
-use crate::looper::tree::TREE;
+use crate::db::tree::TREE;
 use crate::looper::{LOOPER, Signal};
 use crate::structure::album::Share;
 
