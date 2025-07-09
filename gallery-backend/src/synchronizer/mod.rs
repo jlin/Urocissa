@@ -1,6 +1,5 @@
 use event::start_event_channel;
 use rocket::Shutdown;
-use video::start_video_channel;
 use watch::start_watcher;
 
 use crate::coordinator::{COORDINATOR, Coordinator};
@@ -16,7 +15,6 @@ use tokio::task::JoinError;
 use tokio::task::JoinHandle;
 
 pub mod event;
-pub mod video;
 pub mod watch;
 
 /// Define a type alias for better readability
@@ -36,7 +34,6 @@ pub async fn start_sync(shutdown: Shutdown) {
     let mut tasks = FuturesUnordered::new();
 
     tasks.push(named_task("Event channel", start_event_channel()));
-    tasks.push(named_task("Video channel", start_video_channel()));
     tasks.push(named_task("Tree loop", TREE.start_loop()));
     tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
     tasks.push(named_task(
