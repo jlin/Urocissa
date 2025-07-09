@@ -40,10 +40,6 @@ pub async fn start_sync(shutdown: Shutdown) {
         "Tree snapshot remove loop",
         TREE_SNAPSHOT.start_loop_remove(),
     ));
-    tasks.push(named_task(
-        "Tree snapshot flush loop",
-        TREE_SNAPSHOT.start_loop_flush(),
-    ));
     tasks.push(named_task("Watcher", start_watcher()));
     LOOPER.notify(Signal::Update);
     info!("All channels started.");

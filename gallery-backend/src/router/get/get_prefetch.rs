@@ -1,3 +1,5 @@
+use crate::looper::LOOPER;
+use crate::looper::Signal;
 use crate::looper::query_snapshot::QUERY_SNAPSHOT;
 use crate::looper::tree::TREE;
 use crate::looper::tree::VERSION_COUNT_TIMESTAMP;
@@ -157,7 +159,7 @@ fn persist_tree_snapshot(
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
-    TREE_SNAPSHOT.tree_snapshot_flush();
+    LOOPER.notify(Signal::Flush);
 
     (
         timestamp_millis,

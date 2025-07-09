@@ -1,11 +1,11 @@
 //! looper.rs  – long-lived background workers with ACK support
 
 pub mod expire;
+pub mod flush;
 pub mod query_snapshot;
 pub mod tree;
 pub mod tree_snapshot;
 pub mod update;
-
 use anyhow::Result;
 use std::{
     collections::HashMap,
@@ -21,12 +21,14 @@ use tokio::{
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Signal {
     Update,
+    Flush,
 }
 
 impl std::fmt::Display for Signal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Signal::Update => write!(f, "Update"),
+            Signal::Flush => write!(f, "Flush"),
         }
     }
 }
@@ -48,9 +50,10 @@ pub struct Looper {
 
 impl Looper {
     fn new() -> Self {
-        // ----- Build one Entry for each Signal ----------------------------------------
         let (upd_tx, upd_rx) = mpsc::unbounded_channel();
         let upd_notifier = Arc::new(Notify::new());
+        let (fls_tx, fls_rx) = mpsc::unbounded_channel();
+        let fls_notifier = Arc::new(Notify::new());
 
         let mut entries = HashMap::new();
         entries.insert(
@@ -58,6 +61,13 @@ impl Looper {
             Entry {
                 notifier: upd_notifier.clone(),
                 ack_tx: upd_tx,
+            },
+        );
+        entries.insert(
+            Signal::Flush,
+            Entry {
+                notifier: fls_notifier.clone(),
+                ack_tx: fls_tx,
             },
         );
 
@@ -73,6 +83,8 @@ impl Looper {
                 register_worker(Signal::Update, upd_notifier, upd_rx, || {
                     update::update_task()
                 });
+
+                register_worker(Signal::Flush, fls_notifier, fls_rx, || flush::flush_task());
 
                 // keep runtime alive forever
                 pending::<()>().await;
