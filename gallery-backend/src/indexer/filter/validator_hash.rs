@@ -9,7 +9,7 @@ use std::mem;
 use std::path::PathBuf;
 use std::{fs::File, io::Read, path::Path};
 
-pub fn validator(database: &mut Database) -> Result<()> {
+pub fn validator(database: &mut Database) -> anyhow::Result<()> {
     let hash = blake3_hasher(&database.source_path()).with_context(|| {
         format!(
             "[validator] Failed to compute hash for {}",

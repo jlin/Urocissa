@@ -4,9 +4,8 @@ mod filter;
 mod importer;
 use crate::indexer;
 use crate::looper::tree::TREE;
-use anyhow::Result;
 
-pub fn indexer(path: PathBuf) -> Result<()> {
+pub fn indexer(path: PathBuf) -> anyhow::Result<()> {
     let database = indexer::filter::filter(path)?;
     importer::import(&database)?;
     indexer::databaser::databaser(database)?;

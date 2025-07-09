@@ -1,4 +1,3 @@
-use anyhow::Result;
 use std::sync::LazyLock;
 use tokio::sync::{mpsc, oneshot};
 use tokio::task;
@@ -21,7 +20,7 @@ pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| {
 });
 
 /// (Task, optional reply‐channel) travels through the unbounded queue.
-type Envelope = (Task, Option<oneshot::Sender<Result<()>>>);
+type Envelope = (Task, Option<oneshot::Sender<anyhow::Result<()>>>);
 
 pub struct Coordinator {
     task_tx: mpsc::UnboundedSender<Envelope>,
@@ -48,13 +47,16 @@ impl Coordinator {
     }
 
     /// Fire-and-forget.
-    pub fn submit(&self, task: Task) -> Result<()> {
+    pub fn submit(&self, task: Task) -> anyhow::Result<()> {
         self.task_tx.send((task, None))?; // sync send
         Ok(())
     }
 
     /// Fire and get a `oneshot::Receiver` you may `.await`.
-    pub fn submit_with_ack(&self, task: Task) -> Result<oneshot::Receiver<Result<()>>> {
+    pub fn submit_with_ack(
+        &self,
+        task: Task,
+    ) -> anyhow::Result<oneshot::Receiver<anyhow::Result<()>>> {
         let (tx, rx) = oneshot::channel(); // single-reply channel
         self.task_tx.send((task, Some(tx)))?;
         Ok(rx)
@@ -62,9 +64,9 @@ impl Coordinator {
 }
 
 /// Runs blocking / CPU-bound work, then answers through the optional sender.
-fn spawn_worker<F, T>(f: F, task: T, reply: Option<oneshot::Sender<Result<()>>>)
+fn spawn_worker<F, T>(f: F, task: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
 where
-    F: FnOnce(T) -> Result<()> + Send + 'static,
+    F: FnOnce(T) -> anyhow::Result<()> + Send + 'static,
     T: Send + 'static,
 {
     tokio::spawn(async move {

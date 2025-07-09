@@ -8,10 +8,9 @@ use super::{
     generate_width_height::{generate_image_width_height, generate_video_width_height},
 };
 use crate::structure::database_struct::database::definition::Database;
-use anyhow::Result;
 use std::fs::metadata;
 
-pub fn process_image_info(database: &mut Database) -> Result<()> {
+pub fn process_image_info(database: &mut Database) -> anyhow::Result<()> {
     database.exif_vec = generate_exif_for_image(&database);
     let mut dynamic_image = generate_dynamic_image(&database)?;
     (database.width, database.height) = generate_image_width_height(&dynamic_image);
@@ -23,7 +22,7 @@ pub fn process_image_info(database: &mut Database) -> Result<()> {
     Ok(())
 }
 
-pub fn process_video_info(database: &mut Database) -> Result<()> {
+pub fn process_video_info(database: &mut Database) -> anyhow::Result<()> {
     database.exif_vec = generate_exif_for_video(&database)?;
     (database.width, database.height) = generate_video_width_height(&database)?;
     fix_video_width_height(database);
@@ -34,13 +33,13 @@ pub fn process_video_info(database: &mut Database) -> Result<()> {
     Ok(())
 }
 
-pub fn regenerate_metadata_for_image(database: &mut Database) -> Result<()> {
+pub fn regenerate_metadata_for_image(database: &mut Database) -> anyhow::Result<()> {
     database.size = metadata(&database.imported_path()).unwrap().len();
     process_image_info(database)?;
     Ok(())
 }
 
-pub fn regenerate_metadata_for_video(database: &mut Database) -> Result<()> {
+pub fn regenerate_metadata_for_video(database: &mut Database) -> anyhow::Result<()> {
     database.size = metadata(&database.imported_path()).unwrap().len();
     process_video_info(database)?;
     Ok(())

@@ -1,13 +1,12 @@
 use super::small_width_height;
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
-use anyhow::Result;
 use image::{DynamicImage, ImageFormat};
 use std::process::Command;
 pub fn generate_thumbnail_for_image(
     database: &mut Database,
     dynamic_image: DynamicImage,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
 
@@ -29,7 +28,7 @@ pub fn generate_thumbnail_for_image(
     Ok(())
 }
 
-pub fn generate_thumbnail_for_video(database: &Database) -> Result<()> {
+pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
     let width = database.width;
     let height = database.height;
 

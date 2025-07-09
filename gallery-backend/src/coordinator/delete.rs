@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::{Context};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -23,7 +23,7 @@ impl DeleteTask {
 static UPLOAD_PATH: LazyLock<PathBuf> =
     LazyLock::new(|| fs::canonicalize("./upload").expect("`./upload` directory must exist"));
 
-pub fn delete_task(task: DeleteTask) -> Result<()> {
+pub fn delete_task(task: DeleteTask) -> anyhow::Result<()> {
     let path = task.path;
 
     // Skip if path is not under ./upload

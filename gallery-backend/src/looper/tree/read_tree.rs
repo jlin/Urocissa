@@ -3,7 +3,6 @@ use crate::{
     structure::{album::Album, database_struct::database::definition::Database},
 };
 
-use anyhow::Result;
 use redb::ReadOnlyTable;
 
 use super::Tree;
@@ -23,7 +22,7 @@ impl Tree {
             .open_table(ALBUM_TABLE)
             .unwrap()
     }
-    pub fn insert_tree_api(&self, data_vec: &Vec<Database>) -> Result<()> {
+    pub fn insert_tree_api(&self, data_vec: &Vec<Database>) -> anyhow::Result<()> {
         let txn = self.in_disk.begin_write()?;
         {
             let mut table = txn.open_table(DATA_TABLE)?;

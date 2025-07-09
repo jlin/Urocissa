@@ -3,7 +3,7 @@ use crate::{
     indexer::databaser::processor::process_image_info,
     structure::database_struct::database::definition::Database,
 };
-use anyhow::{Context, Result};
+use anyhow::Context;
 use regex::Regex;
 use std::{
     cmp,
@@ -11,7 +11,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
+pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {

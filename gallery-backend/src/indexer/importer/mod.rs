@@ -1,8 +1,8 @@
 use crate::structure::database_struct::database::definition::Database;
-use anyhow::{Context, Result};
+use anyhow::Context;
 use tokio::fs;
 /// Synchronous import function that internally uses Tokio's async capabilities
-pub fn import(database: &Database) -> Result<()> {
+pub fn import(database: &Database) -> anyhow::Result<()> {
     // Create a new Tokio runtime to perform async copy
     let rt = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
@@ -14,7 +14,7 @@ pub fn import(database: &Database) -> Result<()> {
 }
 
 /// Asynchronous helper function to perform concurrent file copying
-async fn async_import(database: &Database) -> Result<()> {
+async fn async_import(database: &Database) -> anyhow::Result<()> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 

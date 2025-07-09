@@ -1,4 +1,3 @@
-use anyhow::Result;
 use std::path::PathBuf;
 
 use crate::indexer::indexer;
@@ -13,7 +12,7 @@ impl IndexTask {
     }
 }
 
-pub fn index_task(task: IndexTask) -> Result<()> {
+pub fn index_task(task: IndexTask) -> anyhow::Result<()> {
     indexer(task.path)?;
     Ok(())
 }

@@ -6,7 +6,7 @@ use crate::coordinator::video::VideoTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
-use anyhow::{Context, Result};
+use anyhow::{Context,};
 use std::cmp;
 
 use std::path::PathBuf;
@@ -19,7 +19,7 @@ pub mod generate_thumbnail;
 pub mod generate_width_height;
 pub mod processor;
 pub mod video_ffprobe;
-pub fn databaser(mut database: Database) -> Result<()> {
+pub fn databaser(mut database: Database) -> anyhow::Result<()> {
     let write_txn = TREE
         .in_disk
         .begin_write()

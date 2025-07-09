@@ -1,8 +1,8 @@
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use anyhow::{Result, bail};
+use anyhow::bail;
 use std::{ffi::OsStr, path::PathBuf};
 
-pub fn validator(path: &PathBuf) -> Result<()> {
+pub fn validator(path: &PathBuf) -> anyhow::Result<()> {
     let extension = path.extension().and_then(OsStr::to_str);
 
     match extension {

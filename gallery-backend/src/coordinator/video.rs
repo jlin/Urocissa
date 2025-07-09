@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Context;
 use arrayvec::ArrayString;
 
 use crate::{
@@ -17,7 +17,7 @@ impl VideoTask {
     }
 }
 
-pub fn video_task(task: VideoTask) -> Result<()> {
+pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
     let hash = task.hash;
     let read_table = TREE.api_read_tree();
     let guard = read_table.get(&*hash).unwrap();
