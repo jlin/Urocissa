@@ -25,41 +25,27 @@ pub fn databaser(mut database: Database) -> Result<()> {
         .begin_write()
         .with_context(|| "[databaser] Failed to begin write transaction")?;
     {
-        let mut write_table = write_txn
-            .open_table(DATA_TABLE)
-            .with_context(|| "[databaser] Failed to open data table")?;
+        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
 
         if VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str()) {
-            process_image_info(&mut database).with_context(|| {
-                format!(
-                    "[databaser] Failed to process image info: {}",
-                    database.source_path().display()
-                )
-            })?;
+            process_image_info(&mut database)?;
         } else {
-            process_video_info(&mut database).with_context(|| {
-                format!(
-                    "[databaser] Failed to process video info: {}",
-                    database.source_path().display()
-                )
-            })?;
+            process_video_info(&mut database)?;
 
             database.pending = true;
-            COORDINATOR.submit(Task::Video(VideoTask::new(database.hash)));
+            COORDINATOR.submit(Task::Video(VideoTask::new(database.hash)))?;
         }
 
         write_table
             .insert(&*database.hash, database.clone())
-            .with_context(|| "[databaser] Failed to insert into data table")?;
+            .unwrap();
 
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
             COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))?
         };
     }
 
-    write_txn
-        .commit()
-        .with_context(|| "[databaser] Failed to commit transaction")?;
+    write_txn.commit().unwrap();
 
     Ok(())
 }

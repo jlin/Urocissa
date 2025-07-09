@@ -26,7 +26,7 @@ pub fn validator(database: &mut Database) -> Result<()> {
         database_exist.alias.push(file_modify);
         TREE.insert_tree_api(&vec![database_exist]).unwrap();
         TREE.tree_update();
-        COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)));
+        COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)))?;
         bail!("File already exists in the database");
     }
     // New file
