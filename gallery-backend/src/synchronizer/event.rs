@@ -1,7 +1,7 @@
 use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::coordinator::index::IndexTask;
 use crate::coordinator::{COORDINATOR, Task};
-use crate::executor::executor;
+use crate::indexer::indexer;
 
 use log::info;
 use std::sync::{Arc, OnceLock};

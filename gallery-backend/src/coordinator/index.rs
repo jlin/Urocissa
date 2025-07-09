@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::path::PathBuf;
 
-use crate::executor::executor;
+use crate::indexer::indexer;
 
 #[derive(Debug)]
 pub struct IndexTask {
@@ -14,6 +14,6 @@ impl IndexTask {
 }
 
 pub fn index_task(task: IndexTask) -> Result<()> {
-    executor(task.path)?;
+    indexer(task.path)?;
     Ok(())
 }

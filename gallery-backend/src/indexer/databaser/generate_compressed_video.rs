@@ -1,6 +1,6 @@
 use super::video_ffprobe::video_duration;
 use crate::{
-    executor::databaser::processor::process_image_info,
+    indexer::databaser::processor::process_image_info,
     structure::database_struct::database::definition::Database,
 };
 use anyhow::{Context, Result};

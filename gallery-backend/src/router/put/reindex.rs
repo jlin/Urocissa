@@ -2,7 +2,7 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
-use crate::executor::databaser::processor::{
+use crate::indexer::databaser::processor::{
     regenerate_metadata_for_image, regenerate_metadata_for_video,
 };
 use crate::constant::PROCESS_BATCH_NUMBER;

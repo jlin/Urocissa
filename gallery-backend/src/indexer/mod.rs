@@ -2,14 +2,14 @@ use std::path::PathBuf;
 pub mod databaser;
 mod filter;
 mod importer;
-use crate::executor;
+use crate::indexer;
 use crate::looper::tree::TREE;
 use anyhow::Result;
 
-pub fn executor(path: PathBuf) -> Result<()> {
-    let database = executor::filter::filter(path)?;
+pub fn indexer(path: PathBuf) -> Result<()> {
+    let database = indexer::filter::filter(path)?;
     importer::import(&database)?;
-    executor::databaser::databaser(database)?;
+    indexer::databaser::databaser(database)?;
     TREE.tree_update();
     Ok(())
 }

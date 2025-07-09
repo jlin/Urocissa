@@ -19,7 +19,7 @@ use std::thread;
 use std::time::Instant;
 mod constant;
 mod coordinator;
-mod executor;
+mod indexer;
 mod initialization;
 mod looper;
 mod public;
