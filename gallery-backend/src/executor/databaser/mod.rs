@@ -1,14 +1,13 @@
 use self::processor::{process_image_info, process_video_info};
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 use crate::constant::redb::DATA_TABLE;
+use crate::coordinator::delete::DeleteTask;
 use crate::coordinator::video::VideoTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
-use crate::synchronizer::delete::delete_paths;
 use anyhow::{Context, Result};
 use std::cmp;
-use std::collections::HashSet;
 
 use std::path::PathBuf;
 pub mod fix_orientation;
@@ -49,19 +48,13 @@ pub fn databaser(mut database: Database) -> Result<()> {
             COORDINATOR.submit(Task::Video(VideoTask::new(database.hash)));
         }
 
-        let mut to_delete = HashSet::new();
-
         write_table
             .insert(&*database.hash, database.clone())
             .with_context(|| "[databaser] Failed to insert into data table")?;
 
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-            to_delete.insert(PathBuf::from(&latest.file));
-        }
-
-        if !to_delete.is_empty() {
-            delete_paths(to_delete.into_iter().collect());
-        }
+            COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))
+        };
     }
 
     write_txn

@@ -7,11 +7,17 @@ use std::{
     time::Duration,
 };
 
-use crate::synchronizer::delete::MAX_DELETE_ATTEMPTS;
+use crate::constant::MAX_DELETE_ATTEMPTS;
 
 #[derive(Debug)]
 pub struct DeleteTask {
     pub path: PathBuf,
+}
+
+impl DeleteTask {
+    pub fn new(path: PathBuf) -> Self {
+        Self { path }
+    }
 }
 
 static UPLOAD_PATH: LazyLock<PathBuf> =
@@ -19,6 +25,12 @@ static UPLOAD_PATH: LazyLock<PathBuf> =
 
 pub fn delete_task(task: DeleteTask) -> Result<()> {
     let path = task.path;
+
+    // Skip if path is not under ./upload
+    if !path_starts_with_upload(&path) {
+        return Ok(());
+    }
+
     let mut attempts = 0;
     loop {
         attempts += 1;
@@ -46,7 +58,7 @@ pub fn delete_task(task: DeleteTask) -> Result<()> {
     }
 }
 
-fn path_starts_with_upload(path: &Path) -> bool {
+pub fn path_starts_with_upload(path: &Path) -> bool {
     match fs::canonicalize(path) {
         Ok(abs_path) => abs_path.starts_with(&*UPLOAD_PATH),
         Err(_) => false,

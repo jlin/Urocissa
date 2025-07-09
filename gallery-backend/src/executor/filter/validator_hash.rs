@@ -1,10 +1,12 @@
+use crate::coordinator::delete::DeleteTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::structure::database_struct::database::definition::Database;
-use crate::synchronizer::delete::delete_paths;
 use anyhow::{Context, Result, bail};
 use arrayvec::ArrayString;
 use blake3::Hasher;
 use std::mem;
+use std::path::PathBuf;
 use std::{fs::File, io::Read, path::Path};
 
 pub fn validator(database: &mut Database) -> Result<()> {
@@ -20,13 +22,11 @@ pub fn validator(database: &mut Database) -> Result<()> {
     if let Some(guard) = read_table.get(&*hash).unwrap() {
         let mut database_exist = guard.value();
         let file_modify = mem::take(&mut database.alias[0]);
-        let path_to_delete = file_modify.file.clone().into();
-
+        let path_to_delete = PathBuf::from(&file_modify.file);
         database_exist.alias.push(file_modify);
         TREE.insert_tree_api(&vec![database_exist]).unwrap();
         TREE.tree_update();
-
-        delete_paths(vec![path_to_delete]);
+        COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)));
         bail!("File already exists in the database");
     }
     // New file
