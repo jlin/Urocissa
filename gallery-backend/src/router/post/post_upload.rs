@@ -9,14 +9,16 @@ use crate::coordinator::{COORDINATOR, Task};
 use crate::public::error_data::{ErrorData, handle_error};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::router::post::get_extension;
 
+use ::anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 use rocket::http::Status;
 use rocket::{form::Form, fs::TempFile};
+use rocket_errors::anyhow;
 use tokio::sync::Notify;
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
-
 pub enum FileUpload<'r> {
     LastModified(u64),
     File(TempFile<'r>),
@@ -47,28 +49,12 @@ fn get_filename(file: &TempFile<'_>) -> String {
         .unwrap_or_else(|| "".to_string())
 }
 
-fn get_extension(file: &TempFile<'_>) -> Result<String, Status> {
-    match file.content_type() {
-        Some(ct) => match ct.extension() {
-            Some(ext) => Ok(ext.as_str().to_lowercase()),
-            None => {
-                error!("Failed to extract file extension.");
-                Err(Status::InternalServerError)
-            }
-        },
-        None => {
-            error!("Failed to get content type.");
-            Err(Status::InternalServerError)
-        }
-    }
-}
-
 #[post("/upload", data = "<data>")]
 pub async fn upload(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     data: Form<Vec<FileUpload<'_>>>,
-) -> Result<(), Status> {
+) -> anyhow::Result<()> {
     let mut last_modified_time = 0;
 
     for file_data in data.into_inner() {
@@ -79,29 +65,19 @@ pub async fn upload(
             FileUpload::File(mut file) => {
                 let start_time = Instant::now();
                 let filename = get_filename(&file);
-                let extension = match get_extension(&file) {
-                    Ok(ext) => ext,
-                    Err(err) => return Err(err),
-                };
+                let extension = get_extension(&file)?;
 
                 warn!(duration = &*format!("{:?}", start_time.elapsed()); "Get filename and extension");
                 if VALID_IMAGE_EXTENSIONS.contains(&extension.as_str())
                     || VALID_VIDEO_EXTENSIONS.contains(&extension.as_str())
                 {
-                    match save_file(&mut file, filename, extension, last_modified_time).await {
-                        Ok(final_path) => {
-                            COORDINATOR
-                                .submit_with_ack(Task::Index(IndexTask::new(PathBuf::from(
-                                    final_path,
-                                ))))
-                                .unwrap()
-                                .await;
-                        }
-                        Err(err) => return Err(err),
-                    }
+                    let final_path =
+                        save_file(&mut file, filename, extension, last_modified_time).await?;
+                    COORDINATOR
+                        .submit_with_ack(Task::Index(IndexTask::new(PathBuf::from(final_path))))?
+                        .await??;
                 } else {
                     error!("Invalid file type");
-                    return Err(Status::InternalServerError);
                 }
             }
         }
@@ -114,40 +90,26 @@ async fn save_file(
     filename: String,
     extension: String,
     last_modified_time: u64,
-) -> Result<String, Status> {
+) -> anyhow::Result<String> {
     let unique_id = Uuid::new_v4();
     let path_tmp = format!("./upload/{}-{}.tmp", filename, unique_id);
 
-    match file.move_copy_to(&path_tmp).await {
-        Ok(_) => spawn_blocking(move || {
-            set_last_modified_time(&path_tmp, last_modified_time)?;
-            let path_final = format!("./upload/{}-{}.{}", filename, unique_id, extension);
-            match std::fs::rename(&path_tmp, &path_final) {
-                Ok(_) => Ok(path_final),
-                Err(err) => {
-                    error!("Failed to rename file: {}", err);
-                    Err(Status::InternalServerError)
-                }
-            }
-        })
-        .await
-        .unwrap(),
-        Err(err) => {
-            error!("Failed to save file: {}", err);
-            Err(Status::InternalServerError)
-        }
-    }
-}
+    file.move_copy_to(&path_tmp).await?;
 
-fn set_last_modified_time(path: &str, last_modified_time: u64) -> Result<(), Status> {
-    match filetime::set_file_mtime(
-        path,
-        filetime::FileTime::from_unix_time((last_modified_time / 1000) as i64, 0),
-    ) {
-        Ok(_) => Ok(()),
-        Err(err) => {
-            error!("Failed to set last modified time: {}", err);
-            Err(Status::InternalServerError)
-        }
-    }
+    let filename = filename.clone(); // Needed because filename is moved in path_tmp
+
+    let path_final = spawn_blocking(move || -> anyhow::Result<String> {
+        let path_final = format!("./upload/{}-{}.{}", filename, unique_id, extension);
+        set_last_modified_time(&path_tmp, last_modified_time)?;
+        std::fs::rename(&path_tmp, &path_final)?;
+        Ok(path_final)
+    })
+    .await??;
+
+    Ok(path_final)
+}
+fn set_last_modified_time(path: &str, last_modified_time: u64) -> anyhow::Result<()> {
+    let mtime = filetime::FileTime::from_unix_time((last_modified_time / 1000) as i64, 0);
+    filetime::set_file_mtime(path, mtime)?;
+    Ok(())
 }
