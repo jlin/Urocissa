@@ -53,7 +53,7 @@ pub fn databaser(mut database: Database) -> Result<()> {
             .with_context(|| "[databaser] Failed to insert into data table")?;
 
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-            COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))
+            COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))?
         };
     }
 

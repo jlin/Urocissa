@@ -1,12 +1,13 @@
+use anyhow::Result;
 use std::sync::LazyLock;
-
-use tokio::sync::mpsc;
-
-use crate::coordinator::{delete::DeleteTask, index::IndexTask, video::VideoTask};
+use tokio::sync::{mpsc, oneshot};
+use tokio::task;
 
 pub mod delete;
 pub mod index;
 pub mod video;
+use crate::coordinator::{delete::DeleteTask, index::IndexTask, video::VideoTask};
+
 #[derive(Debug)]
 pub enum Task {
     Delete(DeleteTask),
@@ -19,32 +20,62 @@ pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| {
     Coordinator::new()
 });
 
+/// (Task, optional reply‐channel) travels through the unbounded queue.
+type Envelope = (Task, Option<oneshot::Sender<Result<()>>>);
+
 pub struct Coordinator {
-    task_sender: mpsc::UnboundedSender<Task>,
+    task_tx: mpsc::UnboundedSender<Envelope>,
 }
 
 impl Coordinator {
     pub fn new() -> Self {
-        let (task_sender, mut task_receiver) = mpsc::unbounded_channel::<Task>();
+        let (task_tx, mut task_rx) = mpsc::unbounded_channel::<Envelope>();
 
-        tokio::spawn(async move {
-            while let Some(task) = task_receiver.recv().await {
-                tokio::task::spawn_blocking(move || match task {
-                    Task::Delete(task) => delete::delete_task(task),
-                    Task::Video(task) => video::video_task(task),
-                    Task::Index(task) => index::index_task(task),
-                });
-            }
+        std::thread::spawn(move || {
+            let rt = tokio::runtime::Runtime::new().unwrap(); // Tokio runtime
+            rt.block_on(async move {
+                while let Some((task, reply)) = task_rx.recv().await {
+                    match task {
+                        Task::Delete(task) => spawn_worker(delete::delete_task, task, reply),
+                        Task::Video(task) => spawn_worker(video::video_task, task, reply),
+                        Task::Index(task) => spawn_worker(index::index_task, task, reply),
+                    }
+                }
+            });
         });
 
-        Self { task_sender }
+        Coordinator { task_tx }
     }
 
-    pub fn submit(&self, task: Task) {
-        let _ = self.task_sender.send(task);
+    /// Fire-and-forget.
+    pub fn submit(&self, task: Task) -> Result<()> {
+        self.task_tx.send((task, None))?; // sync send
+        Ok(())
+    }
+
+    /// Fire and get a `oneshot::Receiver` you may `.await`.
+    pub fn submit_with_ack(&self, task: Task) -> Result<oneshot::Receiver<Result<()>>> {
+        let (tx, rx) = oneshot::channel(); // single-reply channel
+        self.task_tx.send((task, Some(tx)))?;
+        Ok(rx)
     }
 }
 
-pub struct StateManager {
-    // This struct can be used to manage the state of the coordinator if needed
+/// Runs blocking / CPU-bound work, then answers through the optional sender.
+fn spawn_worker<F, T>(f: F, task: T, reply: Option<oneshot::Sender<Result<()>>>)
+where
+    F: FnOnce(T) -> Result<()> + Send + 'static,
+    T: Send + 'static,
+{
+    tokio::spawn(async move {
+        let res = task::spawn_blocking(move || f(task))
+            .await
+            .expect("blocking task panicked"); // spawn_blocking docs
+        if let Some(tx) = reply {
+            let _ = tx.send(res); // ignore if receiver dropped
+        }
+    });
 }
+
+/// Extend later if you need global state.
+pub struct StateManager;
