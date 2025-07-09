@@ -79,7 +79,7 @@ pub async fn create_non_empty_album(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;
@@ -118,7 +118,7 @@ pub async fn create_empty_album(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     COORDINATOR
         .submit_with_ack(Task::Album(AlbumTask::new(id)))
         .await?;

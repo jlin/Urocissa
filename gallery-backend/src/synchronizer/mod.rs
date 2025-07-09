@@ -37,7 +37,7 @@ pub async fn start_sync(shutdown: Shutdown) {
         QUERY_SNAPSHOT.start_loop(),
     ));
     tasks.push(named_task("Watcher", start_watcher()));
-    LOOPER.notify(Signal::Update);
+    LOOPER.notify(Signal::UpdateTree);
     info!("All channels started.");
 
     // Await the first task to complete

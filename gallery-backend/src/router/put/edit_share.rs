@@ -46,7 +46,7 @@ pub async fn edit_share(
     .await
     .unwrap();
 
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,5 +83,5 @@ pub async fn delete_share(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
 }

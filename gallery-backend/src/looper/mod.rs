@@ -1,7 +1,8 @@
 //! looper.rs  – long-lived background workers with ACK support
 
-pub mod flush;
-pub mod update;
+pub mod flush_query;
+pub mod flush_snapshot;
+pub mod update_tree;
 use anyhow::Result;
 use std::{
     collections::HashMap,
@@ -16,15 +17,17 @@ use tokio::{
 /// Signals you can poke.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Signal {
-    Update,
-    Flush,
+    UpdateTree,
+    FlushTreeSnapshot,
+    FlushQuerySnapshot,
 }
 
 impl std::fmt::Display for Signal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Signal::Update => write!(f, "Update"),
-            Signal::Flush => write!(f, "Flush"),
+            Signal::UpdateTree => write!(f, "UpdateTree"),
+            Signal::FlushTreeSnapshot => write!(f, "FlushTreeSnapshot"),
+            Signal::FlushQuerySnapshot => write!(f, "FlushQuerySnapshot"),
         }
     }
 }
@@ -46,27 +49,37 @@ pub struct Looper {
 
 impl Looper {
     fn new() -> Self {
-        let (upd_tx, upd_rx) = mpsc::unbounded_channel();
-        let upd_notifier = Arc::new(Notify::new());
-        let (fls_tx, fls_rx) = mpsc::unbounded_channel();
-        let fls_notifier = Arc::new(Notify::new());
+        let (update_tree_ack_sender, update_tree_ack_receiver) = mpsc::unbounded_channel();
+        let update_tree_notifier = Arc::new(Notify::new());
+
+        let (flush_tree_ack_sender, flush_tree_ack_receiver) = mpsc::unbounded_channel();
+        let flush_tree_notifier = Arc::new(Notify::new());
+
+        let (flush_query_ack_sender, flush_query_ack_receiver) = mpsc::unbounded_channel();
+        let flush_query_notifier = Arc::new(Notify::new());
 
         let mut entries = HashMap::new();
         entries.insert(
-            Signal::Update,
+            Signal::UpdateTree,
             Entry {
-                notifier: upd_notifier.clone(),
-                ack_tx: upd_tx,
+                notifier: update_tree_notifier.clone(),
+                ack_tx: update_tree_ack_sender,
             },
         );
         entries.insert(
-            Signal::Flush,
+            Signal::FlushTreeSnapshot,
             Entry {
-                notifier: fls_notifier.clone(),
-                ack_tx: fls_tx,
+                notifier: flush_tree_notifier.clone(),
+                ack_tx: flush_tree_ack_sender,
             },
         );
-
+        entries.insert(
+            Signal::FlushQuerySnapshot,
+            Entry {
+                notifier: flush_query_notifier.clone(),
+                ack_tx: flush_query_ack_sender,
+            },
+        );
         // ----- Dedicated OS thread + runtime that NEVER exits -------------------------
         std::thread::spawn(move || {
             let rt = tokio::runtime::Builder::new_multi_thread()
@@ -76,12 +89,26 @@ impl Looper {
 
             rt.block_on(async move {
                 // start the worker
-                register_worker(Signal::Update, upd_notifier, upd_rx, || {
-                    update::update_task()
-                });
+                register_worker(
+                    Signal::UpdateTree,
+                    update_tree_notifier,
+                    update_tree_ack_receiver,
+                    || update_tree::update_task(),
+                );
 
-                register_worker(Signal::Flush, fls_notifier, fls_rx, || flush::flush_task());
+                register_worker(
+                    Signal::FlushTreeSnapshot,
+                    flush_tree_notifier,
+                    flush_tree_ack_receiver,
+                    || flush_snapshot::flush_snapshot_task(),
+                );
 
+                register_worker(
+                    Signal::FlushQuerySnapshot,
+                    flush_query_notifier,
+                    flush_query_ack_receiver,
+                    || flush_snapshot::flush_query_task(),
+                );
                 // keep runtime alive forever
                 pending::<()>().await;
             });

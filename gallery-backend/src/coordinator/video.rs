@@ -39,7 +39,7 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
                 write_table.insert(&*database.hash, &database).unwrap();
             }
             write_txn.commit().unwrap();
-            LOOPER.notify(Signal::Update);
+            LOOPER.notify(Signal::UpdateTree);
             Ok(())
         }
         Err(err) => Err(err)

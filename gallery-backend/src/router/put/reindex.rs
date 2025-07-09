@@ -92,6 +92,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     Status::Ok
 }

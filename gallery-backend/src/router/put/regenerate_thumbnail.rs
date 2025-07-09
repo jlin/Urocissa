@@ -64,7 +64,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+                LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
             }
         }
     }

@@ -16,6 +16,6 @@ pub async fn generate_random_data(
         .map(|_| Database::generate_random_data())
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     info!("Insert random data complete")
 }

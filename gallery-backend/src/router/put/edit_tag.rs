@@ -76,6 +76,6 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     Json(vec_tags_info)
 }

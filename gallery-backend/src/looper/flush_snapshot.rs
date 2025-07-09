@@ -3,7 +3,7 @@ use crate::structure::reduced_data::ReducedData;
 use redb::TableDefinition;
 use std::time::Instant;
 
-pub fn flush_task() -> anyhow::Result<()> {
+pub fn flush_snapshot_task() -> anyhow::Result<()> {
     loop {
         if TREE_SNAPSHOT.in_memory.is_empty() {
             break;

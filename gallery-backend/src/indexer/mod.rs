@@ -9,6 +9,6 @@ pub fn indexer(path: PathBuf) -> anyhow::Result<()> {
     let database = indexer::filter::filter(path)?;
     importer::import(&database)?;
     indexer::databaser::databaser(database)?;
-    LOOPER.notify(Signal::Update);
+    LOOPER.notify(Signal::UpdateTree);
     Ok(())
 }

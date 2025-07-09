@@ -1,10 +1,9 @@
 pub mod new;
 pub mod read_tags;
 pub mod read_tree;
-pub mod start_loop;
 
 use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use std::sync::{atomic::AtomicU64, Arc, LazyLock, RwLock};
+use std::sync::{Arc, LazyLock, RwLock, atomic::AtomicU64};
 
 pub struct Tree {
     pub in_disk: &'static redb::Database,

@@ -80,7 +80,7 @@ pub async fn delete_data(
     .await
     .unwrap();
 
-    LOOPER.notify_with_ack(Signal::Update).await.unwrap();
+    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     let futures = deleted_album_id.into_iter().map(async |album_id| {
         COORDINATOR
             .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
