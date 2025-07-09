@@ -35,3 +35,5 @@ impl From<anyhow::Error> for AppError {
         AppError(err)
     }
 }
+
+pub type AppResult<T> = Result<T, AppError>;

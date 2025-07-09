@@ -1,3 +1,4 @@
+use anyhow::Context;
 use std::sync::LazyLock;
 use tokio::sync::{mpsc, oneshot};
 use tokio::task;
@@ -57,13 +58,18 @@ impl Coordinator {
     }
 
     /// Fire and get a `oneshot::Receiver` you may `.await`.
-    pub fn submit_with_ack(
-        &self,
-        task: Task,
-    ) -> anyhow::Result<oneshot::Receiver<anyhow::Result<()>>> {
-        let (tx, rx) = oneshot::channel(); // single-reply channel
-        self.task_tx.send((task, Some(tx)))?;
-        Ok(rx)
+    pub async fn submit_with_ack(&self, task: Task) -> anyhow::Result<()> {
+        let (tx, rx) = tokio::sync::oneshot::channel();
+
+        self.task_tx
+            .send((task, Some(tx)))
+            .map_err(|e| anyhow::anyhow!("Failed to submit task to worker queue: {}", e))?;
+
+        let task_result = rx
+            .await
+            .context("Failed to receive acknowledgment from worker. It might have crashed.")?;
+
+        task_result
     }
 }
 

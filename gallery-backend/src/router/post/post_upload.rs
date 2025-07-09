@@ -7,10 +7,10 @@ use crate::coordinator::index::IndexTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::router::post::get_extension;
-use crate::router::{AppError, AppResult};
 
-use anyhow::Context;
+use crate::router::AppError;
+
+use anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 
 use rocket::{form::Form, fs::TempFile};
@@ -71,12 +71,9 @@ pub async fn upload(
                     let final_path =
                         save_file(&mut file, filename, extension, last_modified_time).await?;
 
-                    // --- 這裡是修改的關鍵 ---
                     COORDINATOR
-                        .submit_with_ack(Task::Index(IndexTask::new(PathBuf::from(final_path))))?
-                        // 使用 .context() 將 RecvError 轉成 anyhow::Error，並加上下文描述
-                        .await
-                        .context("Failed to receive acknowledgement from coordinator task")??;
+                        .submit_with_ack(Task::Index(IndexTask::new(PathBuf::from(final_path))))
+                        .await?;
                 } else {
                     error!("Invalid file type");
                     return Err(anyhow::anyhow!("Invalid file type: {}", extension).into());
@@ -84,7 +81,6 @@ pub async fn upload(
             }
         }
     }
-
     Ok(())
 }
 async fn save_file(

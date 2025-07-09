@@ -74,10 +74,10 @@ pub async fn edit_album(
     .unwrap();
 
     TREE.should_update_async().await;
-    let futures = concact_result.into_iter().map(|album_id| {
+    let futures = concact_result.into_iter().map(async |album_id| {
         COORDINATOR
             .submit_with_ack(Task::Album(AlbumTask::new(album_id)))
-            .unwrap()
+            .await
     });
     join_all(futures).await;
 }

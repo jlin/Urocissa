@@ -1,5 +1,4 @@
 use std::time::Instant;
-
 use arrayvec::ArrayString;
 use rand::Rng;
 use rand::distr::Alphanumeric;
@@ -14,6 +13,7 @@ use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::looper::tree::TREE;
 use crate::looper::tree_snapshot::TREE_SNAPSHOT;
+use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::structure::album::Album;
@@ -31,7 +31,7 @@ pub async fn create_non_empty_album(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     create_album: Json<CreateAlbum>,
-) -> anyhow::Result<String> {
+) -> AppResult<String> {
     let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
@@ -80,8 +80,8 @@ pub async fn create_non_empty_album(
     .unwrap();
     TREE.should_update_async().await;
     COORDINATOR
-        .submit_with_ack(Task::Album(AlbumTask::new(id)))?
-        .await??;
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))
+        .await?;
     Ok(id.to_string())
 }
 
@@ -89,7 +89,7 @@ pub async fn create_non_empty_album(
 pub async fn create_empty_album(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
-) -> anyhow::Result<String> {
+) -> AppResult<String> {
     let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
 
@@ -119,7 +119,7 @@ pub async fn create_empty_album(
     .unwrap();
     TREE.should_update_async().await;
     COORDINATOR
-        .submit_with_ack(Task::Album(AlbumTask::new(id)))?
-        .await??;
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))
+        .await?;
     Ok(id.to_string())
 }
