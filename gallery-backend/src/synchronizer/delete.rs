@@ -6,7 +6,7 @@ use tokio;
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub static DELETE_QUEUE_SENDER: OnceLock<UnboundedSender<Vec<PathBuf>>> = OnceLock::new();
-const MAX_DELETE_ATTEMPTS: u64 = 5;
+pub const MAX_DELETE_ATTEMPTS: u64 = 5;
 
 pub fn start_delete_channel() -> tokio::task::JoinHandle<()> {
     let (delete_queue_sender, mut delete_queue_receiver) = unbounded_channel::<Vec<PathBuf>>();

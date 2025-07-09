@@ -8,9 +8,6 @@ edition = "2024"
 [profile.release]
 lto = true
 
-[lib]
-path = "lib/lib.rs"
-
 [profile.dev-release]
 inherits = "release"
 lto = false
