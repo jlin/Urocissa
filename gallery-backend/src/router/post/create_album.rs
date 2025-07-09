@@ -5,7 +5,7 @@ use rand::Rng;
 use rand::distr::Alphanumeric;
 use redb::ReadableTable;
 use rocket::serde::json::Json;
-use rocket::{http::Status, post};
+use rocket::{ post};
 
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +17,7 @@ use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::structure::album::Album;
-
+use rocket_errors::anyhow;
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAlbum {
@@ -31,7 +31,7 @@ pub async fn create_non_empty_album(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     create_album: Json<CreateAlbum>,
-) -> Result<String, Status> {
+) -> anyhow::Result<String> {
     let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
@@ -80,9 +80,8 @@ pub async fn create_non_empty_album(
     .unwrap();
     TREE.should_update_async().await;
     COORDINATOR
-        .submit_with_ack(Task::Album(AlbumTask::new(id)))
-        .unwrap()
-        .await;
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))?
+        .await??;
     Ok(id.to_string())
 }
 
@@ -90,7 +89,7 @@ pub async fn create_non_empty_album(
 pub async fn create_empty_album(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
-) -> Result<String, Status> {
+) -> anyhow::Result<String> {
     let id = tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
 
@@ -120,8 +119,7 @@ pub async fn create_empty_album(
     .unwrap();
     TREE.should_update_async().await;
     COORDINATOR
-        .submit_with_ack(Task::Album(AlbumTask::new(id)))
-        .unwrap()
-        .await;
+        .submit_with_ack(Task::Album(AlbumTask::new(id)))?
+        .await??;
     Ok(id.to_string())
 }

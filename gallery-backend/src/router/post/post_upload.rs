@@ -1,22 +1,19 @@
-use std::panic::Location;
 use std::path::PathBuf;
-use std::sync::Arc;
+
 use std::time::Instant;
 
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::coordinator::index::IndexTask;
 use crate::coordinator::{COORDINATOR, Task};
-use crate::public::error_data::{ErrorData, handle_error};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::post::get_extension;
 
-use ::anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
-use rocket::http::Status;
+
 use rocket::{form::Form, fs::TempFile};
 use rocket_errors::anyhow;
-use tokio::sync::Notify;
+
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
 pub enum FileUpload<'r> {
