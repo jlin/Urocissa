@@ -3,7 +3,6 @@ use arrayvec::ArrayString;
 
 use crate::{
     constant::redb::DATA_TABLE,
-    coordinator::{COORDINATOR, Task},
     indexer::databaser::generate_compressed_video::generate_compressed_video,
     looper::{LOOPER, Signal, tree::TREE},
 };
