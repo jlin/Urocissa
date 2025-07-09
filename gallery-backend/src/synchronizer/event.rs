@@ -1,7 +1,6 @@
 use crate::constant::PROCESS_BATCH_NUMBER;
 use crate::coordinator::index::IndexTask;
 use crate::coordinator::{COORDINATOR, Task};
-use crate::indexer::indexer;
 
 use log::info;
 use std::sync::{Arc, OnceLock};
@@ -49,7 +48,9 @@ pub fn start_event_channel() -> tokio::task::JoinHandle<()> {
                 // Convert to Vec only once
                 let paths: Vec<PathBuf> = unique_paths.into_iter().collect();
                 for path in paths {
-                    COORDINATOR.submit(Task::Index(IndexTask::new(path)));
+                    if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(path))) {
+                        error!("Failed to submit task:\n{:#}", err);
+                    }
                 }
                 // Notify all at once
                 for notify in notify_list {
