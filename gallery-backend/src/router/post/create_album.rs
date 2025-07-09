@@ -4,8 +4,8 @@ use arrayvec::ArrayString;
 use rand::Rng;
 use rand::distr::Alphanumeric;
 use redb::ReadableTable;
+use rocket::post;
 use rocket::serde::json::Json;
-use rocket::{ post};
 
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +17,7 @@ use crate::looper::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::structure::album::Album;
-use rocket_errors::anyhow;
+
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAlbum {

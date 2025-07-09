@@ -8,12 +8,12 @@ use crate::coordinator::{COORDINATOR, Task};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::post::get_extension;
+use crate::router::{AppError, AppResult};
 
+use anyhow::Context;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 
 use rocket::{form::Form, fs::TempFile};
-use rocket_errors::anyhow;
-
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
 pub enum FileUpload<'r> {
@@ -51,7 +51,7 @@ pub async fn upload(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     data: Form<Vec<FileUpload<'_>>>,
-) -> anyhow::Result<()> {
+) -> Result<(), AppError> {
     let mut last_modified_time = 0;
 
     for file_data in data.into_inner() {
@@ -70,18 +70,23 @@ pub async fn upload(
                 {
                     let final_path =
                         save_file(&mut file, filename, extension, last_modified_time).await?;
+
+                    // --- 這裡是修改的關鍵 ---
                     COORDINATOR
                         .submit_with_ack(Task::Index(IndexTask::new(PathBuf::from(final_path))))?
-                        .await??;
+                        // 使用 .context() 將 RecvError 轉成 anyhow::Error，並加上下文描述
+                        .await
+                        .context("Failed to receive acknowledgement from coordinator task")??;
                 } else {
                     error!("Invalid file type");
+                    return Err(anyhow::anyhow!("Invalid file type: {}", extension).into());
                 }
             }
         }
     }
+
     Ok(())
 }
-
 async fn save_file(
     file: &mut TempFile<'_>,
     filename: String,
@@ -109,4 +114,20 @@ fn set_last_modified_time(path: &str, last_modified_time: u64) -> anyhow::Result
     let mtime = filetime::FileTime::from_unix_time((last_modified_time / 1000) as i64, 0);
     filetime::set_file_mtime(path, mtime)?;
     Ok(())
+}
+
+pub fn get_extension(file: &TempFile<'_>) -> anyhow::Result<String> {
+    match file.content_type() {
+        Some(ct) => match ct.extension() {
+            Some(ext) => Ok(ext.as_str().to_lowercase()),
+            None => {
+                error!("Failed to extract file extension.");
+                bail!("Failed to extract file extension.")
+            }
+        },
+        None => {
+            error!("Failed to get content type.");
+            bail!("Failed to get content type.")
+        }
+    }
 }

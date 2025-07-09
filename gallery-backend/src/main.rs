@@ -27,10 +27,8 @@ mod router;
 mod structure;
 mod synchronizer;
 mod utils;
-use rocket_errors::anyhow;
-
-#[rocket::main]
-async fn main() -> anyhow::Result<()> {
+#[launch]
+async fn rocket() -> _ {
     initialize_logger();
     check_ffmpeg_and_ffprobe();
     initialize_folder();
@@ -47,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
 
     txn.commit().unwrap();
 
-    let _ = rocket::build()
+    rocket::build()
         .attach(cache_control_fairing())
         .attach(AdHoc::on_liftoff("Shutdown", |rocket| {
             Box::pin(async move {
@@ -67,6 +65,5 @@ async fn main() -> anyhow::Result<()> {
         .mount("/", generate_post_routes())
         .mount("/", generate_put_routes())
         .mount("/", generate_delete_routes())
-        .mount("/", generate_fairing_routes());
-    Ok(())
+        .mount("/", generate_fairing_routes())
 }
