@@ -2,14 +2,12 @@ use log::info;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 
 use std::collections::HashSet;
+use std::path::PathBuf;
 use std::thread;
-use std::{panic::Location, path::PathBuf};
 
+use crate::coordinator::index::IndexTask;
+use crate::coordinator::{COORDINATOR, Task};
 use crate::public::config::PRIVATE_CONFIG;
-use crate::public::error_data::{ErrorData, handle_error};
-use crate::synchronizer::event::ScanQueue;
-
-use super::event::EVENTS_SENDER;
 pub fn start_watcher() -> tokio::task::JoinHandle<()> {
     tokio::task::spawn(async {
         tokio::task::spawn_blocking(|| {
@@ -35,28 +33,11 @@ fn get_watcher() -> RecommendedWatcher {
                     match wacher_events.kind {
                         EventKind::Create(_) => {
                             if !wacher_events.paths.is_empty() {
-                                // Attempt to send the paths without cloning.
-                                match EVENTS_SENDER.get().unwrap().send(ScanQueue {
-                                    scan_list: wacher_events.paths,
-                                    notify: None, // No need for notification here
-                                }) {
-                                    Ok(_) => {
-                                        // Successfully sent. Nothing else needed.
-                                    }
-                                    Err(err) => {
-                                        // The send failed, and we get `returned_paths` back here.
-                                        let error_data = ErrorData::new(
-                                            format!("Failed to send paths: {}", err),
-                                            format!(
-                                                "Error occurred when sending path: {:?}",
-                                                err.0
-                                            ),
-                                            None,
-                                            None,
-                                            Location::caller(),
-                                            None,
-                                        );
-                                        handle_error(error_data);
+                                for path in wacher_events.paths {
+                                    if let Err(err) =
+                                        COORDINATOR.submit(Task::Index(IndexTask::new(path)))
+                                    {
+                                        error!("Failed to submit task:\n{:#}", err);
                                     }
                                 }
                             }
@@ -70,14 +51,13 @@ fn get_watcher() -> RecommendedWatcher {
                                 .collect();
 
                             if !filtered_paths.is_empty() {
-                                EVENTS_SENDER
-                                    .get()
-                                    .unwrap()
-                                    .send(ScanQueue {
-                                        scan_list: filtered_paths,
-                                        notify: None, // No need for notification here
-                                    })
-                                    .expect("events_sender send error");
+                                for path in filtered_paths {
+                                    if let Err(err) =
+                                        COORDINATOR.submit(Task::Index(IndexTask::new(path)))
+                                    {
+                                        error!("Failed to submit task:\n{:#}", err);
+                                    }
+                                }
                             }
                         }
                         _ => (),

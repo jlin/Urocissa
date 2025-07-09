@@ -1,4 +1,3 @@
-use event::start_event_channel;
 use rocket::Shutdown;
 use watch::start_watcher;
 
@@ -14,7 +13,6 @@ use std::sync::LazyLock;
 use tokio::task::JoinError;
 use tokio::task::JoinHandle;
 
-pub mod event;
 pub mod watch;
 
 /// Define a type alias for better readability
@@ -33,7 +31,6 @@ pub async fn start_sync(shutdown: Shutdown) {
     // Initialize a collection of tasks with their respective names
     let mut tasks = FuturesUnordered::new();
 
-    tasks.push(named_task("Event channel", start_event_channel()));
     tasks.push(named_task("Tree loop", TREE.start_loop()));
     tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
     tasks.push(named_task(
