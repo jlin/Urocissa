@@ -8,11 +8,13 @@ use tokio::{
 pub mod album;
 pub mod delete;
 pub mod index;
+pub mod remove;
 pub mod video;
 
 use album::AlbumTask;
 use delete::DeleteTask;
 use index::IndexTask;
+use remove::RemoveTask;
 use video::VideoTask;
 
 /// One-shot tasks that travel through the queue.
@@ -22,6 +24,7 @@ pub enum Task {
     Video(VideoTask),
     Index(IndexTask),
     Album(AlbumTask),
+    Remove(RemoveTask),
 }
 
 type Envelope = (Task, Option<oneshot::Sender<Result<()>>>);
@@ -47,6 +50,7 @@ impl Coordinator {
                         Task::Video(t) => spawn_worker(video::video_task, t, reply),
                         Task::Index(t) => spawn_worker(index::index_task, t, reply),
                         Task::Album(t) => spawn_worker(album::album_task, t, reply),
+                        Task::Remove(t) => spawn_worker(remove::remove_task, t, reply),
                     }
                 }
             });

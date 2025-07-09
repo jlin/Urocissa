@@ -1,9 +1,8 @@
 use super::Expire;
 use crate::{
     constant::SNAPSHOT_MAX_LIFETIME_MS,
-    looper::{
-        query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP, tree_snapshot::TREE_SNAPSHOT,
-    },
+    coordinator::{COORDINATOR, Task, remove::RemoveTask},
+    looper::{query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
     router::get::get_prefetch::Prefetch,
     utils::start_loop_util,
 };
@@ -59,7 +58,11 @@ impl Expire {
                                         })
                                         .collect();
 
-                                    TREE_SNAPSHOT.tree_snapshot_delete(tree_snapshot_delete_queue);
+                                    tree_snapshot_delete_queue.iter().for_each(|timestamp| {
+                                        COORDINATOR
+                                            .submit(Task::Remove(RemoveTask::new(*timestamp)))
+                                            .unwrap();
+                                    });
                                 }
                                 Ok(false) => {
                                     error!("Failed to delete query cache table: {:?}", timestamp);

@@ -3,7 +3,7 @@ use watch::start_watcher;
 
 use crate::coordinator::{COORDINATOR, Coordinator};
 use crate::looper::{LOOPER, Looper, Signal};
-use crate::looper::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree_snapshot::TREE_SNAPSHOT};
+use crate::looper::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT};
 
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
@@ -35,10 +35,6 @@ pub async fn start_sync(shutdown: Shutdown) {
     tasks.push(named_task(
         "Query snapshot loop",
         QUERY_SNAPSHOT.start_loop(),
-    ));
-    tasks.push(named_task(
-        "Tree snapshot remove loop",
-        TREE_SNAPSHOT.start_loop_remove(),
     ));
     tasks.push(named_task("Watcher", start_watcher()));
     LOOPER.notify(Signal::Update);

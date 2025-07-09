@@ -3,7 +3,6 @@ pub mod read_rows;
 pub mod read_scrollbar;
 pub mod read_tags;
 pub mod read_tree_snapshot;
-pub mod start_loop;
 
 use std::sync::LazyLock;
 
