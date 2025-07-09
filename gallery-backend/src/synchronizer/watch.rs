@@ -1,5 +1,6 @@
 use log::info;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use walkdir::WalkDir;
 
 use std::collections::HashSet;
 use std::path::PathBuf;
@@ -24,48 +25,40 @@ pub fn start_watcher() -> tokio::task::JoinHandle<()> {
         .unwrap();
     })
 }
-
 fn get_watcher() -> RecommendedWatcher {
-    let watcher: RecommendedWatcher =
-        notify::recommended_watcher(move |watcher_result: notify::Result<Event>| {
-            match watcher_result {
-                Ok(wacher_events) => {
-                    match wacher_events.kind {
-                        EventKind::Create(_) => {
-                            if !wacher_events.paths.is_empty() {
-                                for path in wacher_events.paths {
-                                    if let Err(err) =
-                                        COORDINATOR.submit(Task::Index(IndexTask::new(path)))
-                                    {
-                                        error!("Failed to submit task:\n{:#}", err);
-                                    }
-                                }
-                            }
-                        }
-                        EventKind::Modify(_) => {
-                            // Avoid modifying files within the folder to prevent a full rescan of the entire folder
-                            let filtered_paths: Vec<PathBuf> = wacher_events
-                                .paths
-                                .into_iter()
-                                .filter(|path| path.is_file())
-                                .collect();
+    notify::recommended_watcher(move |res: Result<Event, notify::Error>| match res {
+        Ok(evt) => {
+            match evt.kind {
+                // === New or changed paths -> (re)index ===
+                EventKind::Create(_) | EventKind::Modify(_) => {
+                    // ── collect unique file paths ──────────────────────────────
+                    let mut files: HashSet<PathBuf> = HashSet::new();
 
-                            if !filtered_paths.is_empty() {
-                                for path in filtered_paths {
-                                    if let Err(err) =
-                                        COORDINATOR.submit(Task::Index(IndexTask::new(path)))
-                                    {
-                                        error!("Failed to submit task:\n{:#}", err);
-                                    }
-                                }
-                            }
+                    for p in evt.paths {
+                        if p.is_file() {
+                            files.insert(p);
+                        } else if p.is_dir() {
+                            WalkDir::new(&p)
+                                .into_iter()
+                                .filter_map(|e| e.ok())
+                                .filter(|e| e.file_type().is_file())
+                                .for_each(|e| {
+                                    files.insert(e.into_path());
+                                });
                         }
-                        _ => (),
+                    }
+
+                    // ── submit one task per unique file ────────────────────────
+                    for file in files {
+                        if let Err(e) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
+                            error!("submit failed: {:#}", e);
+                        }
                     }
                 }
-                Err(err) => error!("watch error: {:#?}", err),
+                _ => { /* ignore other kinds */ }
             }
-        })
-        .unwrap();
-    watcher
+        }
+        Err(e) => error!("watch error: {:#?}", e),
+    })
+    .expect("failed to create watcher")
 }
