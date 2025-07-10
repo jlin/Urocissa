@@ -13,6 +13,7 @@ use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
 
 use super::VALIDATION_ALLOW_EXPIRED;
 use super::guard_share::GuardShare;
+
 pub struct GuardTimestamp {
     pub claims: ClaimsTimestamp,
 }
@@ -25,7 +26,7 @@ impl<'r> FromRequest<'r> for GuardTimestamp {
         let auth_header = match req.headers().get_one("Authorization") {
             Some(header) => header,
             None => {
-                warn!("Request is missing the Authorization header.");
+                warn!("Request is missing the Authorization header");
                 return Outcome::Forward(Status::Unauthorized);
             }
         };
@@ -33,7 +34,7 @@ impl<'r> FromRequest<'r> for GuardTimestamp {
         let token = match auth_header.strip_prefix("Bearer ") {
             Some(token) => token,
             None => {
-                warn!("Authorization header format is invalid. Expected 'Bearer <token>'.");
+                warn!("Authorization header format is invalid, expected 'Bearer <token>'");
                 return Outcome::Forward(Status::Unauthorized);
             }
         };
@@ -61,14 +62,14 @@ impl<'r> FromRequest<'r> for GuardTimestamp {
         let query_timestamp = match query_timestamp {
             Some(ts) => ts,
             None => {
-                warn!("No valid 'timestamp' parameter found in the query.");
+                warn!("No valid 'timestamp' parameter found in the query");
                 return Outcome::Forward(Status::Unauthorized);
             }
         };
 
         if query_timestamp != claims.timestamp {
             warn!(
-                "Timestamp does not match. Received: {}, Expected: {}.",
+                "Timestamp does not match; received: {}; expected: {}",
                 query_timestamp, claims.timestamp
             );
             return Outcome::Forward(Status::Unauthorized);
@@ -109,7 +110,7 @@ pub async fn renew_timestamp_token(
             Ok(data) => data,
             Err(err) => {
                 warn!(
-                    "Token renewal failed: unable to decode token. Error: {:#?}",
+                    "Token renewal failed: unable to decode token, error: {:#?}",
                     err
                 );
                 return Err(anyhow::anyhow!("Unauthorized: Invalid token").into());

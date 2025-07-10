@@ -42,7 +42,9 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
             LOOPER.notify(Signal::UpdateTree);
             Ok(())
         }
-        Err(err) => Err(err)
-            .with_context(|| format!("video_task: video compression failed for hash: {}", hash)),
+        Err(err) => Err(err).context(format!(
+            "video_task: video compression failed for hash: {}",
+            hash
+        )),
     }
 }

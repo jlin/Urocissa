@@ -17,7 +17,7 @@ pub fn generate_thumbnail_for_image(
     let binding = database.compressed_path();
     let parent_path = binding.parent().ok_or_else(|| {
         anyhow::anyhow!(
-            "image_compressor: failed to get parent directory for {:?}",
+            "image_compressor: Failed to get parent directory for {:?}",
             database.compressed_path()
         )
     })?;
@@ -37,12 +37,10 @@ pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
     let thumbnail_scale_args = format!("scale={}:{}", thumbnail_width, thumbnail_height);
 
     let thumbnail_file_path_string = &database.thumbnail_path();
-    std::fs::create_dir_all(database.compressed_path_parent()).with_context(|| {
-        format!(
-            "generate_thumbnail: failed to create directory for {:?}",
-            database.imported_path_string()
-        )
-    })?;
+    std::fs::create_dir_all(database.compressed_path_parent()).context(format!(
+        "Failed to create directory for {:?}",
+        database.imported_path_string()
+    ))?;
     let status = Command::new("ffmpeg")
         .args(&[
             "-y",
@@ -57,12 +55,10 @@ pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
             thumbnail_file_path_string,
         ])
         .status()
-        .with_context(|| {
-            format!(
-                "generate_thumbnail: failed to spawn new command for ffmpeg: {:?}",
-                thumbnail_file_path_string
-            )
-        })?;
+        .context(format!(
+            "Failed to spawn new command for ffmpeg: {:?}",
+            thumbnail_file_path_string
+        ))?;
 
     if !status.success() {
         let code = status.code().unwrap_or(-1); // If None, assign -1 or handle explicitly

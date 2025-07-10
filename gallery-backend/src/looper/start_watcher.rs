@@ -9,8 +9,8 @@ use std::{
     collections::HashSet,
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
         LazyLock, Mutex,
+        atomic::{AtomicBool, Ordering},
     },
 };
 
@@ -40,14 +40,15 @@ pub fn start_watcher_task() -> anyhow::Result<()> {
     // Build the watcher.
     let mut watcher = new_watcher()?;
     for path in &PRIVATE_CONFIG.sync_path {
-        watcher.watch(path, RecursiveMode::Recursive)?; // propagate error
+        watcher.watch(path, RecursiveMode::Recursive)?;
         info!("Watching path {:?}", path);
     }
 
     // Store it globally to keep it alive.
     *WATCHER_HANDLE
         .lock()
-        .expect("watcher mutex poisoned") = Some(watcher);
+        .map_err(|err| anyhow::anyhow!("Failed to lock WATCHER_HANDLE mutex: {}", err))? =
+        Some(watcher);
 
     Ok(())
 }
@@ -79,13 +80,13 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     // Submit one indexing task per file.
                     for file in files {
                         if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
-                            error!("submit failed: {:#}", err);
+                            error!("Submit failed: {:#}", err);
                         }
                     }
                 }
                 _ => { /* ignore other kinds */ }
             }
         }
-        Err(err) => error!("watch error: {:#?}", err),
+        Err(err) => error!("Watch error: {:#?}", err),
     })
 }

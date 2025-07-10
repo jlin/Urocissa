@@ -190,7 +190,7 @@ pub async fn renew_hash_token(
 
         if token_data.claims.timestamp != auth.timestamp_decoded {
             warn!(
-                "Timestamp does not match. Received: {}, Expected: {}.",
+                "Timestamp does not match. Received: {}, Expected: {}",
                 token_data.claims.timestamp, auth.timestamp_decoded
             );
             return Err(anyhow::anyhow!("Unauthorized: Timestamp mismatch").into());
@@ -220,7 +220,7 @@ impl<'r> FromRequest<'r> for TimestampGuardModified {
         let auth_header = match req.headers().get_one("Authorization") {
             Some(header) => header,
             None => {
-                warn!("Request is missing the Authorization header.");
+                warn!("Request is missing the Authorization header");
                 return Outcome::Forward(Status::Unauthorized);
             }
         };
@@ -228,7 +228,7 @@ impl<'r> FromRequest<'r> for TimestampGuardModified {
         let token = match auth_header.strip_prefix("Bearer ") {
             Some(token) => token,
             None => {
-                warn!("Authorization header format is invalid. Expected 'Bearer <token>'.");
+                warn!("Authorization header format is invalid; expected 'Bearer <token>'");
                 return Outcome::Forward(Status::Unauthorized);
             }
         };

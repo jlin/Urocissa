@@ -95,13 +95,13 @@ pub fn process_video_info(database: &mut Database) -> anyhow::Result<()> {
 }
 
 pub fn regenerate_metadata_for_image(database: &mut Database) -> anyhow::Result<()> {
-    database.size = metadata(&database.imported_path()).unwrap().len();
+    database.size = metadata(&database.imported_path())?.len();
     process_image_info(database)?;
     Ok(())
 }
 
 pub fn regenerate_metadata_for_video(database: &mut Database) -> anyhow::Result<()> {
-    database.size = metadata(&database.imported_path()).unwrap().len();
+    database.size = metadata(&database.imported_path())?.len();
     process_video_info(database)?;
     Ok(())
 }

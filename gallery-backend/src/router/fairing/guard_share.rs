@@ -57,7 +57,7 @@ impl<'r> FromRequest<'r> for GuardShare {
                     });
                 }
                 _ => {
-                    warn!("JWT validation failed.");
+                    warn!("JWT validation failed");
                 }
             }
         }

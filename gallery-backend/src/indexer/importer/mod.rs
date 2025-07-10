@@ -21,12 +21,13 @@ async fn async_import(database: &Database) -> anyhow::Result<()> {
     if let Some(parent) = dest_path.parent() {
         fs::create_dir_all(parent)
             .await
-            .with_context(|| format!("Failed to create directory: {:?}", parent))?;
+            .context(format!("Failed to create directory: {:?}", parent))?;
     }
 
-    fs::copy(&source_path, &dest_path)
-        .await
-        .with_context(|| format!("Failed to copy from {:?} to {:?}", source_path, dest_path))?;
+    fs::copy(&source_path, &dest_path).await.context(format!(
+        "Failed to copy from {:?} to {:?}",
+        source_path, dest_path
+    ))?;
 
     Ok(())
 }

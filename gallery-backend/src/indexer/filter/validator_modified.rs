@@ -5,24 +5,18 @@ use path_clean::PathClean;
 use std::{fs::metadata, path::PathBuf, time::UNIX_EPOCH};
 
 pub fn validator(path: PathBuf) -> anyhow::Result<Database> {
-    let metadata = metadata(&path)
-        .with_context(|| format!("[validator] Failed to read metadata for {}", path.display()))?;
+    let metadata = metadata(&path).context(format!("Failed to read metadata: {:?}", path))?;
 
-    let modified = metadata.modified().with_context(|| {
-        format!(
-            "[validator] Failed to get modification time for {}",
-            path.display()
-        )
-    })?;
+    let modified = metadata
+        .modified()
+        .context(format!("Failed to get modification time: {:?}", path))?;
 
     let modified_millis = modified
         .duration_since(UNIX_EPOCH)
-        .with_context(|| {
-            format!(
-                "[validator] Modification time for {} is before UNIX_EPOCH",
-                path.display()
-            )
-        })?
+        .context(format!(
+            "Modification time is before UNIX_EPOCH: {:?}",
+            path
+        ))?
         .as_millis();
 
     let file_modify = FileModify::new(path.clean(), modified_millis);

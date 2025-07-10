@@ -5,9 +5,7 @@ pub fn video_width_height(info: &str, file_path: &str) -> anyhow::Result<u32> {
     let command_text = match info {
         "width" => Ok("stream=width"),
         "height" => Ok("stream=height"),
-        _ => Err(anyhow::Error::msg(
-            "video_duration_width_height: command error",
-        )),
+        _ => Err(anyhow::Error::msg("Command error")),
     };
     let output = Command::new("ffprobe")
         .args(&[
@@ -20,12 +18,10 @@ pub fn video_width_height(info: &str, file_path: &str) -> anyhow::Result<u32> {
             file_path,
         ])
         .output()
-        .with_context(|| {
-            format!(
-                "video_duration_width_height: fail to spawn new command for ffmpeg: {:?}",
-                file_path
-            )
-        })?;
+        .context(format!(
+            "Fail to spawn new command for ffmpeg: {:?}",
+            file_path
+        ))?;
     if output.status.success() {
         Ok(String::from_utf8(output.stdout)?.trim().parse::<u32>()?)
     } else {
@@ -50,22 +46,15 @@ pub fn video_duration(file_path: &str) -> anyhow::Result<f64, Box<dyn Error>> {
             file_path,
         ])
         .output()
-        .with_context(|| {
-            format!(
-                "video_duration_width_height: fail to spawn new command for ffmpeg: {:?}",
-                file_path
-            )
-        })?;
+        .context(format!(
+            "Fail to spawn new command for ffmpeg: {:?}",
+            file_path
+        ))?;
     if output.status.success() {
         let duration_in_seconds = String::from_utf8(output.stdout)?
             .trim()
             .parse::<f64>()
-            .with_context(|| {
-                format!(
-                    "video_duration_width_height: fail to parse to f64: {:?}",
-                    file_path
-                )
-            })?;
+            .context(format!("Fail to parse to f64: {:?}", file_path))?;
         Ok(duration_in_seconds)
     } else {
         Err(From::from(

@@ -13,11 +13,11 @@ pub fn validator(path: &PathBuf) -> anyhow::Result<()> {
             {
                 Ok(())
             } else {
-                bail!("{} is not a valid extension", &lowercased_ext);
+                bail!("Invalid file extension: {}", lowercased_ext);
             }
         }
         None => {
-            bail!("{} has no extension", path.display());
+            bail!("File path is missing an extension: {:?}", path);
         }
     }
 }

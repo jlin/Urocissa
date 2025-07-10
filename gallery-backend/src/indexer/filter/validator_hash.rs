@@ -11,12 +11,10 @@ use std::path::PathBuf;
 use std::{fs::File, io::Read, path::Path};
 
 pub fn validator(database: &mut Database) -> anyhow::Result<()> {
-    let hash = blake3_hasher(&database.source_path()).with_context(|| {
-        format!(
-            "[validator] Failed to compute hash for {}",
-            database.source_path().display()
-        )
-    })?;
+    let hash = blake3_hasher(&database.source_path()).context(format!(
+        "Failed to compute hash: {:?}",
+        database.source_path()
+    ))?;
 
     let read_table = TREE.api_read_tree();
     // File already in persistent database
@@ -28,7 +26,10 @@ pub fn validator(database: &mut Database) -> anyhow::Result<()> {
         TREE.insert_tree_api(&vec![database_exist]).unwrap();
         LOOPER.notify(Signal::UpdateTree);
         COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)))?;
-        bail!("File already exists in the database");
+        bail!(
+            "File already exists in the database: {:?}",
+            database.source_path()
+        );
     }
     // New file
     else {
@@ -38,23 +39,16 @@ pub fn validator(database: &mut Database) -> anyhow::Result<()> {
 }
 
 fn blake3_hasher(file_path: &Path) -> anyhow::Result<ArrayString<64>> {
-    let mut file = File::open(file_path).with_context(|| {
-        format!(
-            "[blake3_hasher] Failed to open file: {}",
-            file_path.display()
-        )
-    })?;
+    let mut file =
+        File::open(file_path).context(format!("Failed to open file: {:?}", file_path))?;
 
     let mut hasher = Hasher::new();
     let mut buffer = [0; 512 * 1024];
 
     loop {
-        let bytes_read = file.read(&mut buffer).with_context(|| {
-            format!(
-                "[blake3_hasher] Failed to read file: {}",
-                file_path.display()
-            )
-        })?;
+        let bytes_read = file
+            .read(&mut buffer)
+            .context(format!("Failed to read file: {:?}", file_path))?;
 
         if bytes_read == 0 {
             break;

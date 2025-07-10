@@ -1,12 +1,19 @@
 use super::video_ffprobe::video_duration;
-use crate::{indexer::databaser::process_image_info, structure::database_struct::database::definition::Database};
+use crate::{
+    indexer::databaser::process_image_info,
+    structure::database_struct::database::definition::Database,
+};
 use anyhow::Context;
 use regex::Regex;
 use std::{
     cmp,
     io::{BufRead, BufReader},
     process::{Command, Stdio},
+    sync::LazyLock,
 };
+
+static REGEX_OUT_TIME_US: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"out_time_us=(\d+)").unwrap());
 
 pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> {
     let duration_result = video_duration(&database.imported_path_string());
@@ -58,12 +65,10 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
-        .with_context(|| {
-            format!(
-                "video_compressor: failed to spawn new command for ffmpeg: {:?}",
-                database.imported_path_string()
-            )
-        })?;
+        .context(format!(
+            "video_compressor: failed to spawn new command for ffmpeg: {:?}",
+            database.imported_path_string()
+        ))?;
     let stdout = cmd.stdout.as_mut().ok_or_else(|| {
         anyhow::anyhow!(
             "video_compressor: failed to get stdout from ffmpeg command for {:?}",
@@ -76,9 +81,9 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
         line.ok()
             .filter(|line_string| line_string.contains("out_time_us"))
     });
-    let re = Regex::new(r"out_time_us=(\d+)").unwrap();
+
     for line in stdout_lines_filtered {
-        if let Some(captured) = re.captures(&line)
+        if let Some(captured) = REGEX_OUT_TIME_US.captures(&line)
             && let Some(processed_time) = captured.get(1)
         {
             match processed_time.as_str().parse::<f64>() {
@@ -97,7 +102,7 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
             error!("No digits captured for line: {}", line);
         }
     }
-    cmd.wait().unwrap();
+    cmd.wait()?;
 
     Ok(())
 }
