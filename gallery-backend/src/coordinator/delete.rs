@@ -50,9 +50,10 @@ pub fn delete_task(task: DeleteTask) -> anyhow::Result<()> {
                 thread::sleep(Duration::from_millis(100 * attempts));
             }
             Err(err) => {
-                return Err(err).with_context(|| {
-                    format!("Failed deleting {:?} after {} attempts", path, attempts)
-                });
+                return Err(err).context(format!(
+                    "Failed deleting {:?} after {} attempts",
+                    path, attempts
+                ));
             }
         }
     }

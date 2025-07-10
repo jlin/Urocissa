@@ -26,6 +26,8 @@ pub async fn authenticate(password: Json<String>) -> AppResult<Json<String>> {
         let token = Claims::new_admin().encode();
         Ok(Json(token))
     } else {
-        Err(anyhow::anyhow!("Invalid password").into())
+        Err(anyhow::anyhow!("Invalid password")
+            .context("Authentication failed")
+            .into())
     }
 }
