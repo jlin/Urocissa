@@ -1,12 +1,13 @@
 #[macro_use]
 extern crate rocket;
+use crate::coordinator::{COORDINATOR, Coordinator};
 use crate::db::tree::TREE;
+use crate::looper::{LOOPER, Looper, Signal};
 use constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
 use redb::ReadableTableMetadata;
-use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 use router::fairing::cache_control_fairing::cache_control_fairing;
 use router::fairing::generate_fairing_routes;
@@ -15,7 +16,7 @@ use router::{
     put::generate_put_routes,
 };
 
-use std::thread;
+use std::sync::LazyLock;
 use std::time::Instant;
 mod constant;
 mod coordinator;
@@ -26,7 +27,6 @@ mod looper;
 mod public;
 mod router;
 mod structure;
-mod synchronizer;
 mod utils;
 #[launch]
 async fn rocket() -> _ {
@@ -46,18 +46,15 @@ async fn rocket() -> _ {
 
     txn.commit().unwrap();
 
+    // Force-init global Coordinator and Looper on their own threads/runtime.
+    let _ = LazyLock::<Coordinator>::force(&COORDINATOR);
+    let _ = LazyLock::<Looper>::force(&LOOPER);
+
+    LOOPER.notify(Signal::StartWatcher);
+    LOOPER.notify(Signal::UpdateTree);
+
     rocket::build()
         .attach(cache_control_fairing())
-        .attach(AdHoc::on_liftoff("Shutdown", |rocket| {
-            Box::pin(async move {
-                let shutdown = rocket.shutdown();
-                // dedicated thread and tokio runtime for channel
-                thread::spawn(move || {
-                    let rt = tokio::runtime::Runtime::new().unwrap();
-                    rt.block_on(synchronizer::start_sync(shutdown))
-                });
-            })
-        }))
         .mount(
             "/assets",
             FileServer::from("../gallery-frontend/dist/assets"),

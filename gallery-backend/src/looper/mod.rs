@@ -1,45 +1,63 @@
-//! looper.rs  – long-lived background workers with ACK support
-
+pub mod expire_check;
 pub mod flush_query;
 pub mod flush_snapshot;
+pub mod start_watcher;
 pub mod update_tree;
+
 use anyhow::Result;
 use std::{
     collections::HashMap,
     future::pending,
     sync::{Arc, LazyLock},
 };
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 use tokio::{
     sync::{Notify, mpsc, oneshot},
     task,
 };
 
-/// Signals you can poke.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+/// Every background task handled by the looper.
+///
+/// **To add a new task**  
+/// 1. Create a new variant here.  
+/// 2. Add its worker function in [`Signal::task_fn`].
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, EnumIter)]
 pub enum Signal {
     UpdateTree,
     FlushTreeSnapshot,
     FlushQuerySnapshot,
+    ExpireCheck,
+    StartWatcher,
 }
 
 impl std::fmt::Display for Signal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
+}
+
+impl Signal {
+    /// Blocking function executed when this signal is received.
+    pub const fn task_fn(self) -> fn() -> Result<()> {
         match self {
-            Signal::UpdateTree => write!(f, "UpdateTree"),
-            Signal::FlushTreeSnapshot => write!(f, "FlushTreeSnapshot"),
-            Signal::FlushQuerySnapshot => write!(f, "FlushQuerySnapshot"),
+            Signal::UpdateTree => update_tree::update_task,
+            Signal::FlushTreeSnapshot => flush_snapshot::flush_snapshot_task,
+            Signal::FlushQuerySnapshot => flush_query::flush_query_task,
+            Signal::ExpireCheck => expire_check::expire_check_task,
+            Signal::StartWatcher => start_watcher::start_watcher_task,
         }
     }
 }
 
-/// Internal bundle for each Signal.
+/// Runtime state kept for each [`Signal`].
 #[derive(Debug)]
 struct Entry {
     notifier: Arc<Notify>,
-    ack_tx: mpsc::UnboundedSender<oneshot::Sender<Result<()>>>,
+    ack_sender: mpsc::UnboundedSender<oneshot::Sender<Result<()>>>,
 }
 
-/// Global singleton.
+/// Global singleton that multiplexes [`Signal`] notifications.
 pub static LOOPER: LazyLock<Looper> = LazyLock::new(Looper::new);
 
 #[derive(Debug)]
@@ -48,136 +66,107 @@ pub struct Looper {
 }
 
 impl Looper {
+    /// Build the singleton and spawn one worker per [`Signal`].
     fn new() -> Self {
-        let (update_tree_ack_sender, update_tree_ack_receiver) = mpsc::unbounded_channel();
-        let update_tree_notifier = Arc::new(Notify::new());
-
-        let (flush_tree_ack_sender, flush_tree_ack_receiver) = mpsc::unbounded_channel();
-        let flush_tree_notifier = Arc::new(Notify::new());
-
-        let (flush_query_ack_sender, flush_query_ack_receiver) = mpsc::unbounded_channel();
-        let flush_query_notifier = Arc::new(Notify::new());
-
         let mut entries = HashMap::new();
-        entries.insert(
-            Signal::UpdateTree,
-            Entry {
-                notifier: update_tree_notifier.clone(),
-                ack_tx: update_tree_ack_sender,
-            },
-        );
-        entries.insert(
-            Signal::FlushTreeSnapshot,
-            Entry {
-                notifier: flush_tree_notifier.clone(),
-                ack_tx: flush_tree_ack_sender,
-            },
-        );
-        entries.insert(
-            Signal::FlushQuerySnapshot,
-            Entry {
-                notifier: flush_query_notifier.clone(),
-                ack_tx: flush_query_ack_sender,
-            },
-        );
-        // ----- Dedicated OS thread + runtime that NEVER exits -------------------------
+        let mut workers = Vec::new();
+
+        for signal in Signal::iter() {
+            let (ack_sender, ack_receiver) = mpsc::unbounded_channel();
+            let notifier = Arc::new(Notify::new());
+
+            entries.insert(
+                signal,
+                Entry {
+                    notifier: notifier.clone(),
+                    ack_sender,
+                },
+            );
+
+            workers.push((signal, notifier, ack_receiver));
+        }
+
+        // Private Tokio runtime held alive in its own OS thread.
         std::thread::spawn(move || {
-            let rt = tokio::runtime::Builder::new_multi_thread()
+            let runtime = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
-                .expect("tart Tokio runtime failed");
+                .expect("failed to start Tokio runtime");
 
-            rt.block_on(async move {
-                // start the worker
-                register_worker(
-                    Signal::UpdateTree,
-                    update_tree_notifier,
-                    update_tree_ack_receiver,
-                    || update_tree::update_task(),
-                );
-
-                register_worker(
-                    Signal::FlushTreeSnapshot,
-                    flush_tree_notifier,
-                    flush_tree_ack_receiver,
-                    || flush_snapshot::flush_snapshot_task(),
-                );
-
-                register_worker(
-                    Signal::FlushQuerySnapshot,
-                    flush_query_notifier,
-                    flush_query_ack_receiver,
-                    || flush_query::flush_query_task(),
-                );
-                // keep runtime alive forever
-                pending::<()>().await;
+            runtime.block_on(async move {
+                for (signal, notifier, ack_receiver) in workers {
+                    register_worker(signal, notifier, ack_receiver, signal.task_fn());
+                }
+                pending::<()>().await; // never exit
             });
         });
 
         Self { entries }
     }
 
-    // -------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------
     // Public API
-    // -------------------------------------------------------------------------------
-    /// Fire-and-forget poke.
-    pub fn notify(&self, sig: Signal) {
-        if let Some(e) = self.entries.get(&sig) {
-            e.notifier.notify_one();
+    // ---------------------------------------------------------------------
+
+    /// Fire-and-forget.
+    pub fn notify(&self, signal: Signal) {
+        if let Some(entry) = self.entries.get(&signal) {
+            entry.notifier.notify_one();
         }
     }
 
-    /// Async poke **with** acknowledgment.
-    pub async fn notify_with_ack(&self, sig: Signal) -> Result<()> {
-        let (tx, rx) = oneshot::channel();
+    /// Notify the worker and await an acknowledgement.
+    pub async fn notify_with_ack(&self, signal: Signal) -> Result<()> {
+        let (response_sender, response_receiver) = oneshot::channel();
         let entry = self
             .entries
-            .get(&sig)
+            .get(&signal)
             .ok_or_else(|| anyhow::anyhow!("unknown signal"))?;
 
         entry
-            .ack_tx
-            .send(tx)
+            .ack_sender
+            .send(response_sender)
             .map_err(|_| anyhow::anyhow!("worker shut down"))?;
 
         entry.notifier.notify_one();
-        rx.await?
+        response_receiver.await?
     }
 }
 
-/// Spawn a never-ending worker, ACKing everyone who asked.
+/// Spawn a perpetual async task that waits for `signal` notifications and
+/// executes `task_fn` on Tokio’s blocking thread-pool.
 fn register_worker(
-    kind: Signal,
+    signal: Signal,
     notifier: Arc<Notify>,
-    mut ack_rx: mpsc::UnboundedReceiver<oneshot::Sender<Result<()>>>,
-    job: fn() -> Result<()>,
+    mut ack_receiver: mpsc::UnboundedReceiver<oneshot::Sender<Result<()>>>,
+    task_fn: fn() -> Result<()>,
 ) {
-    let name = kind.to_string();
+    let worker_name = signal.to_string();
     tokio::spawn(async move {
         loop {
             notifier.notified().await;
 
-            // collect ACK channels first
-            let mut acks = Vec::new();
-            while let Ok(s) = ack_rx.try_recv() {
-                acks.push(s);
+            // Drain pending acknowledgements.
+            let mut pending_ack_senders = Vec::new();
+            while let Ok(sender) = ack_receiver.try_recv() {
+                pending_ack_senders.push(sender);
             }
 
-            let res = task::spawn_blocking(job)
+            let job_result = task::spawn_blocking(task_fn)
                 .await
-                .expect(&format!("{name} panicked"));
+                .expect(&format!("{worker_name} panicked"));
 
-            // clone-friendly result
-            let err_msg = res.as_ref().err().map(|e| e.to_string());
-            for tx in acks {
-                let _ = tx.send(match &err_msg {
+            // Fan-out the result.
+            let error_message = job_result.as_ref().err().map(|e| e.to_string());
+            for sender in pending_ack_senders {
+                let _ = sender.send(match &error_message {
                     None => Ok(()),
                     Some(msg) => Err(anyhow::anyhow!(msg.clone())),
                 });
             }
 
-            if let Some(msg) = err_msg {
-                error!("{name} worker failed: {msg}");
+            if let Some(msg) = error_message {
+                error!("{worker_name} worker failed: {msg}");
             }
         }
     });

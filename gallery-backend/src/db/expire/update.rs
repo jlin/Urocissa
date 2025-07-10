@@ -1,12 +1,13 @@
 use crate::db::expire::EXPIRE_TABLE_DEFINITION;
 use crate::db::tree::VERSION_COUNT_TIMESTAMP;
+use crate::looper::{LOOPER, Signal};
 use crate::utils::get_current_timestamp_u64;
 
 use log::info;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
-use super::{EXPIRE, Expire};
+use super::Expire;
 
 impl Expire {
     pub fn update_expire_time(&self, start_time: Instant) {
@@ -39,7 +40,7 @@ impl Expire {
             }
 
             expire_write_txn.commit().unwrap();
-            EXPIRE.expire_check();
+            LOOPER.notify(Signal::ExpireCheck);
         }
     }
 }
