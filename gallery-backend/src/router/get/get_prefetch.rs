@@ -159,7 +159,7 @@ fn persist_tree_snapshot(
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
-    LOOPER.notify(Signal::Flush);
+    LOOPER.notify(Signal::FlushTreeSnapshot);
 
     (
         timestamp_millis,
@@ -178,7 +178,7 @@ fn persist_tree_snapshot(
 /// Insert `prefetch` into the query‑level cache.
 fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
     QUERY_SNAPSHOT.in_memory.insert(query_hash, prefetch);
-    QUERY_SNAPSHOT.query_snapshot_flush();
+    LOOPER.notify(Signal::FlushQuerySnapshot);
 }
 
 /// Assemble the JSON response for the **edit** path.

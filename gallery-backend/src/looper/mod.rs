@@ -85,7 +85,7 @@ impl Looper {
             let rt = tokio::runtime::Builder::new_multi_thread()
                 .enable_all()
                 .build()
-                .expect("start Tokio runtime");
+                .expect("tart Tokio runtime failed");
 
             rt.block_on(async move {
                 // start the worker
@@ -107,7 +107,7 @@ impl Looper {
                     Signal::FlushQuerySnapshot,
                     flush_query_notifier,
                     flush_query_ack_receiver,
-                    || flush_snapshot::flush_query_task(),
+                    || flush_query::flush_query_task(),
                 );
                 // keep runtime alive forever
                 pending::<()>().await;

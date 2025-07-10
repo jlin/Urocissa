@@ -2,7 +2,7 @@ use rocket::Shutdown;
 use watch::start_watcher;
 
 use crate::coordinator::{COORDINATOR, Coordinator};
-use crate::db::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT};
+use crate::db::expire::EXPIRE;
 use crate::looper::{LOOPER, Looper, Signal};
 
 use futures::stream::{FuturesUnordered, StreamExt};
@@ -32,10 +32,6 @@ pub async fn start_sync(shutdown: Shutdown) {
     let mut tasks = FuturesUnordered::new();
 
     tasks.push(named_task("Expire loop", EXPIRE.start_loop()));
-    tasks.push(named_task(
-        "Query snapshot loop",
-        QUERY_SNAPSHOT.start_loop(),
-    ));
     tasks.push(named_task("Watcher", start_watcher()));
     LOOPER.notify(Signal::UpdateTree);
     info!("All channels started.");

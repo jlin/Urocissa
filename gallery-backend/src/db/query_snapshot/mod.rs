@@ -1,6 +1,5 @@
 pub mod new;
 pub mod read_query_snapshots;
-pub mod start_loop;
 use dashmap::DashMap;
 use std::sync::LazyLock;
 
