@@ -165,3 +165,8 @@ export const tokenReturnSchema = z.object({
 export const TokenResponseSchema = z.object({
   token: z.string()
 })
+
+export const serverErrorSchema = z.object({
+  error: z.string(),
+  chain: z.array(z.string()).optional(),
+})

@@ -25,9 +25,12 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useRedirectionStore } from '@/store/redirectionStore'
+import { useMessageStore } from '@/store/messageStore'
+import { errorDisplay } from '@/script/utils/errorDisplay'
 const password = ref('')
 const router = useRouter()
 const redirectionStore = useRedirectionStore('mainId')
+const messageStore = useMessageStore('mainId')
 const handleLogin = async () => {
   try {
     const response = await axios.post('/post/authenticate', JSON.stringify(password.value), {
@@ -53,7 +56,8 @@ const handleLogin = async () => {
     } else {
       await router.push({ name: 'home' })
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    messageStore.error(errorDisplay(error))
     console.error('Error during login:', error)
   }
 }
