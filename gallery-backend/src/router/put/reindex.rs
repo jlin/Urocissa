@@ -7,9 +7,7 @@ use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::db::tree::TREE;
 use crate::db::tree_snapshot::TREE_SNAPSHOT;
-use crate::indexer::databaser::processor::{
-    regenerate_metadata_for_image, regenerate_metadata_for_video,
-};
+use crate::indexer::databaser::{regenerate_metadata_for_image, regenerate_metadata_for_video};
 use crate::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;

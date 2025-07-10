@@ -1,8 +1,5 @@
 use super::video_ffprobe::video_duration;
-use crate::{
-    indexer::databaser::processor::process_image_info,
-    structure::database_struct::database::definition::Database,
-};
+use crate::{indexer::databaser::process_image_info, structure::database_struct::database::definition::Database};
 use anyhow::Context;
 use regex::Regex;
 use std::{
@@ -94,7 +91,7 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
                         &database.compressed_path_string()
                     );
                 }
-                Err(e) => error!("Failed to parse processed_time: {}", e),
+                Err(err) => error!("Failed to parse processed_time: {}", err),
             }
         } else {
             error!("No digits captured for line: {}", line);

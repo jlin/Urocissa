@@ -68,8 +68,8 @@ pub fn handle_error(error_data: ErrorData) -> () {
                     Ok(_) => {
                         info!("Successfully removed file {}", file_path.display());
                     }
-                    Err(e) => {
-                        error!("Failed to remove file {}: {}", file_path.display(), e);
+                    Err(err) => {
+                        error!("Failed to remove file {}: {}", file_path.display(), err);
                     }
                 }
             } else {
@@ -86,7 +86,7 @@ fn send_discord_webhook(webhook_url: &str, error_data: ErrorData) -> () {
     let debug_string = error_data.to_formatted_string();
     let params = json!({ "content": debug_string });
     let result = client.post(webhook_url).json(&params).send();
-    if let Err(e) = result {
-        error!("Error sending webhook: {:#?}", e);
+    if let Err(err) = result {
+        error!("Error sending webhook: {:#?}", err);
     }
 }

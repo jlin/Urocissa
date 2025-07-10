@@ -23,13 +23,13 @@ pub static PUBLIC_CONFIG: LazyLock<PublicConfig> = LazyLock::new(|| {
             // If the file opens successfully, attempt to deserialize it
             serde_json::from_reader(file).expect("Failed to parse config.json")
         }
-        Err(e) => {
-            if e.kind() == io::ErrorKind::NotFound {
+        Err(err) => {
+            if err.kind() == io::ErrorKind::NotFound {
                 info!("config.json not found. Using default configuration.");
                 PublicConfig::default()
             } else {
                 // For other errors, panic and provide the error message
-                panic!("Failed to open config.json: {}", e);
+                panic!("Failed to open config.json: {}", err);
             }
         }
     }

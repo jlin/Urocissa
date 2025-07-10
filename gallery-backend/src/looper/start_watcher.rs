@@ -78,14 +78,14 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
 
                     // Submit one indexing task per file.
                     for file in files {
-                        if let Err(e) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
-                            error!("submit failed: {:#}", e);
+                        if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
+                            error!("submit failed: {:#}", err);
                         }
                     }
                 }
                 _ => { /* ignore other kinds */ }
             }
         }
-        Err(e) => error!("watch error: {:#?}", e),
+        Err(err) => error!("watch error: {:#?}", err),
     })
 }

@@ -25,10 +25,10 @@ pub fn remove_task(task: RemoveTask) -> anyhow::Result<()> {
         Ok(false) => {
             error!("Failed to delete tree cache table: {:?}", timestamp_delete)
         }
-        Err(e) => {
+        Err(err) => {
             error!(
                 "Failed to delete tree cache table: {:?}, error: {:#?}",
-                timestamp_delete, e
+                timestamp_delete, err
             )
         }
     }
