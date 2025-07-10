@@ -8,7 +8,7 @@ use crate::coordinator::{COORDINATOR, Task};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 
-use crate::router::AppError;
+use crate::router::AppResult;
 
 use anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -51,7 +51,7 @@ pub async fn upload(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     data: Form<Vec<FileUpload<'_>>>,
-) -> Result<(), AppError> {
+) -> AppResult<()> {
     let mut last_modified_time = 0;
 
     for file_data in data.into_inner() {

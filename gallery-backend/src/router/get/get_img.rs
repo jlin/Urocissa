@@ -1,12 +1,14 @@
 use rocket::fs::NamedFile;
-use rocket::http::Status;
 use rocket::response::Responder;
 use rocket_seek_stream::SeekStream;
 use std::path::{Path, PathBuf};
 
-use crate::router::fairing::{
-    guard_share::GuardShare,
-    guard_hash::{GuardHash, GuardHashOriginal},
+use crate::router::{
+    AppResult,
+    fairing::{
+        guard_hash::{GuardHash, GuardHashOriginal},
+        guard_share::GuardShare,
+    },
 };
 #[derive(Responder)]
 pub enum CompressedFileResponse<'a> {
@@ -19,9 +21,9 @@ pub async fn compressed_file(
     _auth_guard: GuardShare,
     _hash_guard: GuardHash,
     file_path: PathBuf,
-) -> Result<CompressedFileResponse<'static>, Status> {
+) -> AppResult<CompressedFileResponse<'static>> {
     let compressed_file_path = Path::new("./object/compressed").join(&file_path);
-    if compressed_file_path
+    let result = if compressed_file_path
         .extension()
         .and_then(std::ffi::OsStr::to_str)
         == Some("mp4")
@@ -30,17 +32,18 @@ pub async fn compressed_file(
             .map(CompressedFileResponse::SeekStream)
             .map_err(|error| {
                 error!("Error opening MP4 file: {:#?}", error);
-                Status::NotFound
-            })
+                anyhow::anyhow!("Error opening MP4 file: {:#?}", error)
+            })?
     } else {
-        NamedFile::open(compressed_file_path)
+        let named_file = NamedFile::open(compressed_file_path)
             .await
-            .map(CompressedFileResponse::NamedFile)
             .map_err(|error| {
                 error!("Error opening file: {:#?}", error);
-                Status::NotFound
-            })
-    }
+                anyhow::anyhow!("Error opening file: {:#?}", error)
+            })?;
+        CompressedFileResponse::NamedFile(named_file)
+    };
+    Ok(result)
 }
 
 #[get("/object/imported/<file_path..>")]
@@ -48,13 +51,14 @@ pub async fn imported_file(
     _auth: GuardShare,
     _hash_guard: GuardHashOriginal,
     file_path: PathBuf,
-) -> Result<CompressedFileResponse<'static>, Status> {
+) -> AppResult<CompressedFileResponse<'static>> {
     let imported_file_path = Path::new("./object/imported").join(&file_path);
+
     NamedFile::open(imported_file_path)
         .await
         .map(CompressedFileResponse::NamedFile)
         .map_err(|error| {
             error!("Error opening imported file: {:#?}", error);
-            Status::NotFound
+            anyhow::anyhow!("Error opening imported file: {:#?}", error).into()
         })
 }

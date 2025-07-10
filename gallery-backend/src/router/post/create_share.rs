@@ -4,11 +4,12 @@ use arrayvec::ArrayString;
 use rand::Rng;
 use rand::distr::Alphanumeric;
 use redb::{ReadableTable, WriteTransaction};
+use rocket::post;
 use rocket::serde::json::Json;
-use rocket::{http::Status, post};
 
 use crate::constant::redb::ALBUM_TABLE;
 use crate::db::tree::TREE;
+use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::structure::album::Share;
@@ -31,7 +32,7 @@ pub async fn create_share(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     create_share: Json<CreateShare>,
-) -> Result<String, Status> {
+) -> AppResult<String> {
     tokio::task::spawn_blocking(move || {
         let create_share = create_share.into_inner();
         let txn = TREE.in_disk.begin_write().unwrap();
@@ -47,20 +48,13 @@ pub async fn create_share(
     .unwrap()
 }
 
-fn create_and_insert_share(
-    txn: &WriteTransaction,
-    create_share: CreateShare,
-) -> Result<String, Status> {
+fn create_and_insert_share(txn: &WriteTransaction, create_share: CreateShare) -> AppResult<String> {
     let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
-    // TODO: simplfy this
-    let album_opt = match album_table.get(&*create_share.album_id).unwrap() {
-        Some(guard) => {
-            let album = guard.value();
-            Some(album)
-        }
-        _ => None,
-    };
+    let album_opt = album_table
+        .get(&*create_share.album_id)
+        .unwrap()
+        .map(|guard| guard.value());
 
     match album_opt {
         Some(mut album) => {
@@ -85,10 +79,8 @@ fn create_and_insert_share(
             };
             album.share_list.insert(share_id, share);
             album_table.insert(&*create_share.album_id, album).unwrap();
-            return Ok(link);
+            Ok(link)
         }
-        _ => {
-            return Err(Status::NotFound);
-        }
+        None => Err(anyhow::anyhow!("Album not found").into()),
     }
 }

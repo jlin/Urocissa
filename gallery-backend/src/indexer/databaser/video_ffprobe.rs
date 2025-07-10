@@ -1,8 +1,7 @@
 use anyhow::Context;
-use anyhow::Result;
 use std::error::Error;
 use std::process::Command;
-pub fn video_width_height(info: &str, file_path: &str) -> Result<u32> {
+pub fn video_width_height(info: &str, file_path: &str) -> anyhow::Result<u32> {
     let command_text = match info {
         "width" => Ok("stream=width"),
         "height" => Ok("stream=height"),
@@ -39,7 +38,7 @@ pub fn video_width_height(info: &str, file_path: &str) -> Result<u32> {
     }
 }
 
-pub fn video_duration(file_path: &str) -> Result<f64, Box<dyn Error>> {
+pub fn video_duration(file_path: &str) -> anyhow::Result<f64, Box<dyn Error>> {
     let output = Command::new("ffprobe")
         .args(&[
             "-v",

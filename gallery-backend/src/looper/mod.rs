@@ -4,7 +4,6 @@ pub mod flush_snapshot;
 pub mod start_watcher;
 pub mod update_tree;
 
-use anyhow::Result;
 use std::{
     collections::HashMap,
     future::pending,
@@ -32,14 +31,14 @@ pub enum Signal {
 }
 
 impl std::fmt::Display for Signal {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "{self:?}")
     }
 }
 
 impl Signal {
     /// Blocking function executed when this signal is received.
-    pub const fn task_fn(self) -> fn() -> Result<()> {
+    pub const fn task_fn(self) -> fn() -> anyhow::Result<()> {
         match self {
             Signal::UpdateTree => update_tree::update_task,
             Signal::FlushTreeSnapshot => flush_snapshot::flush_snapshot_task,
@@ -54,7 +53,7 @@ impl Signal {
 #[derive(Debug)]
 struct Entry {
     notifier: Arc<Notify>,
-    ack_sender: mpsc::UnboundedSender<oneshot::Sender<Result<()>>>,
+    ack_sender: mpsc::UnboundedSender<oneshot::Sender<anyhow::Result<()>>>,
 }
 
 /// Global singleton that multiplexes [`Signal`] notifications.
@@ -116,7 +115,7 @@ impl Looper {
     }
 
     /// Notify the worker and await an acknowledgement.
-    pub async fn notify_with_ack(&self, signal: Signal) -> Result<()> {
+    pub async fn notify_with_ack(&self, signal: Signal) -> anyhow::Result<()> {
         let (response_sender, response_receiver) = oneshot::channel();
         let entry = self
             .entries
@@ -138,8 +137,8 @@ impl Looper {
 fn register_worker(
     signal: Signal,
     notifier: Arc<Notify>,
-    mut ack_receiver: mpsc::UnboundedReceiver<oneshot::Sender<Result<()>>>,
-    task_fn: fn() -> Result<()>,
+    mut ack_receiver: mpsc::UnboundedReceiver<oneshot::Sender<anyhow::Result<()>>>,
+    task_fn: fn() -> anyhow::Result<()>,
 ) {
     let worker_name = signal.to_string();
     tokio::spawn(async move {

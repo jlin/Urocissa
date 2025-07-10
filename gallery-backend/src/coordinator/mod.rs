@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use anyhow::Context;
 use std::sync::LazyLock;
 use tokio::{
     sync::{mpsc, oneshot},
@@ -27,7 +27,7 @@ pub enum Task {
     Remove(RemoveTask),
 }
 
-type Envelope = (Task, Option<oneshot::Sender<Result<()>>>);
+type Envelope = (Task, Option<oneshot::Sender<anyhow::Result<()>>>);
 
 /// Global singleton you can call from anywhere.
 pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(Coordinator::new);
@@ -60,13 +60,13 @@ impl Coordinator {
     }
 
     /// Fire-and-forget.
-    pub fn submit(&self, task: Task) -> Result<()> {
+    pub fn submit(&self, task: Task) -> anyhow::Result<()> {
         self.tx.send((task, None))?;
         Ok(())
     }
 
     /// Fire and wait for an ACK.
-    pub async fn submit_with_ack(&self, task: Task) -> Result<()> {
+    pub async fn submit_with_ack(&self, task: Task) -> anyhow::Result<()> {
         let (tx, rx) = oneshot::channel();
         self.tx.send((task, Some(tx)))?;
         rx.await.context("worker crashed before ACK")?
@@ -74,9 +74,9 @@ impl Coordinator {
 }
 
 /// Off-load blocking / CPU-bound work.
-fn spawn_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<Result<()>>>)
+fn spawn_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
 where
-    F: FnOnce(T) -> Result<()> + Send + 'static,
+    F: FnOnce(T) -> anyhow::Result<()> + Send + 'static,
     T: Send + 'static,
 {
     tokio::spawn(async move {

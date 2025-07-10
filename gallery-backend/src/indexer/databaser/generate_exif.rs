@@ -1,6 +1,5 @@
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
-use anyhow::Result;
 use regex::Regex;
 use std::{collections::BTreeMap, error::Error, io, path::Path, process::Command, sync::LazyLock};
 pub fn generate_exif_for_image(database: &Database) -> BTreeMap<String, String> {
@@ -17,7 +16,7 @@ pub fn generate_exif_for_image(database: &Database) -> BTreeMap<String, String> 
     exif_tuple
 }
 
-fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
+fn read_exif(file_path: &Path) -> anyhow::Result<exif::Exif, Box<dyn Error>> {
     let exif_reader = exif::Reader::new();
     let file = std::fs::File::open(file_path)
         .with_context(|| format!("read_exif: Failed to open file {:?}", file_path))?;
@@ -30,7 +29,7 @@ fn read_exif(file_path: &Path) -> Result<exif::Exif, Box<dyn Error>> {
 
 static RE_VIDEO_INFO: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(.*?)=(.*?)\n").unwrap());
 
-pub fn generate_exif_for_video(database: &Database) -> Result<BTreeMap<String, String>> {
+pub fn generate_exif_for_video(database: &Database) -> anyhow::Result<BTreeMap<String, String>> {
     let source_path = database.source_path_string();
     let mut exif_tuple = BTreeMap::new();
     let output = Command::new("ffprobe")

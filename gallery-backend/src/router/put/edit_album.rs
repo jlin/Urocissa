@@ -2,6 +2,7 @@ use crate::coordinator::album::AlbumTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::looper::{LOOPER, Signal};
+use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::fairing::guard_share::GuardShare;
@@ -11,7 +12,6 @@ use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use arrayvec::ArrayString;
 use futures::future::join_all;
 use redb::ReadableTable;
-use rocket::http::Status;
 use rocket::serde::{Deserialize, json::Json};
 use serde::Serialize;
 
@@ -95,7 +95,7 @@ pub async fn set_album_cover(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     set_album_cover: Json<SetAlbumCover>,
-) -> Result<(), Status> {
+) -> AppResult<()> {
     tokio::task::spawn_blocking(move || {
         let set_album_cover_inner = set_album_cover.into_inner();
         let album_id = set_album_cover_inner.album_id;
@@ -132,7 +132,7 @@ pub async fn set_album_title(
     _auth: GuardShare,
     _read_only_mode: GuardReadOnlyMode,
     set_album_title: Json<SetAlbumTitle>,
-) -> Result<(), Status> {
+) -> AppResult<()> {
     tokio::task::spawn_blocking(move || {
         let set_album_title_inner = set_album_title.into_inner();
         let album_id = set_album_title_inner.album_id;

@@ -7,6 +7,7 @@ use rocket::serde::json::Json;
 
 use serde::{Deserialize, Serialize};
 
+use crate::router::AppResult;
 use crate::router::claims::claims_hash::ClaimsHash;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::VALIDATION;
@@ -169,7 +170,7 @@ pub struct RenewHashTokenReturn {
 pub async fn renew_hash_token(
     auth: TimestampGuardModified,
     token_request: Json<RenewHashToken>,
-) -> Result<Json<RenewHashTokenReturn>, Status> {
+) -> AppResult<Json<RenewHashTokenReturn>> {
     tokio::task::spawn_blocking(move || {
         let expired_hash_token = token_request.into_inner().expired_hash_token;
         let token_data = match decode::<ClaimsHash>(
@@ -183,7 +184,7 @@ pub async fn renew_hash_token(
                     "Token renewal failed: unable to decode token. Error: {:#?}",
                     err
                 );
-                return Err(Status::Unauthorized);
+                return Err(anyhow::anyhow!("Unauthorized: Invalid token").into());
             }
         };
 
@@ -192,7 +193,7 @@ pub async fn renew_hash_token(
                 "Timestamp does not match. Received: {}, Expected: {}.",
                 token_data.claims.timestamp, auth.timestamp_decoded
             );
-            return Err(Status::Unauthorized);
+            return Err(anyhow::anyhow!("Unauthorized: Timestamp mismatch").into());
         }
 
         let claims = token_data.claims;

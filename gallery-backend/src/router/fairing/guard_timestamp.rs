@@ -6,6 +6,7 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 
+use crate::router::AppResult;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::VALIDATION;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
@@ -97,7 +98,7 @@ pub struct RenewTimestampTokenReturn {
 pub async fn renew_timestamp_token(
     _auth: GuardShare,
     token_request: Json<RenewTimestampToken>,
-) -> Result<Json<RenewTimestampTokenReturn>, Status> {
+) -> AppResult<Json<RenewTimestampTokenReturn>> {
     tokio::task::spawn_blocking(move || {
         let token = token_request.into_inner().token;
         let token_data = match decode::<ClaimsTimestamp>(
@@ -111,7 +112,7 @@ pub async fn renew_timestamp_token(
                     "Token renewal failed: unable to decode token. Error: {:#?}",
                     err
                 );
-                return Err(Status::Unauthorized);
+                return Err(anyhow::anyhow!("Unauthorized: Invalid token").into());
             }
         };
 

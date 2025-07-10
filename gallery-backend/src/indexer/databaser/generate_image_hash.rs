@@ -1,8 +1,7 @@
-use anyhow::Result;
 use image::DynamicImage;
 use image_hasher::HasherConfig;
 
-pub fn generate_thumbhash(dynamic_image_rotated: &DynamicImage) -> Result<Vec<u8>> {
+pub fn generate_thumbhash(dynamic_image_rotated: &DynamicImage) -> anyhow::Result<Vec<u8>> {
     let resized_image = dynamic_image_rotated.thumbnail_exact(100, 100);
     let rgba_image = resized_image.to_rgba8();
     let (swidth, sheight) = (rgba_image.width(), rgba_image.height());

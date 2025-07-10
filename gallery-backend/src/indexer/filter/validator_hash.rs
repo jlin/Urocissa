@@ -3,7 +3,7 @@ use crate::coordinator::{COORDINATOR, Task};
 use crate::db::tree::TREE;
 use crate::looper::{LOOPER, Signal};
 use crate::structure::database_struct::database::definition::Database;
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, bail};
 use arrayvec::ArrayString;
 use blake3::Hasher;
 use std::mem;
@@ -37,7 +37,7 @@ pub fn validator(database: &mut Database) -> anyhow::Result<()> {
     }
 }
 
-fn blake3_hasher(file_path: &Path) -> Result<ArrayString<64>> {
+fn blake3_hasher(file_path: &Path) -> anyhow::Result<ArrayString<64>> {
     let mut file = File::open(file_path).with_context(|| {
         format!(
             "[blake3_hasher] Failed to open file: {}",

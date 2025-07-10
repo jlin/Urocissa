@@ -1,10 +1,10 @@
 use crate::structure::database_struct::database::definition::Database;
 use crate::structure::database_struct::file_modify::FileModify;
-use anyhow::{Context, Result};
+use anyhow::Context;
 use path_clean::PathClean;
 use std::{fs::metadata, path::PathBuf, time::UNIX_EPOCH};
 
-pub fn validator(path: PathBuf) -> Result<Database> {
+pub fn validator(path: PathBuf) -> anyhow::Result<Database> {
     let metadata = metadata(&path)
         .with_context(|| format!("[validator] Failed to read metadata for {}", path.display()))?;
 
