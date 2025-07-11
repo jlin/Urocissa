@@ -7,8 +7,58 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
-pub fn initialize_logger() {
-    Builder::new()
+use std::sync::OnceLock;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
+static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
+static LOGGER_RX: OnceLock<UnboundedReceiver<String>> = OnceLock::new();
+use tokio::{
+    select,
+    time::{Duration, interval},
+};
+
+use superconsole::{Component, Dimensions, DrawMode, Lines, SuperConsole};
+struct TokioPipe(UnboundedSender<String>);
+impl std::io::Write for TokioPipe {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        let s = String::from_utf8_lossy(buf);
+        for line in s.split_terminator('\n') {
+            // ← 切掉最後的 \n
+            let clean = line.replace('\t', "    "); // ← 如有 Tab, 換空格
+            if !clean.is_empty() {
+                let _ = self.0.send(clean.to_string());
+            }
+        }
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+pub async fn tui_task(
+    mut sc: SuperConsole,
+    mut counter: Counter,
+    mut rx: UnboundedReceiver<String>,
+) -> anyhow::Result<()> {
+    let mut tick = interval(Duration::from_millis(200));
+    loop {
+        select! {
+            Some(line) = rx.recv() => {
+                sc.emit(Lines(vec![
+                    superconsole::content::Line::unstyled(&line)?   // & fixes type
+                ]));
+            }
+            _ = tick.tick() => {
+                sc.render(&counter)?;
+            }
+        }
+    }
+}
+
+pub fn initialize_logger() -> UnboundedReceiver<String> {
+    let (tx, rx) = unbounded_channel();
+    LOGGER_TX.set(tx).unwrap(); // sender stays global
+
+    env_logger::Builder::new()
         .format(|buf, record| {
             let custom_value = record
                 .key_values()
@@ -60,9 +110,24 @@ pub fn initialize_logger() {
 
             Ok(())
         })
-        .filter(None, LevelFilter::Info) // Set minimum Level to Warn for all modules
-        .filter(Some("rocket"), LevelFilter::Warn)
+        .target(env_logger::Target::Pipe(Box::new(TokioPipe(
+            LOGGER_TX.get().unwrap().clone(),
+        )))) // Target::Pipe 文件:contentReference[oaicite:5]{index=5}
+        .filter(None, log::LevelFilter::Info)
+        .filter(Some("rocket"), log::LevelFilter::Warn)
         .init();
+    rx
+}
+
+pub struct Counter {
+    pub handled: usize,
+}
+impl Component for Counter {
+    fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
+        Ok(Lines(vec![
+            vec![format!("📸 handled number: {}", self.handled)].try_into()?,
+        ]))
+    }
 }
 
 pub fn check_ffmpeg_and_ffprobe() {

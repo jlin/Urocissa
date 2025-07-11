@@ -44,6 +44,7 @@ serde = { version = "1.0.219", features = ["derive", "rc"] }
 serde_json = "1.0.140"
 strum = "0.27.1"
 strum_macros = "0.27.1"
+superconsole = "0.2.0"
 thumbhash = "0.1.0"
 tokio = { version = "1.46.1", features = ["full"] }
 tokio-rayon = "2.1.0"
