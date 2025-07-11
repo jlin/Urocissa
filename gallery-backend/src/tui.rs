@@ -10,11 +10,11 @@ use std::{
     time::Instant,
 };
 use superconsole::{Component, Dimensions, DrawMode, Line, Lines, SuperConsole};
-use terminal_size::{terminal_size, Width};
+use terminal_size::{Width, terminal_size};
 use tokio::{
     select,
     sync::mpsc::{UnboundedReceiver, UnboundedSender},
-    time::{interval, Duration},
+    time::{Duration, interval},
 };
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
@@ -110,7 +110,10 @@ impl TaskRow {
 
     /// REFACTORED: Formatting adjusted to the user's new specification.
     pub fn fmt(&self) -> String {
+        const COL_STATUS: usize = 6; // 100.0% ⇒ 6
+        const COL_HASH: usize = 5;
         const DEFAULT_COLS: usize = 120;
+
         let margin = std::env::var("UROCISSA_TERM_MARGIN")
             .ok()
             .and_then(|v| v.parse().ok())
@@ -119,52 +122,38 @@ impl TaskRow {
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(DEFAULT_COLS);
 
-        // Determine the bullet and elapsed time from the state
-        let (bullet, secs) = match self.state {
-            TaskState::Indexing(t0) => ('•', t0.elapsed().as_secs_f64()),
-            TaskState::Transcoding(t0) => ('•', t0.elapsed().as_secs_f64()),
-            TaskState::Done(d) => ('✓', d),
+        /* ----------  status / progress  ---------- */
+        let status = match (&self.state, self.progress) {
+            (TaskState::Transcoding(_), Some(p)) => format!("{:>5.1}%", p.min(100.0)),
+            (TaskState::Done(_), _) => "✓".into(),
+            _ => "•".into(),
         };
+        let status_col = format!("{:<COL_STATUS$}", status);
 
-        // --- Left Side: Bullet and Hash ---
-        let short_hash = &self.hash.as_str()[..5.min(self.hash.len())];
-        let prefix = format!("{bullet} {:<5} │ ", short_hash);
+        /* ----------  hash  ---------- */
+        let short_hash = &self.hash.as_str()[..COL_HASH.min(self.hash.len())];
+        let hash_col = format!("{:>COL_HASH$}", short_hash);
 
-        // --- Right Side: Timer ---
-        let suffix = format!("│ {:>6.1}s", secs);
-
-        // --- Middle: Progress Percentage (if applicable) ---
-        let progress_part = if let Some(p) = self.progress {
-            // Only show progress for active (not Done) tasks
-            if !matches!(self.state, TaskState::Done(_)) {
-                format!("│ {:>5.1}% ", p)
-            } else {
-                String::new()
-            }
-        } else {
-            String::new()
+        /* ----------  elapsed secs  ---------- */
+        let secs = match self.state {
+            TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0.elapsed().as_secs_f64(),
+            TaskState::Done(d) => d,
         };
+        let suffix = format!(" │ {:>6.1}s", secs);
 
-        // --- Middle: File Path ---
-        // Calculate the space available for the file path
+        /* ----------  path  ---------- */
+        let prefix_w = COL_STATUS + 3 /* │ */ + COL_HASH + 3 /* │ */;
         let path_budget = cols
-            .saturating_sub(
-                UnicodeWidthStr::width(prefix.as_str())
-                    + UnicodeWidthStr::width(progress_part.as_str())
-                    + UnicodeWidthStr::width(suffix.as_str())
-                    + margin,
-            )
+            .saturating_sub(prefix_w + UnicodeWidthStr::width(suffix.as_str()) + margin)
             .max(5);
 
         let raw_path = self.path.display().to_string();
         let short_path = Self::tail_ellipsis(&raw_path, path_budget);
-        
-        // Add padding to fill the remaining space for the path column
-        let path_pad = " ".repeat(path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str())));
-        let path_part = format!("{short_path}{path_pad}");
+        let pad =
+            " ".repeat(path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str())));
 
-        // --- Assemble Final String ---
-        format!("{prefix}{path_part}{progress_part}{suffix}")
+        /* ----------  assemble  ---------- */
+        format!("{status_col} │ {hash_col} │ {short_path}{pad}{suffix}")
     }
 
     fn tail_ellipsis(s: &str, max: usize) -> String {
