@@ -46,9 +46,17 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
             ));
         }
     };
-    let mut cmd = Command::new("ffmpeg")
-        .args(&[
-            "-y", // Add this line to allow automatic file overwrite
+    // QUIET but still emits machine-readable progress --------------------
+    let mut child = Command::new("ffmpeg")
+        .args([
+            // Silence absolutely everything
+            "-v",
+            "quiet", // no banner, no info, no warnings
+            "-hide_banner",
+            "-nostats", // hide per-second counter
+            "-nostdin", // suppress “[q]” prompt
+            "-y",
+            // input/output...
             "-i",
             &database.imported_path_string(),
             "-vf",
@@ -59,50 +67,31 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
             "-movflags",
             "faststart",
             &database.compressed_path_string(),
+            // progress now goes to stderr (fd 2)
             "-progress",
-            "pipe:1",
+            "pipe:2",
         ])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
+        // we parse *stderr*; stdout is sent to /dev/null
+        .stdout(Stdio::null())
+        .stderr(Stdio::piped())
         .spawn()
-        .context(format!(
-            "video_compressor: failed to spawn new command for ffmpeg: {:?}",
-            database.imported_path_string()
-        ))?;
-    let stdout = cmd.stdout.as_mut().ok_or_else(|| {
-        anyhow::anyhow!(
-            "video_compressor: failed to get stdout from ffmpeg command for {:?}",
-            database.imported_path_string()
-        )
-    })?;
-    let stdout_reader = BufReader::new(stdout);
-    let stdout_lines = stdout_reader.lines();
-    let stdout_lines_filtered = stdout_lines.filter_map(|line| {
-        line.ok()
-            .filter(|line_string| line_string.contains("out_time_us"))
-    });
+        .context("failed to spawn ffmpeg")?;
 
-    for line in stdout_lines_filtered {
-        if let Some(captured) = REGEX_OUT_TIME_US.captures(&line)
-            && let Some(processed_time) = captured.get(1)
-        {
-            match processed_time.as_str().parse::<f64>() {
-                Ok(processed_time_f64) => {
-                    // Microseconds
-                    let x = ((processed_time_f64 / 1000000.0) / duration) * 100.0;
-                    info!(
-                        "Percentage: {:.2}% for {}",
-                        x,
-                        &database.compressed_path_string()
-                    );
-                }
-                Err(err) => error!("Failed to parse processed_time: {}", err),
+    let stderr = child.stderr.take().unwrap();
+    let reader = BufReader::new(stderr);
+
+    for line in reader.lines().flatten() {
+        if let Some(caps) = REGEX_OUT_TIME_US.captures(&line) {
+            if let Ok(us) = caps[1].parse::<f64>() {
+                let pct = (us / 1_000_000.0) / duration * 100.0;
+                info!(
+                    "Percentage: {pct:.2}% for {}",
+                    database.compressed_path_string()
+                );
             }
-        } else {
-            error!("No digits captured for line: {}", line);
         }
     }
-    cmd.wait()?;
+    child.wait()?; // remember to await the child
 
     Ok(())
 }

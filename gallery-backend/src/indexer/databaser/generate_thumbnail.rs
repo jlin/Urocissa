@@ -2,7 +2,7 @@ use super::small_width_height;
 use crate::structure::database_struct::database::definition::Database;
 use anyhow::Context;
 use image::{DynamicImage, ImageFormat};
-use std::process::Command;
+use std::process::{Command, Stdio};
 pub fn generate_thumbnail_for_image(
     database: &mut Database,
     dynamic_image: DynamicImage,
@@ -41,8 +41,17 @@ pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
         "Failed to create directory for {:?}",
         database.imported_path_string()
     ))?;
+
+    // The corrected command with silencing flags and redirected output
     let status = Command::new("ffmpeg")
         .args(&[
+            // --- ADDED FLAGS FOR COMPLETE SILENCE ---
+            "-v",
+            "quiet",
+            "-hide_banner",
+            "-nostats",
+            "-nostdin",
+            // --- ORIGINAL ARGUMENTS ---
             "-y",
             "-i",
             &database.imported_path_string(),
@@ -54,6 +63,8 @@ pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
             &thumbnail_scale_args,
             thumbnail_file_path_string,
         ])
+        .stdout(Stdio::null()) // Discard anything ffmpeg prints to standard output
+        .stderr(Stdio::null()) // Discard anything ffmpeg prints to standard error
         .status()
         .context(format!(
             "Failed to spawn new command for ffmpeg: {:?}",
