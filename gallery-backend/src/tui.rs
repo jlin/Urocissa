@@ -69,7 +69,6 @@ impl TaskRow {
     fn fmt(&self) -> String {
         /* ---------- 0. 終端欄寬 + 安全邊界 ---------- */
         const DEFAULT_COLS: usize = 120;
-        // 允許用環境變數临时調大保險欄
         let safety_env = std::env::var("UROCISSA_TERM_MARGIN")
             .ok()
             .and_then(|v| v.parse::<usize>().ok())
@@ -80,34 +79,26 @@ impl TaskRow {
 
         /* ---------- 1. 前綴 + 後綴動態計算 ---------- */
         let short_hash = &self.hash.as_str()[..5.min(self.hash.len())];
-        let prefix = format!("🔑 {:<5} 📂 ", short_hash);
+        // 🛑 Emojis gone – using plain bullet and bar
+        let prefix = format!("• {:<5} │ ", short_hash);
         let prefix_w = UnicodeWidthStr::width(prefix.as_str());
 
-        // ① 取得帶小數的秒數
         let secs = self.started.elapsed().as_secs_f64();
-
-        // ② 6 欄、右對齊、1 位小數
-        let suffix = format!(" ⏱️ {:>6.1}s", secs);
-
-        // ③ 重新量 suffix 寬度
+        // 🛑 Emojis gone – simple bar before seconds
+        let suffix = format!("│ {:>6.1}s", secs);
         let suffix_w = UnicodeWidthStr::width(suffix.as_str());
 
         /* ---------- 2. 可分配給路徑的欄位 ---------- */
-        let path_budget = cols.saturating_sub(prefix_w + suffix_w + safety_env).max(5); // 至少留 5 欄給路徑
+        let path_budget = cols.saturating_sub(prefix_w + suffix_w + safety_env).max(5);
 
         /* ---------- 3. 路徑尾端裁切 ---------- */
         let raw_path = self.path.display().to_string();
-        //  路徑顯示字串
         let short_path = Self::tail_ellipsis(&raw_path, path_budget);
 
-        //  實際顯示寬度（unicode-width 已正確計算 2 欄字）
         let path_w = UnicodeWidthStr::width(short_path.as_str());
-
-        //  需要再補多少半形空格，確保整列 = path_budget 欄
         let filler = path_budget.saturating_sub(path_w);
         let spaces = " ".repeat(filler);
 
-        //  組合
         format!("{prefix}{short_path}{spaces}{suffix}")
     }
 
@@ -142,7 +133,6 @@ pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
     LazyLock::new(|| Arc::new(RwLock::new(Dashboard::new())));
 impl Component for Dashboard {
     fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
-        // 取得終端欄寬
         let cols = terminal_size()
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(120);
@@ -150,41 +140,38 @@ impl Component for Dashboard {
         let sep = "─".repeat(cols);
         let mut lines: Vec<Line> = Vec::new();
 
-        /* ── 1. 第一條分隔線 ─────────────────────────────────────────── */
+        /* 1. top rule */
         lines.push(vec![sep.clone()].try_into()?);
 
-        /* ── 2. 統計列（固定 1 行，含其餘提示） ─────────────────────── */
-        let human = ByteSize(self.db_bytes).to_string(); // 例如 "65.3 MiB"
+        /* 2. stats row */
+        let human = ByteSize(self.db_bytes).to_string();
         let total = self.tasks.len();
-        let max_rows = *MAX_ROWS; // 動態行數
+        let max_rows = *MAX_ROWS;
         let remain = total.saturating_sub(max_rows);
-
         let extra = if remain > 0 {
             format!(" │  … 其餘 {remain} 筆")
         } else {
             String::new()
         };
 
+        // 🛑 Emojis removed
         let mut stats = format!(
-            "📊 已處理：{:<6} │  💾 DB 使用： {:>8}{extra}",
+            "• 已處理：{:<6} │ DB 使用： {:>8}{extra}",
             self.handled, human
         );
-        // 補空白確保同寬，避免殘影
         let pad = cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()));
         stats.push_str(&" ".repeat(pad));
         lines.push(vec![stats].try_into()?);
 
-        /* ── 3. 第二條分隔線 ─────────────────────────────────────────── */
+        /* 3. second rule */
         lines.push(vec![sep].try_into()?);
 
-        /* ── 4. 任務列（固定 max_rows 行） ──────────────────────────── */
+        /* 4. task rows and padding – unchanged */
         let shown_iter = self.tasks.iter().take(max_rows);
         let shown_cnt = shown_iter.len();
         for t in shown_iter {
             lines.push(vec![t.fmt()].try_into()?);
         }
-
-        // 不足行數補空白，行高固定
         for _ in 0..max_rows.saturating_sub(shown_cnt) {
             lines.push(vec![" ".repeat(cols)].try_into()?);
         }
