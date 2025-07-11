@@ -1,5 +1,5 @@
 use anstyle::Color;
-use env_logger::Builder;
+use env_logger::{Builder, WriteStyle};
 use env_logger::fmt::style::Style;
 use log::LevelFilter;
 use log::kv::Key;
@@ -59,6 +59,7 @@ pub fn initialize_logger() -> UnboundedReceiver<String> {
     LOGGER_TX.set(tx).unwrap(); // sender stays global
 
     env_logger::Builder::new()
+        .write_style(WriteStyle::Always)
         .format(|buf, record| {
             let custom_value = record
                 .key_values()
