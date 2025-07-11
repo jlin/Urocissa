@@ -2,12 +2,11 @@
 extern crate rocket;
 use crate::coordinator::{COORDINATOR, Coordinator};
 use crate::db::tree::TREE;
-use crate::initialization::{tui_task, Counter};
+use crate::initialization::initialize_logger;
 use crate::looper::{LOOPER, Looper, Signal};
+use crate::tui::{DASHBOARD, tui_task};
 use constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use initialization::{
-    check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
-};
+use initialization::{check_ffmpeg_and_ffprobe, initialize_file, initialize_folder};
 use redb::ReadableTableMetadata;
 use rocket::fs::FileServer;
 use router::fairing::cache_control_fairing::cache_control_fairing;
@@ -28,6 +27,7 @@ mod looper;
 mod public;
 mod router;
 mod structure;
+mod tui;
 mod utils;
 #[launch]
 async fn rocket() -> _ {
@@ -55,10 +55,9 @@ async fn rocket() -> _ {
     LOOPER.notify(Signal::UpdateTree);
 
     if let Some(sc) = superconsole::SuperConsole::new() {
-        let counter = Counter { handled: 0 };
         rocket::tokio::spawn(async move {
             // run the non-interactive TUI
-            if let Err(e) = tui_task(sc, counter, rx).await {
+            if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {
                 eprintln!("TUI error: {e}");
             }
         });

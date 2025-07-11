@@ -4,8 +4,8 @@ use anyhow::Context;
 use path_clean::PathClean;
 use std::{fs::metadata, path::PathBuf, time::UNIX_EPOCH};
 
-pub fn validator(path: PathBuf) -> anyhow::Result<Database> {
-    let metadata = metadata(&path).context(format!("Failed to read metadata: {:?}", path))?;
+pub fn validator(path: &PathBuf) -> anyhow::Result<Database> {
+    let metadata = metadata(path).context(format!("Failed to read metadata: {:?}", path))?;
 
     let modified = metadata
         .modified()
