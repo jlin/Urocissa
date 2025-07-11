@@ -46,11 +46,11 @@ impl Coordinator {
             rt.block_on(async move {
                 while let Some((task, reply)) = rx.recv().await {
                     match task {
-                        Task::Delete(t) => spawn_worker(delete::delete_task, t, reply),
-                        Task::Video(t) => spawn_worker(video::video_task, t, reply),
-                        Task::Index(t) => spawn_worker(index::index_task, t, reply),
-                        Task::Album(t) => spawn_worker(album::album_task, t, reply),
-                        Task::Remove(t) => spawn_worker(remove::remove_task, t, reply),
+                        Task::Delete(t) => spawn_io_worker(delete::delete_task, t, reply),
+                        Task::Video(t) => spawn_cpu_worker(video::video_task, t, reply),
+                        Task::Index(t) => spawn_cpu_worker(index::index_task, t, reply),
+                        Task::Album(t) => spawn_io_worker(album::album_task, t, reply),
+                        Task::Remove(t) => spawn_io_worker(remove::remove_task, t, reply),
                     }
                 }
             });
@@ -73,8 +73,8 @@ impl Coordinator {
     }
 }
 
-/// Off-load blocking / CPU-bound work.
-fn spawn_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
+/// For I/O-bound *async* work.
+fn spawn_io_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
 where
     F: FnOnce(T) -> anyhow::Result<()> + Send + 'static,
     T: Send + 'static,
@@ -83,6 +83,21 @@ where
         let res = task::spawn_blocking(move || f(arg))
             .await
             .expect("blocking task panicked");
+        if let Some(tx) = reply {
+            let _ = tx.send(res);
+        }
+    });
+}
+
+/// For CPU-bound *sync* work.
+pub fn spawn_cpu_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
+where
+    F: FnOnce(T) -> anyhow::Result<()> + Send + 'static,
+    T: Send + 'static,
+{
+    // Run the closure on Rayon's global pool and await its handle on Tokio.
+    tokio::spawn(async move {
+        let res = tokio_rayon::spawn(move || f(arg)).await;
         if let Some(tx) = reply {
             let _ = tx.send(res);
         }

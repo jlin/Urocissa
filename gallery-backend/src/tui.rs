@@ -15,6 +15,8 @@ pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
 
 use superconsole::{Component, Dimensions, DrawMode, Line, Lines, SuperConsole};
 
+pub static MAX_ROWS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
+
 pub struct TokioPipe(pub UnboundedSender<String>);
 impl std::io::Write for TokioPipe {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
@@ -59,9 +61,9 @@ pub async fn tui_task(
 }
 
 struct TaskRow {
-    hash: ArrayString<64>,
-    path: PathBuf,
-    started: Instant,
+    pub hash: ArrayString<64>,
+    pub path: PathBuf,
+    pub started: Instant,
 }
 impl TaskRow {
     fn fmt(&self) -> String {
@@ -81,8 +83,13 @@ impl TaskRow {
         let prefix = format!("🔑 {:<5} 📂 ", short_hash);
         let prefix_w = UnicodeWidthStr::width(prefix.as_str());
 
-        let secs = self.started.elapsed().as_secs();
-        let suffix = format!(" ⏱️ {:>4}s", secs);
+        // ① 取得帶小數的秒數
+        let secs = self.started.elapsed().as_secs_f64();
+
+        // ② 6 欄、右對齊、1 位小數
+        let suffix = format!(" ⏱️ {:>6.1}s", secs);
+
+        // ③ 重新量 suffix 寬度
         let suffix_w = UnicodeWidthStr::width(suffix.as_str());
 
         /* ---------- 2. 可分配給路徑的欄位 ---------- */
@@ -90,14 +97,18 @@ impl TaskRow {
 
         /* ---------- 3. 路徑尾端裁切 ---------- */
         let raw_path = self.path.display().to_string();
+        //  路徑顯示字串
         let short_path = Self::tail_ellipsis(&raw_path, path_budget);
 
-        /* ---------- 4. 組合輸出 ---------- */
-        format!(
-            "{prefix}{:<width$}{suffix}",
-            short_path,
-            width = path_budget
-        )
+        //  實際顯示寬度（unicode-width 已正確計算 2 欄字）
+        let path_w = UnicodeWidthStr::width(short_path.as_str());
+
+        //  需要再補多少半形空格，確保整列 = path_budget 欄
+        let filler = path_budget.saturating_sub(path_w);
+        let spaces = " ".repeat(filler);
+
+        //  組合
+        format!("{prefix}{short_path}{spaces}{suffix}")
     }
 
     fn tail_ellipsis(s: &str, max: usize) -> String {
@@ -129,38 +140,55 @@ pub struct Dashboard {
 
 pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
     LazyLock::new(|| Arc::new(RwLock::new(Dashboard::new())));
-
 impl Component for Dashboard {
     fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
+        // 取得終端欄寬
         let cols = terminal_size()
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(120);
+
         let sep = "─".repeat(cols);
+        let mut lines: Vec<Line> = Vec::new();
 
-        let mut lines = Vec::<Line>::new();
-
-        // 第一條線
+        /* ── 1. 第一條分隔線 ─────────────────────────────────────────── */
         lines.push(vec![sep.clone()].try_into()?);
 
-        // 📊 統計列 —─ 動態欄寬
-        let human = ByteSize(self.db_bytes).to_string();
-        let stats = format!(
-            "📊 已處理：{:<6} │  💾 DB 使用： {:>8}",
+        /* ── 2. 統計列（固定 1 行，含其餘提示） ─────────────────────── */
+        let human = ByteSize(self.db_bytes).to_string(); // 例如 "65.3 MiB"
+        let total = self.tasks.len();
+        let max_rows = *MAX_ROWS; // 動態行數
+        let remain = total.saturating_sub(max_rows);
+
+        let extra = if remain > 0 {
+            format!(" │  … 其餘 {remain} 筆")
+        } else {
+            String::new()
+        };
+
+        let mut stats = format!(
+            "📊 已處理：{:<6} │  💾 DB 使用： {:>8}{extra}",
             self.handled, human
         );
+        // 補空白確保同寬，避免殘影
+        let pad = cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()));
+        stats.push_str(&" ".repeat(pad));
         lines.push(vec![stats].try_into()?);
 
-        // 第二條線
+        /* ── 3. 第二條分隔線 ─────────────────────────────────────────── */
         lines.push(vec![sep].try_into()?);
 
-        // 任務清單（同前，最多五筆）
-        for t in self.tasks.iter().take(5) {
+        /* ── 4. 任務列（固定 max_rows 行） ──────────────────────────── */
+        let shown_iter = self.tasks.iter().take(max_rows);
+        let shown_cnt = shown_iter.len();
+        for t in shown_iter {
             lines.push(vec![t.fmt()].try_into()?);
         }
-        let remain = self.tasks.len().saturating_sub(5);
-        if remain > 0 {
-            lines.push(vec![format!("… 其餘 {remain} 筆任務")].try_into()?);
+
+        // 不足行數補空白，行高固定
+        for _ in 0..max_rows.saturating_sub(shown_cnt) {
+            lines.push(vec![" ".repeat(cols)].try_into()?);
         }
+
         Ok(Lines(lines))
     }
 }
