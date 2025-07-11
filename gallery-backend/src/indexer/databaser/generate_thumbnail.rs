@@ -1,8 +1,11 @@
 use super::small_width_height;
-use crate::structure::database_struct::database::definition::Database;
+use crate::{
+    indexer::databaser::generate_ffmpeg::create_silent_ffmpeg_command,
+    structure::database_struct::database::definition::Database,
+};
 use anyhow::Context;
 use image::{DynamicImage, ImageFormat};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 pub fn generate_thumbnail_for_image(
     database: &mut Database,
     dynamic_image: DynamicImage,
@@ -28,55 +31,43 @@ pub fn generate_thumbnail_for_image(
     Ok(())
 }
 
+/// Generates a single JPEG thumbnail from the first frame of a video.
 pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
-    let width = database.width;
-    let height = database.height;
+    let (width, height) = (database.width, database.height);
+    let (thumb_width, thumb_height) = small_width_height(width, height, 1280);
+    let thumbnail_path = database.thumbnail_path();
 
-    let (thumbnail_width, thumbnail_height) = small_width_height(width, height, 1280);
+    std::fs::create_dir_all(database.compressed_path_parent())
+        .context("Failed to create parent directory for thumbnail")?;
 
-    let thumbnail_scale_args = format!("scale={}:{}", thumbnail_width, thumbnail_height);
+    // --- REFACTORED: Use the helper for a fire-and-forget silent command ---
+    let mut cmd = create_silent_ffmpeg_command();
+    cmd.args([
+        "-y",
+        "-i",
+        &database.imported_path_string(),
+        "-ss",
+        "0", // Seek to the beginning
+        "-vframes",
+        "1", // Extract exactly one frame
+        "-vf",
+        &format!("scale={}:{}", thumb_width, thumb_height),
+        &thumbnail_path,
+    ]);
 
-    let thumbnail_file_path_string = &database.thumbnail_path();
-    std::fs::create_dir_all(database.compressed_path_parent()).context(format!(
-        "Failed to create directory for {:?}",
-        database.imported_path_string()
-    ))?;
-
-    // The corrected command with silencing flags and redirected output
-    let status = Command::new("ffmpeg")
-        .args(&[
-            // --- ADDED FLAGS FOR COMPLETE SILENCE ---
-            "-v",
-            "quiet",
-            "-hide_banner",
-            "-nostats",
-            "-nostdin",
-            // --- ORIGINAL ARGUMENTS ---
-            "-y",
-            "-i",
-            &database.imported_path_string(),
-            "-ss",
-            "0",
-            "-frames:v",
-            "1", // Generate only one image
-            "-vf",
-            &thumbnail_scale_args,
-            thumbnail_file_path_string,
-        ])
-        .stdout(Stdio::null()) // Discard anything ffmpeg prints to standard output
-        .stderr(Stdio::null()) // Discard anything ffmpeg prints to standard error
+    // For this command, we don't need to read any output, so we discard both streams.
+    let status = cmd
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
-        .context(format!(
-            "Failed to spawn new command for ffmpeg: {:?}",
-            thumbnail_file_path_string
-        ))?;
+        .context("Failed to execute ffmpeg for thumbnail generation")?;
 
     if !status.success() {
-        let code = status.code().unwrap_or(-1); // If None, assign -1 or handle explicitly
         return Err(anyhow::anyhow!(
-            "ffmpeg failed to generate thumbnail with exit code {}",
-            code
+            "ffmpeg thumbnail generation failed with exit code: {}",
+            status.code().unwrap_or(-1)
         ));
     }
+
     Ok(())
 }
