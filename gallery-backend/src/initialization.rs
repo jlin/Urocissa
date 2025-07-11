@@ -7,9 +7,26 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use std::io::Write;
-use tokio::sync::mpsc::{UnboundedReceiver, unbounded_channel};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
 
-use crate::tui::{LOGGER_TX, TokioPipe};
+use crate::tui::LOGGER_TX;
+
+pub struct TokioPipe(pub UnboundedSender<String>);
+impl std::io::Write for TokioPipe {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        let s = String::from_utf8_lossy(buf);
+        for line in s.split_terminator('\n') {
+            let clean = line.replace('\t', "    ");
+            if !clean.is_empty() {
+                let _ = self.0.send(clean.to_string());
+            }
+        }
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
 
 pub fn initialize_logger() -> UnboundedReceiver<String> {
     let (tx, rx) = unbounded_channel();
