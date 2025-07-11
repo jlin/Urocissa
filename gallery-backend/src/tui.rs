@@ -1,4 +1,5 @@
 use arrayvec::ArrayString;
+use bytesize::ByteSize;
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, OnceLock, RwLock};
 use std::time::Instant;
@@ -12,7 +13,7 @@ use tokio::{
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
 
-use superconsole::{Component, Dimensions, DrawMode, Lines, SuperConsole};
+use superconsole::{Component, Dimensions, DrawMode, Line, Lines, SuperConsole};
 
 pub struct TokioPipe(pub UnboundedSender<String>);
 impl std::io::Write for TokioPipe {
@@ -121,7 +122,9 @@ impl TaskRow {
     }
 }
 pub struct Dashboard {
-    tasks: Vec<TaskRow>,
+    pub tasks: Vec<TaskRow>,
+    pub handled: u64,  // ✔ 已完成計數
+    pub db_bytes: u64, // 💾 目前 DB 佔用
 }
 
 pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
@@ -129,26 +132,76 @@ pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
 
 impl Component for Dashboard {
     fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
-        let mut lines = Vec::new();
-        for t in &self.tasks {
+        let cols = terminal_size()
+            .map(|(Width(w), _)| w as usize)
+            .unwrap_or(120);
+        let sep = "─".repeat(cols);
+
+        let mut lines = Vec::<Line>::new();
+
+        // 第一條線
+        lines.push(vec![sep.clone()].try_into()?);
+
+        // 📊 統計列 —─ 動態欄寬
+        let human = ByteSize(self.db_bytes).to_string();
+        let stats = format!(
+            "📊 已處理：{:<6} │  💾 DB 使用： {:>8}",
+            self.handled, human
+        );
+        lines.push(vec![stats].try_into()?);
+
+        // 第二條線
+        lines.push(vec![sep].try_into()?);
+
+        // 任務清單（同前，最多五筆）
+        for t in self.tasks.iter().take(5) {
             lines.push(vec![t.fmt()].try_into()?);
+        }
+        let remain = self.tasks.len().saturating_sub(5);
+        if remain > 0 {
+            lines.push(vec![format!("… 其餘 {remain} 筆任務")].try_into()?);
         }
         Ok(Lines(lines))
     }
 }
 
 impl Dashboard {
-    // 建構一個空的 Dashboard
+    /// 建構空 Dashboard
     pub fn new() -> Self {
-        Dashboard { tasks: Vec::new() }
+        Dashboard {
+            tasks: Vec::new(),
+            handled: 0,
+            db_bytes: 0,
+        }
     }
 
-    // 新增一個任務
+    /// 新增/覆寫同雜湊任務
     pub fn add_task(&mut self, hash: ArrayString<64>, path: PathBuf) {
-        self.tasks.push(TaskRow {
-            hash,
-            path,
-            started: Instant::now(),
+        // 若雜湊已存在就覆寫路徑並重置計時
+        if let Some(t) = self.tasks.iter_mut().find(|t| t.hash == hash) {
+            t.path = path;
+            t.started = Instant::now();
+        } else {
+            self.tasks.push(TaskRow {
+                hash,
+                path,
+                started: Instant::now(),
+            });
+        }
+    }
+
+    /// 處理完畢後移除
+    pub fn remove_task(&mut self, hash: &ArrayString<64>) {
+        let mut removed = false;
+        self.tasks.retain(|t| {
+            let keep = &t.hash != hash;
+            if !keep {
+                removed = true;
+            }
+            keep
         });
+        if removed {
+            self.handled += 1;
+        }
     }
 }
