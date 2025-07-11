@@ -2,6 +2,7 @@ use super::video_ffprobe::video_duration;
 use crate::{
     indexer::databaser::{generate_ffmpeg::create_silent_ffmpeg_command, process_image_info},
     structure::database_struct::database::definition::Database,
+    tui::DASHBOARD,
 };
 use anyhow::Context;
 use regex::Regex;
@@ -91,11 +92,15 @@ pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> 
                 // We only proceed if the captured value can be parsed as a number.
                 if let Ok(microseconds) = caps[1].parse::<f64>() {
                     let percentage = (microseconds / 1_000_000.0 / duration) * 100.0;
-                    info!(
+                    DASHBOARD
+                        .write()
+                        .unwrap()
+                        .update_progress(database.hash, percentage);
+                    /* info!(
                         "Percentage: {:.2}% for {}",
                         percentage,
                         &database.compressed_path_string()
-                    );
+                    ); */
                 }
             }
         }
