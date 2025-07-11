@@ -3,73 +3,84 @@ use bytesize::ByteSize;
 use std::path::PathBuf;
 use std::sync::{Arc, LazyLock, OnceLock, RwLock};
 use std::time::Instant;
-use terminal_size::Width;
-use terminal_size::terminal_size;
+use terminal_size::{Width, terminal_size};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::{
     select,
     time::{Duration, interval},
 };
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
-pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
 
 use superconsole::{Component, Dimensions, DrawMode, Line, Lines, SuperConsole};
 
+/// Global sender for log messages written through `TokioPipe`.
+pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
+
+/// Maximum number of task rows shown equals the Rayon thread-pool size.
 pub static MAX_ROWS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
 
+/// Pipe that forwards `stdout`/`stderr` to an async channel, allowing redirection into the TUI.
 pub struct TokioPipe(pub UnboundedSender<String>);
+
 impl std::io::Write for TokioPipe {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         let s = String::from_utf8_lossy(buf);
+        // Split by `\n`; the newline itself is discarded.
         for line in s.split_terminator('\n') {
-            // ← 切掉最後的 \n
-            let clean = line.replace('\t', "    "); // ← 如有 Tab, 換空格
+            // Replace tabs with four spaces so alignment stays predictable.
+            let clean = line.replace('\t', "    ");
             if !clean.is_empty() {
                 let _ = self.0.send(clean.to_string());
             }
         }
         Ok(buf.len())
     }
+
     fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
     }
 }
+
+/// Tokio task that drives the TUI. It listens for incoming log lines and
+/// periodically redraws the `Dashboard`.
 pub async fn tui_task(
     mut sc: SuperConsole,
-    dashboard: Arc<RwLock<Dashboard>>, // ❷ 共享讀寫鎖
+    dashboard: Arc<RwLock<Dashboard>>, // shared, read-heavy
     mut rx: UnboundedReceiver<String>,
 ) -> anyhow::Result<()> {
     let mut tick = interval(Duration::from_millis(200));
 
     loop {
         select! {
-            //── A. 收到 logger 行：emit 到上方 ────────────────────────────
+            // A. New log line → emit to the top area.
             Some(line) = rx.recv() => {
                 sc.emit(Lines(vec![
                     superconsole::content::Line::unstyled(&line)?
                 ]));
             }
 
-            //── B. 每 200 ms 重新渲染 Scratch 區域 ───────────────────────
+            // B. Periodic repaint of the dashboard.
             _ = tick.tick() => {
-                // 只讀鎖：允許多個渲染迴圈同時取用
-                let guard = dashboard.read().unwrap(); // ❸
-                sc.render(&*guard)?;    // Dashboard 已實作 Component
+                let guard = dashboard.read().unwrap();
+                sc.render(&*guard)?;
             }
         }
     }
 }
 
-struct TaskRow {
+/// A single running task shown in the dashboard.
+pub struct TaskRow {
     pub hash: ArrayString<64>,
     pub path: PathBuf,
     pub started: Instant,
 }
+
 impl TaskRow {
+    /// Format the row for display, truncating the path from the head if needed.
     fn fmt(&self) -> String {
-        /* ---------- 0. 終端欄寬 + 安全邊界 ---------- */
+        /* Terminal width and safety margin */
         const DEFAULT_COLS: usize = 120;
-        let safety_env = std::env::var("UROCISSA_TERM_MARGIN")
+        let margin = std::env::var("UROCISSA_TERM_MARGIN")
             .ok()
             .and_then(|v| v.parse::<usize>().ok())
             .unwrap_or(4);
@@ -77,37 +88,35 @@ impl TaskRow {
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(DEFAULT_COLS);
 
-        /* ---------- 1. 前綴 + 後綴動態計算 ---------- */
+        /* Prefix & suffix */
         let short_hash = &self.hash.as_str()[..5.min(self.hash.len())];
-        // 🛑 Emojis gone – using plain bullet and bar
         let prefix = format!("• {:<5} │ ", short_hash);
         let prefix_w = UnicodeWidthStr::width(prefix.as_str());
 
         let secs = self.started.elapsed().as_secs_f64();
-        // 🛑 Emojis gone – simple bar before seconds
         let suffix = format!("│ {:>6.1}s", secs);
         let suffix_w = UnicodeWidthStr::width(suffix.as_str());
 
-        /* ---------- 2. 可分配給路徑的欄位 ---------- */
-        let path_budget = cols.saturating_sub(prefix_w + suffix_w + safety_env).max(5);
+        /* Remaining budget for the path */
+        let path_budget = cols.saturating_sub(prefix_w + suffix_w + margin).max(5);
 
-        /* ---------- 3. 路徑尾端裁切 ---------- */
+        /* Truncate the path, keeping the tail and inserting an ellipsis if necessary. */
         let raw_path = self.path.display().to_string();
         let short_path = Self::tail_ellipsis(&raw_path, path_budget);
 
         let path_w = UnicodeWidthStr::width(short_path.as_str());
-        let filler = path_budget.saturating_sub(path_w);
-        let spaces = " ".repeat(filler);
+        let spaces = " ".repeat(path_budget.saturating_sub(path_w));
 
         format!("{prefix}{short_path}{spaces}{suffix}")
     }
 
+    /// Keep the tail of `s` so that its display width fits `max`; prepend an ellipsis if truncated.
     fn tail_ellipsis(s: &str, max: usize) -> String {
         if UnicodeWidthStr::width(s) <= max {
             return s.to_owned();
         }
 
-        let tail_len = max.saturating_sub(1); // 1 格留給 ‘…’
+        let tail_len = max.saturating_sub(1); // leave room for ‘…’
         let mut acc = 0;
         let mut rev = String::new();
 
@@ -123,14 +132,20 @@ impl TaskRow {
         format!("…{tail}")
     }
 }
+
+/// Aggregate state rendered by the dashboard.
 pub struct Dashboard {
     pub tasks: Vec<TaskRow>,
-    pub handled: u64,  // ✔ 已完成計數
-    pub db_bytes: u64, // 💾 目前 DB 佔用
+    /// Number of completed tasks.
+    pub handled: u64,
+    /// Bytes currently used by the on-disk database.
+    pub db_bytes: u64,
 }
 
+/// Global dashboard instance.
 pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
     LazyLock::new(|| Arc::new(RwLock::new(Dashboard::new())));
+
 impl Component for Dashboard {
     fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
         let cols = terminal_size()
@@ -143,20 +158,19 @@ impl Component for Dashboard {
         /* 1. top rule */
         lines.push(vec![sep.clone()].try_into()?);
 
-        /* 2. stats row */
+        /* 2. statistics row */
         let human = ByteSize(self.db_bytes).to_string();
         let total = self.tasks.len();
         let max_rows = *MAX_ROWS;
         let remain = total.saturating_sub(max_rows);
         let extra = if remain > 0 {
-            format!(" │  … 其餘 {remain} 筆")
+            format!(" │  … remaining {remain}")
         } else {
             String::new()
         };
 
-        // 🛑 Emojis removed
         let mut stats = format!(
-            "• 已處理：{:<6} │ DB 使用： {:>8}{extra}",
+            "• Processed: {:<6} │ DB size: {:>8}{extra}",
             self.handled, human
         );
         let pad = cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()));
@@ -166,7 +180,7 @@ impl Component for Dashboard {
         /* 3. second rule */
         lines.push(vec![sep].try_into()?);
 
-        /* 4. task rows and padding – unchanged */
+        /* 4. task rows and padding */
         let shown_iter = self.tasks.iter().take(max_rows);
         let shown_cnt = shown_iter.len();
         for t in shown_iter {
@@ -181,7 +195,7 @@ impl Component for Dashboard {
 }
 
 impl Dashboard {
-    /// 建構空 Dashboard
+    /// Create an empty dashboard.
     pub fn new() -> Self {
         Dashboard {
             tasks: Vec::new(),
@@ -190,9 +204,8 @@ impl Dashboard {
         }
     }
 
-    /// 新增/覆寫同雜湊任務
+    /// Add a new task or reset an existing one that has the same hash.
     pub fn add_task(&mut self, hash: ArrayString<64>, path: PathBuf) {
-        // 若雜湊已存在就覆寫路徑並重置計時
         if let Some(t) = self.tasks.iter_mut().find(|t| t.hash == hash) {
             t.path = path;
             t.started = Instant::now();
@@ -205,7 +218,7 @@ impl Dashboard {
         }
     }
 
-    /// 處理完畢後移除
+    /// Remove a task after it completes and increment the `handled` counter.
     pub fn remove_task(&mut self, hash: &ArrayString<64>) {
         let mut removed = false;
         self.tasks.retain(|t| {
