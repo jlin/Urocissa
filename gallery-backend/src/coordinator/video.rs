@@ -6,6 +6,7 @@ use crate::{
     db::tree::TREE,
     indexer::databaser::generate_compressed_video::generate_compressed_video,
     looper::{LOOPER, Signal},
+    tui::DASHBOARD,
 };
 
 #[derive(Debug)]
@@ -40,6 +41,7 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
             }
             write_txn.commit().unwrap();
             LOOPER.notify(Signal::UpdateTree);
+            DASHBOARD.write().unwrap().advance_task_state(&hash);
             Ok(())
         }
         Err(err) => Err(err).context(format!(
