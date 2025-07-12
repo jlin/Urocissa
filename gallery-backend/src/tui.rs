@@ -1,4 +1,4 @@
-//! tui.rs — lock-free dashboard (Rust 1.88, std::LazyLock / OnceLock)
+//! tui.rs — lock-free dashboard with 148-task timer (Rust 1.88)
 
 use arrayvec::ArrayString;
 use atomic_float::AtomicF64;
@@ -61,7 +61,7 @@ pub enum TaskState {
     Transcoding(Instant),
     Done(f64),
 }
-impl Clone for TaskState {                // 手動實作，Instant 是 Copy
+impl Clone for TaskState {
     fn clone(&self) -> Self {
         match self {
             TaskState::Indexing(t)   => TaskState::Indexing(*t),
@@ -150,10 +150,14 @@ impl TaskRow {
 /// ---------- dashboard ----------
 pub struct Dashboard {
     tasks:          DashMap<ArrayString<64>, TaskRow>,
-    completed:      ArrayQueue<TaskRow>,     // lock-free ring
+    completed:      ArrayQueue<TaskRow>,
     handled:        AtomicU64,
     pending:        AtomicU64,
     total_duration: AtomicF64,
+
+    /* 148-task timer */
+    start_ts:    OnceLock<Instant>,
+    window_148:  AtomicF64,
 }
 
 pub static MAX_ROWS:  LazyLock<usize>                 = LazyLock::new(|| rayon::current_num_threads());
@@ -168,11 +172,17 @@ impl Dashboard {
             handled:        AtomicU64::new(0),
             pending:        AtomicU64::new(0),
             total_duration: AtomicF64::new(0.0),
+
+            start_ts:   OnceLock::new(),
+            window_148: AtomicF64::new(0.0),
         }
     }
 
     /* ---------- mutation API ---------- */
     pub fn add_task(&self, hash: ArrayString<64>, path: String, file_type: FileType) {
+        // 若為第一筆任務則啟動計時
+        let _ = self.start_ts.set(Instant::now());
+
         self.tasks
             .entry(hash.clone())
             .and_modify(|t| {
@@ -205,14 +215,18 @@ impl Dashboard {
     fn move_to_completed(&self, row: TaskRow, duration: f64) {
         self.total_duration.fetch_add(duration, Ordering::Relaxed);
 
-        match self.completed.push(row) {          // 不再重複使用已 move 的值
+        match self.completed.push(row) {
             Ok(()) => {}
-            Err(r) => {                            // r 回傳值仍擁有權
-                let _ = self.completed.pop();
-                let _ = self.completed.push(r);
+            Err(r) => { let _ = self.completed.pop(); let _ = self.completed.push(r); }
+        }
+        // fetch_add 先回傳舊值，再 +1
+        let prev = self.handled.fetch_add(1, Ordering::Relaxed) + 1;
+        if prev == 148 {
+            if let Some(t0) = self.start_ts.get() {
+                self.window_148
+                    .store(t0.elapsed().as_secs_f64(), Ordering::Relaxed);
             }
         }
-        self.handled.fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn update_progress(&self, hash: ArrayString<64>, percent: f64) {
@@ -226,6 +240,7 @@ impl Dashboard {
     #[inline] fn handled(&self)        -> u64 { self.handled.load(Ordering::Relaxed) }
     #[inline] fn pending(&self)        -> u64 { self.pending.load(Ordering::Relaxed) }
     #[inline] fn total_duration(&self) -> f64 { self.total_duration.load(Ordering::Relaxed) }
+    #[inline] fn window148(&self)      -> f64 { self.window_148.load(Ordering::Relaxed) }
 }
 
 /// ---------- renderer ----------
@@ -241,8 +256,12 @@ impl Component for Dashboard {
             format!("│ Avg: {:.2}s", self.total_duration() / self.handled() as f64)
         } else { String::new() };
 
-        let mut stats = format!("• Processed: {:<6} │ Pending: {:<6} {}",
-                                self.handled(), self.pending(), avg);
+        let win148 = if self.window148() > 0.0 {
+            format!(" │ 148T: {:.2}s", self.window148())
+        } else { String::new() };
+
+        let mut stats = format!("• Processed: {:<6} │ Pending: {:<6} {}{}",
+                                self.handled(), self.pending(), avg, win148);
         stats.push_str(&" ".repeat(cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()))));
         lines.push(vec![stats].try_into()?);
 
@@ -255,10 +274,7 @@ impl Component for Dashboard {
             while let Some(item) = self.completed.pop() {
                 v.push(item);
             }
-            for item in &v {
-                // This might fail if other threads are pushing, which is acceptable.
-                let _ = self.completed.push(item.clone());
-            }
+            for item in &v { let _ = self.completed.push(item.clone()); }
             v
         };
 
