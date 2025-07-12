@@ -6,6 +6,7 @@ use tokio::{
 };
 
 pub mod album;
+pub mod copy;
 pub mod deduplicate;
 pub mod delete;
 pub mod index;
@@ -19,7 +20,7 @@ use index::IndexTask;
 use remove::RemoveTask;
 use video::VideoTask;
 
-use crate::tui::DASHBOARD;
+use crate::{coordinator::copy::CopyTask, tui::DASHBOARD};
 
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
@@ -30,6 +31,7 @@ pub enum Task {
     Index(IndexTask),
     Album(AlbumTask),
     Remove(RemoveTask),
+    Copy(CopyTask),
 }
 
 type Envelope = (Task, Option<oneshot::Sender<anyhow::Result<()>>>);
@@ -55,6 +57,9 @@ impl Coordinator {
                             spawn_io_worker(deduplicate::deduplicate_task, t, reply)
                         }
                         Task::Index(t) => spawn_cpu_worker(index::index_task, t, reply),
+                        Task::Copy(t) => {
+                            spawn_io_worker(copy::copy_task, t, reply);
+                        }
                         Task::Video(t) => spawn_cpu_worker(video::video_task, t, reply),
                         Task::Delete(t) => spawn_io_worker(delete::delete_task, t, reply),
                         Task::Remove(t) => spawn_io_worker(remove::remove_task, t, reply),

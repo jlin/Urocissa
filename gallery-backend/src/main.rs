@@ -31,6 +31,12 @@ mod tui;
 mod utils;
 #[launch]
 async fn rocket() -> _ {
+    /*  let threads = num_cpus::get() * 2;
+
+    ThreadPoolBuilder::new()
+        .num_threads(threads)
+        .build_global()
+        .unwrap(); // 全域設置 */
     let rx = initialize_logger();
     check_ffmpeg_and_ffprobe();
     initialize_folder();

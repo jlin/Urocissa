@@ -4,9 +4,9 @@ use anyhow::bail;
 use path_clean::PathClean;
 
 use crate::{
-    coordinator::{delete::DeleteTask, index::IndexTask, Task, COORDINATOR},
+    coordinator::{COORDINATOR, Task, copy::CopyTask, delete::DeleteTask},
     db::tree::TREE,
-    looper::{Signal, LOOPER},
+    looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
 };
 
@@ -40,7 +40,7 @@ pub fn deduplicate_task(task: DeduplicateTask) -> anyhow::Result<()> {
             database.source_path()
         );
     } else {
-        COORDINATOR.submit(Task::Index(IndexTask::new(database)))?;
+        COORDINATOR.submit(Task::Copy(CopyTask::new(database)))?;
     }
     Ok(())
 }

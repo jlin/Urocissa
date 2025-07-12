@@ -1,7 +1,5 @@
 pub mod databaser;
 
-mod importer;
-
 use crate::indexer;
 use crate::looper::{LOOPER, Signal};
 use crate::structure::database_struct::database::definition::Database;
@@ -15,7 +13,7 @@ pub fn indexer(database: Database) -> anyhow::Result<()> {
         newest_path,
         FileType::try_from(database.ext_type.as_str())?,
     );
-    importer::import(&database)?;
+
     indexer::databaser::databaser(database)?;
     LOOPER.notify(Signal::UpdateTree);
     DASHBOARD.write().unwrap().advance_task_state(&hash);
