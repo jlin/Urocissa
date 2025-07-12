@@ -1,18 +1,16 @@
-use std::path::PathBuf;
-
-use crate::indexer::indexer;
+use crate::{indexer::indexer, structure::database_struct::database::definition::Database};
 
 #[derive(Debug)]
 pub struct IndexTask {
-    pub path: PathBuf,
+    pub database: Database,
 }
 impl IndexTask {
-    pub fn new(path: PathBuf) -> Self {
-        Self { path }
+    pub fn new(database: Database) -> Self {
+        Self { database }
     }
 }
 
 pub fn index_task(task: IndexTask) -> anyhow::Result<()> {
-    indexer(task.path)?;
+    indexer(task.database)?;
     Ok(())
 }

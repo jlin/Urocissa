@@ -14,7 +14,7 @@ use std::{
     },
 };
 
-use crate::coordinator::index::IndexTask;
+use crate::coordinator::deduplicate::DeduplicateTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::public::config::PRIVATE_CONFIG;
 
@@ -76,7 +76,9 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     }
 
                     for file in files {
-                        if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
+                        if let Err(err) =
+                            COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
+                        {
                             error!("Submit failed: {:#}", err);
                         }
                     }
@@ -92,7 +94,9 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     }
 
                     for file in files {
-                        if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
+                        if let Err(err) =
+                            COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
+                        {
                             error!("Submit failed: {:#}", err);
                         }
                     }

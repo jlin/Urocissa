@@ -4,7 +4,6 @@ use arrayvec::ArrayString;
 use std::{
     collections::VecDeque,
     mem,
-    path::PathBuf,
     sync::{Arc, LazyLock, OnceLock, RwLock},
     time::Instant,
 };
@@ -73,7 +72,7 @@ pub enum TaskState {
 
 pub struct TaskRow {
     pub hash: ArrayString<64>,
-    pub path: PathBuf,
+    pub path: String,
     pub file_type: FileType,
     pub state: TaskState,
     pub progress: Option<f64>,
@@ -153,7 +152,7 @@ impl TaskRow {
             .saturating_sub(prefix_w + UnicodeWidthStr::width(suffix.as_str()) + margin)
             .max(5);
 
-        let raw_path = self.path.display().to_string();
+        let raw_path = self.path.to_string();
         let short_path = Self::tail_ellipsis(&raw_path, path_budget);
         let pad =
             " ".repeat(path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str())));
@@ -202,7 +201,7 @@ impl Dashboard {
         }
     }
 
-    pub fn add_task(&mut self, hash: ArrayString<64>, path: PathBuf, file_type: FileType) {
+    pub fn add_task(&mut self, hash: ArrayString<64>, path: String, file_type: FileType) {
         if let Some(t) = self.tasks.iter_mut().find(|t| t.hash == hash) {
             // Restart task if it already exists
             t.path = path;

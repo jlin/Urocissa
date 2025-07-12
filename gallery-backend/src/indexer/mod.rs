@@ -1,20 +1,18 @@
-use std::path::PathBuf;
 pub mod databaser;
-mod filter;
+
 mod importer;
-use path_clean::PathClean;
 
 use crate::indexer;
 use crate::looper::{LOOPER, Signal};
+use crate::structure::database_struct::database::definition::Database;
 use crate::tui::{DASHBOARD, FileType};
 
-pub fn indexer(path: PathBuf) -> anyhow::Result<()> {
-    let path = path.clean();
-    let database = indexer::filter::filter(&path)?;
+pub fn indexer(database: Database) -> anyhow::Result<()> {
     let hash = database.hash;
+    let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.write().unwrap().add_task(
         hash,
-        path,
+        newest_path,
         FileType::try_from(database.ext_type.as_str())?,
     );
     importer::import(&database)?;

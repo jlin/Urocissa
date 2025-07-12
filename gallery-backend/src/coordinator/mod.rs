@@ -6,12 +6,14 @@ use tokio::{
 };
 
 pub mod album;
+pub mod deduplicate;
 pub mod delete;
 pub mod index;
 pub mod remove;
 pub mod video;
 
 use album::AlbumTask;
+use deduplicate::DeduplicateTask;
 use delete::DeleteTask;
 use index::IndexTask;
 use remove::RemoveTask;
@@ -22,6 +24,7 @@ use crate::tui::DASHBOARD;
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
 pub enum Task {
+    Deduplicate(DeduplicateTask),
     Delete(DeleteTask),
     Video(VideoTask),
     Index(IndexTask),
@@ -48,11 +51,14 @@ impl Coordinator {
             rt.block_on(async move {
                 while let Some((task, reply)) = rx.recv().await {
                     match task {
-                        Task::Delete(t) => spawn_io_worker(delete::delete_task, t, reply),
-                        Task::Video(t) => spawn_cpu_worker(video::video_task, t, reply),
+                        Task::Deduplicate(t) => {
+                            spawn_io_worker(deduplicate::deduplicate_task, t, reply)
+                        }
                         Task::Index(t) => spawn_cpu_worker(index::index_task, t, reply),
-                        Task::Album(t) => spawn_io_worker(album::album_task, t, reply),
+                        Task::Video(t) => spawn_cpu_worker(video::video_task, t, reply),
+                        Task::Delete(t) => spawn_io_worker(delete::delete_task, t, reply),
                         Task::Remove(t) => spawn_io_worker(remove::remove_task, t, reply),
+                        Task::Album(t) => spawn_io_worker(album::album_task, t, reply),
                     }
                 }
             });
