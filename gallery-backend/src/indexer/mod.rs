@@ -2,11 +2,14 @@ use std::path::PathBuf;
 pub mod databaser;
 mod filter;
 mod importer;
+use path_clean::PathClean;
+
 use crate::indexer;
 use crate::looper::{LOOPER, Signal};
 use crate::tui::{DASHBOARD, FileType};
 
 pub fn indexer(path: PathBuf) -> anyhow::Result<()> {
+    let path = path.clean();
     let database = indexer::filter::filter(&path)?;
     let hash = database.hash;
     DASHBOARD.write().unwrap().add_task(

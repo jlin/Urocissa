@@ -1,7 +1,6 @@
 use crate::structure::database_struct::database::definition::Database;
 use crate::structure::database_struct::file_modify::FileModify;
 use anyhow::Context;
-use path_clean::PathClean;
 use std::{fs::metadata, path::PathBuf, time::UNIX_EPOCH};
 
 pub fn validator(path: &PathBuf) -> anyhow::Result<Database> {
@@ -19,7 +18,7 @@ pub fn validator(path: &PathBuf) -> anyhow::Result<Database> {
         ))?
         .as_millis();
 
-    let file_modify = FileModify::new(path.clean(), modified_millis);
+    let file_modify = FileModify::new(path, modified_millis);
     let size = metadata.len();
     let database = Database::new(size, file_modify);
     Ok(database)

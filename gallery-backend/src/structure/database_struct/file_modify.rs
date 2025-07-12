@@ -18,7 +18,7 @@ pub struct FileModifySize {
 }
 
 impl FileModify {
-    pub fn new(file: PathBuf, modified: u128) -> Self {
+    pub fn new(file: &PathBuf, modified: u128) -> Self {
         Self {
             file: file.to_string_lossy().into_owned(),
             modified,
