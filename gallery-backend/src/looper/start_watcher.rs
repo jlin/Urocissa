@@ -58,9 +58,7 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
     notify::recommended_watcher(move |res: Result<Event, notify::Error>| match res {
         Ok(evt) => {
             match evt.kind {
-                // Index new or modified files/directories.
-                EventKind::Create(_) | EventKind::Modify(_) => {
-                    // Collect unique file paths.
+                EventKind::Create(_) => {
                     let mut files: HashSet<PathBuf> = HashSet::new();
 
                     for p in evt.paths {
@@ -77,13 +75,29 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                         }
                     }
 
-                    // Submit one indexing task per file.
                     for file in files {
                         if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
                             error!("Submit failed: {:#}", err);
                         }
                     }
                 }
+
+                EventKind::Modify(_) => {
+                    let mut files: HashSet<PathBuf> = HashSet::new();
+
+                    for p in evt.paths {
+                        if p.is_file() {
+                            files.insert(p);
+                        }
+                    }
+
+                    for file in files {
+                        if let Err(err) = COORDINATOR.submit(Task::Index(IndexTask::new(file))) {
+                            error!("Submit failed: {:#}", err);
+                        }
+                    }
+                }
+
                 _ => { /* ignore other kinds */ }
             }
         }
