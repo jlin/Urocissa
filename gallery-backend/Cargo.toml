@@ -16,10 +16,12 @@ lto = false
 anstyle = "1.0.11"
 anyhow = "1.0.98"
 arrayvec = { version = "0.7.6", features = ["serde"] }
+atomic_float = "1.1.0"
 bitcode = { version = "0.6.6", features = ["arrayvec"] }
 blake3 = "1.8.2"
 bytesize = "2.0.1"
 chrono = "0.4.41"
+crossbeam-queue = "0.3.12"
 dashmap = { version = "6.1.0", features = ["rayon"] }
 dotenv = "0.15.0"
 env_logger = { version = "0.11.8", features = ["humantime", "color"] }

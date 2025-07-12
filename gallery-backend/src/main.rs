@@ -7,6 +7,7 @@ use crate::looper::{LOOPER, Looper, Signal};
 use crate::tui::{DASHBOARD, tui_task};
 use constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use initialization::{check_ffmpeg_and_ffprobe, initialize_file, initialize_folder};
+use rayon::ThreadPoolBuilder;
 use redb::ReadableTableMetadata;
 use rocket::fs::FileServer;
 use router::fairing::cache_control_fairing::cache_control_fairing;
@@ -31,12 +32,12 @@ mod tui;
 mod utils;
 #[launch]
 async fn rocket() -> _ {
-    /*  let threads = num_cpus::get() * 2;
+    let threads = 1;
 
     ThreadPoolBuilder::new()
         .num_threads(threads)
         .build_global()
-        .unwrap(); // 全域設置 */
+        .unwrap(); // 全域設置 
     let rx = initialize_logger();
     check_ffmpeg_and_ffprobe();
     initialize_folder();

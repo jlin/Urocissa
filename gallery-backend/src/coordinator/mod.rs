@@ -110,11 +110,11 @@ where
 {
     // Run the closure on Rayon's global pool and await its handle on Tokio.
     tokio::spawn(async move {
-        DASHBOARD.write().unwrap().increase_pending();
+        DASHBOARD.increase_pending();
         let res = tokio_rayon::spawn(move || f(arg)).await;
         if let Some(tx) = reply {
             let _ = tx.send(res);
         }
-        DASHBOARD.write().unwrap().decrease_pending();
+        DASHBOARD.decrease_pending();
     });
 }

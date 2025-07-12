@@ -41,7 +41,7 @@ pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
             }
             write_txn.commit().unwrap();
             LOOPER.notify(Signal::UpdateTree);
-            DASHBOARD.write().unwrap().advance_task_state(&hash);
+            DASHBOARD.advance_task_state(&hash);
             Ok(())
         }
         Err(err) => Err(err).context(format!(
