@@ -1,7 +1,6 @@
 // tui.rs
 
 use arrayvec::ArrayString;
-use bytesize::ByteSize;
 use std::{
     collections::VecDeque,
     mem,
@@ -180,7 +179,7 @@ pub struct Dashboard {
     pub tasks: Vec<TaskRow>,          // running
     pub completed: VecDeque<TaskRow>, // finished (oldest at front)
     pub handled: u64,
-    pub db_bytes: u64,
+    pub pending: u64,
 }
 
 pub static DASHBOARD: LazyLock<Arc<RwLock<Dashboard>>> =
@@ -192,7 +191,7 @@ impl Dashboard {
             tasks: vec![],
             completed: VecDeque::new(),
             handled: 0,
-            db_bytes: 0,
+            pending: 0,
         }
     }
 
@@ -243,6 +242,13 @@ impl Dashboard {
             row.progress = Some(percent.clamp(0.0, 100.0));
         }
     }
+    pub fn increase_pending(&mut self) {
+        self.pending = self.pending.saturating_add(1);
+    }
+
+    pub fn decrease_pending(&mut self) {
+        self.pending = self.pending.saturating_sub(1);
+    }
 }
 
 /// ---------- renderer ----------
@@ -257,17 +263,9 @@ impl Component for Dashboard {
         // top rule
         lines.push(vec![sep.clone()].try_into()?);
 
-        // stats
-        let human = ByteSize(self.db_bytes).to_string();
-        let remain = self.tasks.len().saturating_sub(*MAX_ROWS);
-        let extra = if remain > 0 {
-            format!(" │  … remaining {remain}")
-        } else {
-            String::new()
-        };
         let mut stats = format!(
-            "• Processed: {:<6} │ DB size: {:>8}{extra}",
-            self.handled, human
+            "• Processed: {:<6} │ Pending: {:<6}",
+            self.handled, self.pending
         );
         stats.push_str(&" ".repeat(cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()))));
         lines.push(vec![stats].try_into()?);

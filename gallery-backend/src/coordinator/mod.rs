@@ -17,6 +17,8 @@ use index::IndexTask;
 use remove::RemoveTask;
 use video::VideoTask;
 
+use crate::tui::DASHBOARD;
+
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
 pub enum Task {
@@ -97,9 +99,11 @@ where
 {
     // Run the closure on Rayon's global pool and await its handle on Tokio.
     tokio::spawn(async move {
+        DASHBOARD.write().unwrap().increase_pending();
         let res = tokio_rayon::spawn(move || f(arg)).await;
         if let Some(tx) = reply {
             let _ = tx.send(res);
         }
+        DASHBOARD.write().unwrap().decrease_pending();
     });
 }
