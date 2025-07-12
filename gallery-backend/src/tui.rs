@@ -17,6 +17,8 @@ use tokio::{
 };
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
+use crate::structure::database_struct::database::definition::Database;
+
 pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
 pub static MAX_ROWS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
 
@@ -56,6 +58,11 @@ impl TryFrom<&str> for FileType {
             _ => Err(anyhow::anyhow!("Unknown file type: {}", s)),
         }
     }
+}
+
+pub struct TaskStateMachine {
+    pub database: Database,
+    pub state: TaskState,
 }
 
 pub enum TaskState {

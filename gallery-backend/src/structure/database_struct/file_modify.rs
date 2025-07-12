@@ -18,19 +18,11 @@ pub struct FileModifySize {
 }
 
 impl FileModify {
-    pub fn new(file: &PathBuf, modified: u128) -> Self {
+    pub fn new(file: &Path, modified: u128) -> Self {
         Self {
             file: file.to_string_lossy().into_owned(),
             modified,
             scan_time: Utc::now().timestamp_millis() as u128,
         }
-    }
-    pub fn ext(&self) -> String {
-        Path::new(&self.file)
-            .extension()
-            .and_then(std::ffi::OsStr::to_str)
-            .unwrap_or("")
-            .to_string()
-            .to_lowercase()
     }
 }
