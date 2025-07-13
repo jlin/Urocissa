@@ -31,6 +31,7 @@ mod router;
 mod structure;
 mod tui;
 mod utils;
+mod batcher;
 #[launch]
 async fn rocket() -> _ {
     /*   let threads = 1;
