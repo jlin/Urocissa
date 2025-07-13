@@ -25,7 +25,6 @@ mod db;
 mod indexer;
 mod initialization;
 mod looper;
-mod pool;
 mod public;
 mod router;
 mod structure;
@@ -34,7 +33,7 @@ mod utils;
 mod batcher;
 #[launch]
 async fn rocket() -> _ {
-    /*   let threads = 1;
+  /*   let threads = 1;
 
     ThreadPoolBuilder::new()
         .num_threads(threads)

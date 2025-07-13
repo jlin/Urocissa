@@ -20,7 +20,7 @@ use index::IndexTask;
 use remove::RemoveTask;
 use video::VideoTask;
 
-use crate::{coordinator::copy::CopyTask, pool::spawn_cpu_worker, tui::DASHBOARD};
+use crate::{coordinator::copy::CopyTask, tui::DASHBOARD};
 
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
@@ -99,5 +99,22 @@ where
         if let Some(tx) = reply {
             let _ = tx.send(res);
         }
+    });
+}
+
+/// For CPU-bound *sync* work.
+pub fn spawn_cpu_worker<F, T>(f: F, arg: T, reply: Option<oneshot::Sender<anyhow::Result<()>>>)
+where
+    F: FnOnce(T) -> anyhow::Result<()> + Send + 'static,
+    T: Send + 'static,
+{
+    // Run the closure on Rayon's global pool and await its handle on Tokio.
+    tokio::spawn(async move {
+        DASHBOARD.increase_pending();
+        let res = tokio_rayon::spawn(move || f(arg)).await;
+        if let Some(tx) = reply {
+            let _ = tx.send(res);
+        }
+        DASHBOARD.decrease_pending();
     });
 }
