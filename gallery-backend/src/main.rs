@@ -67,7 +67,6 @@ fn main() -> anyhow::Result<()> {
         }
         txn.commit().unwrap();
 
-        // 啟動 background tasks
         LazyLock::force(&COORDINATOR);
         LazyLock::force(&LOOPER);
 
@@ -84,7 +83,6 @@ fn main() -> anyhow::Result<()> {
             eprintln!("Superconsole disabled (no TTY)");
         }
 
-        // Rocket 啟動與優雅關機機制
         let rocket_instance = build_rocket().await.ignite().await?;
         let shutdown_handle = rocket_instance.shutdown();
 
