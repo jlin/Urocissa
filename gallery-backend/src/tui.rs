@@ -1,4 +1,4 @@
-//! tui.rs — lock-free dashboard with 148-task timer (Rust 1.88)
+//! tui.rs — lock-free dashboard (Rust 1.88)
 
 use arrayvec::ArrayString;
 use atomic_float::AtomicF64;
@@ -20,8 +20,6 @@ use tokio::{
     time::{interval, Duration},
 };
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
-
-use crate::structure::database_struct::database::definition::Database;
 
 /// ---------- async driver ----------
 pub async fn tui_task(
@@ -154,10 +152,6 @@ pub struct Dashboard {
     handled:        AtomicU64,
     pending:        AtomicU64,
     total_duration: AtomicF64,
-
-    /* 148-task timer */
-    start_ts:    OnceLock<Instant>,
-    window_148:  AtomicF64,
 }
 
 pub static MAX_ROWS:  LazyLock<usize>                 = LazyLock::new(|| rayon::current_num_threads());
@@ -172,17 +166,11 @@ impl Dashboard {
             handled:        AtomicU64::new(0),
             pending:        AtomicU64::new(0),
             total_duration: AtomicF64::new(0.0),
-
-            start_ts:   OnceLock::new(),
-            window_148: AtomicF64::new(0.0),
         }
     }
 
     /* ---------- mutation API ---------- */
     pub fn add_task(&self, hash: ArrayString<64>, path: String, file_type: FileType) {
-        // 若為第一筆任務則啟動計時
-        let _ = self.start_ts.set(Instant::now());
-
         self.tasks
             .entry(hash.clone())
             .and_modify(|t| {
@@ -219,14 +207,7 @@ impl Dashboard {
             Ok(()) => {}
             Err(r) => { let _ = self.completed.pop(); let _ = self.completed.push(r); }
         }
-        // fetch_add 先回傳舊值，再 +1
-        let prev = self.handled.fetch_add(1, Ordering::Relaxed) + 1;
-        if prev == 148 {
-            if let Some(t0) = self.start_ts.get() {
-                self.window_148
-                    .store(t0.elapsed().as_secs_f64(), Ordering::Relaxed);
-            }
-        }
+        self.handled.fetch_add(1, Ordering::Relaxed);
     }
 
     pub fn update_progress(&self, hash: ArrayString<64>, percent: f64) {
@@ -240,7 +221,6 @@ impl Dashboard {
     #[inline] fn handled(&self)        -> u64 { self.handled.load(Ordering::Relaxed) }
     #[inline] fn pending(&self)        -> u64 { self.pending.load(Ordering::Relaxed) }
     #[inline] fn total_duration(&self) -> f64 { self.total_duration.load(Ordering::Relaxed) }
-    #[inline] fn window148(&self)      -> f64 { self.window_148.load(Ordering::Relaxed) }
 }
 
 /// ---------- renderer ----------
@@ -252,16 +232,14 @@ impl Component for Dashboard {
 
         lines.push(vec![sep.clone()].try_into()?);
 
-        let avg = if self.handled() > 0 {
-            format!("│ Avg: {:.2}s", self.total_duration() / self.handled() as f64)
-        } else { String::new() };
+        let avg_str = if self.handled() > 0 {
+            format!("{:.2}s", self.total_duration() / self.handled() as f64)
+        } else {
+            "n/a".into()
+        };
 
-        let win148 = if self.window148() > 0.0 {
-            format!(" │ 148T: {:.2}s", self.window148())
-        } else { String::new() };
-
-        let mut stats = format!("• Processed: {:<6} │ Pending: {:<6} {}{}",
-                                self.handled(), self.pending(), avg, win148);
+        let mut stats = format!("• Processed: {:<6} │ Pending: {:<6} │ Avg: {}",
+                                self.handled(), self.pending(), avg_str);
         stats.push_str(&" ".repeat(cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()))));
         lines.push(vec![stats].try_into()?);
 
