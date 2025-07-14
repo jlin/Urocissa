@@ -1,10 +1,10 @@
 use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
-use crate::constant::redb::DATA_TABLE;
+
 use crate::coordinator::delete::DeleteTask;
 use crate::coordinator::video::VideoTask;
 use crate::coordinator::{COORDINATOR, Task};
-use crate::db::tree::TREE;
+
 use crate::indexer::databaser::fix_orientation::{
     fix_image_orientation, fix_image_width_height, fix_video_width_height,
 };

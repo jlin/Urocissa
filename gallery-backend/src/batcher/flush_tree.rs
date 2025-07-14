@@ -6,7 +6,6 @@ use crate::{
 pub static FLUSH_TREE_QUEUE: QueueApi<Database> = QueueApi::new(flush_tree_task);
 
 pub fn flush_tree_task(vec: Vec<Database>) {
-    info!("Flushing {} databases to disk", vec.len());
     let write_txn = TREE.in_disk.begin_write().unwrap();
 
     {

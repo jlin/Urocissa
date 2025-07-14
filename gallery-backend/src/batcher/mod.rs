@@ -14,12 +14,13 @@
 
 pub mod flush_tree;
 
-use std::sync::{Arc, LazyLock, OnceLock};
+use std::sync::{Arc, OnceLock};
 use tokio::sync::{
     Notify,
     mpsc::{UnboundedSender, unbounded_channel},
 };
-use tokio::task::JoinHandle;
+
+use crate::constant::runtime::TOKIO_RUNTIME;
 
 /* ---------------------------------------------------------------------------
 1.  Generic queue element
@@ -93,7 +94,7 @@ impl<T: Send + 'static> QueueApi<T> {
             let process_fn = self.process;
 
             // Spawn the worker **once** — `OnceLock` guarantees single init
-            RUNTIME.spawn(async move {
+            TOKIO_RUNTIME.spawn(async move {
                 loop {
                     let mut buf: Vec<Queue<T>> = Vec::new();
                     // Batch-receive everything currently buffered; avoids
@@ -128,44 +129,3 @@ impl<T: Send + 'static> QueueApi<T> {
         });
     }
 }
-
-/* ---------------------------------------------------------------------------
-3.  Example concrete queue
------------------------------------------------------------------------- */
-#[cfg(test)]
-mod demo {
-    use super::*;
-    use std::sync::atomic::{AtomicUsize, Ordering};
-
-    // Dummy batch handler for demonstration
-    fn count(ids: Vec<u64>) {
-        static TOTAL: AtomicUsize = AtomicUsize::new(0);
-        TOTAL.fetch_add(ids.len(), Ordering::Relaxed);
-    }
-
-    // **One static and done** — no separate *_TX, no `start()` call needed.
-    pub static PHOTO_QUEUE: QueueApi<u64> = QueueApi::new(count);
-
-    #[tokio::test]
-    async fn smoke() {
-        PHOTO_QUEUE.update(vec![1, 2, 3]);
-        PHOTO_QUEUE.update_async(vec![4]).await;
-        assert_eq!(PHOTO_QUEUE.tx().is_closed(), false);
-    }
-}
-
-
-use tokio::runtime::{Builder, Runtime};
-
-// The magic: a lazily-initialized static Tokio runtime.
-// The first time this is accessed, the closure will be executed to
-// build and start the runtime. Subsequent accesses will return the
-// already-created instance.
-pub static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
-    Builder::new_multi_thread()
-        .worker_threads(2) // Or more, depending on your needs
-        .thread_name("my-global-runtime")
-        .enable_all()
-        .build()
-        .expect("Failed to create Tokio runtime")
-});
