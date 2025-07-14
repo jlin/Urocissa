@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate rocket;
+use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::coordinator::{COORDINATOR, Coordinator};
 use crate::db::tree::TREE;
 use crate::initialization::initialize_logger;
@@ -58,7 +59,6 @@ async fn rocket() -> _ {
     // Force-init global Coordinator and Looper on their own threads/runtime.
     let _ = LazyLock::<Coordinator>::force(&COORDINATOR);
     let _ = LazyLock::<Looper>::force(&LOOPER);
-
     LOOPER.notify(Signal::StartWatcher);
     LOOPER.notify(Signal::UpdateTree);
 

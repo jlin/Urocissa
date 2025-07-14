@@ -1,3 +1,4 @@
+use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 use crate::constant::redb::DATA_TABLE;
 use crate::coordinator::delete::DeleteTask;
@@ -31,11 +32,9 @@ pub mod generate_thumbnail;
 pub mod generate_width_height;
 pub mod video_ffprobe;
 pub fn databaser(mut database: Database) -> anyhow::Result<()> {
-    let write_txn = TREE.in_disk.begin_write().unwrap();
     let is_image = VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str());
+    let hash = database.hash;
     {
-        let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-
         if is_image {
             process_image_info(&mut database)?;
         } else {
@@ -44,18 +43,14 @@ pub fn databaser(mut database: Database) -> anyhow::Result<()> {
             database.pending = true;
         }
 
-        write_table
-            .insert(&*database.hash, database.clone())
-            .unwrap();
-
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
             COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))?
         };
+        FLUSH_TREE_QUEUE.update(vec![database]);
     }
 
-    write_txn.commit().unwrap();
     if !is_image {
-        COORDINATOR.submit(Task::Video(VideoTask::new(database.hash)))?;
+        COORDINATOR.submit(Task::Video(VideoTask::new(hash)))?;
     }
 
     Ok(())

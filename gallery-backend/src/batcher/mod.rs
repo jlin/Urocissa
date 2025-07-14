@@ -12,7 +12,9 @@
 //! PHOTO_QUEUE.update(vec![1, 2, 3]);
 //! PHOTO_QUEUE.update_async(vec![4]).await;
 
-use std::sync::{Arc, OnceLock};
+pub mod flush_tree;
+
+use std::sync::{Arc, LazyLock, OnceLock};
 use tokio::sync::{
     Notify,
     mpsc::{UnboundedSender, unbounded_channel},
@@ -91,7 +93,7 @@ impl<T: Send + 'static> QueueApi<T> {
             let process_fn = self.process;
 
             // Spawn the worker **once** — `OnceLock` guarantees single init
-            tokio::spawn(async move {
+            RUNTIME.spawn(async move {
                 loop {
                     let mut buf: Vec<Queue<T>> = Vec::new();
                     // Batch-receive everything currently buffered; avoids
@@ -151,3 +153,19 @@ mod demo {
         assert_eq!(PHOTO_QUEUE.tx().is_closed(), false);
     }
 }
+
+
+use tokio::runtime::{Builder, Runtime};
+
+// The magic: a lazily-initialized static Tokio runtime.
+// The first time this is accessed, the closure will be executed to
+// build and start the runtime. Subsequent accesses will return the
+// already-created instance.
+pub static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
+    Builder::new_multi_thread()
+        .worker_threads(2) // Or more, depending on your needs
+        .thread_name("my-global-runtime")
+        .enable_all()
+        .build()
+        .expect("Failed to create Tokio runtime")
+});
