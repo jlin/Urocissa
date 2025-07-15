@@ -1,10 +1,11 @@
 use anstyle::Color;
-use env_logger::WriteStyle;
 use env_logger::fmt::style::Style;
+use env_logger::{Builder, WriteStyle};
 use log::kv::Key;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
+use superconsole::style::Stylize;
 
 use std::io::Write;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, unbounded_channel};
@@ -27,73 +28,68 @@ impl std::io::Write for TokioPipe {
         Ok(())
     }
 }
-
 pub fn initialize_logger() -> UnboundedReceiver<String> {
-    let (tx, rx) = unbounded_channel();
-    LOGGER_TX.set(tx).unwrap(); // sender stays global
+    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+    LOGGER_TX.set(tx).unwrap();
 
-    env_logger::Builder::new()
+    Builder::new()
         .write_style(WriteStyle::Always)
         .format(|buf, record| {
-            let custom_value = record
+            // 1. 时间戳（深灰）
+            let ts = buf.timestamp().to_string().dark_grey();
+
+            // 2. 日志级别（自动彩色+重置）
+            let level_style = buf.default_level_style(record.level());
+            let lvl = format!(
+                "{}{}{}",
+                level_style.render(),
+                record.level(),
+                level_style.render_reset()
+            );
+
+            // 3. 模块目标（灰色）
+            let tgt = record.target().dark_grey();
+
+            // 4. 取出 raw duration 字符串，并格式化到最多两位小数
+            let dur_raw = record
                 .key_values()
                 .get(Key::from("duration"))
                 .map(|v| {
-                    let value_str = format!("{}", v);
-                    if let Some(index) = value_str.find(|c: char| c.is_alphabetic())
-                        && let Ok(value) = value_str[..index].parse::<f32>()
-                    {
-                        format!("{:.2} {}", value, &value_str[index..])
-                    } else {
-                        value_str
+                    let s = format!("{}", v);
+                    if let Some(idx) = s.find(|c: char| c.is_alphabetic()) {
+                        // 拆出数字和单位
+                        let (num, unit) = (&s[..idx], &s[idx..]);
+                        if let Ok(val) = num.parse::<f32>() {
+                            // 格式化到两位小数
+                            return format!("{:.2} {}", val, unit);
+                        }
                     }
+                    // 回退到原始字符串
+                    s
                 })
-                .unwrap_or_default(); // Return an empty string if "duration" is not found
+                .unwrap_or_default();
 
-            // Set style: bold blue for custom_value
-            let custom_value_style = Style::new()
-                .bold() // Set bold style
-                .fg_color(Some(Color::Ansi(anstyle::AnsiColor::Blue))); // Set blue foreground color
+            // 5. 无 duration 就输出 10 个空格，否则右对齐到 10 列再上色
+            let dur = if dur_raw.is_empty() {
+                " ".repeat(10)
+            } else {
+                format!("{:>10}", dur_raw).cyan().to_string()
+            };
 
-            // Set style: gray for timestamp and target
-            let grey_style =
-                Style::new().fg_color(Some(Color::Ansi(anstyle::AnsiColor::BrightBlack))); // Set gray foreground color
-
-            // Begin writing to buffer, combining all content into one write!
-            writeln!(
-                buf,
-                "{}{}{}{} {}{}{} {}{}{}\n{:>10}{} {}",
-                // Render timestamp in gray style
-                grey_style.render(),
-                buf.timestamp(),           // Directly use the timestamp method
-                grey_style.render_reset(), // Reset gray style
-                // Render level color
-                buf.default_level_style(record.level()).render(), // Begin rendering Level style
-                record.level(),                                   // Actual Level content
-                buf.default_level_style(record.level()).render_reset(), // End Level style rendering
-                // Render target in gray style
-                grey_style.render(),
-                record.target(),           // Target is displayed after Level
-                grey_style.render_reset(), // Reset gray style
-                // Render custom_value in bold blue style
-                custom_value_style.render(),
-                custom_value,                      // Write custom_value
-                custom_value_style.render_reset(), // Reset custom_value style
-                // Write log message
-                record.args()
-            )?;
+            // 6. 输出两行：第一行前缀，第二行 dur + 空格 + message
+            writeln!(buf, "{} {} [{}]\n{} {}", ts, lvl, tgt, dur, record.args())?;
 
             Ok(())
         })
         .target(env_logger::Target::Pipe(Box::new(TokioPipe(
             LOGGER_TX.get().unwrap().clone(),
-        )))) // Target::Pipe 文件:contentReference[oaicite:5]{index=5}
+        ))))
         .filter(None, log::LevelFilter::Info)
         .filter(Some("rocket"), log::LevelFilter::Warn)
         .init();
+
     rx
 }
-
 pub fn check_ffmpeg_and_ffprobe() {
     for command in &["ffmpeg", "ffprobe"] {
         match Command::new(command).arg("-version").output() {
