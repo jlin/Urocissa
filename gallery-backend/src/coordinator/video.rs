@@ -1,46 +1,39 @@
+use core::hash;
+
 use anyhow::Context;
 use arrayvec::ArrayString;
+use log::info;
 
 use crate::{
-    constant::redb::DATA_TABLE,
+    batcher::flush_tree::FLUSH_TREE_QUEUE,
     db::tree::TREE,
     indexer::databaser::generate_compressed_video::generate_compressed_video,
     looper::{LOOPER, Signal},
+    structure::database_struct::database::definition::Database,
     tui::DASHBOARD,
 };
 
 #[derive(Debug)]
 pub struct VideoTask {
-    pub hash: ArrayString<64>,
+    pub database: Database,
 }
 
 impl VideoTask {
-    pub fn new(hash: ArrayString<64>) -> Self {
-        Self { hash }
+    pub fn new(database: Database) -> Self {
+        Self { database }
     }
 }
 
 pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
-    let hash = task.hash;
-    let read_table = TREE.api_read_tree();
-    let guard = read_table.get(&*hash).unwrap();
-
-    let mut database = if let Some(guard) = guard {
-        guard.value()
-    } else {
-        anyhow::bail!("video_task: hash not found in database: {hash}");
-    };
-
+    let mut database = task.database;
+    let hash = database.hash;
     match generate_compressed_video(&mut database) {
         Ok(_) => {
             database.pending = false;
-            let write_txn = TREE.in_disk.begin_write().unwrap();
-            {
-                let mut write_table = write_txn.open_table(DATA_TABLE).unwrap();
-                write_table.insert(&*database.hash, &database).unwrap();
-            }
-            write_txn.commit().unwrap();
+
+            FLUSH_TREE_QUEUE.update(vec![database]);
             LOOPER.notify(Signal::UpdateTree);
+
             DASHBOARD.advance_task_state(&hash);
             Ok(())
         }

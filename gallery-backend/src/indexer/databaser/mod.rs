@@ -46,12 +46,12 @@ pub fn databaser(mut database: Database) -> anyhow::Result<()> {
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
             COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))?
         };
+        if !is_image {
+            COORDINATOR.submit(Task::Video(VideoTask::new(database.clone())))?;
+        }
         FLUSH_TREE_QUEUE.update(vec![database]);
     }
-
-    if !is_image {
-        COORDINATOR.submit(Task::Video(VideoTask::new(hash)))?;
-    }
+    info!("{}", hash);
 
     Ok(())
 }
