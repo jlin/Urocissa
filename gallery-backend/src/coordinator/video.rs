@@ -1,31 +1,14 @@
-use core::hash;
-
 use anyhow::Context;
-use arrayvec::ArrayString;
-use log::info;
 
 use crate::{
     batcher::flush_tree::FLUSH_TREE_QUEUE,
-    db::tree::TREE,
     indexer::databaser::generate_compressed_video::generate_compressed_video,
     looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
     tui::DASHBOARD,
 };
 
-#[derive(Debug)]
-pub struct VideoTask {
-    pub database: Database,
-}
-
-impl VideoTask {
-    pub fn new(database: Database) -> Self {
-        Self { database }
-    }
-}
-
-pub fn video_task(task: VideoTask) -> anyhow::Result<()> {
-    let mut database = task.database;
+pub fn video_task(mut database: Database) -> anyhow::Result<()> {
     let hash = database.hash;
     match generate_compressed_video(&mut database) {
         Ok(_) => {

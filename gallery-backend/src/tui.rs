@@ -12,13 +12,9 @@ use std::{
     },
     time::Instant,
 };
-use superconsole::{Component, Dimensions, DrawMode, Line, Lines, SuperConsole};
+use superconsole::{Component, Dimensions, DrawMode, Line, Lines};
 use terminal_size::{Width, terminal_size};
-use tokio::{
-    select,
-    sync::mpsc::{UnboundedReceiver, UnboundedSender},
-    time::{Duration, interval},
-};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 /// ---------- async driver ----------

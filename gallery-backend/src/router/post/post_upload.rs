@@ -1,15 +1,11 @@
 use std::path::PathBuf;
-
 use std::time::Instant;
 
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::coordinator::deduplicate::DeduplicateTask;
 use crate::coordinator::{COORDINATOR, Task};
+use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-
-use crate::router::AppResult;
-
 use anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
 
@@ -72,9 +68,7 @@ pub async fn upload(
                         save_file(&mut file, filename, extension, last_modified_time).await?;
 
                     COORDINATOR
-                        .submit_with_ack(Task::Deduplicate(DeduplicateTask::new(PathBuf::from(
-                            final_path,
-                        ))))
+                        .submit_with_ack(Task::Deduplicate(PathBuf::from(final_path)))
                         .await?;
                 } else {
                     error!("Invalid file type");

@@ -14,12 +14,9 @@ use std::{
     },
 };
 
+use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::coordinator::{COORDINATOR, Task};
 use crate::public::config::PRIVATE_CONFIG;
-use crate::{
-    constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
-    coordinator::deduplicate::DeduplicateTask,
-};
 
 /// `true` once the watcher has been successfully initialised.
 static IS_WATCHING: AtomicBool = AtomicBool::new(false);
@@ -91,9 +88,7 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     for file in files {
                         // Check if the file has a valid extension before submitting
                         if is_valid_media_file(&file) {
-                            if let Err(err) =
-                                COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
-                            {
+                            if let Err(err) = COORDINATOR.submit(Task::Deduplicate(file)) {
                                 error!("Submit failed: {:#}", err);
                             }
                         }
@@ -112,9 +107,7 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     for file in files {
                         // Check if the file has a valid extension before submitting
                         if is_valid_media_file(&file) {
-                            if let Err(err) =
-                                COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
-                            {
+                            if let Err(err) = COORDINATOR.submit(Task::Deduplicate(file)) {
                                 error!("Submit failed: {:#}", err);
                             }
                         }

@@ -1,5 +1,6 @@
 use anyhow::Context;
-use std::sync::LazyLock;
+use arrayvec::ArrayString;
+use std::{path::PathBuf, sync::LazyLock};
 use tokio::{
     runtime::Runtime,
     sync::{mpsc, oneshot},
@@ -14,25 +15,21 @@ pub mod index;
 pub mod remove;
 pub mod video;
 
-use album::AlbumTask;
-use deduplicate::DeduplicateTask;
-use delete::DeleteTask;
-use index::IndexTask;
-use remove::RemoveTask;
-use video::VideoTask;
-
-use crate::{constant::runtime::TOKIO_RUNTIME, coordinator::copy::CopyTask, tui::DASHBOARD};
+use crate::{
+    constant::runtime::TOKIO_RUNTIME, structure::database_struct::database::definition::Database,
+    tui::DASHBOARD,
+};
 
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
 pub enum Task {
-    Deduplicate(DeduplicateTask),
-    Delete(DeleteTask),
-    Video(VideoTask),
-    Index(IndexTask),
-    Album(AlbumTask),
-    Remove(RemoveTask),
-    Copy(CopyTask),
+    Deduplicate(PathBuf),
+    Delete(PathBuf),
+    Video(Database),
+    Index(Database),
+    Album(ArrayString<64>),
+    Remove(u128),
+    Copy(Database),
 }
 
 type Envelope = (Task, Option<oneshot::Sender<anyhow::Result<()>>>);
@@ -57,9 +54,7 @@ impl Coordinator {
                             spawn_io_worker(deduplicate::deduplicate_task, t, reply)
                         }
                         Task::Index(t) => spawn_cpu_worker(index::index_task, t, reply),
-                        Task::Copy(t) => {
-                            spawn_io_worker(copy::copy_task, t, reply);
-                        }
+                        Task::Copy(t) => spawn_io_worker(copy::copy_task, t, reply),
                         Task::Video(t) => spawn_cpu_worker(video::video_task, t, reply),
                         Task::Delete(t) => spawn_io_worker(delete::delete_task, t, reply),
                         Task::Remove(t) => spawn_io_worker(remove::remove_task, t, reply),

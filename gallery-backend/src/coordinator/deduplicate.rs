@@ -4,25 +4,14 @@ use anyhow::bail;
 use path_clean::PathClean;
 
 use crate::{
-    coordinator::{COORDINATOR, Task, copy::CopyTask, delete::DeleteTask},
+    coordinator::{COORDINATOR, Task},
     db::tree::TREE,
     looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
 };
 
-#[derive(Debug)]
-pub struct DeduplicateTask {
-    pub path: PathBuf,
-}
-
-impl DeduplicateTask {
-    pub fn new(path: PathBuf) -> Self {
-        Self { path }
-    }
-}
-
-pub fn deduplicate_task(task: DeduplicateTask) -> anyhow::Result<()> {
-    let path = task.path.clean();
+pub fn deduplicate_task(path: PathBuf) -> anyhow::Result<()> {
+    let path = path.clean();
     let mut database = Database::new(&path)?;
     let read_table = TREE.api_read_tree();
     // File already in persistent database
@@ -34,13 +23,13 @@ pub fn deduplicate_task(task: DeduplicateTask) -> anyhow::Result<()> {
         database_exist.alias.push(file_modify);
         TREE.insert_tree_api(&vec![database_exist]).unwrap();
         LOOPER.notify(Signal::UpdateTree);
-        COORDINATOR.submit(Task::Delete(DeleteTask::new(path_to_delete)))?;
+        COORDINATOR.submit(Task::Delete(path_to_delete))?;
         bail!(
             "File already exists in the database: {:?}",
             database.source_path()
         );
     } else {
-        COORDINATOR.submit(Task::Copy(CopyTask::new(database)))?;
+        COORDINATOR.submit(Task::Copy(database))?;
     }
     Ok(())
 }

@@ -1,8 +1,6 @@
 use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 
-use crate::coordinator::delete::DeleteTask;
-use crate::coordinator::video::VideoTask;
 use crate::coordinator::{COORDINATOR, Task};
 
 use crate::indexer::databaser::fix_orientation::{
@@ -20,8 +18,8 @@ use crate::indexer::databaser::generate_width_height::{
 use crate::structure::database_struct::database::definition::Database;
 use std::cmp;
 use std::fs::metadata;
-
 use std::path::PathBuf;
+
 pub mod fix_orientation;
 pub mod generate_compressed_video;
 pub mod generate_dynamic_image;
@@ -33,7 +31,6 @@ pub mod generate_width_height;
 pub mod video_ffprobe;
 pub fn databaser(mut database: Database) -> anyhow::Result<()> {
     let is_image = VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str());
-    let hash = database.hash;
     {
         if is_image {
             process_image_info(&mut database)?;
@@ -44,10 +41,10 @@ pub fn databaser(mut database: Database) -> anyhow::Result<()> {
         }
 
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-            COORDINATOR.submit(Task::Delete(DeleteTask::new(PathBuf::from(&latest.file))))?
+            COORDINATOR.submit(Task::Delete(PathBuf::from(&latest.file)))?
         };
         if !is_image {
-            COORDINATOR.submit(Task::Video(VideoTask::new(database.clone())))?;
+            COORDINATOR.submit(Task::Video(database.clone()))?;
         }
         FLUSH_TREE_QUEUE.update(vec![database]);
     }

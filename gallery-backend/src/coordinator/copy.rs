@@ -3,22 +3,11 @@ use std::fs;
 use anyhow::Context;
 
 use crate::{
-    coordinator::{COORDINATOR, Task, index::IndexTask},
+    coordinator::{COORDINATOR, Task},
     structure::database_struct::database::definition::Database,
 };
 
-#[derive(Debug)]
-pub struct CopyTask {
-    pub database: Database,
-}
-impl CopyTask {
-    pub fn new(database: Database) -> Self {
-        Self { database }
-    }
-}
-
-pub fn copy_task(task: CopyTask) -> anyhow::Result<()> {
-    let database = task.database;
+pub fn copy_task(database: Database) -> anyhow::Result<()> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 
@@ -28,6 +17,6 @@ pub fn copy_task(task: CopyTask) -> anyhow::Result<()> {
 
     fs::copy(&source_path, &dest_path)
         .context(format!("failed to copy {source_path:?} → {dest_path:?}"))?;
-    COORDINATOR.submit(Task::Index(IndexTask::new(database)))?;
+    COORDINATOR.submit(Task::Index(database))?;
     Ok(())
 }

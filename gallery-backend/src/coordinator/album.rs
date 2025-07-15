@@ -9,18 +9,7 @@ use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 
-#[derive(Debug)]
-pub struct AlbumTask {
-    pub album_id: ArrayString<64>,
-}
-
-impl AlbumTask {
-    pub fn new(album_id: ArrayString<64>) -> Self {
-        Self { album_id }
-    }
-}
-
-pub fn album_task(task: AlbumTask) -> anyhow::Result<()> {
+pub fn album_task(album_id: ArrayString<64>) -> anyhow::Result<()> {
     info!("Perform album self-update");
 
     let txn = TREE
@@ -29,7 +18,6 @@ pub fn album_task(task: AlbumTask) -> anyhow::Result<()> {
         .context("begin_write failed (album)")?;
     {
         let mut album_table = txn.open_table(ALBUM_TABLE)?;
-        let album_id = task.album_id;
 
         let album_opt = album_table
             .get(&*album_id)

@@ -9,23 +9,10 @@ use std::{
 
 use crate::constant::MAX_DELETE_ATTEMPTS;
 
-#[derive(Debug)]
-pub struct DeleteTask {
-    pub path: PathBuf,
-}
-
-impl DeleteTask {
-    pub fn new(path: PathBuf) -> Self {
-        Self { path }
-    }
-}
-
 static UPLOAD_PATH: LazyLock<PathBuf> =
     LazyLock::new(|| fs::canonicalize("./upload").expect("`./upload` directory must exist"));
 
-pub fn delete_task(task: DeleteTask) -> anyhow::Result<()> {
-    let path = task.path;
-
+pub fn delete_task(path: PathBuf) -> anyhow::Result<()> {
     // Skip if path is not under ./upload
     if !path_starts_with_upload(&path) {
         return Ok(());
