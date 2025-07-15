@@ -7,16 +7,19 @@ use walkdir::WalkDir;
 
 use std::{
     collections::HashSet,
-    path::PathBuf,
+    path::{Path, PathBuf},
     sync::{
         LazyLock, Mutex,
         atomic::{AtomicBool, Ordering},
     },
 };
 
-use crate::coordinator::deduplicate::DeduplicateTask;
 use crate::coordinator::{COORDINATOR, Task};
 use crate::public::config::PRIVATE_CONFIG;
+use crate::{
+    constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
+    coordinator::deduplicate::DeduplicateTask,
+};
 
 /// `true` once the watcher has been successfully initialised.
 static IS_WATCHING: AtomicBool = AtomicBool::new(false);
@@ -53,7 +56,17 @@ pub fn start_watcher_task() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Create a `RecommendedWatcher` wired to the indexing callback.
+fn is_valid_media_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_lowercase())
+        .map(|ext| {
+            VALID_IMAGE_EXTENSIONS.contains(&ext.as_str())
+                || VALID_VIDEO_EXTENSIONS.contains(&ext.as_str())
+        })
+        .unwrap_or(false)
+}
+
 fn new_watcher() -> notify::Result<RecommendedWatcher> {
     notify::recommended_watcher(move |res: Result<Event, notify::Error>| match res {
         Ok(evt) => {
@@ -76,10 +89,13 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     }
 
                     for file in files {
-                        if let Err(err) =
-                            COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
-                        {
-                            error!("Submit failed: {:#}", err);
+                        // Check if the file has a valid extension before submitting
+                        if is_valid_media_file(&file) {
+                            if let Err(err) =
+                                COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
+                            {
+                                error!("Submit failed: {:#}", err);
+                            }
                         }
                     }
                 }
@@ -94,10 +110,13 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     }
 
                     for file in files {
-                        if let Err(err) =
-                            COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
-                        {
-                            error!("Submit failed: {:#}", err);
+                        // Check if the file has a valid extension before submitting
+                        if is_valid_media_file(&file) {
+                            if let Err(err) =
+                                COORDINATOR.submit(Task::Deduplicate(DeduplicateTask::new(file)))
+                            {
+                                error!("Submit failed: {:#}", err);
+                            }
                         }
                     }
                 }
