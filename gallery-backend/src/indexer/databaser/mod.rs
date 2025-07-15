@@ -51,7 +51,6 @@ pub fn databaser(mut database: Database) -> anyhow::Result<()> {
         }
         FLUSH_TREE_QUEUE.update(vec![database]);
     }
-    info!("{}", hash);
 
     Ok(())
 }
