@@ -12,9 +12,12 @@ use std::{
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 use tokio::{
+    runtime::Runtime,
     sync::{Notify, mpsc, oneshot},
     task,
 };
+
+use crate::constant::runtime::TOKIO_RUNTIME;
 
 /// Every background task handled by the looper.
 ///
@@ -57,7 +60,7 @@ struct Entry {
 }
 
 /// Global singleton that multiplexes [`Signal`] notifications.
-pub static LOOPER: LazyLock<Looper> = LazyLock::new(Looper::new);
+pub static LOOPER: LazyLock<Looper> = LazyLock::new(|| Looper::new(&TOKIO_RUNTIME));
 
 #[derive(Debug)]
 pub struct Looper {
@@ -66,7 +69,7 @@ pub struct Looper {
 
 impl Looper {
     /// Build the singleton and spawn one worker per [`Signal`].
-    fn new() -> Self {
+    fn new(rt: &'static Runtime) -> Self {
         let mut entries = HashMap::new();
         let mut workers = Vec::new();
 
@@ -87,12 +90,7 @@ impl Looper {
 
         // Private Tokio runtime held alive in its own OS thread.
         std::thread::spawn(move || {
-            let runtime = tokio::runtime::Builder::new_multi_thread()
-                .enable_all()
-                .build()
-                .expect("failed to start Tokio runtime");
-
-            runtime.block_on(async move {
+            rt.spawn(async move {
                 for (signal, notifier, ack_receiver) in workers {
                     register_worker(signal, notifier, ack_receiver, signal.task_fn());
                 }

@@ -1,6 +1,7 @@
 use anyhow::Context;
 use std::sync::LazyLock;
 use tokio::{
+    runtime::Runtime,
     sync::{mpsc, oneshot},
     task,
 };
@@ -20,7 +21,7 @@ use index::IndexTask;
 use remove::RemoveTask;
 use video::VideoTask;
 
-use crate::{coordinator::copy::CopyTask, tui::DASHBOARD};
+use crate::{constant::runtime::TOKIO_RUNTIME, coordinator::copy::CopyTask, tui::DASHBOARD};
 
 /// One-shot tasks that travel through the queue.
 #[derive(Debug)]
@@ -37,20 +38,19 @@ pub enum Task {
 type Envelope = (Task, Option<oneshot::Sender<anyhow::Result<()>>>);
 
 /// Global singleton you can call from anywhere.
-pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(Coordinator::new);
+pub static COORDINATOR: LazyLock<Coordinator> = LazyLock::new(|| Coordinator::new(&TOKIO_RUNTIME));
 
 pub struct Coordinator {
     tx: mpsc::UnboundedSender<Envelope>,
 }
 
 impl Coordinator {
-    fn new() -> Self {
+    fn new(rt: &'static Runtime) -> Self {
         let (tx, mut rx) = mpsc::unbounded_channel::<Envelope>();
 
         // Dedicated OS thread with its own Tokio runtime
         std::thread::spawn(move || {
-            let rt = tokio::runtime::Runtime::new().expect("start Tokio runtime");
-            rt.block_on(async move {
+            rt.spawn(async move {
                 while let Some((task, reply)) = rx.recv().await {
                     match task {
                         Task::Deduplicate(t) => {
