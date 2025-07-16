@@ -8,7 +8,7 @@ use superconsole::style::Stylize;
 use std::io::Write;
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
-use crate::tui::LOGGER_TX;
+use crate::public::tui::LOGGER_TX;
 
 /// A `Write` adapter that sends each incoming line over a Tokio channel.
 pub struct TokioPipe(pub UnboundedSender<String>);

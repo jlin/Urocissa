@@ -2,7 +2,7 @@ use super::video_ffprobe::video_duration;
 use crate::{
     operations::indexer::databaser::{generate_ffmpeg::create_silent_ffmpeg_command, process_image_info},
     public::structure::database_struct::database::definition::Database,
-    tui::DASHBOARD,
+    public::tui::DASHBOARD,
 };
 use anyhow::Context;
 use regex::Regex;

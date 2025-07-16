@@ -7,7 +7,7 @@ use crate::{
     tasks::actor::Task,
     tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
     tasks::looper::{LOOPER, Signal},
-    tui::DASHBOARD,
+    public::tui::DASHBOARD,
 };
 
 pub struct VideoTask {

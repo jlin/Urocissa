@@ -3,7 +3,7 @@ use crate::operations;
 use crate::public::structure::database_struct::database::definition::Database;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
-use crate::tui::{DASHBOARD, FileType};
+use crate::public::tui::{DASHBOARD, FileType};
 
 pub fn indexer(database: Database) -> anyhow::Result<()> {
     let hash = database.hash;
