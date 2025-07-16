@@ -1,5 +1,5 @@
-use crate::coordinator::COORDINATOR;
-use crate::coordinator::album::AlbumTask;
+use crate::tasks::COORDINATOR;
+use crate::tasks::album::AlbumTask;
 use crate::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::looper::{LOOPER, Signal};
 use crate::router::AppResult;

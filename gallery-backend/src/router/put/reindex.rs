@@ -3,8 +3,8 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use rocket::http::Status;
 
 use crate::constant::PROCESS_BATCH_NUMBER;
-use crate::coordinator::COORDINATOR;
-use crate::coordinator::album::AlbumTask;
+use crate::tasks::COORDINATOR;
+use crate::tasks::album::AlbumTask;
 use crate::db::tree::TREE;
 use crate::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::indexer::databaser::{regenerate_metadata_for_image, regenerate_metadata_for_video};

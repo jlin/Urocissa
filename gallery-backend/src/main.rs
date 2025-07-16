@@ -4,7 +4,7 @@ extern crate rocket;
 // --- Make sure all your modules are declared ---
 mod batcher;
 mod constant;
-mod coordinator;
+mod tasks;
 mod db;
 mod indexer;
 mod initialization;
@@ -16,7 +16,7 @@ mod tui;
 mod utils;
 
 use crate::constant::runtime::TOKIO_RUNTIME;
-use crate::coordinator::COORDINATOR;
+use crate::tasks::COORDINATOR;
 use crate::initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };

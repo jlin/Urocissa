@@ -4,7 +4,7 @@ use anyhow::Context;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    coordinator::{COORDINATOR, actor::Task, index::IndexTask},
+    tasks::{COORDINATOR, actor::Task, index::IndexTask},
     structure::database_struct::database::definition::Database,
 };
 

@@ -1,9 +1,9 @@
 use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 
-use crate::coordinator::COORDINATOR;
-use crate::coordinator::delete::DeleteTask;
-use crate::coordinator::video::VideoTask;
+use crate::tasks::COORDINATOR;
+use crate::tasks::delete::DeleteTask;
+use crate::tasks::video::VideoTask;
 use crate::indexer::databaser::fix_orientation::{
     fix_image_orientation, fix_image_width_height, fix_video_width_height,
 };

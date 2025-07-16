@@ -14,11 +14,11 @@ use std::{
     },
 };
 
-use crate::coordinator::COORDINATOR;
+use crate::tasks::COORDINATOR;
 use crate::public::config::PRIVATE_CONFIG;
 use crate::{
     constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
-    coordinator::deduplicate::DeduplicateTask,
+    tasks::deduplicate::DeduplicateTask,
 };
 
 /// `true` once the watcher has been successfully initialised.

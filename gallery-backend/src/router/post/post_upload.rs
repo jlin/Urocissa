@@ -2,8 +2,8 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use crate::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::coordinator::COORDINATOR;
-use crate::coordinator::deduplicate::DeduplicateTask;
+use crate::tasks::COORDINATOR;
+use crate::tasks::deduplicate::DeduplicateTask;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;

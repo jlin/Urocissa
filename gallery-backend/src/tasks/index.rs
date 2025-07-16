@@ -1,7 +1,7 @@
 use tokio_rayon::spawn;
 
 use crate::{
-    coordinator::actor::Task, indexer::indexer,
+    tasks::actor::Task, indexer::indexer,
     structure::database_struct::database::definition::Database,
 };
 

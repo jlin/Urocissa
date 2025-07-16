@@ -2,7 +2,7 @@ use redb::TableDefinition;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    coordinator::actor::Task, db::tree_snapshot::TREE_SNAPSHOT,
+    tasks::actor::Task, db::tree_snapshot::TREE_SNAPSHOT,
     structure::reduced_data::ReducedData,
 };
 

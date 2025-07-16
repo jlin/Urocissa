@@ -1,6 +1,6 @@
 // album.rs
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::coordinator::actor::Task;
+use crate::tasks::actor::Task;
 use crate::db::tree::TREE;
 use crate::structure::abstract_data::AbstractData;
 

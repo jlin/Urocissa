@@ -10,7 +10,7 @@ pub mod index;
 pub mod remove;
 pub mod video;
 
-use crate::{constant::runtime::TOKIO_RUNTIME, coordinator::actor::Actor, tui::DASHBOARD};
+use crate::{constant::runtime::TOKIO_RUNTIME, tasks::actor::Actor, tui::DASHBOARD};
 
 pub static COORDINATOR: LazyLock<Actor> = LazyLock::new(|| Actor::new(&TOKIO_RUNTIME));
 
