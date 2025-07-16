@@ -41,6 +41,8 @@ impl Task for IndexTask {
 }
 
 pub fn index_task(mut database: Database) -> anyhow::Result<()> {
+    DASHBOARD.increase_pending();
+
     let hash = database.hash;
     let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.add_task(
@@ -69,6 +71,6 @@ pub fn index_task(mut database: Database) -> anyhow::Result<()> {
     }
     LOOPER.notify(Signal::UpdateTree);
     DASHBOARD.advance_task_state(&hash);
-
+    DASHBOARD.decrease_pending();
     Ok(())
 }

@@ -34,6 +34,7 @@ impl Task for VideoTask {
 }
 
 pub fn video_task(mut database: Database) -> anyhow::Result<()> {
+    DASHBOARD.increase_pending();
     let hash = database.hash;
     match generate_compressed_video(&mut database) {
         Ok(_) => {
@@ -43,11 +44,12 @@ pub fn video_task(mut database: Database) -> anyhow::Result<()> {
             LOOPER.notify(Signal::UpdateTree);
 
             DASHBOARD.advance_task_state(&hash);
-            Ok(())
         }
         Err(err) => Err(err).context(format!(
             "video_task: video compression failed for hash: {}",
             hash
-        )),
+        ))?,
     }
+    DASHBOARD.decrease_pending();
+    Ok(())
 }
