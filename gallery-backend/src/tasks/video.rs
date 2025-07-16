@@ -2,7 +2,7 @@ use anyhow::Context;
 use tokio_rayon::spawn;
 
 use crate::{
-    indexer::databaser::generate_compressed_video::generate_compressed_video,
+    operations::indexer::databaser::generate_compressed_video::generate_compressed_video,
     public::structure::database_struct::database::definition::Database,
     tasks::actor::Task,
     tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,

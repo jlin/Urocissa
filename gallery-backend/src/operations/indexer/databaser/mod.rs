@@ -1,22 +1,26 @@
-use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::public::constant::VALID_IMAGE_EXTENSIONS;
+use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 
-use crate::tasks::COORDINATOR;
-use crate::tasks::delete::DeleteTask;
-use crate::tasks::video::VideoTask;
-use crate::indexer::databaser::fix_orientation::{
+use crate::operations::indexer::databaser::fix_orientation::{
     fix_image_orientation, fix_image_width_height, fix_video_width_height,
 };
-use crate::indexer::databaser::generate_dynamic_image::generate_dynamic_image;
-use crate::indexer::databaser::generate_exif::{generate_exif_for_image, generate_exif_for_video};
-use crate::indexer::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
-use crate::indexer::databaser::generate_thumbnail::{
+use crate::operations::indexer::databaser::generate_dynamic_image::generate_dynamic_image;
+use crate::operations::indexer::databaser::generate_exif::{
+    generate_exif_for_image, generate_exif_for_video,
+};
+use crate::operations::indexer::databaser::generate_image_hash::{
+    generate_phash, generate_thumbhash,
+};
+use crate::operations::indexer::databaser::generate_thumbnail::{
     generate_thumbnail_for_image, generate_thumbnail_for_video,
 };
-use crate::indexer::databaser::generate_width_height::{
+use crate::operations::indexer::databaser::generate_width_height::{
     generate_image_width_height, generate_video_width_height,
 };
 use crate::public::structure::database_struct::database::definition::Database;
+use crate::tasks::COORDINATOR;
+use crate::tasks::delete::DeleteTask;
+use crate::tasks::video::VideoTask;
 use std::cmp;
 use std::fs::metadata;
 use std::path::PathBuf;

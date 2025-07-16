@@ -4,7 +4,6 @@ extern crate rocket;
 // --- Make sure all your modules are declared ---
 
 mod db;
-mod indexer;
 mod initialization;
 mod jobs;
 mod operations;
@@ -13,16 +12,16 @@ mod router;
 mod tasks;
 mod tui;
 mod utils;
-use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
+use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::tasks::COORDINATOR;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use crate::tui::{DASHBOARD, tui_task};
-use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use db::tree::TREE;
+use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use redb::ReadableTableMetadata;
 use rocket::fs::FileServer;
 use router::fairing::cache_control_fairing::cache_control_fairing;
