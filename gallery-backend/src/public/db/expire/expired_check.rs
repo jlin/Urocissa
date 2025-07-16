@@ -1,6 +1,6 @@
 // Import necessary modules and items
 use super::{Expire, EXPIRE_TABLE_DEFINITION};
-use crate::utils::get_current_timestamp_u64;
+use crate::operations::utils::get_current_timestamp_u64;
 use log::info;
 use redb::{ReadableTable, ReadableTableMetadata};
 

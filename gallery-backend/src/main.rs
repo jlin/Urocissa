@@ -10,7 +10,6 @@ mod public;
 mod router;
 mod tasks;
 mod tui;
-mod utils;
 use crate::initialization::{
     check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
 };
