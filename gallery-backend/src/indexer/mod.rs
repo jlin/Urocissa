@@ -1,8 +1,8 @@
 pub mod databaser;
-
 use crate::indexer;
-use crate::looper::{LOOPER, Signal};
 use crate::structure::database_struct::database::definition::Database;
+use crate::tasks::looper::LOOPER;
+use crate::tasks::looper::Signal;
 use crate::tui::{DASHBOARD, FileType};
 
 pub fn indexer(database: Database) -> anyhow::Result<()> {

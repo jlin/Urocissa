@@ -5,10 +5,10 @@ use path_clean::PathClean;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    tasks::{COORDINATOR, actor::Task, copy::CopyTask, delete::DeleteTask},
     db::tree::TREE,
-    looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
+    tasks::looper::{LOOPER, Signal},
+    tasks::{COORDINATOR, actor::Task, copy::CopyTask, delete::DeleteTask},
 };
 
 pub struct DeduplicateTask {

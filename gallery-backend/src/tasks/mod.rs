@@ -1,12 +1,15 @@
+use redb::backends;
 use std::sync::LazyLock;
 use tokio::sync::oneshot;
 
 pub mod actor;
 pub mod album;
+pub mod batcher;
 pub mod copy;
 pub mod deduplicate;
 pub mod delete;
 pub mod index;
+pub mod looper;
 pub mod remove;
 pub mod video;
 

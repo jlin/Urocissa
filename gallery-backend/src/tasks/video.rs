@@ -2,11 +2,11 @@ use anyhow::Context;
 use tokio_rayon::spawn;
 
 use crate::{
-    batcher::flush_tree::FLUSH_TREE_QUEUE,
-    tasks::actor::Task,
     indexer::databaser::generate_compressed_video::generate_compressed_video,
-    looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
+    tasks::actor::Task,
+    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
+    tasks::looper::{LOOPER, Signal},
     tui::DASHBOARD,
 };
 

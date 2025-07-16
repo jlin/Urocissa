@@ -1,4 +1,4 @@
-use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
+use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 
 use crate::tasks::COORDINATOR;

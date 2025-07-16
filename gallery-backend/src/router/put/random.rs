@@ -1,5 +1,5 @@
 use crate::TREE;
-use crate::looper::{LOOPER, Signal};
+use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::structure::database_struct::database::definition::Database;
