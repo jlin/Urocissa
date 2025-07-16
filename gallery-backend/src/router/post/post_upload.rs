@@ -2,8 +2,8 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::tasks::actor::deduplicate::DeduplicateTask;
 use crate::tasks::COORDINATOR;
+use crate::tasks::actor::deduplicate::DeduplicateTask;
 
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -71,7 +71,8 @@ pub async fn upload(
 
                     COORDINATOR
                         .execute_waiting(DeduplicateTask::new(PathBuf::from(final_path)))
-                        .await?;
+                        .await
+                        .map_err(anyhow::Error::from)??;
                 } else {
                     error!("Invalid file type");
                     return Err(anyhow::anyhow!("Invalid file type: {}", extension).into());

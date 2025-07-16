@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
-use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::COORDINATOR;
+use crate::tasks::actor::album::AlbumTask;
 
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
@@ -82,7 +82,10 @@ pub async fn create_non_empty_album(
     .await
     .unwrap();
     LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
-    COORDINATOR.execute_waiting(AlbumTask::new(id)).await?;
+    COORDINATOR
+        .execute_waiting(AlbumTask::new(id))
+        .await
+        .map_err(anyhow::Error::from)??;
     Ok(id.to_string())
 }
 
@@ -119,6 +122,9 @@ pub async fn create_empty_album(
     .await
     .unwrap();
     LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
-    COORDINATOR.execute_waiting(AlbumTask::new(id)).await?;
+    COORDINATOR
+        .execute_waiting(AlbumTask::new(id))
+        .await
+        .map_err(anyhow::Error::from)??;
     Ok(id.to_string())
 }
