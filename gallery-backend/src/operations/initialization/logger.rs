@@ -80,7 +80,7 @@ pub fn initialize_logger() -> UnboundedReceiver<String> {
             };
 
             // Write two lines: first is prefix, second is duration + message
-            writeln!(buf, "{} {} [{}]\n{} {}", ts, lvl, tgt, dur, record.args())?;
+            writeln!(buf, "{} {} {}\n{} {}", ts, lvl, tgt, dur, record.args())?;
 
             Ok(())
         })

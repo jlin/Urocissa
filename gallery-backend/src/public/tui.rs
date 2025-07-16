@@ -96,64 +96,84 @@ impl TaskRow {
             self.progress = None;
         }
     }
-
     pub fn fmt(&self) -> String {
+        // Fixed column widths
         const COL_STATUS: usize = 6;
         const COL_HASH: usize = 5;
         const DEFAULT_COLS: usize = 120;
 
+        // Get custom terminal margin (default 4)
         let margin = std::env::var("UROCISSA_TERM_MARGIN")
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(4);
+
+        // Get terminal width or use default
         let cols = terminal_size()
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(DEFAULT_COLS);
 
+        // Determine status text based on task state
         let status = match (&self.state, self.progress) {
-            (TaskState::Transcoding(_), Some(p)) => format!("{:>5.1}%", p.min(100.0)),
-            (TaskState::Done(_), _) => "✓".into(),
-            _ => "•".into(),
+            (TaskState::Transcoding(_), Some(p)) => format!("{:>5.1}%", p.min(100.0)), // show percent
+            (TaskState::Done(_), _) => "✓".into(),                                     // done
+            _ => "•".into(), // in-progress or other state
         };
-        let status_col = format!("{:<COL_STATUS$}", status);
+        let status_col = format!("{:<COL_STATUS$}", status); // left-align within status column
 
+        // Take first few chars of hash
         let short_hash = &self.hash.as_str()[..COL_HASH.min(self.hash.len())];
-        let hash_col = format!("{:>COL_HASH$}", short_hash);
+        let hash_col = format!("{:>COL_HASH$}", short_hash); // right-align hash column
 
+        // Compute elapsed time in seconds based on state
         let secs = match self.state {
             TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0.elapsed().as_secs_f64(),
             TaskState::Done(d) => d,
         };
-        let suffix = format!(" │ {:>6.1}s", secs);
+        let suffix = format!(" │ {:>6.1}s", secs); // right-align time suffix
 
+        // Compute available width for path display
         let prefix_w = COL_STATUS + 3 + COL_HASH + 3;
         let path_budget = cols
             .saturating_sub(prefix_w + UnicodeWidthStr::width(suffix.as_str()) + margin)
-            .max(5);
+            .max(5); // ensure minimum width of 5
 
+        // Truncate path with ellipsis if too long
         let short_path = Self::tail_ellipsis(&self.path, path_budget);
-        let pad =
-            " ".repeat(path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str())));
 
+        // Calculate padding to fill fixed width
+        let pad_width = path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str()));
+        let pad = " ".repeat(pad_width);
+
+        // Final formatted output
         format!("{status_col} │ {hash_col} │ {short_path}{pad}{suffix}")
     }
 
+    // Truncate string to fit within max width by adding ellipsis at front if needed
     fn tail_ellipsis(s: &str, max: usize) -> String {
         if UnicodeWidthStr::width(s) <= max {
-            return s.to_owned();
+            return s.to_owned(); // no truncation needed
         }
-        let tail_len = max.saturating_sub(1);
-        let mut acc = 0;
-        let mut rev = String::new();
+
+        let tail_len = max.saturating_sub(1); // leave space for "…"
+        let mut acc_width = 0;
+        let mut rev_chars = String::new();
+
+        // Collect characters from end until width limit
         for c in s.chars().rev() {
-            let w = c.width().unwrap_or(0);
-            if acc + w > tail_len {
+            let char_width = c.width().unwrap_or(0);
+            if acc_width + char_width > tail_len {
+                if acc_width + 1 <= tail_len {
+                    rev_chars.push('…'); // optionally add ellipsis
+                }
                 break;
             }
-            acc += w;
-            rev.push(c);
+            acc_width += char_width;
+            rev_chars.push(c);
         }
-        format!("…{}", rev.chars().rev().collect::<String>())
+
+        // Reverse back and prepend ellipsis
+        format!("…{}", rev_chars.chars().rev().collect::<String>())
     }
 }
 
