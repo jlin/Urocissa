@@ -3,7 +3,6 @@ extern crate rocket;
 
 // --- Make sure all your modules are declared ---
 
-mod db;
 mod initialization;
 mod jobs;
 mod operations;
@@ -20,8 +19,8 @@ use crate::tasks::COORDINATOR;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use crate::tui::{DASHBOARD, tui_task};
-use db::tree::TREE;
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
+use public::db::tree::TREE;
 use redb::ReadableTableMetadata;
 use rocket::fs::FileServer;
 use router::fairing::cache_control_fairing::cache_control_fairing;

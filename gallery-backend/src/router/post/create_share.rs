@@ -8,7 +8,7 @@ use rocket::post;
 use rocket::serde::json::Json;
 
 use crate::public::constant::redb::ALBUM_TABLE;
-use crate::db::tree::TREE;
+use crate::public::db::tree::TREE;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;

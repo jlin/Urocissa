@@ -1,5 +1,5 @@
 use super::TreeSnapshot;
-use crate::db::tree::{TREE, read_tags::TagInfo};
+use crate::public::db::tree::{TREE, read_tags::TagInfo};
 use dashmap::DashMap;
 use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 use redb::ReadableTable;

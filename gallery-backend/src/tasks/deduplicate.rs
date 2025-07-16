@@ -5,7 +5,7 @@ use path_clean::PathClean;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    db::tree::TREE,
+    public::db::tree::TREE,
     public::structure::database_struct::database::definition::Database,
     tasks::looper::{LOOPER, Signal},
     tasks::{COORDINATOR, actor::Task, copy::CopyTask, delete::DeleteTask},

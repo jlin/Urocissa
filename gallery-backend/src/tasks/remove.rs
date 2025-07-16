@@ -2,8 +2,8 @@ use redb::TableDefinition;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    tasks::actor::Task, db::tree_snapshot::TREE_SNAPSHOT,
-    public::structure::reduced_data::ReducedData,
+    public::db::tree_snapshot::TREE_SNAPSHOT, public::structure::reduced_data::ReducedData,
+    tasks::actor::Task,
 };
 
 pub struct RemoveTask {

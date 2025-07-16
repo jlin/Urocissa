@@ -1,5 +1,5 @@
-use crate::db::tree::TREE;
-use crate::db::tree::read_tags::TagInfo;
+use crate::public::db::tree::TREE;
+use crate::public::db::tree::read_tags::TagInfo;
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_share::GuardShare;

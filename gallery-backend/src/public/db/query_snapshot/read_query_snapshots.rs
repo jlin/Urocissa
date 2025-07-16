@@ -1,7 +1,7 @@
 use std::{error::Error, sync::atomic::Ordering};
 
 use super::QuerySnapshot;
-use crate::db::{query_snapshot::Prefetch, tree::VERSION_COUNT_TIMESTAMP};
+use crate::public::db::{query_snapshot::Prefetch, tree::VERSION_COUNT_TIMESTAMP};
 
 use redb::TableDefinition;
 

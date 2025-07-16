@@ -1,4 +1,4 @@
-use crate::db::tree_snapshot::TREE_SNAPSHOT;
+use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::reduced_data::ReducedData;
 use redb::TableDefinition;
 use std::time::Instant;

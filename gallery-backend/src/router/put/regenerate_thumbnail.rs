@@ -1,4 +1,4 @@
-use crate::db::tree::TREE;
+use crate::public::db::tree::TREE;
 use crate::operations::indexer::databaser::generate_dynamic_image::generate_dynamic_image;
 use crate::operations::indexer::databaser::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::tasks::looper::{LOOPER, Signal};

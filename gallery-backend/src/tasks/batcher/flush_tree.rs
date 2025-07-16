@@ -1,5 +1,5 @@
 use crate::{
-    tasks::batcher::QueueApi, public::constant::redb::DATA_TABLE, db::tree::TREE,
+    tasks::batcher::QueueApi, public::constant::redb::DATA_TABLE, public::db::tree::TREE,
     public::structure::database_struct::database::definition::Database,
 };
 

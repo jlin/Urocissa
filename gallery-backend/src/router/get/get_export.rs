@@ -1,4 +1,4 @@
-use crate::db::tree::TREE;
+use crate::public::db::tree::TREE;
 use crate::{
     router::fairing::guard_auth::GuardAuth,
     public::structure::database_struct::database::definition::Database,
