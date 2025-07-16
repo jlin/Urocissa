@@ -1,5 +1,5 @@
 use crate::{
-    tasks::{COORDINATOR, remove::RemoveTask},
+    tasks::{COORDINATOR, actor::remove::RemoveTask},
     public::db::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
     router::get::get_prefetch::Prefetch,
 };

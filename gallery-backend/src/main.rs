@@ -9,14 +9,11 @@ mod public;
 mod router;
 mod tasks;
 
-use crate::operations::initialization::{
-    check_ffmpeg_and_ffprobe, initialize_file, initialize_folder, initialize_logger,
-};
 use crate::public::constant::runtime::TOKIO_RUNTIME;
-use crate::tasks::COORDINATOR;
+use crate::public::tui::{DASHBOARD, tui_task};
+use crate::tasks::{initialize, COORDINATOR};
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
-use crate::public::tui::{DASHBOARD, tui_task};
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::db::tree::TREE;
 use redb::ReadableTableMetadata;
@@ -47,11 +44,7 @@ async fn build_rocket() -> rocket::Rocket<rocket::Build> {
 fn main() -> anyhow::Result<()> {
     TOKIO_RUNTIME.block_on(async {
         // 初始化
-        let rx = initialize_logger();
-        check_ffmpeg_and_ffprobe();
-        initialize_folder();
-        initialize_file();
-
+        let rx = initialize();
         let start_time = Instant::now();
         let txn = TREE.in_disk.begin_write().unwrap();
         {

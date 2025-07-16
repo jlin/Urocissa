@@ -3,14 +3,17 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use rocket::http::Status;
 
 use crate::public::constant::PROCESS_BATCH_NUMBER;
+use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::COORDINATOR;
-use crate::tasks::album::AlbumTask;
+
+use crate::operations::indexer::databaser::{
+    regenerate_metadata_for_image, regenerate_metadata_for_video,
+};
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
-use crate::operations::indexer::databaser::{regenerate_metadata_for_image, regenerate_metadata_for_video};
-use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::tasks::looper::{LOOPER, Signal};
 
 use rocket::serde::json::Json;
 use serde::Deserialize;

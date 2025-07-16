@@ -1,19 +1,18 @@
 use redb::backends;
 use std::sync::LazyLock;
-use tokio::sync::oneshot;
+use tokio::sync::{mpsc::UnboundedReceiver, oneshot};
 
 pub mod actor;
-pub mod album;
 pub mod batcher;
-pub mod copy;
-pub mod deduplicate;
-pub mod delete;
-pub mod index;
 pub mod looper;
-pub mod remove;
-pub mod video;
 
-use crate::{public::constant::runtime::TOKIO_RUNTIME, tasks::actor::Actor, public::tui::DASHBOARD};
+use crate::{
+    operations::initialization::{
+        ffmpeg::check_ffmpeg_and_ffprobe, folder::initialize_folder, logger::initialize_logger,
+        redb::initialize_file,
+    },
+    public::{constant::runtime::TOKIO_RUNTIME, tui::DASHBOARD}, tasks::actor::actor::Actor,
+};
 
 pub static COORDINATOR: LazyLock<Actor> = LazyLock::new(|| Actor::new(&TOKIO_RUNTIME));
 
@@ -32,4 +31,12 @@ where
         }
         DASHBOARD.decrease_pending();
     });
+}
+
+pub fn initialize() -> UnboundedReceiver<String> {
+    let rx = initialize_logger();
+    check_ffmpeg_and_ffprobe();
+    initialize_folder();
+    initialize_file();
+    rx
 }

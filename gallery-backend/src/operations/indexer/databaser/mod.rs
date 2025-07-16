@@ -1,4 +1,6 @@
 use crate::public::constant::VALID_IMAGE_EXTENSIONS;
+use crate::tasks::actor::delete::DeleteTask;
+use crate::tasks::actor::video::VideoTask;
 use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 
 use crate::operations::indexer::databaser::fix_orientation::{
@@ -19,8 +21,7 @@ use crate::operations::indexer::databaser::generate_width_height::{
 };
 use crate::public::structure::database_struct::database::definition::Database;
 use crate::tasks::COORDINATOR;
-use crate::tasks::delete::DeleteTask;
-use crate::tasks::video::VideoTask;
+
 use std::cmp;
 use std::fs::metadata;
 use std::path::PathBuf;

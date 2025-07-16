@@ -18,7 +18,7 @@ use crate::tasks::COORDINATOR;
 use crate::public::config::PRIVATE_CONFIG;
 use crate::{
     public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
-    tasks::deduplicate::DeduplicateTask,
+    tasks::actor::deduplicate::DeduplicateTask,
 };
 
 /// `true` once the watcher has been successfully initialised.

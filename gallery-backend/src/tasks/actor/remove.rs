@@ -3,7 +3,7 @@ use tokio::task::spawn_blocking;
 
 use crate::{
     public::db::tree_snapshot::TREE_SNAPSHOT, public::structure::reduced_data::ReducedData,
-    tasks::actor::Task,
+    tasks::actor::actor::Task,
 };
 
 pub struct RemoveTask {

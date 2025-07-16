@@ -1,8 +1,5 @@
 use env_logger::{Builder, WriteStyle};
 use log::kv::Key;
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
 use superconsole::style::Stylize;
 
 use std::io::Write;
@@ -97,82 +94,4 @@ pub fn initialize_logger() -> UnboundedReceiver<String> {
         .init();
 
     rx
-}
-pub fn check_ffmpeg_and_ffprobe() {
-    for command in &["ffmpeg", "ffprobe"] {
-        match Command::new(command).arg("-version").output() {
-            Ok(output) if output.status.success() => {
-                let version_info = String::from_utf8_lossy(&output.stdout);
-                let version_number = version_info
-                    .lines()
-                    .next()
-                    .unwrap_or("Unknown version")
-                    .split_whitespace()
-                    .nth(2) // Get the third word
-                    .unwrap_or("Unknown");
-                info!("{} version: {}", command, version_number);
-            }
-            Ok(_) => {
-                error!(
-                    "`{}` command was found, but it returned an error. Please ensure it's correctly installed.",
-                    command
-                );
-            }
-            Err(_) => {
-                error!(
-                    "`{}` is not installed or not available in PATH. Please install it before running the application.",
-                    command
-                );
-            }
-        }
-    }
-}
-
-pub fn initialize_folder() {
-    std::fs::create_dir_all(PathBuf::from("./db")).unwrap();
-    std::fs::create_dir_all(PathBuf::from("./object/imported")).unwrap();
-    std::fs::create_dir_all(PathBuf::from("./object/compressed")).unwrap();
-    std::fs::create_dir_all(PathBuf::from("./upload")).unwrap();
-}
-
-pub fn initialize_file() {
-    {
-        let db_path = "./db/temp_db.redb";
-        if fs::metadata(db_path).is_ok() {
-            match fs::remove_file(db_path) {
-                Ok(_) => {
-                    info!("Clear tree cache");
-                }
-                Err(_) => {
-                    error!("Fail to delete cache data ./db/temp_db.redb")
-                }
-            }
-        }
-    }
-    {
-        let db_path = "./db/cache_db.redb";
-        if fs::metadata(db_path).is_ok() {
-            match fs::remove_file(db_path) {
-                Ok(_) => {
-                    info!("Clear query cache");
-                }
-                Err(_) => {
-                    error!("Fail to delete cache data ./db/cache_db.redb")
-                }
-            }
-        }
-    }
-    {
-        let db_path = "./db/expire_db.redb";
-        if fs::metadata(db_path).is_ok() {
-            match fs::remove_file(db_path) {
-                Ok(_) => {
-                    info!("Clear expire table");
-                }
-                Err(_) => {
-                    error!("Fail to delete expire table ./db/expire_db.redb")
-                }
-            }
-        }
-    }
 }
