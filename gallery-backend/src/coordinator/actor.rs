@@ -1,49 +1,30 @@
-use std::{path::PathBuf, sync::LazyLock};
-
-use serde_json::value::Index;
 use tokio::{runtime::Runtime, task::JoinHandle};
 
-use std::future::Future;
-
-use crate::constant::runtime::TOKIO_RUNTIME;
-
 pub trait Task: Sized + Send + 'static {
-    type O: Send + 'static;
+    type Output: Send + 'static;
 
-    fn perform_task(self) -> impl std::future::Future<Output = Self::O> + std::marker::Send;
+    /// Starts this task and returns a Future
+    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send;
 }
 
-struct Actor {
+pub struct Actor {
     rt: &'static Runtime,
 }
 
 impl Actor {
-    fn new(rt: &'static Runtime) -> Self {
+    /// Creates a new Actor bound to the given runtime
+    pub fn new(rt: &'static Runtime) -> Self {
         Actor { rt }
     }
 
-    async fn perform<T: Task>(&self, task: T) -> T::O {
-        let handle = self.rt.spawn(async move { task.perform_task().await });
+    /// Executes the task and waits for it to complete, returning its output
+    pub async fn execute_waiting<T: Task>(&self, task: T) -> T::Output {
+        let handle = self.rt.spawn(async move { task.run().await });
         handle.await.unwrap()
     }
 
-    fn perform_one_shot<T: Task>(&self, task: T) -> tokio::task::JoinHandle<T::O> {
-        self.rt.spawn(async move { task.perform_task().await })
+    /// Executes the task without waiting, returning a JoinHandle for later awaiting
+    pub fn execute_detached<T: Task>(&self, task: T) -> JoinHandle<T::Output> {
+        self.rt.spawn(async move { task.run().await })
     }
-}
-
-pub struct IndexTask(PathBuf);
-impl Task for IndexTask {
-    type O = String;
-
-    fn perform_task(self) -> impl std::future::Future<Output = Self::O> + Send {
-        async move { format!("{}", self.0.display()) }
-    }
-}
-
-pub static ACTOR: LazyLock<Actor> = LazyLock::new(|| Actor::new(&TOKIO_RUNTIME));
-
-fn testing(path: PathBuf) -> () {
-    let task = IndexTask(path);
-    ACTOR.perform_one_shot(task);
 }

@@ -1,6 +1,7 @@
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
-use crate::coordinator::{COORDINATOR, Task};
+use crate::coordinator::COORDINATOR;
+use crate::coordinator::album::AlbumTask;
 use crate::db::tree::TREE;
 use crate::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::looper::{LOOPER, Signal};
@@ -83,6 +84,6 @@ pub async fn delete_data(
     LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     let futures = deleted_album_id
         .into_iter()
-        .map(async |album_id| COORDINATOR.submit_with_ack(Task::Album(album_id)).await);
+        .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
     join_all(futures).await;
 }

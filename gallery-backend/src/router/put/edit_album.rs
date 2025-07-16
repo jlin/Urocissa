@@ -1,4 +1,5 @@
-use crate::coordinator::{COORDINATOR, Task};
+use crate::coordinator::COORDINATOR;
+use crate::coordinator::album::AlbumTask;
 use crate::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::looper::{LOOPER, Signal};
 use crate::router::AppResult;
@@ -76,7 +77,7 @@ pub async fn edit_album(
     LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
     let futures = concact_result
         .into_iter()
-        .map(async |album_id| COORDINATOR.submit_with_ack(Task::Album(album_id)).await);
+        .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
     join_all(futures).await;
 }
 

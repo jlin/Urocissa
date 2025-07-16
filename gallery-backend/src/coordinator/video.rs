@@ -1,12 +1,37 @@
 use anyhow::Context;
+use tokio_rayon::spawn;
 
 use crate::{
     batcher::flush_tree::FLUSH_TREE_QUEUE,
+    coordinator::actor::Task,
     indexer::databaser::generate_compressed_video::generate_compressed_video,
     looper::{LOOPER, Signal},
     structure::database_struct::database::definition::Database,
     tui::DASHBOARD,
 };
+
+pub struct VideoTask {
+    database: Database,
+}
+
+impl VideoTask {
+    pub fn new(database: Database) -> Self {
+        Self { database }
+    }
+}
+
+impl Task for VideoTask {
+    type Output = anyhow::Result<()>;
+
+    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+        async move {
+            let result = spawn(move || video_task(self.database))
+                .await
+                .expect("blocking task panicked");
+            Ok(result)
+        }
+    }
+}
 
 pub fn video_task(mut database: Database) -> anyhow::Result<()> {
     let hash = database.hash;

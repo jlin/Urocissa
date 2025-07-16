@@ -1,6 +1,33 @@
 use redb::TableDefinition;
+use tokio::task::spawn_blocking;
 
-use crate::{db::tree_snapshot::TREE_SNAPSHOT, structure::reduced_data::ReducedData};
+use crate::{
+    coordinator::actor::Task, db::tree_snapshot::TREE_SNAPSHOT,
+    structure::reduced_data::ReducedData,
+};
+
+pub struct RemoveTask {
+    pub timestamp: u128,
+}
+
+impl RemoveTask {
+    pub fn new(timestamp: u128) -> Self {
+        Self { timestamp }
+    }
+}
+
+impl Task for RemoveTask {
+    type Output = anyhow::Result<()>;
+
+    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+        async move {
+            let result = spawn_blocking(move || remove_task(self.timestamp))
+                .await
+                .expect("blocking task panicked");
+            result
+        }
+    }
+}
 
 /// Removes a tree cache table by its timestamp.
 pub fn remove_task(timestamp: u128) -> anyhow::Result<()> {

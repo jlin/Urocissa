@@ -1,11 +1,35 @@
 use std::fs;
 
 use anyhow::Context;
+use tokio::task::spawn_blocking;
 
 use crate::{
-    coordinator::{COORDINATOR, Task},
+    coordinator::{COORDINATOR, actor::Task, index::IndexTask},
     structure::database_struct::database::definition::Database,
 };
+
+pub struct CopyTask {
+    pub database: Database,
+}
+
+impl CopyTask {
+    pub fn new(database: Database) -> Self {
+        Self { database }
+    }
+}
+
+impl Task for CopyTask {
+    type Output = anyhow::Result<()>;
+
+    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+        async move {
+            let result = spawn_blocking(move || copy_task(self.database))
+                .await
+                .expect("blocking task panicked");
+            result
+        }
+    }
+}
 
 pub fn copy_task(database: Database) -> anyhow::Result<()> {
     let source_path = database.source_path();
@@ -17,6 +41,6 @@ pub fn copy_task(database: Database) -> anyhow::Result<()> {
 
     fs::copy(&source_path, &dest_path)
         .context(format!("failed to copy {source_path:?} → {dest_path:?}"))?;
-    COORDINATOR.submit(Task::Index(database))?;
+    COORDINATOR.execute_detached(IndexTask::new(database));
     Ok(())
 }

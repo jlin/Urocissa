@@ -1,5 +1,6 @@
 // album.rs
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::coordinator::actor::Task;
 use crate::db::tree::TREE;
 use crate::structure::abstract_data::AbstractData;
 
@@ -8,6 +9,30 @@ use arrayvec::ArrayString;
 use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
+use tokio::task::spawn_blocking;
+
+pub struct AlbumTask {
+    album_id: ArrayString<64>,
+}
+
+impl AlbumTask {
+    pub fn new(album_id: ArrayString<64>) -> Self {
+        Self { album_id }
+    }
+}
+
+impl Task for AlbumTask {
+    type Output = anyhow::Result<()>;
+
+    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+        async move {
+            let result = spawn_blocking(move || album_task(self.album_id))
+                .await
+                .expect("blocking task panicked");
+            result
+        }
+    }
+}
 
 pub fn album_task(album_id: ArrayString<64>) -> anyhow::Result<()> {
     info!("Perform album self-update");

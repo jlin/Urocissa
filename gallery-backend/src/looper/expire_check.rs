@@ -1,5 +1,5 @@
 use crate::{
-    coordinator::{COORDINATOR, Task},
+    coordinator::{COORDINATOR, remove::RemoveTask},
     db::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
     router::get::get_prefetch::Prefetch,
 };
@@ -40,7 +40,7 @@ pub fn expire_check_task() -> anyhow::Result<()> {
                             .collect();
 
                         for timestamp in tree_snapshot_delete_queue {
-                            COORDINATOR.submit(Task::Remove(timestamp))?;
+                            let _ = COORDINATOR.execute_detached(RemoveTask::new(timestamp));
                         }
                     }
                     Ok(false) => {

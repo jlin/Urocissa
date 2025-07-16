@@ -1,8 +1,9 @@
 use crate::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::constant::VALID_IMAGE_EXTENSIONS;
 
-use crate::coordinator::{COORDINATOR, Task};
-
+use crate::coordinator::COORDINATOR;
+use crate::coordinator::delete::DeleteTask;
+use crate::coordinator::video::VideoTask;
 use crate::indexer::databaser::fix_orientation::{
     fix_image_orientation, fix_image_width_height, fix_video_width_height,
 };
@@ -41,10 +42,10 @@ pub fn databaser(mut database: Database) -> anyhow::Result<()> {
         }
 
         if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-            COORDINATOR.submit(Task::Delete(PathBuf::from(&latest.file)))?
+            COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&latest.file)));
         };
         if !is_image {
-            COORDINATOR.submit(Task::Video(database.clone()))?;
+            COORDINATOR.execute_detached(VideoTask::new(database.clone()));
         }
         FLUSH_TREE_QUEUE.update(vec![database]);
     }

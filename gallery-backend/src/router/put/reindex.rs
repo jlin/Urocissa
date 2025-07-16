@@ -3,7 +3,8 @@ use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterato
 use rocket::http::Status;
 
 use crate::constant::PROCESS_BATCH_NUMBER;
-use crate::coordinator::{COORDINATOR, Task};
+use crate::coordinator::COORDINATOR;
+use crate::coordinator::album::AlbumTask;
 use crate::db::tree::TREE;
 use crate::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::indexer::databaser::{regenerate_metadata_for_image, regenerate_metadata_for_video};
@@ -67,7 +68,7 @@ pub async fn reindex(
                             match album_table.get(&*hash).unwrap() {
                                 Some(_) => {
                                     // album_self_update already will commit
-                                    COORDINATOR.submit(Task::Album(hash)).unwrap();
+                                    COORDINATOR.execute_detached(AlbumTask::new(hash));
                                     None
                                 }
                                 _ => {
