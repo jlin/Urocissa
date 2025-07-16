@@ -9,9 +9,10 @@ mod public;
 mod router;
 mod tasks;
 
+use crate::jobs::initialization::initialize;
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::tui::{DASHBOARD, tui_task};
-use crate::tasks::{initialize, COORDINATOR};
+use crate::tasks::COORDINATOR;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};

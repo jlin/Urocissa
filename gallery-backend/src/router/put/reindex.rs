@@ -2,8 +2,8 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
-use crate::jobs::info::image_info::regenerate_metadata_for_image;
-use crate::jobs::info::video_info::regenerate_metadata_for_video;
+use crate::jobs::info::regenerate_metadata_for_image;
+use crate::jobs::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;

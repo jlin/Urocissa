@@ -3,10 +3,10 @@ use std::path::PathBuf;
 use tokio_rayon::spawn;
 
 use crate::{
-    jobs::info::{image_info::process_image_info, video_info::process_video_info},
+    jobs::info::{process_image_info, process_video_info},
     public::{
         constant::VALID_IMAGE_EXTENSIONS,
-        structure::database_struct::database::definition::Database,
+        structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
     tasks::{
@@ -32,17 +32,17 @@ impl Task for IndexTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn(move || index_task(self.database))
-                .await
-                .expect("blocking task panicked");
+            let result = spawn(move || {
+                let _pending_guard = PendingGuard::new();
+                index_task(self.database)
+            })
+            .await?;
             Ok(result)
         }
     }
 }
 
-pub fn index_task(mut database: Database) -> anyhow::Result<()> {
-    DASHBOARD.increase_pending();
-
+fn index_task(mut database: Database) -> anyhow::Result<()> {
     let hash = database.hash;
     let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.add_task(
@@ -71,6 +71,6 @@ pub fn index_task(mut database: Database) -> anyhow::Result<()> {
     }
     LOOPER.notify(Signal::UpdateTree);
     DASHBOARD.advance_task_state(&hash);
-    DASHBOARD.decrease_pending();
+
     Ok(())
 }
