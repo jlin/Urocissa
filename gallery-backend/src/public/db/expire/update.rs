@@ -1,4 +1,4 @@
-use crate::operations::utils::get_current_timestamp_u64;
+use crate::operations::utils::timestamp::get_current_timestamp_u64;
 use crate::public::db::expire::EXPIRE_TABLE_DEFINITION;
 use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::tasks::looper::{LOOPER, Signal};

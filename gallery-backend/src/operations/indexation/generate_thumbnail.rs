@@ -1,6 +1,7 @@
-use super::small_width_height;
 use crate::{
-    operations::indexer::generate_ffmpeg::create_silent_ffmpeg_command,
+    operations::{
+        indexation::generate_ffmpeg::create_silent_ffmpeg_command, utils::resize::small_width_height,
+    },
     public::structure::database_struct::database::definition::Database,
 };
 use anyhow::Context;

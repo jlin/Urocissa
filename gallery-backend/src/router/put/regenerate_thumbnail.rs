@@ -1,6 +1,6 @@
 use crate::public::db::tree::TREE;
-use crate::operations::indexer::generate_dynamic_image::generate_dynamic_image;
-use crate::operations::indexer::generate_image_hash::{generate_phash, generate_thumbhash};
+use crate::operations::indexation::generate_dynamic_image::generate_dynamic_image;
+use crate::operations::indexation::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;

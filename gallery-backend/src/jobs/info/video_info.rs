@@ -1,13 +1,13 @@
 use std::fs::metadata;
 
-use crate::operations::indexer::fix_orientation::fix_video_width_height;
-use crate::operations::indexer::generate_dynamic_image::generate_dynamic_image;
-use crate::operations::indexer::generate_exif::generate_exif_for_video;
-use crate::operations::indexer::generate_image_hash::{
+use crate::operations::indexation::fix_orientation::fix_video_width_height;
+use crate::operations::indexation::generate_dynamic_image::generate_dynamic_image;
+use crate::operations::indexation::generate_exif::generate_exif_for_video;
+use crate::operations::indexation::generate_image_hash::{
     generate_phash, generate_thumbhash,
 };
-use crate::operations::indexer::generate_thumbnail::generate_thumbnail_for_video;
-use crate::operations::indexer::generate_width_height::generate_video_width_height;
+use crate::operations::indexation::generate_thumbnail::generate_thumbnail_for_video;
+use crate::operations::indexation::generate_width_height::generate_video_width_height;
 use crate::public::structure::database_struct::database::definition::Database;
 
 pub fn process_video_info(database: &mut Database) -> anyhow::Result<()> {
