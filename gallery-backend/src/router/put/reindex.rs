@@ -2,13 +2,12 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
+use crate::jobs::indexer::image_info::regenerate_metadata_for_image;
+use crate::jobs::indexer::video_info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::COORDINATOR;
+use crate::tasks::actor::album::AlbumTask;
 
-use crate::operations::indexer::databaser::{
-    regenerate_metadata_for_image, regenerate_metadata_for_video,
-};
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
