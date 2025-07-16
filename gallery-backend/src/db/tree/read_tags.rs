@@ -5,7 +5,7 @@ use rayon::iter::{IntoParallelRefIterator, ParallelBridge, ParallelIterator};
 use redb::ReadableTable;
 use serde::{Deserialize, Serialize};
 
-use crate::{constant::redb::ALBUM_TABLE, public::structure::album::Album};
+use crate::{public::constant::redb::ALBUM_TABLE, public::structure::album::Album};
 
 use super::Tree;
 

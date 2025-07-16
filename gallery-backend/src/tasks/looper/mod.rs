@@ -17,7 +17,7 @@ use tokio::{
     task,
 };
 
-use crate::constant::runtime::TOKIO_RUNTIME;
+use crate::public::constant::runtime::TOKIO_RUNTIME;
 
 /// Every background task handled by the looper.
 ///

@@ -2,7 +2,7 @@ use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::http::Status;
 
-use crate::constant::PROCESS_BATCH_NUMBER;
+use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::tasks::COORDINATOR;
 use crate::tasks::album::AlbumTask;
 use crate::db::tree::TREE;

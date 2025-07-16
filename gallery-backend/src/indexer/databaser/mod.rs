@@ -1,5 +1,5 @@
 use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
-use crate::constant::VALID_IMAGE_EXTENSIONS;
+use crate::public::constant::VALID_IMAGE_EXTENSIONS;
 
 use crate::tasks::COORDINATOR;
 use crate::tasks::delete::DeleteTask;

@@ -1,5 +1,5 @@
 use crate::{
-    constant::redb::{ALBUM_TABLE, DATA_TABLE},
+    public::constant::redb::{ALBUM_TABLE, DATA_TABLE},
     public::structure::{album::Album, database_struct::database::definition::Database},
 };
 

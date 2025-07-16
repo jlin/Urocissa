@@ -1,5 +1,5 @@
 use crate::{
-    constant::VALID_IMAGE_EXTENSIONS,
+    public::constant::VALID_IMAGE_EXTENSIONS,
     public::structure::database_struct::{database::definition::Database, file_modify::FileModify},
 };
 use anyhow::Context;

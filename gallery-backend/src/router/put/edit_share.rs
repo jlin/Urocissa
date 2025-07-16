@@ -2,7 +2,7 @@ use crate::db::tree::TREE;
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::public::structure::album::Share;
 
-use crate::constant::redb::ALBUM_TABLE;
+use crate::public::constant::redb::ALBUM_TABLE;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 

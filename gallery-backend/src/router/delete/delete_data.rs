@@ -1,4 +1,4 @@
-use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
+use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
 use crate::tasks::COORDINATOR;
 use crate::tasks::album::AlbumTask;

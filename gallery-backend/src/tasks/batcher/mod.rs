@@ -20,7 +20,7 @@ use tokio::sync::{
     mpsc::{UnboundedSender, unbounded_channel},
 };
 
-use crate::constant::runtime::TOKIO_RUNTIME;
+use crate::public::constant::runtime::TOKIO_RUNTIME;
 
 /* ---------------------------------------------------------------------------
 1.  Generic queue element

@@ -17,7 +17,7 @@ use std::{
 use crate::tasks::COORDINATOR;
 use crate::public::config::PRIVATE_CONFIG;
 use crate::{
-    constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
+    public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
     tasks::deduplicate::DeduplicateTask,
 };
 

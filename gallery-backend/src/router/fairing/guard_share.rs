@@ -4,7 +4,7 @@ use rocket::Request;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 
-use crate::constant::redb::ALBUM_TABLE;
+use crate::public::constant::redb::ALBUM_TABLE;
 use crate::db::tree::TREE;
 use crate::router::claims::claims::Claims;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
