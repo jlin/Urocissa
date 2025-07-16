@@ -3,10 +3,10 @@ use tokio_rayon::spawn;
 
 use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
-    public::{structure::database_struct::database::definition::Database, tui::DASHBOARD},
+    public::{structure::{database_struct::database::definition::Database, guard::PendingGuard}, tui::DASHBOARD},
     tasks::{
         batcher::flush_tree::FLUSH_TREE_QUEUE,
-        looper::{LOOPER, Signal},
+        looper::{Signal, LOOPER},
     },
 };
 use mini_actor::Task;
@@ -25,16 +25,18 @@ impl Task for VideoTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn(move || video_task(self.database))
-                .await
-                .expect("blocking task panicked");
+            let result = spawn(move || {
+                let _pending_guard = PendingGuard::new();
+                video_task(self.database)
+            })
+            .await
+            .expect("blocking task panicked");
             Ok(result)
         }
     }
 }
 
 pub fn video_task(mut database: Database) -> anyhow::Result<()> {
-    DASHBOARD.increase_pending();
     let hash = database.hash;
     match generate_compressed_video(&mut database) {
         Ok(_) => {
@@ -50,6 +52,5 @@ pub fn video_task(mut database: Database) -> anyhow::Result<()> {
             hash
         ))?,
     }
-    DASHBOARD.decrease_pending();
     Ok(())
 }
