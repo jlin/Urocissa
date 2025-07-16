@@ -1,6 +1,5 @@
 use std::process::Command;
 
-use crate::public::tui::LOGGER_TX;
 pub fn check_ffmpeg_and_ffprobe() {
     for command in &["ffmpeg", "ffprobe"] {
         match Command::new(command).arg("-version").output() {

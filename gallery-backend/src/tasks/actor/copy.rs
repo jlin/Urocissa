@@ -1,10 +1,12 @@
 use std::fs;
 
 use anyhow::Context;
+use mini_actor::Task;
 use tokio::task::spawn_blocking;
 
 use crate::{
-    public::structure::database_struct::database::definition::Database, tasks::{actor::{actor::Task, index::IndexTask}, COORDINATOR},
+    public::structure::database_struct::database::definition::Database,
+    tasks::{COORDINATOR, actor::index::IndexTask},
 };
 
 pub struct CopyTask {

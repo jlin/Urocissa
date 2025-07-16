@@ -3,6 +3,10 @@ name = "urocissa"
 version = "0.12.4"
 edition = "2024"
 
+[lib]
+name = "mini_actor"
+path = "src/lib.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [profile.release]

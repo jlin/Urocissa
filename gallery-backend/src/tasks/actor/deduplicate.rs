@@ -6,9 +6,13 @@ use tokio::task::spawn_blocking;
 
 use crate::{
     public::{db::tree::TREE, structure::database_struct::database::definition::Database},
-    tasks::{actor::{actor::Task, copy::CopyTask, delete::DeleteTask}, looper::{Signal, LOOPER}, COORDINATOR},
+    tasks::{
+        COORDINATOR,
+        actor::{copy::CopyTask, delete::DeleteTask},
+        looper::{LOOPER, Signal},
+    },
 };
-
+use mini_actor::Task;
 pub struct DeduplicateTask {
     pub path: PathBuf,
 }

@@ -1,12 +1,13 @@
 // album.rs
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::tasks::actor::actor::Task;
+
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 
 use anyhow::Context;
 use arrayvec::ArrayString;
 use log::info;
+use mini_actor::Task;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use tokio::task::spawn_blocking;

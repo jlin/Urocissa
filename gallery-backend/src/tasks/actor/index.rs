@@ -1,10 +1,10 @@
 use tokio_rayon::spawn;
 
 use crate::{
-    tasks::actor::actor::Task, operations::indexer::indexer,
+    operations::indexer::indexer,
     public::structure::database_struct::database::definition::Database,
 };
-
+use mini_actor::Task;
 pub struct IndexTask {
     pub database: Database,
 }

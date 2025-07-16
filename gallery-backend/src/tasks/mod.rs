@@ -1,4 +1,4 @@
-use redb::backends;
+use mini_actor::Actor;
 use std::sync::LazyLock;
 use tokio::sync::{mpsc::UnboundedReceiver, oneshot};
 
@@ -11,7 +11,7 @@ use crate::{
         ffmpeg::check_ffmpeg_and_ffprobe, folder::initialize_folder, logger::initialize_logger,
         redb::initialize_file,
     },
-    public::{constant::runtime::TOKIO_RUNTIME, tui::DASHBOARD}, tasks::actor::actor::Actor,
+    public::{constant::runtime::TOKIO_RUNTIME, tui::DASHBOARD},
 };
 
 pub static COORDINATOR: LazyLock<Actor> = LazyLock::new(|| Actor::new(&TOKIO_RUNTIME));

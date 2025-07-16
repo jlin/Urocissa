@@ -1,4 +1,3 @@
-pub mod actor;
 pub mod album;
 pub mod copy;
 pub mod deduplicate;

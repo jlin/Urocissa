@@ -3,13 +3,13 @@ use tokio_rayon::spawn;
 
 use crate::{
     operations::indexer::databaser::generate_compressed_video::generate_compressed_video,
-    public::structure::database_struct::database::definition::Database,
-    tasks::actor::actor::Task,
-    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
-    tasks::looper::{LOOPER, Signal},
-    public::tui::DASHBOARD,
+    public::{structure::database_struct::database::definition::Database, tui::DASHBOARD},
+    tasks::{
+        batcher::flush_tree::FLUSH_TREE_QUEUE,
+        looper::{LOOPER, Signal},
+    },
 };
-
+use mini_actor::Task;
 pub struct VideoTask {
     database: Database,
 }

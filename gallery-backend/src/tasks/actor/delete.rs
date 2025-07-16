@@ -8,8 +8,8 @@ use std::{
 };
 use tokio::task::spawn_blocking;
 
-use crate::{public::constant::MAX_DELETE_ATTEMPTS, tasks::actor::actor::Task};
-
+use crate::public::constant::MAX_DELETE_ATTEMPTS;
+use mini_actor::Task;
 static UPLOAD_PATH: LazyLock<PathBuf> =
     LazyLock::new(|| fs::canonicalize("./upload").expect("`./upload` directory must exist"));
 
