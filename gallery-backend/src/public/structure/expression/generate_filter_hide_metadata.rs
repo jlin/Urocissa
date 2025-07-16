@@ -1,5 +1,5 @@
 use super::Expression;
-use crate::structure::abstract_data::AbstractData;
+use crate::public::structure::abstract_data::AbstractData;
 use arrayvec::ArrayString;
 
 impl Expression {

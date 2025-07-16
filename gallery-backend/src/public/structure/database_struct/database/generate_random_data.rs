@@ -1,4 +1,4 @@
-use crate::structure::database_struct::file_modify::FileModify;
+use crate::public::structure::database_struct::file_modify::FileModify;
 use arrayvec::ArrayString;
 
 use rand::{distr::Alphanumeric, Rng};

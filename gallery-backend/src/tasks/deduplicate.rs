@@ -6,7 +6,7 @@ use tokio::task::spawn_blocking;
 
 use crate::{
     db::tree::TREE,
-    structure::database_struct::database::definition::Database,
+    public::structure::database_struct::database::definition::Database,
     tasks::looper::{LOOPER, Signal},
     tasks::{COORDINATOR, actor::Task, copy::CopyTask, delete::DeleteTask},
 };

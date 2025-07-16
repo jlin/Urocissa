@@ -12,7 +12,7 @@ use crate::db::tree::TREE;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::structure::album::Share;
+use crate::public::structure::album::Share;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]

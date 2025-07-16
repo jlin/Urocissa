@@ -8,7 +8,7 @@ use crate::constant::redb::ALBUM_TABLE;
 use crate::db::tree::TREE;
 use crate::router::claims::claims::Claims;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
-use crate::structure::album::ResolvedShare;
+use crate::public::structure::album::ResolvedShare;
 
 use super::VALIDATION;
 

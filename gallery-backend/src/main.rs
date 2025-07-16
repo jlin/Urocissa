@@ -11,7 +11,6 @@ mod jobs;
 mod operations;
 mod public;
 mod router;
-mod structure;
 mod tasks;
 mod tui;
 mod utils;

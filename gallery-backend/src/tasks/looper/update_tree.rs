@@ -1,7 +1,7 @@
 use crate::db::expire::EXPIRE;
 use crate::db::tree::TREE;
-use crate::structure::abstract_data::AbstractData;
-use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::public::structure::abstract_data::AbstractData;
+use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;

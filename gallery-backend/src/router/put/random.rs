@@ -2,7 +2,7 @@ use crate::TREE;
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::structure::database_struct::database::definition::Database;
+use crate::public::structure::database_struct::database::definition::Database;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[get("/put/generate_random_data?<number>")]

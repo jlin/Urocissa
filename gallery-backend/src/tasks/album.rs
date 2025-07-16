@@ -2,7 +2,7 @@
 use crate::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::tasks::actor::Task;
 use crate::db::tree::TREE;
-use crate::structure::abstract_data::AbstractData;
+use crate::public::structure::abstract_data::AbstractData;
 
 use anyhow::Context;
 use arrayvec::ArrayString;

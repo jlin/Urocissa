@@ -1,4 +1,4 @@
-use crate::structure::database_struct::database::definition::Database;
+use crate::public::structure::database_struct::database::definition::Database;
 use anyhow::anyhow;
 use anyhow::bail;
 use image::{DynamicImage, ImageBuffer, Rgb};

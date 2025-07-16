@@ -1,4 +1,4 @@
-use crate::structure::database_struct::database::definition::Database;
+use crate::public::structure::database_struct::database::definition::Database;
 use anyhow::Context;
 use regex::Regex;
 use std::{collections::BTreeMap, io, path::Path, process::Command, sync::LazyLock};

@@ -1,5 +1,5 @@
 use crate::db::tree_snapshot::TREE_SNAPSHOT;
-use crate::structure::reduced_data::ReducedData;
+use crate::public::structure::reduced_data::ReducedData;
 use redb::TableDefinition;
 use std::time::Instant;
 

@@ -1,6 +1,6 @@
 use crate::{
     constant::VALID_IMAGE_EXTENSIONS,
-    structure::database_struct::{database::definition::Database, file_modify::FileModify},
+    public::structure::database_struct::{database::definition::Database, file_modify::FileModify},
 };
 use anyhow::Context;
 use arrayvec::ArrayString;

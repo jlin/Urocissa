@@ -1,6 +1,6 @@
 pub mod databaser;
 use crate::indexer;
-use crate::structure::database_struct::database::definition::Database;
+use crate::public::structure::database_struct::database::definition::Database;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use crate::tui::{DASHBOARD, FileType};

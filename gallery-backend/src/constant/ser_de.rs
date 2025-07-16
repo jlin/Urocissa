@@ -1,6 +1,6 @@
 use crate::router::get::get_prefetch::Prefetch;
 
-use crate::structure::{
+use crate::public::structure::{
     album::Album, database_struct::database::definition::Database, reduced_data::ReducedData,
     row::Row,
 };

@@ -5,7 +5,7 @@ use tokio::task::spawn_blocking;
 
 use crate::{
     tasks::{COORDINATOR, actor::Task, index::IndexTask},
-    structure::database_struct::database::definition::Database,
+    public::structure::database_struct::database::definition::Database,
 };
 
 pub struct CopyTask {

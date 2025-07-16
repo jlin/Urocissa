@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
-use crate::structure::album::ResolvedShare;
+use crate::public::structure::album::ResolvedShare;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

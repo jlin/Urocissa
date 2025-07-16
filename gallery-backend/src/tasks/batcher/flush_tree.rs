@@ -1,6 +1,6 @@
 use crate::{
-    batcher::QueueApi, constant::redb::DATA_TABLE, db::tree::TREE,
-    structure::database_struct::database::definition::Database,
+    tasks::batcher::QueueApi, constant::redb::DATA_TABLE, db::tree::TREE,
+    public::structure::database_struct::database::definition::Database,
 };
 
 pub static FLUSH_TREE_QUEUE: QueueApi<Database> = QueueApi::new(flush_tree_task);

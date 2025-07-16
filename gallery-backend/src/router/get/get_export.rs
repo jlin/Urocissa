@@ -1,7 +1,7 @@
 use crate::db::tree::TREE;
 use crate::{
     router::fairing::guard_auth::GuardAuth,
-    structure::database_struct::database::definition::Database,
+    public::structure::database_struct::database::definition::Database,
 };
 use redb::ReadableTable;
 use rocket::get;

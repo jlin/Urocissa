@@ -1,5 +1,5 @@
 use super::Expression;
-use crate::structure::abstract_data::AbstractData;
+use crate::public::structure::abstract_data::AbstractData;
 
 impl Expression {
     pub fn generate_filter(self) -> Box<dyn Fn(&AbstractData) -> bool + Sync + Send> {

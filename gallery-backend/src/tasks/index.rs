@@ -2,7 +2,7 @@ use tokio_rayon::spawn;
 
 use crate::{
     tasks::actor::Task, indexer::indexer,
-    structure::database_struct::database::definition::Database,
+    public::structure::database_struct::database::definition::Database,
 };
 
 pub struct IndexTask {

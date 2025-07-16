@@ -1,7 +1,7 @@
 use super::small_width_height;
 use crate::{
     indexer::databaser::generate_ffmpeg::create_silent_ffmpeg_command,
-    structure::database_struct::database::definition::Database,
+    public::structure::database_struct::database::definition::Database,
 };
 use anyhow::Context;
 use image::{DynamicImage, ImageFormat};

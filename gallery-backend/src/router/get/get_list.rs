@@ -3,7 +3,7 @@ use crate::db::tree::read_tags::TagInfo;
 use crate::public::config::{PUBLIC_CONFIG, PublicConfig};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::structure::album::Share;
+use crate::public::structure::album::Share;
 
 use arrayvec::ArrayString;
 use rocket::serde::json::Json;

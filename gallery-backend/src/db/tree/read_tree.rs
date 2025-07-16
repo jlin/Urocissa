@@ -1,6 +1,6 @@
 use crate::{
     constant::redb::{ALBUM_TABLE, DATA_TABLE},
-    structure::{album::Album, database_struct::database::definition::Database},
+    public::structure::{album::Album, database_struct::database::definition::Database},
 };
 
 use redb::ReadOnlyTable;

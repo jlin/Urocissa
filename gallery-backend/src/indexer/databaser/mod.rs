@@ -16,7 +16,7 @@ use crate::indexer::databaser::generate_thumbnail::{
 use crate::indexer::databaser::generate_width_height::{
     generate_image_width_height, generate_video_width_height,
 };
-use crate::structure::database_struct::database::definition::Database;
+use crate::public::structure::database_struct::database::definition::Database;
 use std::cmp;
 use std::fs::metadata;
 use std::path::PathBuf;

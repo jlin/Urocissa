@@ -49,7 +49,7 @@ impl Expire {
 
                     // Iterate over all entries in the expiration table
                     for result in expire_table.iter().unwrap() {
-                        // Destructure the key-value pair from the result
+                        // Depublic::structure the key-value pair from the result
                         if let Ok((key, _)) = result {
                             let key_timestamp = key.value();
                             // If the key's timestamp is less than or equal to the provided timestamp

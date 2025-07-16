@@ -6,10 +6,10 @@ use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::structure::album::ResolvedShare;
-use crate::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use crate::structure::expression::Expression;
-use crate::structure::reduced_data::ReducedData;
+use crate::public::structure::album::ResolvedShare;
+use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::public::structure::expression::Expression;
+use crate::public::structure::reduced_data::ReducedData;
 
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
