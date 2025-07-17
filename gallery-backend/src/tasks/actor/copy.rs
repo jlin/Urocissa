@@ -34,11 +34,19 @@ pub fn copy_task(database: Database) -> Result<Database> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 
+    // Make sure the parent directory tree exists
     if let Some(parent) = dest_path.parent() {
-        fs::create_dir_all(parent).context(format!("failed to create directory: {parent:?}"))?;
+        fs::create_dir_all(parent).context(format!(
+            "failed to create directory tree for destination {:?}",
+            parent
+        ))?;
     }
 
-    fs::copy(&source_path, &dest_path)
-        .context(format!("failed to copy {source_path:?} → {dest_path:?}"))?;
+    // Perform the copy
+    fs::copy(&source_path, &dest_path).context(format!(
+        "failed to copy file from {:?} to {:?}",
+        source_path, dest_path
+    ))?;
+
     Ok(database)
 }
