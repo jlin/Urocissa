@@ -1,5 +1,5 @@
 use anyhow::Result;
-use std::path::PathBuf;
+
 use tokio_rayon::spawn;
 
 use crate::{
@@ -10,11 +10,7 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
-    tasks::{
-        COORDINATOR,
-        actor::{delete::DeleteTask, video::VideoTask},
-        batcher::flush_tree::FLUSH_TREE_QUEUE,
-    },
+    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
 };
 use mini_actor::Task;
 pub struct IndexTask {
@@ -28,7 +24,7 @@ impl IndexTask {
 }
 
 impl Task for IndexTask {
-    type Output = Result<()>;
+    type Output = Result<Database>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -40,7 +36,7 @@ impl Task for IndexTask {
     }
 }
 
-fn index_task(mut database: Database) -> Result<()> {
+fn index_task(mut database: Database) -> Result<Database> {
     let hash = database.hash;
     let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.add_task(
@@ -55,12 +51,12 @@ fn index_task(mut database: Database) -> Result<()> {
     } else {
         process_video_info(&mut database)?;
         database.pending = true;
-        COORDINATOR.execute_detached(VideoTask::new(database.clone()));
+        /*  COORDINATOR.execute_detached(VideoTask::new(database.clone())); */
     }
 
-    COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(newest_path)));
-    FLUSH_TREE_QUEUE.update(vec![database]);
+    /* COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(newest_path))); */
+    FLUSH_TREE_QUEUE.update(vec![database.clone()]);
     DASHBOARD.advance_task_state(&hash);
 
-    Ok(())
+    Ok(database)
 }

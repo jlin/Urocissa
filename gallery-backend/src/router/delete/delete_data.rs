@@ -2,8 +2,8 @@ use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
 use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
-use crate::tasks::COORDINATOR;
 
+use crate::COORDINATOR;
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;

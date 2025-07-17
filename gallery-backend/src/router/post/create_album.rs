@@ -10,7 +10,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
-use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
@@ -20,6 +19,7 @@ use crate::public::structure::album::Album;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::COORDINATOR;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]

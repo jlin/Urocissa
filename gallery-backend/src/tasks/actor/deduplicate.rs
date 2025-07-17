@@ -3,10 +3,10 @@ use crate::{
         db::tree::TREE, error_data::handle_error,
         structure::database_struct::database::definition::Database,
     },
-    tasks::{COORDINATOR, actor::delete::DeleteTask, batcher::flush_tree::FLUSH_TREE_QUEUE},
+    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
 };
 use anyhow::Result;
-use anyhow::bail;
+
 use mini_actor::Task;
 use path_clean::PathClean;
 use std::{mem, path::PathBuf};
@@ -23,7 +23,7 @@ impl DeduplicateTask {
 }
 
 impl Task for DeduplicateTask {
-    type Output = Result<Database>;
+    type Output = Result<Option<Database>>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -36,7 +36,7 @@ impl Task for DeduplicateTask {
     }
 }
 
-pub fn deduplicate_task(path: PathBuf) -> Result<Database> {
+pub fn deduplicate_task(path: PathBuf) -> Result<Option<Database>> {
     let path = path.clean();
     let mut database = Database::new(&path)?;
     let read_table = TREE.api_read_tree();
@@ -45,14 +45,14 @@ pub fn deduplicate_task(path: PathBuf) -> Result<Database> {
     if let Some(guard) = read_table.get(&*database.hash).unwrap() {
         let mut database_exist = guard.value();
         let file_modify = mem::take(&mut database.alias[0]);
-        let path_to_delete = PathBuf::from(&file_modify.file);
         database_exist.alias.push(file_modify);
         FLUSH_TREE_QUEUE.update(vec![database_exist]);
-        COORDINATOR.execute_detached(DeleteTask::new(path_to_delete));
-        bail!(
+        warn!(
             "File already exists in the database: {:?}",
             database.source_path()
         );
+        Ok(None)
+    } else {
+        Ok(Some(database))
     }
-    Ok(database)
 }
