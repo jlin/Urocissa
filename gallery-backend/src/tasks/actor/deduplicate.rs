@@ -3,10 +3,7 @@ use crate::{
         db::tree::TREE, error_data::handle_error,
         structure::database_struct::database::definition::Database,
     },
-    tasks::{
-        COORDINATOR,
-        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
-    },
+    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
 };
 use anyhow::Result;
 

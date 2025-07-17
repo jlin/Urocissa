@@ -10,10 +10,7 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
-    tasks::{
-        COORDINATOR,
-        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
-    },
+    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
 };
 use mini_coordinator::Task;
 pub struct IndexTask {

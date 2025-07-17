@@ -5,10 +5,7 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::DASHBOARD,
     },
-    tasks::{
-        COORDINATOR,
-        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
-    },
+    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
 };
 use anyhow::Context;
 use anyhow::Result;

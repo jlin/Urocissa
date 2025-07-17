@@ -7,7 +7,7 @@ use crate::process::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
-use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
+use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::public::db::tree::TREE;
@@ -47,7 +47,7 @@ pub async fn reindex(
         for (i, batch) in hash_vec.chunks(PROCESS_BATCH_NUMBER).enumerate() {
             info!("Processing batch {}/{}", i + 1, total_batches);
 
-            let list_of_database: Vec<_> = batch
+            let database_list: Vec<_> = batch
                 .into_par_iter()
                 .filter_map(|&hash| {
                     match database_table.get(&*hash).unwrap() {
@@ -86,7 +86,7 @@ pub async fn reindex(
                     }
                 })
                 .collect();
-            FLUSH_TREE_QUEUE.update(list_of_database);
+            COORDINATOR.execute_batch_detached(FlushTreeTask::new(database_list));
         }
     })
     .await

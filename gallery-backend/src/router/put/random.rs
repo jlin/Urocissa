@@ -1,8 +1,10 @@
-use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
-
-use crate::public::structure::database_struct::database::definition::Database;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::tasks::COORDINATOR;
+use crate::{
+    public::structure::database_struct::database::definition::Database,
+    tasks::batcher::flush_tree::FlushTreeTask,
+};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 #[get("/put/generate_random_data?<number>")]
@@ -11,10 +13,10 @@ pub async fn generate_random_data(
     _read_only_mode: GuardReadOnlyMode,
     number: usize,
 ) {
-    let data_vec: Vec<Database> = (0..number)
+    let database_list: Vec<Database> = (0..number)
         .into_par_iter()
         .map(|_| Database::generate_random_data())
         .collect();
-    FLUSH_TREE_QUEUE.update_async(data_vec).await;
+    COORDINATOR.execute_batch_detached(FlushTreeTask::new(database_list));
     info!("Insert random data complete")
 }
