@@ -8,8 +8,9 @@ use crate::public::structure::expression::Expression;
 use crate::public::structure::reduced_data::ReducedData;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
+use crate::tasks::COORDINATOR;
 use crate::tasks::batcher::flush_query_snapshot::FLUSH_QUERY_SNAPSHOT_QUEUE;
-use crate::tasks::batcher::flush_tree_snapshot::FLUSH_TREE_SNAPSHOT_QUEUE;
+use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -159,7 +160,7 @@ fn persist_tree_snapshot(
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
-    FLUSH_TREE_SNAPSHOT_QUEUE.update(vec![()]);
+    COORDINATOR.execute_batch_detached(FlushTreeSnapshotTask);
 
     (
         timestamp_millis,
