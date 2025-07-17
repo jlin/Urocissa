@@ -5,6 +5,7 @@ use rocket::http::Status;
 use crate::jobs::info::regenerate_metadata_for_image;
 use crate::jobs::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
 
@@ -90,6 +91,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
     Status::Ok
 }

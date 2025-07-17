@@ -5,7 +5,7 @@ use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
     public::{structure::{database_struct::database::definition::Database, guard::PendingGuard}, tui::DASHBOARD},
     tasks::{
-        batcher::flush_tree::FLUSH_TREE_QUEUE,
+        batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE},
         looper::{Signal, LOOPER},
     },
 };
@@ -43,7 +43,7 @@ pub fn video_task(mut database: Database) -> anyhow::Result<()> {
             database.pending = false;
 
             FLUSH_TREE_QUEUE.update(vec![database]);
-            LOOPER.notify(Signal::UpdateTree);
+            UPDATE_TREE_QUEUE.update(vec![()]);
 
             DASHBOARD.advance_task_state(&hash);
         }

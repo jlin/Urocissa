@@ -13,6 +13,7 @@ use crate::jobs::initialization::initialize;
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::looper::LOOPER;
 use crate::tasks::looper::Signal;
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
@@ -60,8 +61,8 @@ fn main() -> anyhow::Result<()> {
         LazyLock::force(&LOOPER);
 
         LOOPER.notify(Signal::StartWatcher);
-        LOOPER.notify(Signal::UpdateTree);
-
+        UPDATE_TREE_QUEUE.update(vec![()]);
+        UPDATE_TREE_QUEUE.update(vec![()]);
         if let Some(sc) = superconsole::SuperConsole::new() {
             TOKIO_RUNTIME.spawn(async move {
                 if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {

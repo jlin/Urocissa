@@ -1,6 +1,7 @@
 use crate::public::db::tree::TREE;
 use crate::operations::indexation::generate_dynamic_image::generate_dynamic_image;
 use crate::operations::indexation::generate_image_hash::{generate_phash, generate_thumbhash};
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
@@ -64,7 +65,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+                UPDATE_TREE_QUEUE.update_async(vec![()]).await;
             }
         }
     }

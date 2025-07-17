@@ -1,4 +1,5 @@
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::looper::{LOOPER, Signal};
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
@@ -76,6 +77,6 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
     Json(vec_tags_info)
 }

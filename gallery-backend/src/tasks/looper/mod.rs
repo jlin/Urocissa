@@ -2,7 +2,6 @@ pub mod expire_check;
 pub mod flush_query;
 pub mod flush_snapshot;
 pub mod start_watcher;
-pub mod update_tree;
 
 use std::{
     collections::HashMap,
@@ -26,7 +25,6 @@ use crate::public::constant::runtime::TOKIO_RUNTIME;
 /// 2. Add its worker function in [`Signal::task_fn`].
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, EnumIter)]
 pub enum Signal {
-    UpdateTree,
     FlushTreeSnapshot,
     FlushQuerySnapshot,
     ExpireCheck,
@@ -43,7 +41,6 @@ impl Signal {
     /// Blocking function executed when this signal is received.
     pub const fn task_fn(self) -> fn() -> anyhow::Result<()> {
         match self {
-            Signal::UpdateTree => update_tree::update_task,
             Signal::FlushTreeSnapshot => flush_snapshot::flush_snapshot_task,
             Signal::FlushQuerySnapshot => flush_query::flush_query_task,
             Signal::ExpireCheck => expire_check::expire_check_task,

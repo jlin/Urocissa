@@ -2,6 +2,10 @@ use crate::public::db::expire::EXPIRE;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::{
+    public::constant::redb::DATA_TABLE,
+    public::structure::database_struct::database::definition::Database, tasks::batcher::QueueApi,
+};
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
@@ -26,7 +30,9 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-pub fn update_task() -> anyhow::Result<()> {
+pub static UPDATE_TREE_QUEUE: QueueApi<()> = QueueApi::new(update_tree_task);
+
+pub fn update_tree_task(_: Vec<()>) {
     let start_time = Instant::now();
     let table = TREE.api_read_tree();
 
@@ -66,5 +72,4 @@ pub fn update_task() -> anyhow::Result<()> {
     *TREE.in_memory.write().unwrap() = data_vec;
 
     EXPIRE.update_expire_time(start_time);
-    Ok(())
 }

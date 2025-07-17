@@ -1,3 +1,4 @@
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::TREE;
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -16,6 +17,6 @@ pub async fn generate_random_data(
         .map(|_| Database::generate_random_data())
         .collect();
     TREE.insert_tree_api(&data_vec).unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
     info!("Insert random data complete")
 }

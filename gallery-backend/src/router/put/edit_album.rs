@@ -1,4 +1,5 @@
 use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::COORDINATOR;
 
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
@@ -75,7 +76,7 @@ pub async fn edit_album(
     .await
     .unwrap();
 
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
     let futures = concact_result
         .into_iter()
         .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
@@ -115,7 +116,7 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
     Ok(())
 }
 
@@ -149,7 +150,7 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
 
     Ok(())
 }

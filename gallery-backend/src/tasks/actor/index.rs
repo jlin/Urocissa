@@ -7,13 +7,10 @@ use crate::{
     public::{
         constant::VALID_IMAGE_EXTENSIONS,
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
-        tui::{DASHBOARD, FileType},
+        tui::{FileType, DASHBOARD},
     },
     tasks::{
-        COORDINATOR,
-        actor::{delete::DeleteTask, video::VideoTask},
-        batcher::flush_tree::FLUSH_TREE_QUEUE,
-        looper::{LOOPER, Signal},
+        actor::{delete::DeleteTask, video::VideoTask}, batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE}, looper::{Signal, LOOPER}, COORDINATOR
     },
 };
 use mini_actor::Task;
@@ -69,7 +66,7 @@ fn index_task(mut database: Database) -> anyhow::Result<()> {
         }
         FLUSH_TREE_QUEUE.update(vec![database]);
     }
-    LOOPER.notify(Signal::UpdateTree);
+    UPDATE_TREE_QUEUE.update(vec![()]);
     DASHBOARD.advance_task_state(&hash);
 
     Ok(())

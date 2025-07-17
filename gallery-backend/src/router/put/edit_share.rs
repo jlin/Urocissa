@@ -1,4 +1,5 @@
 use crate::public::db::tree::TREE;
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::looper::{LOOPER, Signal};
 use crate::public::structure::album::Share;
 
@@ -46,7 +47,7 @@ pub async fn edit_share(
     .await
     .unwrap();
 
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,5 +84,5 @@ pub async fn delete_share(
     })
     .await
     .unwrap();
-    LOOPER.notify_with_ack(Signal::UpdateTree).await.unwrap();
+    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
 }
