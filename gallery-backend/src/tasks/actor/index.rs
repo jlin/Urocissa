@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use tokio_rayon::spawn;
 
 use crate::{
-    jobs::info::{process_image_info, process_video_info},
+    process::info::{process_image_info, process_video_info},
     public::{
         constant::VALID_IMAGE_EXTENSIONS,
         error_data::handle_error,

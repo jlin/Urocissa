@@ -1,6 +1,6 @@
 use super::video_ffprobe::video_duration;
 use crate::{
-    jobs::info::process_image_info,
+    process::info::process_image_info,
     operations::indexation::generate_ffmpeg::create_silent_ffmpeg_command,
     public::{structure::database_struct::database::definition::Database, tui::DASHBOARD},
 };

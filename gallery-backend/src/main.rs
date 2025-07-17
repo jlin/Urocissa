@@ -3,13 +3,14 @@ extern crate rocket;
 use anyhow::Result;
 // --- Make sure all your modules are declared ---
 
-mod jobs;
 mod operations;
+mod process;
 mod public;
 mod router;
 mod tasks;
+mod workflow;
 
-use crate::jobs::initialization::initialize;
+use crate::process::initialization::initialize;
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::COORDINATOR;
