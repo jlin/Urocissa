@@ -6,10 +6,11 @@ use crate::tasks::{
     },
 };
 use anyhow::Result;
-use arrayvec::ArrayString;
-use std::path::PathBuf;
+use std::{path::PathBuf, time::Duration};
+use tokio::time::sleep;
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
+
     let database_opt = COORDINATOR
         .execute_waiting(DeduplicateTask::new(path.clone()))
         .await??;
@@ -18,11 +19,12 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
             let database = COORDINATOR
                 .execute_waiting(CopyTask::new(database))
                 .await??;
+
             let database = COORDINATOR
                 .execute_waiting(IndexTask::new(database))
                 .await??;
 
-            COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(path)));
+            COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&path)));
 
             if database.ext_type == "video" {
                 COORDINATOR
@@ -37,5 +39,3 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
 
     Ok(())
 }
-
-pub async fn delete_data(hash: ArrayString<64>) {}
