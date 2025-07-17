@@ -19,7 +19,7 @@ use crate::public::structure::album::Album;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::COORDINATOR;
+use crate::tasks::COORDINATOR;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]

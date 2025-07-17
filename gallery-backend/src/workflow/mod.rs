@@ -1,16 +1,12 @@
-use crate::{
-    public::constant::runtime::TOKIO_RUNTIME,
-    tasks::actor::{
+use crate::tasks::{
+    COORDINATOR,
+    actor::{
         copy::CopyTask, deduplicate::DeduplicateTask, delete::DeleteTask, index::IndexTask,
         video::VideoTask,
     },
 };
 use anyhow::Result;
-use mini_actor::Actor;
 use std::path::PathBuf;
-use std::sync::LazyLock;
-
-static COORDINATOR: LazyLock<Actor> = LazyLock::new(|| Actor::new(&TOKIO_RUNTIME));
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
     let database_opt = COORDINATOR

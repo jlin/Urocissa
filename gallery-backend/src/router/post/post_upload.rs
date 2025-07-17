@@ -1,8 +1,8 @@
-use crate::COORDINATOR;
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::tasks::COORDINATOR;
 use crate::tasks::actor::deduplicate::DeduplicateTask;
 use anyhow::Result;
 use anyhow::bail;
