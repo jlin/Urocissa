@@ -4,6 +4,7 @@ use mini_actor::Task;
 use std::fs;
 use tokio::task::spawn_blocking;
 
+use crate::public::error_data::handle_error;
 use crate::{
     public::structure::database_struct::database::definition::Database,
     tasks::{COORDINATOR, actor::index::IndexTask},
@@ -24,10 +25,10 @@ impl Task for CopyTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn_blocking(move || copy_task(self.database))
+            spawn_blocking(move || copy_task(self.database))
                 .await
-                .expect("blocking task panicked");
-            result
+                .expect("blocking task panicked")
+                .map_err(|err| handle_error(err.context("Failed to run copy task")))
         }
     }
 }

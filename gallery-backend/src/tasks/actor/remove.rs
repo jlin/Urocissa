@@ -1,5 +1,6 @@
-use crate::{
-    public::db::tree_snapshot::TREE_SNAPSHOT, public::structure::reduced_data::ReducedData,
+use crate::public::{
+    db::tree_snapshot::TREE_SNAPSHOT, error_data::handle_error,
+    structure::reduced_data::ReducedData,
 };
 use anyhow::Result;
 use mini_actor::Task;
@@ -20,14 +21,13 @@ impl Task for RemoveTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn_blocking(move || remove_task(self.timestamp))
+            spawn_blocking(move || remove_task(self.timestamp))
                 .await
-                .expect("blocking task panicked");
-            result
+                .expect("blocking task panicked")
+                .map_err(|err| handle_error(err.context("Failed to run remove task")))
         }
     }
 }
-
 /// Removes a tree cache table by its timestamp.
 pub fn remove_task(timestamp: u128) -> Result<()> {
     let write_txn = TREE_SNAPSHOT.in_disk.begin_write().unwrap();

@@ -1,6 +1,7 @@
 use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
     public::{
+        error_data::handle_error,
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::DASHBOARD,
     },
@@ -27,10 +28,9 @@ impl Task for VideoTask {
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
             let _pending_guard = PendingGuard::new();
-            let result = spawn(move || video_task(self.database))
+            spawn(move || video_task(self.database))
                 .await
-                .expect("blocking task panicked");
-            Ok(result)
+                .map_err(|err| handle_error(err.context("Failed to run video task")))
         }
     }
 }

@@ -1,5 +1,8 @@
 use crate::{
-    public::{db::tree::TREE, structure::database_struct::database::definition::Database},
+    public::{
+        db::tree::TREE, error_data::handle_error,
+        structure::database_struct::database::definition::Database,
+    },
     tasks::{
         COORDINATOR,
         actor::{copy::CopyTask, delete::DeleteTask},
@@ -28,11 +31,11 @@ impl Task for DeduplicateTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            // Spawn the blocking work onto a dedicated thread pool
-            let result = spawn_blocking(move || deduplicate_task(self.path))
+            spawn_blocking(move || deduplicate_task(self.path))
                 .await
-                .expect("blocking task panicked");
-            result
+                .expect("blocking task panicked")
+                // convert Err into your crate‑error via `handle_error`
+                .map_err(|err| handle_error(err.context("Failed to run deduplicate task")))
         }
     }
 }

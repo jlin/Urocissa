@@ -28,17 +28,14 @@ impl IndexTask {
 }
 
 impl Task for IndexTask {
-    type Output = ();
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
             let _pending_guard = PendingGuard::new();
-            match spawn(move || index_task(self.database)).await {
-                Ok(_) => (),
-                Err(err) => {
-                    handle_error(err);
-                }
-            }
+            spawn(move || index_task(self.database))
+                .await
+                .map_err(|err| handle_error(err.context("Failed to run index task")))
         }
     }
 }

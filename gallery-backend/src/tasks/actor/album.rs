@@ -1,5 +1,6 @@
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::db::tree::TREE;
+use crate::public::error_data::handle_error;
 use crate::public::structure::abstract_data::AbstractData;
 use anyhow::Context;
 use anyhow::Result;
@@ -25,10 +26,10 @@ impl Task for AlbumTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn_blocking(move || album_task(self.album_id))
+            spawn_blocking(move || album_task(self.album_id))
                 .await
-                .expect("blocking task panicked");
-            result
+                .expect("blocking task panicked")
+                .map_err(|err| handle_error(err.context("Failed to run album task")))
         }
     }
 }
