@@ -6,11 +6,9 @@ use crate::tasks::{
     },
 };
 use anyhow::Result;
-use std::{path::PathBuf, time::Duration};
-use tokio::time::sleep;
+use std::path::PathBuf;
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
-
     let database_opt = COORDINATOR
         .execute_waiting(DeduplicateTask::new(path.clone()))
         .await??;

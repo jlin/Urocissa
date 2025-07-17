@@ -1,4 +1,5 @@
 use anyhow::Context;
+use anyhow::Error;
 use anyhow::Result;
 use mini_coordinator::Task;
 use std::fs;
@@ -48,7 +49,7 @@ pub fn copy_task(database: Database) -> Result<Database> {
             "failed to copy file from {:?} to {:?}",
             source_path, dest_path
         )
-    })?; // 若三次都失敗就進 Err 流程
+    })?; // If it fails three times, it goes into the Err branch
 
     Ok(database)
 }
@@ -58,12 +59,20 @@ fn robust_copy(src: &Path, dst: &Path) -> io::Result<u64> {
 
     for attempt in 0..=MAX_RETRIES {
         match fs::copy(src, dst) {
-            Ok(bytes) => return Ok(bytes), // 成功就提早結束
-            Err(_) if attempt < MAX_RETRIES => {
-                thread::sleep(Duration::from_secs(1)); // 阻塞 1 s 
-                continue; // 進入下一回合
+            Ok(bytes) => return Ok(bytes), // On success, exit early
+            Err(e) if attempt < MAX_RETRIES => {
+                warn!(
+                    "fs::copy({:?} → {:?}) failed on attempt {}/{}:\n{:?}. Retrying in 1 s",
+                    src,
+                    dst,
+                    attempt + 1,
+                    MAX_RETRIES + 1,
+                    Error::new(e)
+                );
+                thread::sleep(Duration::from_secs(1)); // Block for 1 second
+                continue; // Continue to the next attempt
             }
-            Err(e) => return Err(e), // 第 4 次仍失敗 → 回傳錯誤
+            Err(e) => return Err(e), // If the 4th attempt still fails, return the error
         }
     }
     unreachable!("loop guarantees return")
