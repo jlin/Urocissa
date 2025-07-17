@@ -1,4 +1,5 @@
 use crate::public::structure::database_struct::database::definition::Database;
+use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
 use anyhow::bail;
@@ -12,7 +13,8 @@ pub fn generate_dynamic_image(database: &Database) -> Result<DynamicImage> {
     } else {
         PathBuf::from(database.thumbnail_path())
     };
-    let dynamic_image = decode_image(&img_path)?;
+    let dynamic_image = decode_image(&img_path)
+        .context(format!("Failed to decode image from path {:?}", img_path))?;
     Ok(dynamic_image)
 }
 

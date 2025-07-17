@@ -79,8 +79,27 @@ pub fn initialize_logger() -> UnboundedReceiver<String> {
                 format!("{:>10}", dur_raw).cyan().to_string()
             };
 
-            // Write two lines: first is prefix, second is duration + message
-            writeln!(buf, "{} {} {}\n{} {}", ts, lvl, tgt, dur, record.args())?;
+            // First, print the common prefix for all log entries
+            writeln!(buf, "{} {} {}", ts, lvl, tgt)?;
+
+            // Convert log message to string
+            let message = format!("{}", record.args());
+
+            // Calculate the indent for subsequent lines (duration width 10 + 1 space)
+            let subsequent_indent = " ".repeat(11);
+
+            // Split the message into lines
+            let mut lines = message.lines();
+
+            // Handle the first line of the message, prefix with duration
+            if let Some(first_line) = lines.next() {
+                writeln!(buf, "{} {}", dur, first_line)?;
+            }
+
+            // Handle all subsequent lines, indenting them properly
+            for line in lines {
+                writeln!(buf, "{}{}", subsequent_indent, line)?;
+            }
 
             Ok(())
         })
