@@ -58,9 +58,15 @@ fn index_task(mut database: Database) -> Result<Database> {
     // Branch processing based on file extension
     let is_image = VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str());
     if is_image {
-        process_image_info(&mut database).context("failed to process image metadata pipeline")?;
+        process_image_info(&mut database).context(format!(
+            "failed to process image metadata pipeline:\n{:#?}",
+            database
+        ))?;
     } else {
-        process_video_info(&mut database).context("failed to process video metadata pipeline")?;
+        process_video_info(&mut database).context(format!(
+            "failed to process video metadata pipeline:\n{:#?}",
+            database
+        ))?;
         database.pending = true;
     }
 
