@@ -1,6 +1,7 @@
 use crate::operations::indexation::generate_dynamic_image::generate_dynamic_image;
 use crate::operations::indexation::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::public::db::tree::TREE;
+use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -60,7 +61,7 @@ pub async fn regenerate_thumbnail_with_frame(
                     let dynamic_image = generate_dynamic_image(&database).unwrap();
                     database.thumbhash = generate_thumbhash(&dynamic_image).unwrap();
                     database.phash = generate_phash(&dynamic_image);
-                    TREE.insert_tree_api(&vec![database]).unwrap();
+                    FLUSH_TREE_QUEUE.update(vec![database]);
                 })
                 .await
                 .unwrap();

@@ -22,15 +22,4 @@ impl Tree {
             .open_table(ALBUM_TABLE)
             .unwrap()
     }
-    pub fn insert_tree_api(&self, data_vec: &Vec<Database>) -> anyhow::Result<()> {
-        let txn = self.in_disk.begin_write()?;
-        {
-            let mut table = txn.open_table(DATA_TABLE)?;
-            for data in data_vec {
-                table.insert(&*data.hash, data)?;
-            }
-        }
-        txn.commit()?;
-        Ok(())
-    }
 }

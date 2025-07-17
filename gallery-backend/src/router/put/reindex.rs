@@ -7,6 +7,7 @@ use crate::jobs::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::public::db::tree::TREE;
@@ -85,7 +86,7 @@ pub async fn reindex(
                     }
                 })
                 .collect();
-            TREE.insert_tree_api(&list_of_database).unwrap();
+            FLUSH_TREE_QUEUE.update(list_of_database);
         }
     })
     .await

@@ -1,5 +1,4 @@
-use crate::TREE;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
+use crate::tasks::batcher::flush_tree::FLUSH_TREE_QUEUE;
 
 use crate::public::structure::database_struct::database::definition::Database;
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -16,7 +15,6 @@ pub async fn generate_random_data(
         .into_par_iter()
         .map(|_| Database::generate_random_data())
         .collect();
-    TREE.insert_tree_api(&data_vec).unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    FLUSH_TREE_QUEUE.update_async(data_vec).await;
     info!("Insert random data complete")
 }
