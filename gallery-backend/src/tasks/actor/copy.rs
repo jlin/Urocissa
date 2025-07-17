@@ -5,10 +5,7 @@ use std::fs;
 use tokio::task::spawn_blocking;
 
 use crate::public::error_data::handle_error;
-use crate::{
-    public::structure::database_struct::database::definition::Database,
-    tasks::{COORDINATOR, actor::index::IndexTask},
-};
+use crate::public::structure::database_struct::database::definition::Database;
 
 pub struct CopyTask {
     pub database: Database,
@@ -21,7 +18,7 @@ impl CopyTask {
 }
 
 impl Task for CopyTask {
-    type Output = Result<()>;
+    type Output = Result<Database>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -33,7 +30,7 @@ impl Task for CopyTask {
     }
 }
 
-pub fn copy_task(database: Database) -> Result<()> {
+pub fn copy_task(database: Database) -> Result<Database> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 
@@ -43,6 +40,5 @@ pub fn copy_task(database: Database) -> Result<()> {
 
     fs::copy(&source_path, &dest_path)
         .context(format!("failed to copy {source_path:?} → {dest_path:?}"))?;
-    COORDINATOR.execute_detached(IndexTask::new(database));
-    Ok(())
+    Ok(database)
 }

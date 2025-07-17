@@ -14,12 +14,9 @@ use std::{
     },
 };
 
-use crate::tasks::COORDINATOR;
-use crate::{public::config::PRIVATE_CONFIG, tasks::batcher::QueueApi};
-use crate::{
-    public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
-    tasks::actor::deduplicate::DeduplicateTask,
-};
+use crate::public::constant::runtime::TOKIO_RUNTIME;
+use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
+use crate::{public::config::PRIVATE_CONFIG, tasks::batcher::QueueApi, workflow::index_for_watch};
 
 pub static START_WATCHER_QUEUE: QueueApi<()> = QueueApi::new(start_watcher_task);
 
@@ -57,47 +54,47 @@ fn is_valid_media_file(path: &Path) -> bool {
 }
 
 fn new_watcher() -> notify::Result<RecommendedWatcher> {
-    notify::recommended_watcher(move |res: Result<Event, notify::Error>| match res {
-        Ok(evt) => {
-            match evt.kind {
+    notify::recommended_watcher(move |result: Result<Event, notify::Error>| match result {
+        Ok(event) => {
+            match event.kind {
                 EventKind::Create(_) => {
-                    let mut files: HashSet<PathBuf> = HashSet::new();
+                    let mut path_list: HashSet<PathBuf> = HashSet::new();
 
-                    for p in evt.paths {
-                        if p.is_file() {
-                            files.insert(p);
-                        } else if p.is_dir() {
-                            WalkDir::new(&p)
+                    for path in event.paths {
+                        if path.is_file() {
+                            path_list.insert(path);
+                        } else if path.is_dir() {
+                            WalkDir::new(&path)
                                 .into_iter()
-                                .filter_map(|e| e.ok())
-                                .filter(|e| e.file_type().is_file())
-                                .for_each(|e| {
-                                    files.insert(e.into_path());
+                                .filter_map(|dir_entry| dir_entry.ok())
+                                .filter(|dir_entry| dir_entry.file_type().is_file())
+                                .for_each(|dir_entry| {
+                                    path_list.insert(dir_entry.into_path());
                                 });
                         }
                     }
 
-                    for file in files {
-                        // Check if the file has a valid extension before submitting
-                        if is_valid_media_file(&file) {
-                            COORDINATOR.execute_detached(DeduplicateTask::new(file));
+                    for path in path_list {
+                        // Check if the path has a valid extension before submitting
+                        if is_valid_media_file(&path) {
+                            TOKIO_RUNTIME.spawn(index_for_watch(path));
                         }
                     }
                 }
 
                 EventKind::Modify(_) => {
-                    let mut files: HashSet<PathBuf> = HashSet::new();
+                    let mut path_list: HashSet<PathBuf> = HashSet::new();
 
-                    for p in evt.paths {
-                        if p.is_file() {
-                            files.insert(p);
+                    for path in event.paths {
+                        if path.is_file() {
+                            path_list.insert(path);
                         }
                     }
 
-                    for file in files {
-                        // Check if the file has a valid extension before submitting
-                        if is_valid_media_file(&file) {
-                            COORDINATOR.execute_detached(DeduplicateTask::new(file));
+                    for path in path_list {
+                        // Check if the path has a valid extension before submitting
+                        if is_valid_media_file(&path) {
+                            TOKIO_RUNTIME.spawn(index_for_watch(path));
                         }
                     }
                 }

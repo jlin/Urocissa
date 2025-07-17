@@ -3,11 +3,7 @@ use crate::{
         db::tree::TREE, error_data::handle_error,
         structure::database_struct::database::definition::Database,
     },
-    tasks::{
-        COORDINATOR,
-        actor::{copy::CopyTask, delete::DeleteTask},
-        batcher::flush_tree::FLUSH_TREE_QUEUE,
-    },
+    tasks::{COORDINATOR, actor::delete::DeleteTask, batcher::flush_tree::FLUSH_TREE_QUEUE},
 };
 use anyhow::Result;
 use anyhow::bail;
@@ -27,7 +23,7 @@ impl DeduplicateTask {
 }
 
 impl Task for DeduplicateTask {
-    type Output = Result<()>;
+    type Output = Result<Database>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -40,7 +36,7 @@ impl Task for DeduplicateTask {
     }
 }
 
-pub fn deduplicate_task(path: PathBuf) -> Result<()> {
+pub fn deduplicate_task(path: PathBuf) -> Result<Database> {
     let path = path.clean();
     let mut database = Database::new(&path)?;
     let read_table = TREE.api_read_tree();
@@ -57,8 +53,6 @@ pub fn deduplicate_task(path: PathBuf) -> Result<()> {
             "File already exists in the database: {:?}",
             database.source_path()
         );
-    } else {
-        COORDINATOR.execute_detached(CopyTask::new(database));
     }
-    Ok(())
+    Ok(database)
 }
