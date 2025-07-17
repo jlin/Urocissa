@@ -1,5 +1,5 @@
 pub mod flush_query;
-pub mod flush_snapshot;
+
 pub mod start_watcher;
 
 use std::{
@@ -24,7 +24,6 @@ use crate::public::constant::runtime::TOKIO_RUNTIME;
 /// 2. Add its worker function in [`Signal::task_fn`].
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, EnumIter)]
 pub enum Signal {
-    FlushTreeSnapshot,
     FlushQuerySnapshot,
     StartWatcher,
 }
@@ -39,7 +38,6 @@ impl Signal {
     /// Blocking function executed when this signal is received.
     pub const fn task_fn(self) -> fn() -> anyhow::Result<()> {
         match self {
-            Signal::FlushTreeSnapshot => flush_snapshot::flush_snapshot_task,
             Signal::FlushQuerySnapshot => flush_query::flush_query_task,
             Signal::StartWatcher => start_watcher::start_watcher_task,
         }

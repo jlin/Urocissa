@@ -1,36 +1,14 @@
 use crate::public::db::expire::EXPIRE;
 use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
-use crate::public::db::tree::{TREE, VERSION_COUNT_TIMESTAMP};
-use crate::public::structure::abstract_data::AbstractData;
-use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::router::get::get_prefetch::Prefetch;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::remove::RemoveTask;
 use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
-use rayon::prelude::ParallelSliceMut;
-use redb::{ReadableTable, TableDefinition, TableHandle};
-use std::collections::HashSet;
-use std::sync::LazyLock;
-use std::sync::atomic::Ordering;
-use std::time::Instant;
 
-static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-    [
-        "Make",
-        "Model",
-        "FNumber",
-        "ExposureTime",
-        "FocalLength",
-        "PhotographicSensitivity",
-        "DateTimeOriginal",
-        "duration",
-        "rotation",
-    ]
-    .iter()
-    .cloned()
-    .collect()
-});
+use redb::{ReadableTable, TableDefinition, TableHandle};
+use std::sync::atomic::Ordering;
 
 pub static EXPIRE_CHECK_QUEUE: QueueApi<()> = QueueApi::new(update_tree_task);
 

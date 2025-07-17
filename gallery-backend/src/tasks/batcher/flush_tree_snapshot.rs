@@ -1,9 +1,12 @@
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::reduced_data::ReducedData;
+use crate::tasks::batcher::QueueApi;
 use redb::TableDefinition;
 use std::time::Instant;
 
-pub fn flush_snapshot_task() -> anyhow::Result<()> {
+pub static FLUSH_TREE_SNAPSHOT_QUEUE: QueueApi<()> = QueueApi::new(flush_tree_snapshot_task);
+
+pub fn flush_tree_snapshot_task(_: Vec<()>) {
     loop {
         if TREE_SNAPSHOT.in_memory.is_empty() {
             break;
@@ -47,5 +50,4 @@ pub fn flush_snapshot_task() -> anyhow::Result<()> {
             TREE_SNAPSHOT.in_memory.len()
         );
     }
-    Ok(())
 }

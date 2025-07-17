@@ -2,14 +2,15 @@ use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::db::tree::TREE;
 use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
-use crate::tasks::looper::LOOPER;
-use crate::tasks::looper::Signal;
-use crate::router::claims::claims_timestamp::ClaimsTimestamp;
-use crate::router::fairing::guard_share::GuardShare;
 use crate::public::structure::album::ResolvedShare;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::public::structure::expression::Expression;
 use crate::public::structure::reduced_data::ReducedData;
+use crate::router::claims::claims_timestamp::ClaimsTimestamp;
+use crate::router::fairing::guard_share::GuardShare;
+use crate::tasks::batcher::flush_tree_snapshot::FLUSH_TREE_SNAPSHOT_QUEUE;
+use crate::tasks::looper::LOOPER;
+use crate::tasks::looper::Signal;
 
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -159,7 +160,7 @@ fn persist_tree_snapshot(
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
-    LOOPER.notify(Signal::FlushTreeSnapshot);
+    FLUSH_TREE_SNAPSHOT_QUEUE.update(vec![()]);
 
     (
         timestamp_millis,
