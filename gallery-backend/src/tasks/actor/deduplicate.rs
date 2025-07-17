@@ -3,11 +3,14 @@ use crate::{
         db::tree::TREE, error_data::handle_error,
         structure::database_struct::database::definition::Database,
     },
-    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
+    tasks::{
+        COORDINATOR,
+        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
+    },
 };
 use anyhow::Result;
 
-use mini_actor::Task;
+use mini_coordinator::Task;
 use path_clean::PathClean;
 use std::{mem, path::PathBuf};
 use tokio::task::spawn_blocking;
@@ -46,7 +49,7 @@ pub fn deduplicate_task(path: PathBuf) -> Result<Option<Database>> {
         let mut database_exist = guard.value();
         let file_modify = mem::take(&mut database.alias[0]);
         database_exist.alias.push(file_modify);
-        FLUSH_TREE_QUEUE.update(vec![database_exist]);
+        COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database_exist]));
         warn!(
             "File already exists in the database: {:?}",
             database.source_path()

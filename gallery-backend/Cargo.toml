@@ -5,6 +5,10 @@ edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "mini_coordinator"
+path = "src/lib.rs"
+
 [profile.release]
 lto = true
 
@@ -35,7 +39,6 @@ indicatif = "0.17.11"
 jsonwebtoken = "9.3.1"
 kamadak-exif = "0.6.1"
 log = { version = "0.4.27", features = ["kv"] }
-mini_actor = "1.0.0"
 notify = "8.1.0"
 num_cpus = "1.17.0"
 path-clean = "1.0.1"

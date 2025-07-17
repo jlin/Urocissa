@@ -10,9 +10,12 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
-    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
+    tasks::{
+        COORDINATOR,
+        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
+    },
 };
-use mini_actor::Task;
+use mini_coordinator::Task;
 pub struct IndexTask {
     pub database: Database,
 }
@@ -52,7 +55,7 @@ fn index_task(mut database: Database) -> Result<Database> {
         process_video_info(&mut database)?;
         database.pending = true;
     }
-    FLUSH_TREE_QUEUE.update(vec![database.clone()]);
+    COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database.clone()]));
     DASHBOARD.advance_task_state(&hash);
 
     Ok(database)

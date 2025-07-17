@@ -5,11 +5,14 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::DASHBOARD,
     },
-    tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
+    tasks::{
+        COORDINATOR,
+        batcher::flush_tree::{FLUSH_TREE_QUEUE, FlushTreeTask},
+    },
 };
 use anyhow::Context;
 use anyhow::Result;
-use mini_actor::Task;
+use mini_coordinator::Task;
 use tokio_rayon::spawn;
 
 pub struct VideoTask {
@@ -40,7 +43,7 @@ pub fn video_task(mut database: Database) -> Result<()> {
     match generate_compressed_video(&mut database) {
         Ok(_) => {
             database.pending = false;
-            FLUSH_TREE_QUEUE.update(vec![database]);
+            COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database]));
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(

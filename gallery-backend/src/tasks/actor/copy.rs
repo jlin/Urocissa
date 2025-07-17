@@ -1,6 +1,6 @@
 use anyhow::Context;
 use anyhow::Result;
-use mini_actor::Task;
+use mini_coordinator::Task;
 use std::fs;
 use tokio::task::spawn_blocking;
 

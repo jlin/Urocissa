@@ -1,6 +1,6 @@
 use std::sync::LazyLock;
 
-use mini_actor::Actor;
+use mini_coordinator::Actor;
 
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 

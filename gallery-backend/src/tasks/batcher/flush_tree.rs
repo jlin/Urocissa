@@ -19,3 +19,24 @@ fn flush_tree_task(vec: Vec<Database>) {
     write_txn.commit().unwrap();
     UPDATE_TREE_QUEUE.update(vec![()]);
 }
+
+pub struct FlushTreeTask {
+    pub databases: Vec<Database>,
+}
+
+impl FlushTreeTask {
+    pub fn new(databases: Vec<Database>) -> Self {
+        Self { databases }
+    }
+}
+impl mini_coordinator::BatchTask for FlushTreeTask {
+    fn batch_run(list: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+        async move {
+            let mut all_databases = Vec::new();
+            for task in list {
+                all_databases.extend(task.databases);
+            }
+            flush_tree_task(all_databases);
+        }
+    }
+}
