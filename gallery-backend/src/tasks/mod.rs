@@ -3,7 +3,6 @@ use std::sync::LazyLock;
 
 pub mod actor;
 pub mod batcher;
-pub mod looper;
 
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 

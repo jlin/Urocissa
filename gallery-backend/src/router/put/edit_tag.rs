@@ -1,6 +1,5 @@
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
-use crate::tasks::looper::{LOOPER, Signal};
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::db::tree::read_tags::TagInfo;

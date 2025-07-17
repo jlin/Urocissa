@@ -13,9 +13,8 @@ use crate::jobs::initialization::initialize;
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::start_watcher::START_WATCHER_QUEUE;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
-use crate::tasks::looper::LOOPER;
-use crate::tasks::looper::Signal;
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::db::tree::TREE;
 use redb::ReadableTableMetadata;
@@ -58,9 +57,7 @@ fn main() -> anyhow::Result<()> {
         txn.commit().unwrap();
 
         LazyLock::force(&COORDINATOR);
-        LazyLock::force(&LOOPER);
-
-        LOOPER.notify(Signal::StartWatcher);
+        START_WATCHER_QUEUE.update(vec![()]);
         UPDATE_TREE_QUEUE.update(vec![()]);
         UPDATE_TREE_QUEUE.update(vec![()]);
         if let Some(sc) = superconsole::SuperConsole::new() {

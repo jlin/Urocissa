@@ -15,45 +15,34 @@ use std::{
 };
 
 use crate::tasks::COORDINATOR;
-use crate::public::config::PRIVATE_CONFIG;
+use crate::{public::config::PRIVATE_CONFIG, tasks::batcher::QueueApi};
 use crate::{
     public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS},
     tasks::actor::deduplicate::DeduplicateTask,
 };
 
-/// `true` once the watcher has been successfully initialised.
+pub static START_WATCHER_QUEUE: QueueApi<()> = QueueApi::new(start_watcher_task);
+
 static IS_WATCHING: AtomicBool = AtomicBool::new(false);
 
-/// Holds the watcher so it is never dropped (dropping stops event delivery).
 static WATCHER_HANDLE: LazyLock<Mutex<Option<RecommendedWatcher>>> =
     LazyLock::new(|| Mutex::new(None));
 
-/// Initialise the global filesystem watcher (idempotent).
-///
-/// Subsequent calls return immediately.
-///
-/// # Errors
-/// Propagates any error from [`notify::Watcher::watch`].
-pub fn start_watcher_task() -> anyhow::Result<()> {
+fn start_watcher_task(_: Vec<()>) -> () {
     // Fast-path: already running.
     if IS_WATCHING.swap(true, Ordering::SeqCst) {
-        return Ok(());
+        return;
     }
 
     // Build the watcher.
-    let mut watcher = new_watcher()?;
+    let mut watcher = new_watcher().unwrap();
     for path in &PRIVATE_CONFIG.sync_path {
-        watcher.watch(path, RecursiveMode::Recursive)?;
+        watcher.watch(path, RecursiveMode::Recursive).unwrap();
         info!("Watching path {:?}", path);
     }
 
     // Store it globally to keep it alive.
-    *WATCHER_HANDLE
-        .lock()
-        .map_err(|err| anyhow::anyhow!("Failed to lock WATCHER_HANDLE mutex: {}", err))? =
-        Some(watcher);
-
-    Ok(())
+    *WATCHER_HANDLE.lock().unwrap() = Some(watcher);
 }
 
 fn is_valid_media_file(path: &Path) -> bool {

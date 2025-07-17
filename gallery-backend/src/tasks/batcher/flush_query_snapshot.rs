@@ -1,11 +1,14 @@
-use crate::{
-    public::db::{query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
-    router::get::get_prefetch::Prefetch,
-};
-
+use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
+use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
+use crate::router::get::get_prefetch::Prefetch;
+use crate::tasks::batcher::QueueApi;
 use redb::TableDefinition;
-use std::{sync::atomic::Ordering, time::Instant};
-pub fn flush_query_task() -> anyhow::Result<()> {
+use std::sync::atomic::Ordering;
+use std::time::Instant;
+
+pub static FLUSH_QUERY_SNAPSHOT_QUEUE: QueueApi<()> = QueueApi::new(flush_tree_snapshot_task);
+
+fn flush_tree_snapshot_task(_: Vec<()>) {
     loop {
         if QUERY_SNAPSHOT.in_memory.is_empty() {
             break;
@@ -51,5 +54,4 @@ pub fn flush_query_task() -> anyhow::Result<()> {
             QUERY_SNAPSHOT.in_memory.len()
         );
     }
-    Ok(())
 }

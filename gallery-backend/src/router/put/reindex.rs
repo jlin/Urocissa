@@ -5,15 +5,14 @@ use rocket::http::Status;
 use crate::jobs::info::regenerate_metadata_for_image;
 use crate::jobs::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::looper::{LOOPER, Signal};
 
 use rocket::serde::json::Json;
 use serde::Deserialize;

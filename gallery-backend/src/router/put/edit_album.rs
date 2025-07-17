@@ -1,13 +1,13 @@
+use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
-use crate::tasks::COORDINATOR;
 
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::tasks::looper::{LOOPER, Signal};
+
 use std::collections::HashSet;
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};

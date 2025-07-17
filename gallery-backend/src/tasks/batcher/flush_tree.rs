@@ -5,7 +5,7 @@ use crate::{
 
 pub static FLUSH_TREE_QUEUE: QueueApi<Database> = QueueApi::new(flush_tree_task);
 
-pub fn flush_tree_task(vec: Vec<Database>) {
+fn flush_tree_task(vec: Vec<Database>) {
     let write_txn = TREE.in_disk.begin_write().unwrap();
 
     {

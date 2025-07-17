@@ -8,9 +8,8 @@ use crate::public::structure::expression::Expression;
 use crate::public::structure::reduced_data::ReducedData;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
+use crate::tasks::batcher::flush_query_snapshot::FLUSH_QUERY_SNAPSHOT_QUEUE;
 use crate::tasks::batcher::flush_tree_snapshot::FLUSH_TREE_SNAPSHOT_QUEUE;
-use crate::tasks::looper::LOOPER;
-use crate::tasks::looper::Signal;
 
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -179,7 +178,7 @@ fn persist_tree_snapshot(
 /// Insert `prefetch` into the query‑level cache.
 fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
     QUERY_SNAPSHOT.in_memory.insert(query_hash, prefetch);
-    LOOPER.notify(Signal::FlushQuerySnapshot);
+    FLUSH_QUERY_SNAPSHOT_QUEUE.update(vec![()]);
 }
 
 /// Assemble the JSON response for the **edit** path.
