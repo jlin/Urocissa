@@ -10,25 +10,19 @@ use crate::{
     tasks::batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE},
 };
 use mini_actor::Task;
-pub struct VideoTask {
-    database: Database,
-}
+pub struct WatchTask;
 
-impl VideoTask {
-    pub fn new(database: Database) -> Self {
-        Self { database }
-    }
-}
-
-impl Task for VideoTask {
+impl Task for WatchTask {
     type Output = anyhow::Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let _pending_guard = PendingGuard::new();
-            let result = spawn(move || video_task(self.database))
-                .await
-                .expect("blocking task panicked");
+            let result = spawn(move || {
+                let _pending_guard = PendingGuard::new();
+                video_task(self.database)
+            })
+            .await
+            .expect("blocking task panicked");
             Ok(result)
         }
     }

@@ -31,11 +31,8 @@ impl Task for IndexTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            let result = spawn(move || {
-                let _pending_guard = PendingGuard::new();
-                index_task(self.database)
-            })
-            .await?;
+            let _pending_guard = PendingGuard::new();
+            let result = spawn(move || index_task(self.database)).await?;
             Ok(result)
         }
     }
