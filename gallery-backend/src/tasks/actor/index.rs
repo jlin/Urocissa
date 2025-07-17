@@ -12,7 +12,7 @@ use crate::{
     tasks::{
         COORDINATOR,
         actor::{delete::DeleteTask, video::VideoTask},
-        batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE},
+        batcher::flush_tree::FLUSH_TREE_QUEUE,
     },
 };
 use mini_actor::Task;
@@ -43,29 +43,21 @@ fn index_task(mut database: Database) -> anyhow::Result<()> {
     let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.add_task(
         hash,
-        newest_path,
+        newest_path.clone(),
         FileType::try_from(database.ext_type.as_str())?,
     );
 
     let is_image = VALID_IMAGE_EXTENSIONS.contains(&database.ext.as_str());
-    {
-        if is_image {
-            process_image_info(&mut database)?;
-        } else {
-            process_video_info(&mut database)?;
-
-            database.pending = true;
-        }
-
-        if let Some(latest) = database.alias.iter().max_by_key(|a| a.scan_time) {
-            COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&latest.file)));
-        };
-        if !is_image {
-            COORDINATOR.execute_detached(VideoTask::new(database.clone()));
-        }
-        FLUSH_TREE_QUEUE.update(vec![database]);
+    if is_image {
+        process_image_info(&mut database)?;
+    } else {
+        process_video_info(&mut database)?;
+        database.pending = true;
+        COORDINATOR.execute_detached(VideoTask::new(database.clone()));
     }
-    UPDATE_TREE_QUEUE.update(vec![()]);
+
+    COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(newest_path)));
+    FLUSH_TREE_QUEUE.update(vec![database]);
     DASHBOARD.advance_task_state(&hash);
 
     Ok(())
