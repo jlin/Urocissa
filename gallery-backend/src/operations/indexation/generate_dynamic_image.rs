@@ -13,8 +13,8 @@ pub fn generate_dynamic_image(database: &Database) -> Result<DynamicImage> {
     } else {
         PathBuf::from(database.thumbnail_path())
     };
-    let dynamic_image = decode_image(&img_path)
-        .context(format!("Failed to decode image from path {:?}", img_path))?;
+    let dynamic_image = decode_image(&img_path)?;
+
     Ok(dynamic_image)
 }
 

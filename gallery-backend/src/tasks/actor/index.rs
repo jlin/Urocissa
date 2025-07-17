@@ -6,6 +6,7 @@ use crate::{
     jobs::info::{process_image_info, process_video_info},
     public::{
         constant::VALID_IMAGE_EXTENSIONS,
+        error_data::handle_error,
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
@@ -35,7 +36,7 @@ impl Task for IndexTask {
             match spawn(move || index_task(self.database)).await {
                 Ok(_) => (),
                 Err(err) => {
-                    error!("Indexing task failed: {:?}", err);
+                    handle_error(err);
                 }
             }
         }
