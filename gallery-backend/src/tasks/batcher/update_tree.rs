@@ -2,10 +2,7 @@ use crate::public::db::expire::EXPIRE;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use crate::{
-    public::constant::redb::DATA_TABLE,
-    public::structure::database_struct::database::definition::Database, tasks::batcher::QueueApi,
-};
+use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;

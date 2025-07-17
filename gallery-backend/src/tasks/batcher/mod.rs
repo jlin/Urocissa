@@ -1,6 +1,6 @@
+pub mod expire_check;
 pub mod flush_tree;
 pub mod update_tree;
-
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{
     Notify,
@@ -35,10 +35,7 @@ impl<T: Send + 'static> QueueApi<T> {
 
     pub fn update(&self, list: Vec<T>) {
         self.ensure_started();
-        let msg = Queue {
-            list,
-            notify: None,
-        };
+        let msg = Queue { list, notify: None };
         self.tx().send(msg).unwrap();
     }
 

@@ -10,7 +10,6 @@ use crate::{
         COORDINATOR,
         actor::{copy::CopyTask, delete::DeleteTask},
         batcher::update_tree::UPDATE_TREE_QUEUE,
-        looper::{LOOPER, Signal},
     },
 };
 use mini_actor::Task;

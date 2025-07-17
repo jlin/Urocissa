@@ -7,10 +7,12 @@ use crate::{
     public::{
         constant::VALID_IMAGE_EXTENSIONS,
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
-        tui::{FileType, DASHBOARD},
+        tui::{DASHBOARD, FileType},
     },
     tasks::{
-        actor::{delete::DeleteTask, video::VideoTask}, batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE}, looper::{Signal, LOOPER}, COORDINATOR
+        COORDINATOR,
+        actor::{delete::DeleteTask, video::VideoTask},
+        batcher::{flush_tree::FLUSH_TREE_QUEUE, update_tree::UPDATE_TREE_QUEUE},
     },
 };
 use mini_actor::Task;

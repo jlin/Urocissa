@@ -1,19 +1,47 @@
-use crate::{
-    tasks::{COORDINATOR, actor::remove::RemoveTask},
-    public::db::{expire::EXPIRE, query_snapshot::QUERY_SNAPSHOT, tree::VERSION_COUNT_TIMESTAMP},
-    router::get::get_prefetch::Prefetch,
-};
+use crate::public::db::expire::EXPIRE;
+use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
+use crate::public::db::tree::{TREE, VERSION_COUNT_TIMESTAMP};
+use crate::public::structure::abstract_data::AbstractData;
+use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::router::get::get_prefetch::Prefetch;
+use crate::tasks::COORDINATOR;
+use crate::tasks::actor::remove::RemoveTask;
+use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
+use rayon::prelude::ParallelSliceMut;
 use redb::{ReadableTable, TableDefinition, TableHandle};
+use std::collections::HashSet;
+use std::sync::LazyLock;
 use std::sync::atomic::Ordering;
-pub fn expire_check_task() -> anyhow::Result<()> {
+use std::time::Instant;
+
+static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    [
+        "Make",
+        "Model",
+        "FNumber",
+        "ExposureTime",
+        "FocalLength",
+        "PhotographicSensitivity",
+        "DateTimeOriginal",
+        "duration",
+        "rotation",
+    ]
+    .iter()
+    .cloned()
+    .collect()
+});
+
+pub static EXPIRE_CHECK_QUEUE: QueueApi<()> = QueueApi::new(update_tree_task);
+
+pub fn update_tree_task(_: Vec<()>) {
     let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
 
     write_txn
         .list_tables()
         .unwrap()
         .par_bridge()
-        .try_for_each::<_, anyhow::Result<()>>(|table_handle| {
+        .for_each(|table_handle| {
             if let Ok(timestamp) = table_handle.name().parse::<u64>()
                 && VERSION_COUNT_TIMESTAMP.load(Ordering::Relaxed) > timestamp
                 && EXPIRE.expired_check(timestamp)
@@ -59,9 +87,7 @@ pub fn expire_check_task() -> anyhow::Result<()> {
                     write_txn.list_tables().unwrap().count()
                 );
             }
-            Ok(())
-        })?;
+        });
 
     write_txn.commit().unwrap();
-    Ok(())
 }

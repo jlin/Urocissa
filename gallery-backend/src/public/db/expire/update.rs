@@ -1,6 +1,7 @@
 use crate::operations::utils::timestamp::get_current_timestamp_u64;
 use crate::public::db::expire::EXPIRE_TABLE_DEFINITION;
 use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
+use crate::tasks::batcher::expire_check::EXPIRE_CHECK_QUEUE;
 use crate::tasks::looper::{LOOPER, Signal};
 
 use log::info;
@@ -40,7 +41,7 @@ impl Expire {
             }
 
             expire_write_txn.commit().unwrap();
-            LOOPER.notify(Signal::ExpireCheck);
+            EXPIRE_CHECK_QUEUE.update(vec![()]);
         }
     }
 }

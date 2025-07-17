@@ -1,4 +1,3 @@
-pub mod expire_check;
 pub mod flush_query;
 pub mod flush_snapshot;
 pub mod start_watcher;
@@ -27,7 +26,6 @@ use crate::public::constant::runtime::TOKIO_RUNTIME;
 pub enum Signal {
     FlushTreeSnapshot,
     FlushQuerySnapshot,
-    ExpireCheck,
     StartWatcher,
 }
 
@@ -43,7 +41,6 @@ impl Signal {
         match self {
             Signal::FlushTreeSnapshot => flush_snapshot::flush_snapshot_task,
             Signal::FlushQuerySnapshot => flush_query::flush_query_task,
-            Signal::ExpireCheck => expire_check::expire_check_task,
             Signal::StartWatcher => start_watcher::start_watcher_task,
         }
     }
