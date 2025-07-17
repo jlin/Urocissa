@@ -9,7 +9,7 @@ use crate::public::structure::reduced_data::ReducedData;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
 use crate::tasks::COORDINATOR;
-use crate::tasks::batcher::flush_query_snapshot::FLUSH_QUERY_SNAPSHOT_QUEUE;
+use crate::tasks::batcher::flush_query_snapshot::FlushQuerySnapshotTask;
 use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
 use bitcode::{Decode, Encode};
@@ -179,7 +179,7 @@ fn persist_tree_snapshot(
 /// Insert `prefetch` into the query‑level cache.
 fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
     QUERY_SNAPSHOT.in_memory.insert(query_hash, prefetch);
-    FLUSH_QUERY_SNAPSHOT_QUEUE.update(vec![()]);
+    COORDINATOR.execute_batch_detached(FlushQuerySnapshotTask);
 }
 
 /// Assemble the JSON response for the **edit** path.

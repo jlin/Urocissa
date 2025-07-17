@@ -4,15 +4,22 @@ use crate::router::get::get_prefetch::Prefetch;
 use crate::{public::db::expire::EXPIRE, tasks::COORDINATOR};
 
 use crate::tasks::actor::remove_tree_snapshot::RemoveTask;
-use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use redb::{ReadableTable, TableDefinition, TableHandle};
 use std::sync::atomic::Ordering;
 
-pub static EXPIRE_CHECK_QUEUE: QueueApi<()> = QueueApi::new(update_tree_task);
+pub struct ExpireCheckTask;
 
-pub fn update_tree_task(_: Vec<()>) {
+impl mini_coordinator::BatchTask for ExpireCheckTask {
+    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+        async move {
+            update_tree_task();
+        }
+    }
+}
+
+pub fn update_tree_task() {
     let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
 
     write_txn

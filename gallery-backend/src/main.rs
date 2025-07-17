@@ -13,9 +13,9 @@ mod workflow;
 use crate::process::initialization::initialize;
 use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::tui::{DASHBOARD, tui_task};
-
-use crate::tasks::batcher::start_watcher::START_WATCHER_QUEUE;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
+use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::start_watcher::StartWatcherTask;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use public::db::tree::TREE;
@@ -56,11 +56,8 @@ fn main() -> Result<()> {
             info!(duration = &*format!("{:?}", start_time.elapsed()); "Read {} albums from database.", album_table.len().unwrap());
         }
         txn.commit().unwrap();
-
-        
-        START_WATCHER_QUEUE.update(vec![()]);
-        UPDATE_TREE_QUEUE.update(vec![()]);
-        UPDATE_TREE_QUEUE.update(vec![()]);
+        COORDINATOR.execute_batch_detached(StartWatcherTask);
+        COORDINATOR.execute_batch_detached(UpdateTreeTask);
         if let Some(sc) = superconsole::SuperConsole::new() {
             TOKIO_RUNTIME.spawn(async move {
                 if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {

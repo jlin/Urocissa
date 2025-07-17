@@ -2,11 +2,11 @@ use crate::operations::indexation::generate_dynamic_image::generate_dynamic_imag
 use crate::operations::indexation::generate_image_hash::{generate_phash, generate_thumbhash};
 use crate::public::db::tree::TREE;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use arrayvec::ArrayString;
 use rocket::form::Form;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -66,8 +66,10 @@ pub async fn regenerate_thumbnail_with_frame(
                 })
                 .await
                 .unwrap();
-
-                UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+                COORDINATOR
+                    .execute_batch_waiting(UpdateTreeTask)
+                    .await
+                    .unwrap();
             }
         }
     }

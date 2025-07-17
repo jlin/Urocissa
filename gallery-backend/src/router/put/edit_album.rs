@@ -1,6 +1,6 @@
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
 use crate::router::AppResult;
@@ -76,7 +76,10 @@ pub async fn edit_album(
     .await
     .unwrap();
 
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     let futures = concact_result
         .into_iter()
         .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
@@ -116,7 +119,10 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     Ok(())
 }
 
@@ -150,7 +156,10 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
 
     Ok(())
 }

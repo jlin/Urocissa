@@ -1,10 +1,8 @@
-//! File-system watcher that can be started once and then runs
-//! in the background for the lifetime of the program.
-
+use crate::public::constant::runtime::TOKIO_RUNTIME;
+use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
+use crate::{public::config::PRIVATE_CONFIG, workflow::index_for_watch};
 use log::{error, info};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
-use walkdir::WalkDir;
-
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
@@ -13,19 +11,24 @@ use std::{
         atomic::{AtomicBool, Ordering},
     },
 };
-
-use crate::public::constant::runtime::TOKIO_RUNTIME;
-use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::{public::config::PRIVATE_CONFIG, tasks::batcher::QueueApi, workflow::index_for_watch};
-
-pub static START_WATCHER_QUEUE: QueueApi<()> = QueueApi::new(start_watcher_task);
+use walkdir::WalkDir;
 
 static IS_WATCHING: AtomicBool = AtomicBool::new(false);
 
 static WATCHER_HANDLE: LazyLock<Mutex<Option<RecommendedWatcher>>> =
     LazyLock::new(|| Mutex::new(None));
 
-fn start_watcher_task(_: Vec<()>) -> () {
+pub struct StartWatcherTask;
+
+impl mini_coordinator::BatchTask for StartWatcherTask {
+    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+        async move {
+            start_watcher_task();
+        }
+    }
+}
+
+fn start_watcher_task() -> () {
     // Fast-path: already running.
     if IS_WATCHING.swap(true, Ordering::SeqCst) {
         return;

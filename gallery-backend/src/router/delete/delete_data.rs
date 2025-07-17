@@ -1,17 +1,16 @@
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-
-use crate::tasks::actor::album::AlbumTask;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
-
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
+use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use futures::future::join_all;
 use redb::ReadableTable;
 use rocket::serde::{Deserialize, json::Json};
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeleteList {
@@ -82,8 +81,10 @@ pub async fn delete_data(
     })
     .await
     .unwrap();
-
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     let futures = deleted_album_id
         .into_iter()
         .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);

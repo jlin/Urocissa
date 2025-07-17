@@ -1,10 +1,11 @@
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 use crate::public::db::tree::read_tags::TagInfo;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use redb::ReadableTable;
 use rocket::serde::{Deserialize, json::Json};
@@ -76,6 +77,9 @@ pub async fn edit_tag(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     Json(vec_tags_info)
 }

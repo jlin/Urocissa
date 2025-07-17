@@ -11,7 +11,6 @@ use serde::{Deserialize, Serialize};
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
 use crate::tasks::actor::album::AlbumTask;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
 
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
@@ -20,6 +19,7 @@ use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 #[derive(Debug, Clone, Deserialize, Default, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -81,7 +81,10 @@ pub async fn create_non_empty_album(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     COORDINATOR
         .execute_waiting(AlbumTask::new(id))
         .await
@@ -121,7 +124,10 @@ pub async fn create_empty_album(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .unwrap();
     COORDINATOR
         .execute_waiting(AlbumTask::new(id))
         .await

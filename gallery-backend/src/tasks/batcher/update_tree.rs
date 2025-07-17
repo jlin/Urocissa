@@ -2,7 +2,6 @@ use crate::public::db::expire::EXPIRE;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
@@ -27,9 +26,17 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     .collect()
 });
 
-pub static UPDATE_TREE_QUEUE: QueueApi<()> = QueueApi::new(update_tree_task);
+pub struct UpdateTreeTask;
 
-pub fn update_tree_task(_: Vec<()>) {
+impl mini_coordinator::BatchTask for UpdateTreeTask {
+    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+        async move {
+            update_tree_task();
+        }
+    }
+}
+
+pub fn update_tree_task() {
     let start_time = Instant::now();
     let table = TREE.api_read_tree();
 

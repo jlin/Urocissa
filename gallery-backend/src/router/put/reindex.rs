@@ -8,7 +8,7 @@ use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
-use crate::tasks::batcher::update_tree::UPDATE_TREE_QUEUE;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use crate::public::db::tree::TREE;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
@@ -91,6 +91,6 @@ pub async fn reindex(
     })
     .await
     .unwrap();
-    UPDATE_TREE_QUEUE.update_async(vec![()]).await;
+    COORDINATOR.execute_batch_detached(UpdateTreeTask);
     Status::Ok
 }

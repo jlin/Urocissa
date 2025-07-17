@@ -3,7 +3,7 @@ use crate::{
         constant::redb::DATA_TABLE, db::tree::TREE,
         structure::database_struct::database::definition::Database,
     },
-    tasks::batcher::update_tree::UPDATE_TREE_QUEUE,
+    tasks::{COORDINATOR, batcher::update_tree::UpdateTreeTask},
 };
 
 pub struct FlushTreeTask {
@@ -36,5 +36,5 @@ fn flush_tree_task(vec: Vec<Database>) {
         });
     };
     write_txn.commit().unwrap();
-    UPDATE_TREE_QUEUE.update(vec![()]);
+    COORDINATOR.execute_batch_detached(UpdateTreeTask);
 }
