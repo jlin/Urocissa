@@ -1,5 +1,6 @@
 //! tui.rs — lock-free dashboard (Rust 1.88)
 
+use anyhow::Result;
 use arrayvec::ArrayString;
 use atomic_float::AtomicF64;
 use crossbeam_queue::ArrayQueue;
@@ -22,7 +23,7 @@ pub async fn tui_task(
     mut sc: superconsole::SuperConsole,
     dashboard: std::sync::Arc<Dashboard>,
     mut rx: UnboundedReceiver<String>,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let mut tick = tokio::time::interval(std::time::Duration::from_millis(200));
 
     loop {
@@ -48,7 +49,7 @@ pub enum FileType {
 
 impl TryFrom<&str> for FileType {
     type Error = anyhow::Error;
-    fn try_from(s: &str) -> anyhow::Result<Self> {
+    fn try_from(s: &str) -> Result<Self> {
         match s {
             "image" => Ok(FileType::Image),
             "video" => Ok(FileType::Video),
@@ -273,7 +274,7 @@ impl Dashboard {
 
 /// ---------- renderer ----------
 impl Component for Dashboard {
-    fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> anyhow::Result<Lines> {
+    fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> Result<Lines> {
         let cols = terminal_size()
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(120);

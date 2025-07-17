@@ -9,7 +9,7 @@ impl QuerySnapshot {
     pub fn read_query_snapshot(
         &'static self,
         query_hash: u64,
-    ) -> anyhow::Result<Option<Prefetch>, Box<dyn Error>> {
+    ) -> Result<Option<Prefetch>, Box<dyn Error>> {
         if let Some(data) = self.in_memory.get(&query_hash) {
             return Ok(Some(data.value().clone()));
         }

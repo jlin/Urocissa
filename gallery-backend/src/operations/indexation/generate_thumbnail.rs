@@ -1,16 +1,18 @@
 use crate::{
     operations::{
-        indexation::generate_ffmpeg::create_silent_ffmpeg_command, utils::resize::small_width_height,
+        indexation::generate_ffmpeg::create_silent_ffmpeg_command,
+        utils::resize::small_width_height,
     },
     public::structure::database_struct::database::definition::Database,
 };
 use anyhow::Context;
+use anyhow::Result;
 use image::{DynamicImage, ImageFormat};
 use std::process::Stdio;
 pub fn generate_thumbnail_for_image(
     database: &mut Database,
     dynamic_image: DynamicImage,
-) -> anyhow::Result<()> {
+) -> Result<()> {
     let (compressed_width, compressed_height) =
         small_width_height(database.width, database.height, 1280);
 
@@ -33,7 +35,7 @@ pub fn generate_thumbnail_for_image(
 }
 
 /// Generates a single JPEG thumbnail from the first frame of a video.
-pub fn generate_thumbnail_for_video(database: &Database) -> anyhow::Result<()> {
+pub fn generate_thumbnail_for_video(database: &Database) -> Result<()> {
     let (width, height) = (database.width, database.height);
     let (thumb_width, thumb_height) = small_width_height(width, height, 1280);
     let thumbnail_path = database.thumbnail_path();

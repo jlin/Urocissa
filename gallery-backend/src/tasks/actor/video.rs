@@ -1,6 +1,3 @@
-use anyhow::Context;
-use tokio_rayon::spawn;
-
 use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
     public::{
@@ -9,7 +6,11 @@ use crate::{
     },
     tasks::batcher::flush_tree::FLUSH_TREE_QUEUE,
 };
+use anyhow::Context;
+use anyhow::Result;
 use mini_actor::Task;
+use tokio_rayon::spawn;
+
 pub struct VideoTask {
     database: Database,
 }
@@ -21,7 +22,7 @@ impl VideoTask {
 }
 
 impl Task for VideoTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -34,7 +35,7 @@ impl Task for VideoTask {
     }
 }
 
-pub fn video_task(mut database: Database) -> anyhow::Result<()> {
+pub fn video_task(mut database: Database) -> Result<()> {
     let hash = database.hash;
     match generate_compressed_video(&mut database) {
         Ok(_) => {

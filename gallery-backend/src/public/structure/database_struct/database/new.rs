@@ -3,6 +3,7 @@ use crate::{
     public::structure::database_struct::{database::definition::Database, file_modify::FileModify},
 };
 use anyhow::Context;
+use anyhow::Result;
 use arrayvec::ArrayString;
 use blake3::Hasher;
 use std::{
@@ -28,7 +29,7 @@ impl Database {
     ///
     /// # What remains **unset** (`default()` / `Vec::new()`)
     /// `width`, `height`, `thumbhash`, `phash`, `exif_vec`, `tag`, `album`.
-    pub fn new(path: &Path) -> anyhow::Result<Self> {
+    pub fn new(path: &Path) -> Result<Self> {
         // --- 1 · extension -------------------------------------------------
         let ext = path
             .extension()
@@ -82,7 +83,7 @@ impl Database {
 }
 
 /// Helper: stream the file and return 64-character hex digest.
-fn blake3_hasher(file_path: &Path) -> anyhow::Result<ArrayString<64>> {
+fn blake3_hasher(file_path: &Path) -> Result<ArrayString<64>> {
     let mut file =
         File::open(file_path).with_context(|| format!("Failed to open file: {:?}", file_path))?;
 

@@ -1,4 +1,7 @@
+use crate::public::constant::MAX_DELETE_ATTEMPTS;
 use anyhow::Context;
+use anyhow::Result;
+use mini_actor::Task;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -8,8 +11,6 @@ use std::{
 };
 use tokio::task::spawn_blocking;
 
-use crate::public::constant::MAX_DELETE_ATTEMPTS;
-use mini_actor::Task;
 static UPLOAD_PATH: LazyLock<PathBuf> =
     LazyLock::new(|| fs::canonicalize("./upload").expect("`./upload` directory must exist"));
 
@@ -24,7 +25,7 @@ impl DeleteTask {
 }
 
 impl Task for DeleteTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -36,7 +37,7 @@ impl Task for DeleteTask {
     }
 }
 
-pub fn delete_task(path: PathBuf) -> anyhow::Result<()> {
+pub fn delete_task(path: PathBuf) -> Result<()> {
     // Skip if path is not under ./upload
     if !path_starts_with_upload(&path) {
         return Ok(());

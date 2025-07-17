@@ -5,6 +5,7 @@ use crate::{
     public::{structure::database_struct::database::definition::Database, tui::DASHBOARD},
 };
 use anyhow::Context;
+use anyhow::Result;
 use regex::Regex;
 use std::{
     cmp,
@@ -17,7 +18,7 @@ static REGEX_OUT_TIME_US: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"out_time_us=(\d+)").unwrap());
 
 /// Compresses a video file, reporting progress by parsing ffmpeg's output.
-pub fn generate_compressed_video(database: &mut Database) -> anyhow::Result<()> {
+pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     let duration_result = video_duration(&database.imported_path_string());
 
     let duration = match duration_result {

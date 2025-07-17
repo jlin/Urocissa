@@ -7,7 +7,7 @@ use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition, TableError};
 use rocket::http::Status;
 
 impl TreeSnapshot {
-    pub fn read_tree_snapshot(&'static self, timestamp: &u128) -> anyhow::Result<MyCow, Status> {
+    pub fn read_tree_snapshot(&'static self, timestamp: &u128) -> Result<MyCow, Status> {
         if let Some(data) = self.in_memory.get(timestamp) {
             return Ok(MyCow::DashMap(data));
         }

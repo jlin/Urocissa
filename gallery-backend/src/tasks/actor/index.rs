@@ -1,5 +1,5 @@
+use anyhow::Result;
 use std::path::PathBuf;
-
 use tokio_rayon::spawn;
 
 use crate::{
@@ -27,7 +27,7 @@ impl IndexTask {
 }
 
 impl Task for IndexTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -38,7 +38,7 @@ impl Task for IndexTask {
     }
 }
 
-fn index_task(mut database: Database) -> anyhow::Result<()> {
+fn index_task(mut database: Database) -> Result<()> {
     let hash = database.hash;
     let newest_path = database.alias.iter().max().unwrap().file.clone();
     DASHBOARD.add_task(

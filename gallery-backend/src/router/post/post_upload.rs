@@ -1,17 +1,15 @@
-use std::path::PathBuf;
-use std::time::Instant;
-
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::tasks::COORDINATOR;
-use crate::tasks::actor::deduplicate::DeduplicateTask;
-
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
+use crate::tasks::COORDINATOR;
+use crate::tasks::actor::deduplicate::DeduplicateTask;
+use anyhow::Result;
 use anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
-
 use rocket::{form::Form, fs::TempFile};
+use std::path::PathBuf;
+use std::time::Instant;
 use tokio::task::spawn_blocking;
 use uuid::Uuid;
 pub enum FileUpload<'r> {
@@ -87,7 +85,7 @@ async fn save_file(
     filename: String,
     extension: String,
     last_modified_time: u64,
-) -> anyhow::Result<String> {
+) -> Result<String> {
     let unique_id = Uuid::new_v4();
     let path_tmp = format!("./upload/{}-{}.tmp", filename, unique_id);
 
@@ -95,7 +93,7 @@ async fn save_file(
 
     let filename = filename.clone(); // Needed because filename is moved in path_tmp
 
-    let path_final = spawn_blocking(move || -> anyhow::Result<String> {
+    let path_final = spawn_blocking(move || -> Result<String> {
         let path_final = format!("./upload/{}-{}.{}", filename, unique_id, extension);
         set_last_modified_time(&path_tmp, last_modified_time)?;
         std::fs::rename(&path_tmp, &path_final)?;
@@ -105,13 +103,13 @@ async fn save_file(
 
     Ok(path_final)
 }
-fn set_last_modified_time(path: &str, last_modified_time: u64) -> anyhow::Result<()> {
+fn set_last_modified_time(path: &str, last_modified_time: u64) -> Result<()> {
     let mtime = filetime::FileTime::from_unix_time((last_modified_time / 1000) as i64, 0);
     filetime::set_file_mtime(path, mtime)?;
     Ok(())
 }
 
-pub fn get_extension(file: &TempFile<'_>) -> anyhow::Result<String> {
+pub fn get_extension(file: &TempFile<'_>) -> Result<String> {
     match file.content_type() {
         Some(ct) => match ct.extension() {
             Some(ext) => Ok(ext.as_str().to_lowercase()),

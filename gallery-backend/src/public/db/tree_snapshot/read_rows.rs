@@ -3,7 +3,7 @@ use crate::{public::constant::ROW_BATCH_NUMBER, public::structure::row::{Display
 use rocket::http::Status;
 
 impl TreeSnapshot {
-    pub fn read_row(&'static self, row_index: usize, timestamp: u128) -> anyhow::Result<Row, Status> {
+    pub fn read_row(&'static self, row_index: usize, timestamp: u128) -> Result<Row, Status> {
         let tree_snapshot = self.read_tree_snapshot(&timestamp)?;
 
         let data_length = tree_snapshot.len();

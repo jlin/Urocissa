@@ -1,10 +1,8 @@
-// album.rs
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
-
 use anyhow::Context;
+use anyhow::Result;
 use arrayvec::ArrayString;
 use log::info;
 use mini_actor::Task;
@@ -23,7 +21,7 @@ impl AlbumTask {
 }
 
 impl Task for AlbumTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -35,7 +33,7 @@ impl Task for AlbumTask {
     }
 }
 
-pub fn album_task(album_id: ArrayString<64>) -> anyhow::Result<()> {
+pub fn album_task(album_id: ArrayString<64>) -> Result<()> {
     info!("Perform album self-update");
 
     let txn = TREE

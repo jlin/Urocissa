@@ -1,7 +1,7 @@
-use std::fs;
-
 use anyhow::Context;
+use anyhow::Result;
 use mini_actor::Task;
+use std::fs;
 use tokio::task::spawn_blocking;
 
 use crate::{
@@ -20,7 +20,7 @@ impl CopyTask {
 }
 
 impl Task for CopyTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -32,7 +32,7 @@ impl Task for CopyTask {
     }
 }
 
-pub fn copy_task(database: Database) -> anyhow::Result<()> {
+pub fn copy_task(database: Database) -> Result<()> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 

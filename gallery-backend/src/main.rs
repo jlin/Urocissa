@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate rocket;
-
+use anyhow::Result;
 // --- Make sure all your modules are declared ---
 
 mod jobs;
@@ -42,7 +42,7 @@ async fn build_rocket() -> rocket::Rocket<rocket::Build> {
         .mount("/", generate_fairing_routes())
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     TOKIO_RUNTIME.block_on(async {
         // 初始化
         let rx = initialize();

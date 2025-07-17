@@ -1,9 +1,3 @@
-use std::{mem, path::PathBuf};
-
-use anyhow::bail;
-use path_clean::PathClean;
-use tokio::task::spawn_blocking;
-
 use crate::{
     public::{db::tree::TREE, structure::database_struct::database::definition::Database},
     tasks::{
@@ -12,7 +6,13 @@ use crate::{
         batcher::flush_tree::FLUSH_TREE_QUEUE,
     },
 };
+use anyhow::Result;
+use anyhow::bail;
 use mini_actor::Task;
+use path_clean::PathClean;
+use std::{mem, path::PathBuf};
+use tokio::task::spawn_blocking;
+
 pub struct DeduplicateTask {
     pub path: PathBuf,
 }
@@ -24,7 +24,7 @@ impl DeduplicateTask {
 }
 
 impl Task for DeduplicateTask {
-    type Output = anyhow::Result<()>;
+    type Output = Result<()>;
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
@@ -37,7 +37,7 @@ impl Task for DeduplicateTask {
     }
 }
 
-pub fn deduplicate_task(path: PathBuf) -> anyhow::Result<()> {
+pub fn deduplicate_task(path: PathBuf) -> Result<()> {
     let path = path.clean();
     let mut database = Database::new(&path)?;
     let read_table = TREE.api_read_tree();
