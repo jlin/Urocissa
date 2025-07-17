@@ -1,11 +1,12 @@
 use crate::tasks::{
     COORDINATOR,
     actor::{
-        copy::CopyTask, deduplicate::DeduplicateTask, delete::DeleteTask, index::IndexTask,
-        video::VideoTask,
+        copy::CopyTask, deduplicate::DeduplicateTask, delete_in_update::DeleteTask,
+        index::IndexTask, video::VideoTask,
     },
 };
 use anyhow::Result;
+use arrayvec::ArrayString;
 use std::path::PathBuf;
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
@@ -36,3 +37,5 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
 
     Ok(())
 }
+
+pub async fn delete_data(hash: ArrayString<64>) {}

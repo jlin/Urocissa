@@ -3,7 +3,7 @@ use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::router::get::get_prefetch::Prefetch;
 use crate::{public::db::expire::EXPIRE, tasks::COORDINATOR};
 
-use crate::tasks::actor::remove::RemoveTask;
+use crate::tasks::actor::remove_tree_snapshot::RemoveTask;
 use crate::tasks::batcher::QueueApi;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 

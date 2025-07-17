@@ -1,7 +1,7 @@
 pub mod album;
 pub mod copy;
 pub mod deduplicate;
-pub mod delete;
+pub mod delete_in_update;
 pub mod index;
-pub mod remove;
+pub mod remove_tree_snapshot;
 pub mod video;

@@ -30,14 +30,14 @@ impl Task for DeleteTask {
 
     fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
         async move {
-            spawn_blocking(move || delete_task(self.path))
+            spawn_blocking(move || delete_in_upload_task(self.path))
                 .await
                 .expect("blocking task panicked")
                 .map_err(|err| handle_error(err.context("Failed to run delete task")))
         }
     }
 }
-pub fn delete_task(path: PathBuf) -> Result<()> {
+pub fn delete_in_upload_task(path: PathBuf) -> Result<()> {
     // Skip if path is not under ./upload
     if !path_starts_with_upload(&path) {
         return Ok(());

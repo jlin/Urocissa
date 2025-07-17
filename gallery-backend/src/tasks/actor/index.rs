@@ -51,10 +51,7 @@ fn index_task(mut database: Database) -> Result<Database> {
     } else {
         process_video_info(&mut database)?;
         database.pending = true;
-        /*  COORDINATOR.execute_detached(VideoTask::new(database.clone())); */
     }
-
-    /* COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(newest_path))); */
     FLUSH_TREE_QUEUE.update(vec![database.clone()]);
     DASHBOARD.advance_task_state(&hash);
 

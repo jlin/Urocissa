@@ -15,7 +15,7 @@ use rocket::serde::{Deserialize, json::Json};
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeleteList {
-    delete_list: Vec<usize>, // Keep this field private as it does not need to be accessed outside this struct
+    delete_list: Vec<usize>,
     timestamp: u128,
 }
 #[delete("/delete/delete-data", format = "json", data = "<json_data>")]
