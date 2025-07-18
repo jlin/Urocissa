@@ -9,6 +9,7 @@ use crate::{
 };
 use anyhow::Context;
 use anyhow::Result;
+use log::info;
 use mini_coordinator::Task;
 use tokio_rayon::spawn;
 
@@ -37,10 +38,13 @@ impl Task for VideoTask {
 
 pub fn video_task(mut database: Database) -> Result<()> {
     let hash = database.hash;
+    info!("ready to generate compressed video for hash: {}", hash);
     match generate_compressed_video(&mut database) {
         Ok(_) => {
+            info!("Video compression completed for hash: {}", hash);
             database.pending = false;
             COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database]));
+            info!("Database updated to vonersion done for hash: {}", hash);
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(

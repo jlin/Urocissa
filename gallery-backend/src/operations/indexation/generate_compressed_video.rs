@@ -1,11 +1,12 @@
 use super::video_ffprobe::video_duration;
 use crate::{
-    process::info::process_image_info,
     operations::indexation::generate_ffmpeg::create_silent_ffmpeg_command,
+    process::info::process_image_info,
     public::{structure::database_struct::database::definition::Database, tui::DASHBOARD},
 };
 use anyhow::Context;
 use anyhow::Result;
+use log::info;
 use regex::Regex;
 use std::{
     cmp,
@@ -19,8 +20,13 @@ static REGEX_OUT_TIME_US: LazyLock<Regex> =
 
 /// Compresses a video file, reporting progress by parsing ffmpeg's output.
 pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
+    info!("Starting video compression for hash: {}", database.hash);
     let duration_result = video_duration(&database.imported_path_string());
-
+    info!(
+        "Video duration for {:?} is: {:?}",
+        database.imported_path_string(),
+        duration_result
+    );
     let duration = match duration_result {
         // Handle static GIFs by delegating to the image processor.
         Ok(d) if (d * 1000.0) as u32 == 100 => {
@@ -52,6 +58,8 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
             ));
         }
     };
+
+    info!("Creating ffmpeg command for video compression");
 
     // --- REFACTORED: Use the helper for a clean, consistent command ---
     let mut cmd = create_silent_ffmpeg_command();
@@ -88,17 +96,18 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     // Process each line of progress output from ffmpeg's stderr.
     for line_result in reader.lines() {
         if let Ok(line) = line_result {
+            info!("FFmpeg progress line: {}", line);
             if let Some(caps) = REGEX_OUT_TIME_US.captures(&line) {
                 // The regex now captures either digits or "N/A".
                 // We only proceed if the captured value can be parsed as a number.
                 if let Ok(microseconds) = caps[1].parse::<f64>() {
                     let percentage = (microseconds / 1_000_000.0 / duration) * 100.0;
-                    DASHBOARD.update_progress(database.hash, percentage);
-                    /* info!(
-                        "Percentage: {:.2}% for {}",
+                    info!(
+                        "Progress: {:.2}% for {}",
                         percentage,
                         &database.compressed_path_string()
-                    ); */
+                    );
+                    DASHBOARD.update_progress(database.hash, percentage);
                 }
             }
         }
@@ -107,6 +116,6 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     child
         .wait()
         .context("Failed to wait for ffmpeg child process")?;
-
+    info!("Video compression completed for hash: {}", database.hash);
     Ok(())
 }
