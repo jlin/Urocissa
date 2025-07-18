@@ -92,11 +92,6 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
                 // We only proceed if the captured value can be parsed as a number.
                 if let Ok(microseconds) = caps[1].parse::<f64>() {
                     let percentage = (microseconds / 1_000_000.0 / duration) * 100.0;
-                    info!(
-                        "Progress: {:.2}% for {}",
-                        percentage,
-                        &database.compressed_path_string()
-                    );
                     DASHBOARD.update_progress(database.hash, percentage);
                 }
             }
