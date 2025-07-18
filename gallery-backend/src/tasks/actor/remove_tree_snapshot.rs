@@ -3,7 +3,7 @@ use crate::public::{
     structure::reduced_data::ReducedData,
 };
 use anyhow::Result;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use redb::TableDefinition;
 use tokio::task::spawn_blocking;
 pub struct RemoveTask {

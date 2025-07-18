@@ -28,7 +28,7 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
 
 pub struct UpdateTreeTask;
 
-impl mini_coordinator::BatchTask for UpdateTreeTask {
+impl mini_executor::BatchTask for UpdateTreeTask {
     fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             update_tree_task();

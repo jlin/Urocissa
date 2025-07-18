@@ -1,7 +1,7 @@
 use crate::{operations::hash::blake3_hasher, public::error_data::handle_error};
 use anyhow::Result;
 use arrayvec::ArrayString;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use std::fs::File;
 use tokio_rayon::spawn;
 

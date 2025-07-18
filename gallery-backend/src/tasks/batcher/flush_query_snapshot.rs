@@ -8,7 +8,7 @@ use std::time::Instant;
 
 pub struct FlushQuerySnapshotTask;
 
-impl mini_coordinator::BatchTask for FlushQuerySnapshotTask {
+impl mini_executor::BatchTask for FlushQuerySnapshotTask {
     fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             flush_query_snapshot_task();

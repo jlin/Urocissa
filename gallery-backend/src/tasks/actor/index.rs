@@ -13,7 +13,7 @@ use crate::{
     },
     tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
 };
-use mini_coordinator::Task;
+use mini_executor::Task;
 pub struct IndexTask {
     pub database: Database,
 }

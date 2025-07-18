@@ -1,6 +1,6 @@
 use crate::{operations::open_file::open_file_with_retry, public::error_data::handle_error};
 use anyhow::Result;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use std::{fs::File, path::PathBuf};
 use tokio::task::spawn_blocking;
 

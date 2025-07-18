@@ -6,7 +6,7 @@ use anyhow::Context;
 use anyhow::Result;
 use arrayvec::ArrayString;
 use log::info;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use tokio::task::spawn_blocking;

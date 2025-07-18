@@ -15,7 +15,7 @@ impl FlushTreeTask {
         Self { databases }
     }
 }
-impl mini_coordinator::BatchTask for FlushTreeTask {
+impl mini_executor::BatchTask for FlushTreeTask {
     fn batch_run(list: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             let mut all_databases = Vec::new();

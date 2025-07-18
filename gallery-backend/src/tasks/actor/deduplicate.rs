@@ -7,7 +7,7 @@ use crate::{
 };
 use anyhow::Result;
 use arrayvec::ArrayString;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use std::{mem, path::PathBuf};
 use tokio::task::spawn_blocking;
 

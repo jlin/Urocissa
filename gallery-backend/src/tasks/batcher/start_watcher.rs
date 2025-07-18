@@ -20,7 +20,7 @@ static WATCHER_HANDLE: LazyLock<Mutex<Option<RecommendedWatcher>>> =
 
 pub struct StartWatcherTask;
 
-impl mini_coordinator::BatchTask for StartWatcherTask {
+impl mini_executor::BatchTask for StartWatcherTask {
     fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             start_watcher_task();

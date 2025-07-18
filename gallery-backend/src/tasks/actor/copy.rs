@@ -1,7 +1,7 @@
 use anyhow::Context;
 use anyhow::Error;
 use anyhow::Result;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use std::fs;
 use std::io;
 use std::path::Path;

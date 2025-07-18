@@ -1898,6 +1898,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6877bb514081ee2a7ff5ef9de3281f14a4dd4bceac4c09388074a6b5df8a139a"
 
 [[package]]
+name = "mini_executor"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6277560e01ef59960a04a78983c9c7a9bffdc4d1dbdb6ec321bb4d42f745a342"
+dependencies = [
+ "dashmap",
+ "tokio",
+]
+
+[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4056,6 +4066,7 @@ dependencies = [
  "jsonwebtoken",
  "kamadak-exif",
  "log",
+ "mini_executor",
  "notify",
  "num_cpus",
  "path-clean",

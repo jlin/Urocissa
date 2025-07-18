@@ -9,7 +9,7 @@ use crate::{
 };
 use anyhow::Context;
 use anyhow::Result;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use tokio_rayon::spawn;
 
 pub struct VideoTask {

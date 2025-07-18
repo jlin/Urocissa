@@ -5,7 +5,7 @@ use std::time::Instant;
 
 pub struct FlushTreeSnapshotTask;
 
-impl mini_coordinator::BatchTask for FlushTreeSnapshotTask {
+impl mini_executor::BatchTask for FlushTreeSnapshotTask {
     fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             flush_tree_snapshot_task();

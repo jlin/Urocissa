@@ -11,7 +11,7 @@ use std::sync::atomic::Ordering;
 
 pub struct ExpireCheckTask;
 
-impl mini_coordinator::BatchTask for ExpireCheckTask {
+impl mini_executor::BatchTask for ExpireCheckTask {
     fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
         async move {
             update_tree_task();

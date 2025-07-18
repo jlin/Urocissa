@@ -2,7 +2,7 @@ use crate::public::constant::MAX_DELETE_ATTEMPTS;
 use crate::public::error_data::handle_error;
 use anyhow::Context;
 use anyhow::Result;
-use mini_coordinator::Task;
+use mini_executor::Task;
 use std::{
     fs,
     path::{Path, PathBuf},
