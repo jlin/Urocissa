@@ -1,6 +1,7 @@
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
+use log::info;
 use tokio_rayon::spawn;
 
 use crate::{
@@ -72,6 +73,7 @@ fn index_task(mut database: Database) -> Result<Database> {
 
     // Persist the updated record & advance progress state
     COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database.clone()]));
+    info!("location A: Advanced task state for hash: {}", hash);
     DASHBOARD.advance_task_state(&hash);
 
     Ok(database)

@@ -45,6 +45,7 @@ pub fn video_task(mut database: Database) -> Result<()> {
             database.pending = false;
             COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database]));
             info!("Database updated to vonersion done for hash: {}", hash);
+            info!("location B: Advanced task state for hash: {}", hash);
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(
