@@ -15,16 +15,17 @@ use std::{path::PathBuf, sync::LazyLock};
 static IN_PROGRESS: LazyLock<DashSet<ArrayString<64>>> = LazyLock::new(DashSet::new);
 
 pub struct ProcessingGuard(ArrayString<64>);
-
-impl ProcessingGuard {
-    pub fn try_acquire(hash: ArrayString<64>) -> Option<Self> {
-        IN_PROGRESS.insert(hash).then_some(Self(hash))
-    }
-}
-
 impl Drop for ProcessingGuard {
     fn drop(&mut self) {
         IN_PROGRESS.remove(&self.0);
+    }
+}
+
+fn try_acquire(hash: ArrayString<64>) -> Option<ProcessingGuard> {
+    if IN_PROGRESS.insert(hash.clone()) {
+        Some(ProcessingGuard(hash))
+    } else {
+        None
     }
 }
 
@@ -35,7 +36,7 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
         .await??;
     let hash = COORDINATOR.execute_waiting(HashTask::new(file)).await??;
 
-    let _guard = match ProcessingGuard::try_acquire(hash) {
+    let _guard = match try_acquire(hash) {
         Some(g) => g,
         None => {
             warn!(
@@ -71,7 +72,10 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
         .await??;
 
     COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&path)));
-    info!("Ready to processed video file: {:?}, hash: {}", path, database.hash);
+    info!(
+        "Ready to processed video file: {:?}, hash: {}",
+        path, database.hash
+    );
     if database.ext_type == "video" {
         COORDINATOR
             .execute_waiting(VideoTask::new(database))
