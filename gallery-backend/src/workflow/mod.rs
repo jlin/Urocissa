@@ -9,6 +9,7 @@ use anyhow::{Result, bail};
 use arrayvec::ArrayString;
 use dashmap::DashSet;
 use log::warn;
+use path_clean::PathClean;
 use std::{path::PathBuf, sync::LazyLock};
 
 static IN_PROGRESS: LazyLock<DashSet<ArrayString<64>>> = LazyLock::new(DashSet::new);
@@ -28,6 +29,7 @@ impl Drop for ProcessingGuard {
 }
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
+    let path = path.clean();
     let file = COORDINATOR
         .execute_waiting(OpenFileTask::new(path.clone()))
         .await??;
