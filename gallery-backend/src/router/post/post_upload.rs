@@ -2,8 +2,7 @@ use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::COORDINATOR;
-use crate::tasks::actor::deduplicate::DeduplicateTask;
+use crate::workflow::index_for_watch;
 use anyhow::Result;
 use anyhow::bail;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -66,11 +65,7 @@ pub async fn upload(
                 {
                     let final_path =
                         save_file(&mut file, filename, extension, last_modified_time).await?;
-
-                    COORDINATOR
-                        .execute_waiting(DeduplicateTask::new(PathBuf::from(final_path)))
-                        .await
-                        .map_err(anyhow::Error::from)??;
+                    index_for_watch(PathBuf::from(final_path)).await?;
                 } else {
                     error!("Invalid file type");
                     return Err(anyhow::anyhow!("Invalid file type: {}", extension).into());
