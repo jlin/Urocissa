@@ -8,7 +8,7 @@ use crate::tasks::{
 use anyhow::{Result, bail};
 use arrayvec::ArrayString;
 use dashmap::DashSet;
-use log::{info, warn};
+use log::warn;
 use path_clean::PathClean;
 use std::{path::PathBuf, sync::LazyLock};
 
@@ -72,10 +72,6 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
         .await??;
 
     COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&path)));
-    info!(
-        "Ready to processed video file: {:?}, hash: {}",
-        path, database.hash
-    );
     if database.ext_type == "video" {
         COORDINATOR
             .execute_waiting(VideoTask::new(database))

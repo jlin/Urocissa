@@ -20,13 +20,7 @@ static REGEX_OUT_TIME_US: LazyLock<Regex> =
 
 /// Compresses a video file, reporting progress by parsing ffmpeg's output.
 pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
-    info!("Starting video compression for hash: {}", database.hash);
     let duration_result = video_duration(&database.imported_path_string());
-    info!(
-        "Video duration for {:?} is: {:?}",
-        database.imported_path_string(),
-        duration_result
-    );
     let duration = match duration_result {
         // Handle static GIFs by delegating to the image processor.
         Ok(d) if (d * 1000.0) as u32 == 100 => {
@@ -58,9 +52,6 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
             ));
         }
     };
-
-    info!("Creating ffmpeg command for video compression");
-
     // --- REFACTORED: Use the helper for a clean, consistent command ---
     let mut cmd = create_silent_ffmpeg_command();
     cmd.args([
@@ -96,7 +87,6 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     // Process each line of progress output from ffmpeg's stderr.
     for line_result in reader.lines() {
         if let Ok(line) = line_result {
-            info!("FFmpeg progress line: {}", line);
             if let Some(caps) = REGEX_OUT_TIME_US.captures(&line) {
                 // The regex now captures either digits or "N/A".
                 // We only proceed if the captured value can be parsed as a number.
@@ -116,6 +106,5 @@ pub fn generate_compressed_video(database: &mut Database) -> Result<()> {
     child
         .wait()
         .context("Failed to wait for ffmpeg child process")?;
-    info!("Video compression completed for hash: {}", database.hash);
     Ok(())
 }
