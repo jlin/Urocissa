@@ -2,6 +2,7 @@ use crate::public::constant::runtime::TOKIO_RUNTIME;
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::{public::config::PRIVATE_CONFIG, workflow::index_for_watch};
 use log::{error, info};
+use mini_executor::BatchTask;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
     collections::HashSet,
@@ -20,8 +21,8 @@ static WATCHER_HANDLE: LazyLock<Mutex<Option<RecommendedWatcher>>> =
 
 pub struct StartWatcherTask;
 
-impl mini_executor::BatchTask for StartWatcherTask {
-    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+impl BatchTask for StartWatcherTask {
+    fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             start_watcher_task();
         }

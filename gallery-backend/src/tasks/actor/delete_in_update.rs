@@ -28,7 +28,7 @@ impl DeleteTask {
 impl Task for DeleteTask {
     type Output = Result<()>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             spawn_blocking(move || delete_in_upload_task(self.path))
                 .await

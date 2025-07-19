@@ -2,14 +2,15 @@ use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::router::get::get_prefetch::Prefetch;
 
+use mini_executor::BatchTask;
 use redb::TableDefinition;
 use std::sync::atomic::Ordering;
 use std::time::Instant;
 
 pub struct FlushQuerySnapshotTask;
 
-impl mini_executor::BatchTask for FlushQuerySnapshotTask {
-    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+impl BatchTask for FlushQuerySnapshotTask {
+    fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             flush_query_snapshot_task();
         }

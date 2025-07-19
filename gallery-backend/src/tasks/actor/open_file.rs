@@ -17,7 +17,7 @@ impl OpenFileTask {
 impl Task for OpenFileTask {
     type Output = Result<File>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             spawn_blocking(move || open_file_task(self.path))
                 .await

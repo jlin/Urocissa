@@ -18,7 +18,7 @@ impl HashTask {
 impl Task for HashTask {
     type Output = Result<ArrayString<64>>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             spawn(move || hash_task(self.file))
                 .await

@@ -25,7 +25,7 @@ impl CopyTask {
 impl Task for CopyTask {
     type Output = Result<Database>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             spawn_blocking(move || copy_task(self.database))
                 .await

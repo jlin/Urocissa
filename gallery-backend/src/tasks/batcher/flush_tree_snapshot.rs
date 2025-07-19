@@ -1,12 +1,13 @@
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::reduced_data::ReducedData;
+use mini_executor::BatchTask;
 use redb::TableDefinition;
 use std::time::Instant;
 
 pub struct FlushTreeSnapshotTask;
 
-impl mini_executor::BatchTask for FlushTreeSnapshotTask {
-    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+impl BatchTask for FlushTreeSnapshotTask {
+    fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             flush_tree_snapshot_task();
         }

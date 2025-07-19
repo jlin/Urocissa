@@ -1,3 +1,5 @@
+use mini_executor::BatchTask;
+
 use crate::{
     public::{
         constant::redb::DATA_TABLE, db::tree::TREE,
@@ -25,8 +27,8 @@ impl FlushTreeTask {
         }
     }
 }
-impl mini_executor::BatchTask for FlushTreeTask {
-    fn batch_run(list: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+impl BatchTask for FlushTreeTask {
+    fn batch_run(list: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             let mut all_insert_databases = Vec::new();
             let mut all_remove_databases = Vec::new();

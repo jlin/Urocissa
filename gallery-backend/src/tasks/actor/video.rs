@@ -25,7 +25,7 @@ impl VideoTask {
 impl Task for VideoTask {
     type Output = Result<()>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             let _pending_guard = PendingGuard::new();
             spawn(move || video_task(self.database))

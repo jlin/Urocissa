@@ -2,6 +2,7 @@ use crate::public::db::expire::EXPIRE;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use mini_executor::BatchTask;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
 use redb::ReadableTable;
@@ -28,8 +29,8 @@ static ALLOWED_KEYS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
 
 pub struct UpdateTreeTask;
 
-impl mini_executor::BatchTask for UpdateTreeTask {
-    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+impl BatchTask for UpdateTreeTask {
+    fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             update_tree_task();
         }

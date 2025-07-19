@@ -24,7 +24,7 @@ impl AlbumTask {
 impl Task for AlbumTask {
     type Output = Result<()>;
 
-    fn run(self) -> impl std::future::Future<Output = Self::Output> + Send {
+    fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             spawn_blocking(move || album_task(self.album_id))
                 .await
