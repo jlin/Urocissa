@@ -1,37 +1,23 @@
 use super::TreeSnapshot;
 use crate::public::structure::reduced_data::ReducedData;
+use anyhow::Context;
+use anyhow::Result;
 use arrayvec::ArrayString;
 use dashmap::mapref::one::Ref;
-
-use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition, TableError};
-use rocket::http::Status;
+use redb::{ReadOnlyTable, ReadableTableMetadata, TableDefinition};
 
 impl TreeSnapshot {
-    pub fn read_tree_snapshot(&'static self, timestamp: &u128) -> Result<MyCow, Status> {
+    pub fn read_tree_snapshot(&'static self, timestamp: &u128) -> Result<MyCow> {
         if let Some(data) = self.in_memory.get(timestamp) {
             return Ok(MyCow::DashMap(data));
         }
 
-        let read_txn = self.in_disk.begin_read().map_err(|err| {
-            error!("{:#?}", err);
-            Status::InternalServerError
-        })?;
+        let read_txn = self.in_disk.begin_read()?;
 
         let binding = timestamp.to_string();
         let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&binding);
 
-        let table = read_txn
-            .open_table(table_definition)
-            .map_err(|err| match err {
-                TableError::TableDoesNotExist(_) => {
-                    warn!("Table does not exist. Return unauthorized");
-                    Status::Unauthorized
-                }
-                _ => {
-                    error!("{:#?}", err);
-                    Status::InternalServerError
-                }
-            })?;
+        let table = read_txn.open_table(table_definition)?;
         Ok(MyCow::Redb(table))
     }
 }
@@ -50,28 +36,41 @@ impl MyCow {
         }
     }
 
-    pub fn get_width_height(&self, index: usize) -> (u32, u32) {
+    pub fn get_width_height(&self, index: usize) -> Result<(u32, u32)> {
         match self {
             MyCow::DashMap(data) => {
                 let data = &data.value()[index];
-                (data.width, data.height)
+                Ok((data.width, data.height))
             }
             MyCow::Redb(table) => {
-                let data = &table.get(index as u64).unwrap().unwrap().value();
-                (data.width, data.height)
+                let data = &table
+                    .get(index as u64)?
+                    .context(format!(
+                        "Fail to find with and height in tree snapshots for index {}",
+                        index
+                    ))?
+                    .value();
+
+                Ok((data.width, data.height))
             }
         }
     }
 
-    pub fn get_hash(&self, index: usize) -> ArrayString<64> {
+    pub fn get_hash(&self, index: usize) -> Result<ArrayString<64>> {
         match self {
             MyCow::DashMap(data) => {
                 let data = &data.value()[index];
-                data.hash
+                Ok(data.hash)
             }
             MyCow::Redb(table) => {
-                let data = table.get(index as u64).unwrap().unwrap().value();
-                data.hash
+                let data = table
+                    .get(index as u64)?
+                    .context(format!(
+                        "Fail to find hash in tree snapshots for index {}",
+                        index
+                    ))?
+                    .value();
+                Ok(data.hash)
             }
         }
     }

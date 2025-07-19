@@ -1,9 +1,12 @@
 use super::TreeSnapshot;
-use crate::{public::constant::ROW_BATCH_NUMBER, public::structure::row::{DisplayElement, Row}};
-use rocket::http::Status;
+use crate::{
+    public::constant::ROW_BATCH_NUMBER,
+    public::structure::row::{DisplayElement, Row},
+};
+use anyhow::{Result, bail};
 
 impl TreeSnapshot {
-    pub fn read_row(&'static self, row_index: usize, timestamp: u128) -> Result<Row, Status> {
+    pub fn read_row(&'static self, row_index: usize, timestamp: u128) -> Result<Row> {
         let tree_snapshot = self.read_tree_snapshot(&timestamp)?;
 
         let data_length = tree_snapshot.len();
@@ -11,21 +14,21 @@ impl TreeSnapshot {
 
         if row_index > chunk_count {
             error!("read_rows out of bound");
-            return Err(Status::NotFound);
+            bail!("Row index out of bounds");
         }
 
         let number_vec = (row_index * ROW_BATCH_NUMBER)
             ..(row_index * ROW_BATCH_NUMBER + ROW_BATCH_NUMBER).min(data_length);
 
         let display_elements: Vec<DisplayElement> = number_vec
-            .map(|index| {
-                let (width, height) = tree_snapshot.get_width_height(index);
-                DisplayElement {
+            .map(|index| -> Result<DisplayElement> {
+                let (width, height) = tree_snapshot.get_width_height(index)?;
+                Ok(DisplayElement {
                     display_width: width,
                     display_height: height,
-                }
+                })
             })
-            .collect();
+            .collect::<Result<Vec<DisplayElement>>>()?;
 
         Ok(Row {
             start: row_index * ROW_BATCH_NUMBER,
