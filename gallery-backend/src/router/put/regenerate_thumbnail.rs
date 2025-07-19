@@ -62,7 +62,7 @@ pub async fn regenerate_thumbnail_with_frame(
                     let dynamic_image = generate_dynamic_image(&database).unwrap();
                     database.thumbhash = generate_thumbhash(&dynamic_image);
                     database.phash = generate_phash(&dynamic_image);
-                    COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database]));
+                    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database]));
                 })
                 .await
                 .unwrap();

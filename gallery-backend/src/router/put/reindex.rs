@@ -86,7 +86,7 @@ pub async fn reindex(
                     }
                 })
                 .collect();
-            COORDINATOR.execute_batch_detached(FlushTreeTask::new(database_list));
+            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
         }
     })
     .await

@@ -40,7 +40,7 @@ pub fn video_task(mut database: Database) -> Result<()> {
     match generate_compressed_video(&mut database) {
         Ok(_) => {
             database.pending = false;
-            COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database]));
+            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database]));
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(

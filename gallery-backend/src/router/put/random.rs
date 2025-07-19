@@ -17,6 +17,6 @@ pub async fn generate_random_data(
         .into_par_iter()
         .map(|_| Database::generate_random_data())
         .collect();
-    COORDINATOR.execute_batch_detached(FlushTreeTask::new(database_list));
+    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
     info!("Insert random data complete")
 }

@@ -71,7 +71,7 @@ fn index_task(mut database: Database) -> Result<Database> {
     }
 
     // Persist the updated record & advance progress state
-    COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database.clone()]));
+    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database.clone()]));
     DASHBOARD.advance_task_state(&hash);
 
     Ok(database)

@@ -46,7 +46,7 @@ pub fn deduplicate_task(task: DeduplicateTask) -> Result<Option<Database>> {
         let mut database_exist = guard.value();
         let file_modify = mem::take(&mut database.alias[0]);
         database_exist.alias.push(file_modify);
-        COORDINATOR.execute_batch_detached(FlushTreeTask::new(vec![database_exist]));
+        COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database_exist]));
         warn!("File already exists in the database:\n{:#?}", database);
 
         Ok(None)
