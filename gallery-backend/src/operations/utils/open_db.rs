@@ -1,10 +1,14 @@
-use redb::ReadOnlyTable;
-
 use crate::public::{
     constant::redb::DATA_TABLE,
-    db::tree::TREE,
+    db::{
+        tree::TREE,
+        tree_snapshot::{TREE_SNAPSHOT, read_tree_snapshot::MyCow},
+    },
     structure::{album::Album, database_struct::database::definition::Database},
 };
+use anyhow::Context;
+use anyhow::Result;
+use redb::ReadOnlyTable;
 
 pub fn open_data_table() -> ReadOnlyTable<&'static str, Database> {
     let read_txn = TREE.in_disk.begin_read().unwrap();
@@ -30,4 +34,11 @@ pub fn open_data_and_album_tables() -> (
         .open_table(crate::public::constant::redb::ALBUM_TABLE)
         .unwrap();
     (data_table, album_table)
+}
+
+pub fn open_tree_snapshot_table(timestamp: u128) -> Result<MyCow> {
+    TREE_SNAPSHOT.read_tree_snapshot(&timestamp).context(format!(
+        "Failed to read tree snapshot for timestamp {}",
+        timestamp
+    ))
 }
