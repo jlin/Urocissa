@@ -7,6 +7,7 @@ use crate::{
 };
 use anyhow::Result;
 use anyhow::anyhow;
+use rayon::prelude::*;
 
 pub fn get_data_process(
     timestamp: u128,
@@ -24,21 +25,22 @@ pub fn get_data_process(
         return Ok(vec![]);
     }
 
-    let mut database_timestamp_return_list = Vec::with_capacity(end - start);
+    let database_timestamp_return_list: Result<Vec<DataBaseTimestampReturn>> = (start..end)
+        .into_par_iter()
+        .map(|index| {
+            let hash = index_to_hash(&tree_snapshot, index)
+                .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
 
-    for index in start..end {
-        let hash = index_to_hash(&tree_snapshot, index)
-            .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
+            let mut abstract_data = hash_to_abstract_data(&data_table, &album_table, hash)
+                .map_err(|e| anyhow!("Failed to read abstract data by hash {}: {}", hash, e))?;
 
-        let mut abstract_data = hash_to_abstract_data(&data_table, &album_table, hash)
-            .map_err(|e| anyhow!("Failed to read abstract data by hash {}: {}", hash, e))?;
+            clear_abstract_data_metadata(&mut abstract_data, show_metadata);
 
-        clear_abstract_data_metadata(&mut abstract_data, show_metadata);
+            let database_timestamp_return =
+                abstract_data_to_database_timestamp_return(abstract_data, timestamp, show_download);
+            Ok(database_timestamp_return)
+        })
+        .collect();
 
-        let database_timestamp_return =
-            abstract_data_to_database_timestamp_return(abstract_data, timestamp, show_download);
-        database_timestamp_return_list.push(database_timestamp_return);
-    }
-
-    Ok(database_timestamp_return_list)
+    database_timestamp_return_list
 }
