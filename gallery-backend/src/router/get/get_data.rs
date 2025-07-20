@@ -1,16 +1,13 @@
-use crate::public::constant::DEFAULT_PRIORITY_LIST;
-use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::db::tree::TREE;
+use crate::operations::resolve_show_download_and_metadata;
+use crate::process::get_data::get_data_process;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
-use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::public::structure::row::{Row, ScrollBarData};
 
+use crate::router::AppResult;
 use crate::router::fairing::guard_timestamp::GuardTimestamp;
 use log::info;
-use rocket::http::Status;
 
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rocket::serde::json::Json;
 use std::time::Instant;
 
@@ -20,65 +17,19 @@ pub async fn get_data(
     timestamp: u128,
     start: usize,
     end: usize,
-) -> Json<Vec<DataBaseTimestampReturn>> {
+) -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
-        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(&timestamp).unwrap();
-        let read_txn = TREE.in_disk.begin_read().unwrap();
-        let table = read_txn.open_table(DATA_TABLE).unwrap();
-        let album_table = read_txn.open_table(ALBUM_TABLE).unwrap();
-        let end = end.min(tree_snapshot.len());
 
-        // Early return if start is out of range.
-        if start >= end {
-            return Json(vec![]);
-        }
+        let resolved_share_opt = guard_timestamp.claims.resolved_share_opt;
+        let (show_download, show_metadata) = resolve_show_download_and_metadata(resolved_share_opt);
 
-        let data_vec: Vec<DataBaseTimestampReturn> = (start..end)
-            .into_par_iter()
-            .map(|index| {
-                let hash = tree_snapshot.get_hash(index);
-                let show_download = guard_timestamp
-                    .claims
-                    .resolved_share_opt
-                    .as_ref()
-                    .map_or(true, |resolved_share| resolved_share.share.show_download);
-                if let Some(database) = table.get(&*hash).unwrap() {
-                    let mut database = database.value();
-                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt
-                        && !resolved_share.share.show_metadata
-                    {
-                        database.tag.clear();
-                        database.album.clear();
-                        database.alias.clear();
-                    }
-                    DataBaseTimestampReturn::new(
-                        AbstractData::Database(database),
-                        &DEFAULT_PRIORITY_LIST,
-                        timestamp,
-                        show_download,
-                    )
-                } else if let Some(album) = album_table.get(&*hash).unwrap() {
-                    let mut album = album.value();
-                    if let Some(resolved_share) = &guard_timestamp.claims.resolved_share_opt
-                        && !resolved_share.share.show_metadata
-                    {
-                        album.tag.clear();
-                    };
-                    DataBaseTimestampReturn::new(
-                        AbstractData::Album(album),
-                        &DEFAULT_PRIORITY_LIST,
-                        timestamp,
-                        show_download,
-                    )
-                } else {
-                    panic!("Entry not found for hash: {:?}", hash);
-                }
-            })
-            .collect();
+        let database_timestamp_return_list =
+            get_data_process(timestamp, start, end, show_download, show_metadata)?;
+
         let duration = format!("{:?}", start_time.elapsed());
         info!(duration = &*duration; "Get data: {} ~ {}", start, end);
-        Json(data_vec)
+        Ok(Json(database_timestamp_return_list))
     })
     .await
     .unwrap()
@@ -89,7 +40,7 @@ pub async fn get_rows(
     _auth: GuardTimestamp,
     index: usize,
     timestamp: u128,
-) -> Result<Json<Row>, Status> {
+) -> AppResult<Json<Row>> {
     tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;

@@ -35,7 +35,7 @@ pub async fn delete_data(
             let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
 
             json_data.delete_list.iter().for_each(|index| {
-                let hash = tree_snapshot.get_hash(*index);
+                let hash = tree_snapshot.get_hash(*index).unwrap();
 
                 let found_data = match table.get(hash.as_str()).unwrap() {
                     Some(data) => {

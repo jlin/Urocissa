@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use arrayvec::ArrayString;
 use rand::Rng;
 use rand::distr::Alphanumeric;
@@ -35,60 +36,90 @@ pub async fn create_non_empty_album(
     _read_only_mode: GuardReadOnlyMode,
     create_album: Json<CreateAlbum>,
 ) -> AppResult<String> {
-    let id = tokio::task::spawn_blocking(move || {
+    let id = tokio::task::spawn_blocking(move || -> Result<ArrayString<64>> {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
-        let album_id: String = rand::rng()
+        let mut album_id = ArrayString::<64>::new();
+
+        for ch in rand::rng()
             .sample_iter(&Alphanumeric)
             .filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
             .take(64)
             .map(char::from)
-            .collect();
-        let album_id = ArrayString::<64>::from(&album_id).unwrap();
+        {
+            album_id
+                .try_push(ch)
+                .context("Failed to push character to album ID")?;
+        }
 
         let album_database = Album::new(album_id, create_album.title);
-        let txn = TREE.in_disk.begin_write().unwrap();
+        let txn = TREE
+            .in_disk
+            .begin_write()
+            .context("Failed to begin write transaction")?;
 
         let timestamp = &create_album.timestamp;
-        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
+        let tree_snapshot = TREE_SNAPSHOT
+            .read_tree_snapshot(timestamp)
+            .context("Failed to read tree snapshot")?;
 
         {
-            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
+            let mut album_table = txn
+                .open_table(ALBUM_TABLE)
+                .context("Failed to open album table")?;
 
             album_table
                 .insert(album_id.as_str(), &album_database)
-                .unwrap();
+                .context("Failed to insert album into album table")?;
 
-            let mut data_table = txn.open_table(DATA_TABLE).unwrap();
+            let mut data_table = txn
+                .open_table(DATA_TABLE)
+                .context("Failed to open data table")?;
 
-            create_album.elements_index.iter().for_each(|index| {
-                let hash = tree_snapshot.get_hash(*index);
+            create_album
+                .elements_index
+                .iter()
+                .try_for_each(|index| -> Result<()> {
+                    let hash = tree_snapshot
+                        .get_hash(*index)
+                        .context("Failed to get hash from tree snapshot")?;
 
-                // album should not be added to album
-                let data_opt = data_table.get(hash.as_str()).unwrap().map(|data_guard| {
-                    let mut data = data_guard.value();
-                    data.album.insert(album_id);
-                    data
-                });
-                if let Some(data) = data_opt {
-                    data_table.insert(&*data.hash, &data).unwrap();
-                }
-            });
+                    // album should not be added to album
+                    let data_opt = data_table
+                        .get(&*hash)
+                        .context("Failed to get data from data table")?
+                        .map(|data_guard| {
+                            let mut data = data_guard.value();
+                            data.album.insert(album_id);
+                            data
+                        });
+                    if let Some(data) = data_opt {
+                        data_table
+                            .insert(&*data.hash, &data)
+                            .context("Failed to insert updated data into data table")?;
+                    }
+                    Ok(())
+                })?;
         }
-        txn.commit().unwrap();
+        txn.commit().context("Failed to commit transaction")?;
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
-        album_id
+        Ok(album_id)
     })
     .await
-    .unwrap();
+    .context("Failed to execute blocking task")?
+    .context("Task execution failed")?;
+
     COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
-        .unwrap();
+        .context("Failed to execute update tree task")?;
+
     COORDINATOR
         .execute_waiting(AlbumTask::new(id))
         .await
-        .map_err(anyhow::Error::from)??;
+        .map_err(anyhow::Error::from)?
+        .context("Album task execution failed")?;
+
     Ok(id.to_string())
 }
 
@@ -97,40 +128,55 @@ pub async fn create_empty_album(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
 ) -> AppResult<String> {
-    let id = tokio::task::spawn_blocking(move || {
+    let id = tokio::task::spawn_blocking(move || -> Result<ArrayString<64>> {
         let start_time = Instant::now();
 
-        let album_id: String = rand::rng()
+        let mut album_id = ArrayString::<64>::new();
+
+        for ch in rand::rng()
             .sample_iter(&Alphanumeric)
             .filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
             .take(64)
             .map(char::from)
-            .collect();
-        let album_id = ArrayString::<64>::from(&album_id).unwrap();
+        {
+            album_id
+                .try_push(ch)
+                .context("Failed to push character to album ID")?;
+        }
 
         let album_database = Album::new(album_id, None);
-        let txn = TREE.in_disk.begin_write().unwrap();
+        let txn = TREE
+            .in_disk
+            .begin_write()
+            .context("Failed to begin write transaction")?;
 
         {
-            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
+            let mut album_table = txn
+                .open_table(ALBUM_TABLE)
+                .context("Failed to open album table")?;
 
             album_table
                 .insert(album_id.as_str(), &album_database)
-                .unwrap();
+                .context("Failed to insert album into album table")?;
         }
-        txn.commit().unwrap();
+        txn.commit().context("Failed to commit transaction")?;
         info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
-        album_id
+        Ok(album_id)
     })
     .await
-    .unwrap();
+    .context("Failed to execute blocking task")?
+    .context("Task execution failed")?;
+
     COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
-        .unwrap();
+        .context("Failed to execute update tree task")?;
+
     COORDINATOR
         .execute_waiting(AlbumTask::new(id))
         .await
-        .map_err(anyhow::Error::from)??;
+        .map_err(anyhow::Error::from)?
+        .context("Album task execution failed")?;
+
     Ok(id.to_string())
 }

@@ -32,7 +32,7 @@ pub async fn edit_tag(
             let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
 
             json_data.index_array.iter().for_each(|index| {
-                let hash = tree_snapshot.get_hash(*index);
+                let hash = tree_snapshot.get_hash(*index).unwrap();
                 let data_opt = match write_table.get(hash.as_str()).unwrap() {
                     Some(data) => {
                         let mut data = data.value();

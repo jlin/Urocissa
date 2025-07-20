@@ -40,7 +40,7 @@ pub async fn reindex(
         let hash_vec: Vec<ArrayString<64>> = json_data
             .index_array
             .par_iter()
-            .map(|index| reduced_data_vec.get_hash(*index))
+            .map(|index| reduced_data_vec.get_hash(*index).unwrap())
             .collect();
         let total_batches = (hash_vec.len() + PROCESS_BATCH_NUMBER - 1) / PROCESS_BATCH_NUMBER;
 
