@@ -1,13 +1,17 @@
+use crate::operations::open_db::{
+    abstract_data_to_database_timestamp_return, clear_abstract_data_metadata,
+    hash_to_abstract_data, index_to_hash, open_data_and_album_tables, open_tree_snapshot_table,
+};
 use crate::operations::resolve_show_download_and_metadata;
-use crate::process::get_data::get_data_process;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::public::structure::row::{Row, ScrollBarData};
 
 use crate::router::AppResult;
 use crate::router::fairing::guard_timestamp::GuardTimestamp;
+use anyhow::{Result, anyhow};
 use log::info;
-
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rocket::serde::json::Json;
 use std::time::Instant;
 
@@ -18,18 +22,42 @@ pub async fn get_data(
     start: usize,
     end: usize,
 ) -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
-    tokio::task::spawn_blocking(move || {
+    tokio::task::spawn_blocking(move || -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
         let start_time = Instant::now();
 
         let resolved_share_opt = guard_timestamp.claims.resolved_share_opt;
         let (show_download, show_metadata) = resolve_show_download_and_metadata(resolved_share_opt);
 
-        let database_timestamp_return_list =
-            get_data_process(timestamp, start, end, show_download, show_metadata)?;
+        let (data_table, album_table) = open_data_and_album_tables();
+        let tree_snapshot = open_tree_snapshot_table(timestamp)?;
+
+        if start >= end || end > tree_snapshot.len() {
+            return Ok(Json(vec![]));
+        }
+
+        let database_timestamp_return_list: Result<Vec<DataBaseTimestampReturn>> = (start..end)
+            .into_par_iter()
+            .map(|index| {
+                let hash = index_to_hash(&tree_snapshot, index)
+                    .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
+
+                let mut abstract_data = hash_to_abstract_data(&data_table, &album_table, hash)
+                    .map_err(|e| anyhow!("Failed to read abstract data by hash {}: {}", hash, e))?;
+
+                clear_abstract_data_metadata(&mut abstract_data, show_metadata);
+
+                let database_timestamp_return = abstract_data_to_database_timestamp_return(
+                    abstract_data,
+                    timestamp,
+                    show_download,
+                );
+                Ok(database_timestamp_return)
+            })
+            .collect();
 
         let duration = format!("{:?}", start_time.elapsed());
         info!(duration = &*duration; "Get data: {} ~ {}", start, end);
-        Ok(Json(database_timestamp_return_list))
+        database_timestamp_return_list.map(Json).map_err(Into::into)
     })
     .await
     .unwrap()

@@ -73,85 +73,73 @@ impl From<&DatabaseTimestamp> for ReducedData {
 }
 
 // -----------------------------------------------------------------------------
-// ── 1. Pure helpers (logic only, no side‑effects) ─────────────────────────────
+// ── Single prefetch function ─────────────────────────────────────────────────
 // -----------------------------------------------------------------------------
 
-/// Build a stable cache key from the expression, version counter and locate hash.
-fn build_query_hash(expression_option: &Option<Expression>, locate_option: &Option<String>) -> u64 {
+fn execute_prefetch_logic(
+    expression_option: Option<Expression>,
+    locate_option: Option<String>,
+    resolved_share_option: Option<ResolvedShare>,
+) -> Json<PrefetchReturn> {
+    // Build cache key
     let mut hasher = DefaultHasher::new();
     expression_option.hash(&mut hasher);
     VERSION_COUNT_TIMESTAMP
         .load(Ordering::Relaxed)
         .hash(&mut hasher);
     locate_option.hash(&mut hasher);
-    hasher.finish()
-}
+    let query_hash = hasher.finish();
 
-/// Produce a vector of [`ReducedData`] that matches the expression (if any).
-fn collect_reduced_data_edit(expression_option: Option<Expression>) -> Vec<ReducedData> {
+    // Check cache first
+    if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
+        let claims = ClaimsTimestamp::new(resolved_share_option, prefetch.timestamp);
+        return Json(PrefetchReturn::new(
+            prefetch,
+            claims.encode(),
+            claims.resolved_share_opt,
+        ));
+    }
+
+    // Collect data based on share or edit mode
     let tree_guard = TREE.in_memory.read().unwrap();
-
-    match expression_option {
-        Some(expression) => {
-            let filter_fn = expression.generate_filter();
-            tree_guard
+    let reduced_data_vector: Vec<ReducedData> =
+        match (expression_option.as_ref(), &resolved_share_option) {
+            // If we have a resolved share then it must have a filter expression
+            (Some(expr), Some(resolved_share)) => {
+                let filter_fn = if resolved_share.share.show_metadata {
+                    expr.clone().generate_filter()
+                } else {
+                    expr.clone()
+                        .generate_filter_hide_metadata(resolved_share.album_id)
+                };
+                tree_guard
+                    .par_iter()
+                    .filter(|db_ts| filter_fn(&db_ts.abstract_data))
+                    .map(|db_ts| db_ts.into())
+                    .collect()
+            }
+            (Some(expr), None) => {
+                let filter_fn = expr.clone().generate_filter();
+                tree_guard
+                    .par_iter()
+                    .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
+                    .map(|database_timestamp| database_timestamp.into())
+                    .collect()
+            }
+            (None, _) => tree_guard
                 .par_iter()
-                .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
                 .map(|database_timestamp| database_timestamp.into())
-                .collect()
-        }
-        None => tree_guard
-            .par_iter()
-            .map(|database_timestamp| database_timestamp.into())
-            .collect(),
-    }
-}
+                .collect(),
+        };
 
-fn collect_reduced_data_share(
-    expression_option: Option<Expression>,
-    resolved_share: &ResolvedShare,
-) -> Vec<ReducedData> {
-    let tree_guard = TREE.in_memory.read().unwrap();
-
-    match expression_option {
-        Some(expr) => {
-            let filter_fn = if resolved_share.share.show_metadata {
-                expr.generate_filter()
-            } else {
-                expr.generate_filter_hide_metadata(resolved_share.album_id)
-            };
-
-            tree_guard
-                .par_iter()
-                .filter(|db_ts| filter_fn(&db_ts.abstract_data))
-                .map(|db_ts| db_ts.into())
-                .collect()
-        }
-        None => tree_guard.par_iter().map(|db_ts| db_ts.into()).collect(),
-    }
-}
-
-/// Locate the index for the requested hash, if the client supplied one.
-fn locate_index(
-    reduced_data_slice: &[ReducedData],
-    locate_option: &Option<String>,
-) -> Option<usize> {
-    locate_option.as_ref().and_then(|hash| {
-        reduced_data_slice
+    // Find locate index if requested
+    let locate_to_index = locate_option.as_ref().and_then(|hash| {
+        reduced_data_vector
             .par_iter()
             .position_first(|reduced| reduced.hash.as_str() == hash)
-    })
-}
+    });
 
-// -----------------------------------------------------------------------------
-// ── 2. Helpers with side‑effects (snapshot, cache, JWT) ───────────────────────
-// -----------------------------------------------------------------------------
-
-/// Persist `reduced_data_vector` into `TREE_SNAPSHOT`; return `(timestamp, Prefetch)`.
-fn persist_tree_snapshot(
-    reduced_data_vector: Vec<ReducedData>,
-    locate_to_index: Option<usize>,
-) -> (u128, Prefetch) {
+    // Persist to snapshot
     let timestamp_millis = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
@@ -162,92 +150,28 @@ fn persist_tree_snapshot(
         .insert(timestamp_millis, reduced_data_vector);
     COORDINATOR.execute_batch_detached(FlushTreeSnapshotTask);
 
-    (
+    let prefetch = Prefetch::new(
         timestamp_millis,
-        Prefetch::new(
-            timestamp_millis,
-            locate_to_index,
-            TREE_SNAPSHOT
-                .in_memory
-                .get(&timestamp_millis)
-                .unwrap()
-                .len(),
-        ),
-    )
-}
+        locate_to_index,
+        TREE_SNAPSHOT
+            .in_memory
+            .get(&timestamp_millis)
+            .unwrap()
+            .len(),
+    );
 
-/// Insert `prefetch` into the query‑level cache.
-fn cache_prefetch(query_hash: u64, prefetch: Prefetch) {
+    // Cache the result
     QUERY_SNAPSHOT.in_memory.insert(query_hash, prefetch);
     COORDINATOR.execute_batch_detached(FlushQuerySnapshotTask);
-}
 
-/// Assemble the JSON response for the **edit** path.
-fn build_edit_response(prefetch: Prefetch, timestamp_millis: u128) -> Json<PrefetchReturn> {
-    let claims = ClaimsTimestamp::new(None, timestamp_millis);
-    Json(PrefetchReturn::new(prefetch, claims.encode(), None))
-}
-
-/// Assemble the JSON response for the **share** path.
-fn build_share_response(
-    prefetch: Prefetch,
-    timestamp_millis: u128,
-    resolved_share: ResolvedShare,
-) -> Json<PrefetchReturn> {
-    let claims = ClaimsTimestamp::new(Some(resolved_share), timestamp_millis);
+    // Build response
+    let claims = ClaimsTimestamp::new(resolved_share_option, timestamp_millis);
     Json(PrefetchReturn::new(
         prefetch,
         claims.encode(),
         claims.resolved_share_opt,
     ))
 }
-
-// -----------------------------------------------------------------------------
-// ── 3. Business helpers (edit • share) ────────────────────────────────────────
-// -----------------------------------------------------------------------------
-
-fn execute_edit_path(
-    expression_option: Option<Expression>,
-    locate_option: Option<String>,
-) -> Json<PrefetchReturn> {
-    let query_hash = build_query_hash(&expression_option, &locate_option);
-
-    // A. cache hit?
-    if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
-        return build_edit_response(prefetch, prefetch.timestamp);
-    }
-
-    // B. fresh computation
-    let reduced_data_vector = collect_reduced_data_edit(expression_option);
-    let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
-    let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
-
-    cache_prefetch(query_hash, prefetch);
-    build_edit_response(prefetch, timestamp_millis)
-}
-
-fn execute_share_path(
-    expression_option: Option<Expression>,
-    locate_option: Option<String>,
-    resolved_share: ResolvedShare,
-) -> Json<PrefetchReturn> {
-    let query_hash = build_query_hash(&expression_option, &locate_option);
-
-    if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
-        return build_share_response(prefetch, prefetch.timestamp, resolved_share);
-    }
-
-    let reduced_data_vector = collect_reduced_data_share(expression_option, &resolved_share);
-    let locate_to_index = locate_index(&reduced_data_vector, &locate_option);
-    let (timestamp_millis, prefetch) = persist_tree_snapshot(reduced_data_vector, locate_to_index);
-
-    cache_prefetch(query_hash, prefetch);
-    build_share_response(prefetch, timestamp_millis, resolved_share)
-}
-
-// -----------------------------------------------------------------------------
-// ── 4. Single merged Rocket route ─────────────────────────────────────────────
-// -----------------------------------------------------------------------------
 
 #[post("/get/prefetch?<locate>", format = "json", data = "<query_data>")]
 pub async fn prefetch(
@@ -257,8 +181,9 @@ pub async fn prefetch(
 ) -> Json<PrefetchReturn> {
     // Combine album filter (if any) with the client‑supplied query.
     let mut combined_expression_option = query_data.map(|wrapper| wrapper.into_inner());
+    let resolved_share_option = auth_guard.claims.get_share();
 
-    let job_handle = if let Some(resolved_share) = auth_guard.claims.get_share() {
+    if let Some(resolved_share) = &resolved_share_option {
         let album_filter_expression = Expression::Album(resolved_share.album_id);
 
         combined_expression_option = Some(match combined_expression_option {
@@ -267,15 +192,12 @@ pub async fn prefetch(
             }
             None => album_filter_expression,
         });
+    }
 
-        // heavy work on blocking thread – share path
-        tokio::task::spawn_blocking(move || {
-            execute_share_path(combined_expression_option, locate, resolved_share)
-        })
-    } else {
-        // edit path
-        tokio::task::spawn_blocking(move || execute_edit_path(combined_expression_option, locate))
-    };
+    // Execute on blocking thread
+    let job_handle = tokio::task::spawn_blocking(move || {
+        execute_prefetch_logic(combined_expression_option, locate, resolved_share_option)
+    });
 
     job_handle.await.unwrap()
 }
