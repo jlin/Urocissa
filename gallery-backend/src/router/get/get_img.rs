@@ -1,3 +1,4 @@
+use anyhow::Context;
 use rocket::fs::NamedFile;
 use rocket::response::Responder;
 use rocket_seek_stream::SeekStream;
@@ -23,26 +24,38 @@ pub async fn compressed_file(
     file_path: PathBuf,
 ) -> AppResult<CompressedFileResponse<'static>> {
     let compressed_file_path = Path::new("./object/compressed").join(&file_path);
-    let result = if compressed_file_path
+
+    let result = match compressed_file_path
         .extension()
         .and_then(std::ffi::OsStr::to_str)
-        == Some("mp4")
     {
-        SeekStream::from_path(compressed_file_path)
+        Some("mp4") => SeekStream::from_path(&compressed_file_path)
             .map(CompressedFileResponse::SeekStream)
-            .map_err(|error| {
-                error!("Error opening MP4 file: {:#?}", error);
-                anyhow::anyhow!("Error opening MP4 file: {:#?}", error)
-            })?
-    } else {
-        let named_file = NamedFile::open(compressed_file_path)
-            .await
-            .map_err(|error| {
-                error!("Error opening file: {:#?}", error);
-                anyhow::anyhow!("Error opening file: {:#?}", error)
-            })?;
-        CompressedFileResponse::NamedFile(named_file)
+            .context(format!(
+                "Failed to open MP4 file: {}",
+                compressed_file_path.display()
+            ))?,
+        Some("jpg") => {
+            let named_file = NamedFile::open(&compressed_file_path)
+                .await
+                .context(format!(
+                    "Failed to open JPG file: {}",
+                    compressed_file_path.display()
+                ))?;
+            CompressedFileResponse::NamedFile(named_file)
+        }
+        Some(ext) => {
+            return Err(anyhow::anyhow!("Unsupported file extension: {}", ext)
+                .context(format!("File path: {}", compressed_file_path.display()))
+                .into());
+        }
+        None => {
+            return Err(anyhow::anyhow!("File has no extension")
+                .context(format!("File path: {}", compressed_file_path.display()))
+                .into());
+        }
     };
+
     Ok(result)
 }
 

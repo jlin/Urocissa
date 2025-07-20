@@ -19,9 +19,8 @@ pub fn get_data_process(
     // Open tables and snapshot once, exactly as before.
     let (data_table, album_table) = open_data_and_album_tables();
     let tree_snapshot = open_tree_snapshot_table(timestamp)?;
-    let end = end.min(tree_snapshot.len());
 
-    if start >= end {
+    if start >= end || end > tree_snapshot.len() {
         return Ok(vec![]);
     }
 
