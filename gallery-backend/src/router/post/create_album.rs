@@ -9,6 +9,7 @@ use std::time::Instant;
 
 use serde::{Deserialize, Serialize};
 
+use crate::operations::hash::generate_random_hash;
 use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
 
 use crate::tasks::actor::album::AlbumTask;
@@ -39,18 +40,7 @@ pub async fn create_non_empty_album(
     let id = tokio::task::spawn_blocking(move || -> Result<ArrayString<64>> {
         let start_time = Instant::now();
         let create_album = create_album.into_inner();
-        let mut album_id = ArrayString::<64>::new();
-
-        for ch in rand::rng()
-            .sample_iter(&Alphanumeric)
-            .filter(|c| c.is_ascii_lowercase() || c.is_ascii_digit())
-            .take(64)
-            .map(char::from)
-        {
-            album_id
-                .try_push(ch)
-                .context("Failed to push character to album ID")?;
-        }
+        let album_id = generate_random_hash();
 
         let album_database = Album::new(album_id, create_album.title);
         let txn = TREE
