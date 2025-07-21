@@ -8,6 +8,8 @@ pub const PROCESS_BATCH_NUMBER: usize = 100;
 
 pub const SNAPSHOT_MAX_LIFETIME_MS: u64 = 24 * 60 * 60 * 1_000; // 24 hours
 
+pub const MAX_COPY_RETRIES: u32 = 3;
+
 pub const MAX_DELETE_ATTEMPTS: u64 = 5;
 
 pub const SHOULD_SWAP_WIDTH_HEIGHT_ROTATION: &'static [&'static str] =

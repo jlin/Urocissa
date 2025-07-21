@@ -1,16 +1,18 @@
-use crate::public::constant::redb::{ALBUM_TABLE, DATA_TABLE};
-use crate::public::db::tree::TREE;
-use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
+use crate::operations::open_db::{open_data_and_album_tables, open_tree_snapshot_table};
+use crate::process::transitor::index_to_abstract_data;
+use crate::public::structure::abstract_data::AbstractData;
+use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
-
+use anyhow::Result;
+use arrayvec::ArrayString;
 use futures::future::join_all;
-use redb::ReadableTable;
+use log::error;
 use rocket::serde::{Deserialize, json::Json};
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeleteList {
@@ -22,71 +24,59 @@ pub async fn delete_data(
     _auth: GuardAuth,
     _read_only_mode: GuardReadOnlyMode,
     json_data: Json<DeleteList>,
-) {
-    let deleted_album_id = tokio::task::spawn_blocking(move || {
-        let timestamp = &json_data.timestamp;
-
-        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
-
-        let txn = TREE.in_disk.begin_write().unwrap();
-        let mut deleted_album_id = vec![];
-        {
-            let mut table = txn.open_table(DATA_TABLE).unwrap();
-            let mut album_table = txn.open_table(ALBUM_TABLE).unwrap();
-
-            json_data.delete_list.iter().for_each(|index| {
-                let hash = tree_snapshot.get_hash(*index).unwrap();
-
-                let found_data = match table.get(hash.as_str()).unwrap() {
-                    Some(data) => {
-                        let data = data.value();
-                        let compressed_path = data.compressed_path();
-                        let imported_path = data.imported_path();
-                        std::fs::remove_file(&compressed_path).unwrap_or_else(|err| {
-                            error!("Failed to delete file at {:?}: {:#?}", compressed_path, err);
-                        });
-
-                        std::fs::remove_file(&imported_path).unwrap_or_else(|err| {
-                            error!("Failed to delete file at {:?}: {:#?}", imported_path, err);
-                        });
-
-                        for album_id in data.album {
-                            deleted_album_id.push(album_id);
-                        }
-
-                        true
-                    }
-                    None => false,
-                };
-                if found_data {
-                    table.remove(hash.as_str()).unwrap();
-                }
-
-                let found_album = match album_table.get(hash.as_str()).unwrap() {
-                    Some(album) => {
-                        let album = album.value();
-                        deleted_album_id.push(album.id);
-                        true
-                    }
-                    None => false,
-                };
-                if found_album {
-                    album_table.remove(hash.as_str()).unwrap();
-                }
-            });
-        }
-
-        txn.commit().unwrap();
-        deleted_album_id
+) -> AppResult<()> {
+    let (abstract_data_to_remove, all_affected_album_ids) = tokio::task::spawn_blocking({
+        let delete_list = json_data.delete_list.clone();
+        let timestamp = json_data.timestamp;
+        move || process_deletes(delete_list, timestamp)
     })
     .await
-    .unwrap();
+    .map_err(|e| anyhow::anyhow!("Blocking task failed: {}", e))??;
+
+    COORDINATOR
+        .execute_batch_waiting(FlushTreeTask::remove(abstract_data_to_remove))
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to flush tree: {}", e))?;
+
     COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
-        .unwrap();
-    let futures = deleted_album_id
+        .map_err(|e| anyhow::anyhow!("Failed to update tree: {}", e))?;
+
+    let album_futures = all_affected_album_ids
         .into_iter()
-        .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
-    join_all(futures).await;
+        .map(|album_id| async move {
+            if let Err(e) = COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await {
+                error!("Failed to process album: {}", e);
+            }
+        });
+
+    join_all(album_futures).await;
+    Ok(())
+}
+
+fn process_deletes(
+    delete_list: Vec<usize>,
+    timestamp: u128,
+) -> Result<(Vec<AbstractData>, Vec<ArrayString<64>>)> {
+    let (data_table, album_table) = open_data_and_album_tables();
+    let tree_snapshot = open_tree_snapshot_table(timestamp)?;
+
+    let mut all_affected_album_ids = Vec::new();
+    let mut abstract_data_to_remove = Vec::new();
+
+    for index in delete_list {
+        let abstract_data =
+            index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index)?;
+
+        let affected_albums = match &abstract_data {
+            AbstractData::Database(db) => db.album.iter().cloned().collect(),
+            AbstractData::Album(album) => vec![album.id],
+        };
+
+        all_affected_album_ids.extend(affected_albums);
+        abstract_data_to_remove.push(abstract_data);
+    }
+
+    Ok((abstract_data_to_remove, all_affected_album_ids))
 }

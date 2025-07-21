@@ -1,4 +1,4 @@
-use crate::operations::open_db::open_data_and_album_tables;
+use crate::operations::open_db::{open_data_and_album_tables, open_tree_snapshot_table};
 use crate::process::transitor::index_to_abstract_data;
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 
@@ -27,17 +27,21 @@ pub async fn edit_tag(
 ) -> AppResult<Json<Vec<TagInfo>>> {
     let vec_tags_info = tokio::task::spawn_blocking(move || -> Result<Vec<TagInfo>> {
         let (data_table, album_table) = open_data_and_album_tables();
-        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(&json_data.timestamp)?;
+        let tree_snapshot = open_tree_snapshot_table(json_data.timestamp)?;
 
         // Collect all modified abstract_data objects for batch processing
         let mut modified_data = Vec::with_capacity(json_data.index_array.len());
 
         for &index in &json_data.index_array {
-            let mut abstract_data = index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index)
-                .map_err(|e| anyhow::anyhow!("Failed to convert index {} to abstract data: {}", index, e))?;
-            
+            let mut abstract_data =
+                index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index).map_err(
+                    |e| {
+                        anyhow::anyhow!("Failed to convert index {} to abstract data: {}", index, e)
+                    },
+                )?;
+
             let tag_set = abstract_data.tag_mut();
-            
+
             // Apply tag additions and removals in one pass
             for tag in &json_data.add_tags_array {
                 tag_set.insert(tag.clone());
@@ -45,7 +49,7 @@ pub async fn edit_tag(
             for tag in &json_data.remove_tags_array {
                 tag_set.remove(tag);
             }
-            
+
             modified_data.push(abstract_data);
         }
 
