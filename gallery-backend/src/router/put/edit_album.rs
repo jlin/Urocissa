@@ -1,5 +1,5 @@
 use crate::tasks::COORDINATOR;
-use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
 use crate::public::db::{tree::TREE, tree_snapshot::TREE_SNAPSHOT};
@@ -82,7 +82,7 @@ pub async fn edit_album(
         .unwrap();
     let futures = concact_result
         .into_iter()
-        .map(async |album_id| COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await);
+        .map(async |album_id| COORDINATOR.execute_waiting(AlbumSelfUpdateTask::new(album_id)).await);
     join_all(futures).await;
 }
 

@@ -5,7 +5,7 @@ use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
-use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use anyhow::Result;
@@ -46,7 +46,7 @@ pub async fn delete_data(
     let album_futures = all_affected_album_ids
         .into_iter()
         .map(|album_id| async move {
-            if let Err(e) = COORDINATOR.execute_waiting(AlbumTask::new(album_id)).await {
+            if let Err(e) = COORDINATOR.execute_waiting(AlbumSelfUpdateTask::new(album_id)).await {
                 error!("Failed to process album: {}", e);
             }
         });

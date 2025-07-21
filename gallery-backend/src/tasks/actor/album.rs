@@ -11,17 +11,17 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use redb::ReadableTable;
 use tokio::task::spawn_blocking;
 
-pub struct AlbumTask {
+pub struct AlbumSelfUpdateTask {
     album_id: ArrayString<64>,
 }
 
-impl AlbumTask {
+impl AlbumSelfUpdateTask {
     pub fn new(album_id: ArrayString<64>) -> Self {
         Self { album_id }
     }
 }
 
-impl Task for AlbumTask {
+impl Task for AlbumSelfUpdateTask {
     type Output = Result<()>;
 
     fn run(self) -> impl Future<Output = Self::Output> + Send {

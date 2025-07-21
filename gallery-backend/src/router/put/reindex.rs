@@ -7,7 +7,7 @@ use crate::process::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::tasks::COORDINATOR;
-use crate::tasks::actor::album::AlbumTask;
+use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
@@ -72,7 +72,7 @@ pub async fn reindex(
                             match album_table.get(&*hash).unwrap() {
                                 Some(_) => {
                                     // album_self_update already will commit
-                                    COORDINATOR.execute_detached(AlbumTask::new(hash));
+                                    COORDINATOR.execute_detached(AlbumSelfUpdateTask::new(hash));
                                     None
                                 }
                                 _ => {
