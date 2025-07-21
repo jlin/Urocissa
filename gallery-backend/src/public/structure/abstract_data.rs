@@ -42,4 +42,10 @@ impl AbstractData {
             AbstractData::Album(album) => &album.tag,
         }
     }
+    pub fn tag_mut(self: &mut Self) -> &mut HashSet<String> {
+        match self {
+            AbstractData::Database(database) => &mut database.tag,
+            AbstractData::Album(album) => &mut album.tag,
+        }
+    }
 }
