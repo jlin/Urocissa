@@ -61,11 +61,11 @@ fn main() -> Result<()> {
         if let Some(sc) = superconsole::SuperConsole::new() {
             TOKIO_RUNTIME.spawn(async move {
                 if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {
-                    eprintln!("TUI error: {e}");
+                    error!("TUI error: {e}");
                 }
             });
         } else {
-            eprintln!("Superconsole disabled (no TTY)");
+            error!("Superconsole disabled (no TTY)");
         }
 
         let rocket_instance = build_rocket().await.ignite().await?;
@@ -79,10 +79,14 @@ fn main() -> Result<()> {
             shutdown_handle.notify();
         });
 
-        if let Err(e) = rocket_instance.launch().await {
-            error!("Rocket server failed: {}", e);
-        };
+        let launch_result = rocket_instance.launch().await;
 
-        Ok(())
+
+        if let Err(ref e) = launch_result {
+            error!("Rocket server failed: {}", e);
+        }
+
+      launch_result.map(|_| ()).map_err(anyhow::Error::from)
+      
     })
 }
