@@ -9,7 +9,7 @@ use std::time::Instant;
 
 use crate::operations::hash::generate_random_hash;
 use crate::operations::open_db::open_data_table;
-use crate::process::transitor::index_to_abstract_database;
+use crate::process::transitor::index_to_database;
 
 use crate::public::structure::abstract_data::AbstractData;
 use crate::tasks::actor::album::AlbumTask;
@@ -30,61 +30,54 @@ pub struct CreateAlbum {
     pub elements_index: Vec<usize>,
     pub timestamp: u128,
 }
-
-/// Creates an album with optional title and elements
+/// Creates an album with an optional title and optional element list.
 async fn create_album_internal(
     title: Option<String>,
     elements_index: Vec<usize>,
     timestamp: Option<u128>,
 ) -> Result<ArrayString<64>> {
-    let album_id = tokio::task::spawn_blocking(move || -> Result<ArrayString<64>> {
-        let start_time = Instant::now();
-        
-        let album_id = generate_random_hash();
-        let album_database = Album::new(album_id, title);
-        let abstract_data_album = AbstractData::Album(album_database);
-        
-        // Insert the album first
-        COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data_album]));
-        
-        // Add elements if provided
-        if !elements_index.is_empty() {
-            let timestamp = timestamp.context("Timestamp required for non-empty album")?;
-            let tree_snapshot = TREE_SNAPSHOT
-                .read_tree_snapshot(&timestamp)
-                .context("Failed to read tree snapshot")?;
-            let data_table = open_data_table();
-            
-            elements_index
-                .into_par_iter()
-                .try_for_each(|index| -> Result<()> {
-                    let abstract_data = index_to_abstract_database(&tree_snapshot, &data_table, index)
-                        .map_err(|e| anyhow!("Failed to convert index to abstract data: {}", e))?;
+    let start_time = Instant::now();
 
-                    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
-                    Ok(())
-                })?;
-        }
-
-        info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
-        Ok(album_id)
-    })
-    .await
-    .context("Failed to execute blocking task")?
-    .context("Task execution failed")?;
-
-    // Execute post-creation tasks
+    // --- 1. create the album entry ----------------------------------------
+    let album_id = generate_random_hash();
+    let album = AbstractData::Album(Album::new(album_id, title));
     COORDINATOR
-        .execute_batch_waiting(UpdateTreeTask)
-        .await
-        .context("Failed to execute update tree task")?;
+        .execute_batch_waiting(FlushTreeTask::insert(vec![album]))
+        .await?;
 
+    // --- 2. add elements (if any) -----------------------------------------
+    if !elements_index.is_empty() {
+        let ts = timestamp.context("timestamp required for non‑empty album")?;
+
+        // expensive *sync* look‑ups can stay in Rayon
+        let tree_snapshot = TREE_SNAPSHOT
+            .read_tree_snapshot(&ts)
+            .context("failed to read tree snapshot")?;
+        let data_table = open_data_table();
+
+        let mut batch: Vec<_> = elements_index
+            .into_par_iter()
+            .map(|idx| {
+                let mut db = index_to_database(&tree_snapshot, &data_table, idx)
+                    .map_err(|e| anyhow!("convert index {idx}: {e}"))?;
+                db.album.insert(album_id);
+                Ok(AbstractData::Database(db))
+            })
+            .collect::<Result<_>>()?;
+
+        // single async flush – safe to await here
+        COORDINATOR
+            .execute_batch_waiting(FlushTreeTask::insert(std::mem::take(&mut batch)))
+            .await?;
+    }
+
+    // --- 3. post‑creation maintenance tasks -------------------------------
+    COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
     COORDINATOR
         .execute_waiting(AlbumTask::new(album_id))
-        .await
-        .map_err(anyhow::Error::from)?
-        .context("Album task execution failed")?;
+        .await??;
 
+    info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
     Ok(album_id)
 }
 
