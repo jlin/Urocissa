@@ -1,20 +1,22 @@
+use anyhow::Result;
 use anyhow::anyhow;
-use anyhow::{Context, Result};
 use arrayvec::ArrayString;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use redb::ReadOnlyTable;
 use rocket::post;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
 use crate::operations::hash::generate_random_hash;
-use crate::operations::open_db::open_data_table;
+use crate::operations::open_db::{open_data_table, open_tree_snapshot_table};
 use crate::process::transitor::index_to_database;
 
+use crate::public::db::tree_snapshot::read_tree_snapshot::MyCow;
 use crate::public::structure::abstract_data::AbstractData;
+use crate::public::structure::database_struct::database::definition::Database;
 use crate::tasks::actor::album::AlbumSelfUpdateTask;
 
-use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::album::Album;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -82,24 +84,30 @@ async fn create_album_elements(
     timestamp: u128,
 ) -> Result<()> {
     let element_batch = tokio::task::spawn_blocking(move || -> Result<Vec<AbstractData>> {
-        let tree_snapshot = TREE_SNAPSHOT
-            .read_tree_snapshot(&timestamp)
-            .context("failed to read tree snapshot")?;
+        let tree_snapshot = open_tree_snapshot_table(timestamp)?;
         let data_table = open_data_table();
-
         elements_index
             .into_par_iter()
-            .map(|idx| {
-                let mut db = index_to_database(&tree_snapshot, &data_table, idx)
-                    .map_err(|e| anyhow!("convert index {idx}: {e}"))?;
-                db.album.insert(album_id);
-                Ok(AbstractData::Database(db))
-            })
-            .collect::<Result<_>>()
+            .map(|idx| index_edit_album_insert(&tree_snapshot, &data_table, idx, album_id))
+            .collect()
     })
     .await??;
+
     COORDINATOR
         .execute_batch_waiting(FlushTreeTask::insert(element_batch))
         .await?;
+
     Ok(())
+}
+
+pub fn index_edit_album_insert(
+    tree_snapshot: &MyCow,
+    data_table: &ReadOnlyTable<&'static str, Database>,
+    database_index: usize,
+    album_id: ArrayString<64>,
+) -> Result<AbstractData> {
+    let mut db = index_to_database(&tree_snapshot, &data_table, database_index)
+        .map_err(|e| anyhow!("convert index {database_index}: {e}"))?;
+    db.album.insert(album_id);
+    Ok(AbstractData::Database(db))
 }
