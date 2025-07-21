@@ -6,12 +6,15 @@ use crate::public::structure::album::ResolvedShare;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
 use crate::public::structure::expression::Expression;
 use crate::public::structure::reduced_data::ReducedData;
+use crate::router::AppResult;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
 use crate::tasks::COORDINATOR;
 use crate::tasks::batcher::flush_query_snapshot::FlushQuerySnapshotTask;
 use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
+use anyhow::Context;
+use anyhow::{Result, anyhow};
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::serde::json::Json;
@@ -80,7 +83,7 @@ fn execute_prefetch_logic(
     expression_option: Option<Expression>,
     locate_option: Option<String>,
     resolved_share_option: Option<ResolvedShare>,
-) -> Json<PrefetchReturn> {
+) -> Result<Json<PrefetchReturn>> {
     // Build cache key
     let mut hasher = DefaultHasher::new();
     expression_option.hash(&mut hasher);
@@ -93,15 +96,15 @@ fn execute_prefetch_logic(
     // Check cache first
     if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
         let claims = ClaimsTimestamp::new(resolved_share_option, prefetch.timestamp);
-        return Json(PrefetchReturn::new(
+        return Ok(Json(PrefetchReturn::new(
             prefetch,
             claims.encode(),
             claims.resolved_share_opt,
-        ));
+        )));
     }
 
     // Collect data based on share or edit mode
-    let tree_guard = TREE.in_memory.read().unwrap();
+    let tree_guard = TREE.in_memory.read().map_err(|err| anyhow!("{:?}", err))?;
     let reduced_data_vector: Vec<ReducedData> =
         match (expression_option.as_ref(), &resolved_share_option) {
             // If we have a resolved share then it must have a filter expression
@@ -140,10 +143,7 @@ fn execute_prefetch_logic(
     });
 
     // Persist to snapshot
-    let timestamp_millis = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis();
+    let timestamp_millis = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
 
     TREE_SNAPSHOT
         .in_memory
@@ -156,7 +156,9 @@ fn execute_prefetch_logic(
         TREE_SNAPSHOT
             .in_memory
             .get(&timestamp_millis)
-            .unwrap()
+            .context(format!(
+                "Failed to get prefetch data for timestamp {timestamp_millis}"
+            ))?
             .len(),
     );
 
@@ -166,11 +168,11 @@ fn execute_prefetch_logic(
 
     // Build response
     let claims = ClaimsTimestamp::new(resolved_share_option, timestamp_millis);
-    Json(PrefetchReturn::new(
+    Ok(Json(PrefetchReturn::new(
         prefetch,
         claims.encode(),
         claims.resolved_share_opt,
-    ))
+    )))
 }
 
 #[post("/get/prefetch?<locate>", format = "json", data = "<query_data>")]
@@ -178,7 +180,7 @@ pub async fn prefetch(
     auth_guard: GuardShare,
     query_data: Option<Json<Expression>>,
     locate: Option<String>,
-) -> Json<PrefetchReturn> {
+) -> AppResult<Json<PrefetchReturn>> {
     // Combine album filter (if any) with the client‑supplied query.
     let mut combined_expression_option = query_data.map(|wrapper| wrapper.into_inner());
     let resolved_share_option = auth_guard.claims.get_share();
@@ -197,7 +199,8 @@ pub async fn prefetch(
     // Execute on blocking thread
     let job_handle = tokio::task::spawn_blocking(move || {
         execute_prefetch_logic(combined_expression_option, locate, resolved_share_option)
-    });
+    })
+    .await??;
 
-    job_handle.await.unwrap()
+    Ok(job_handle)
 }
