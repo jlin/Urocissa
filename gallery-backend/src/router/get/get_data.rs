@@ -21,7 +21,7 @@ pub async fn get_data(
     guard_timestamp: GuardTimestamp,
     timestamp: u128,
     start: usize,
-    end: usize,
+    mut end: usize,
 ) -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
     tokio::task::spawn_blocking(move || -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
         let start_time = Instant::now();
@@ -31,8 +31,9 @@ pub async fn get_data(
 
         let (data_table, album_table) = open_data_and_album_tables();
         let tree_snapshot = open_tree_snapshot_table(timestamp)?;
+        end = end.min(tree_snapshot.len());
 
-        if start >= end || end > tree_snapshot.len() {
+        if start >= end {
             return Ok(Json(vec![]));
         }
 
