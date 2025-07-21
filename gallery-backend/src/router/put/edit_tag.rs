@@ -27,37 +27,42 @@ pub async fn edit_tag(
 ) -> AppResult<Json<Vec<TagInfo>>> {
     let vec_tags_info = tokio::task::spawn_blocking(move || -> Result<Vec<TagInfo>> {
         let (data_table, album_table) = open_data_and_album_tables();
-        let timestamp = &json_data.timestamp;
-        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(timestamp).unwrap();
+        let tree_snapshot = TREE_SNAPSHOT.read_tree_snapshot(&json_data.timestamp)?;
 
-        json_data
-            .index_array
-            .iter()
-            .try_for_each(|index| -> Result<()> {
-                let mut abstract_data =
-                    index_to_abstract_data(&tree_snapshot, &data_table, &album_table, *index)
-                        .map_err(|e| {
-                            anyhow::anyhow!("Failed to convert index to abstract data: {}", e)
-                        })?;
-                let tag_set = abstract_data.tag_mut();
-                json_data.add_tags_array.iter().for_each(|tag| {
-                    tag_set.insert(tag.clone());
-                });
-                json_data.remove_tags_array.iter().for_each(|tag| {
-                    tag_set.remove(tag);
-                });
-                COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
-                Ok(())
-            })?;
+        // Collect all modified abstract_data objects for batch processing
+        let mut modified_data = Vec::with_capacity(json_data.index_array.len());
 
-        let vec_tags_info = TREE_SNAPSHOT.read_tags();
-        Ok(vec_tags_info)
+        for &index in &json_data.index_array {
+            let mut abstract_data = index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index)
+                .map_err(|e| anyhow::anyhow!("Failed to convert index {} to abstract data: {}", index, e))?;
+            
+            let tag_set = abstract_data.tag_mut();
+            
+            // Apply tag additions and removals in one pass
+            for tag in &json_data.add_tags_array {
+                tag_set.insert(tag.clone());
+            }
+            for tag in &json_data.remove_tags_array {
+                tag_set.remove(tag);
+            }
+            
+            modified_data.push(abstract_data);
+        }
+
+        // Batch flush all modified data at once for better efficiency
+        if !modified_data.is_empty() {
+            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(modified_data));
+        }
+
+        Ok(TREE_SNAPSHOT.read_tags())
     })
     .await
     .unwrap()?;
+
     COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();
+
     Ok(Json(vec_tags_info))
 }
