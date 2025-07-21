@@ -144,7 +144,7 @@ fn execute_prefetch_logic(
 
     // Persist to snapshot
     let timestamp_millis = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis();
-
+    let reduced_data_vector_length = reduced_data_vector.len();
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
@@ -153,13 +153,7 @@ fn execute_prefetch_logic(
     let prefetch = Prefetch::new(
         timestamp_millis,
         locate_to_index,
-        TREE_SNAPSHOT
-            .in_memory
-            .get(&timestamp_millis)
-            .context(format!(
-                "Failed to get prefetch data for timestamp {timestamp_millis}"
-            ))?
-            .len(),
+        reduced_data_vector_length,
     );
 
     // Cache the result
