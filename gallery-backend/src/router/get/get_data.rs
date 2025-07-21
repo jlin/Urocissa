@@ -1,8 +1,9 @@
-use crate::operations::open_db::{
-    abstract_data_to_database_timestamp_return, clear_abstract_data_metadata,
-    hash_to_abstract_data, index_to_hash, open_data_and_album_tables, open_tree_snapshot_table,
-};
+use crate::operations::open_db::{open_data_and_album_tables, open_tree_snapshot_table};
 use crate::operations::resolve_show_download_and_metadata;
+use crate::operations::transitor::{
+    abstract_data_to_database_timestamp_return, clear_abstract_data_metadata,
+    hash_to_abstract_data, index_to_hash,
+};
 use crate::public::db::tree_snapshot::TREE_SNAPSHOT;
 use crate::public::structure::database_struct::database_timestamp::DataBaseTimestampReturn;
 use crate::public::structure::row::{Row, ScrollBarData};

@@ -10,7 +10,8 @@ use serde::{Deserialize, Serialize};
 use std::time::Instant;
 
 use crate::operations::hash::generate_random_hash;
-use crate::operations::open_db::{hash_to_database, index_to_hash, open_data_table};
+use crate::operations::open_db::open_data_table;
+use crate::operations::transitor::{hash_to_database, index_to_hash};
 use crate::public::constant::redb::ALBUM_TABLE;
 
 use crate::public::structure::abstract_data::AbstractData;
