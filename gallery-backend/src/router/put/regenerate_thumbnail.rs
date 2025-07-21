@@ -7,7 +7,6 @@ use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
-use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use arrayvec::ArrayString;
 use rocket::form::Form;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -57,19 +56,19 @@ pub async fn regenerate_thumbnail_with_frame(
                     error!("Failed to save file: {:#?}", err);
                     return Err(Status::InternalServerError);
                 }
-                tokio::task::spawn_blocking(move || {
+                let abstract_data = tokio::task::spawn_blocking(move || {
                     let table = TREE.api_read_tree();
                     let mut database = table.get(&*hash).unwrap().unwrap().value();
                     let dynamic_image = generate_dynamic_image(&database).unwrap();
                     database.thumbhash = generate_thumbhash(&dynamic_image);
                     database.phash = generate_phash(&dynamic_image);
-                    let abstract_data = AbstractData::Database(database);
-                    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+                    AbstractData::Database(database)
                 })
                 .await
                 .unwrap();
+
                 COORDINATOR
-                    .execute_batch_waiting(UpdateTreeTask)
+                    .execute_batch_waiting(FlushTreeTask::insert(vec![abstract_data]))
                     .await
                     .unwrap();
             }
