@@ -39,6 +39,7 @@ pub async fn create_empty_album(
     _read_only_mode: GuardReadOnlyMode,
 ) -> AppResult<String> {
     let album_id = create_album_internal(None).await?;
+
     Ok(album_id.to_string())
 }
 
@@ -70,9 +71,6 @@ async fn create_album_internal(title: Option<String>) -> Result<ArrayString<64>>
         .await?;
 
     COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
-    COORDINATOR
-        .execute_waiting(AlbumSelfUpdateTask::new(album_id))
-        .await??;
 
     info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
     Ok(album_id)
@@ -96,6 +94,13 @@ async fn create_album_elements(
     COORDINATOR
         .execute_batch_waiting(FlushTreeTask::insert(element_batch))
         .await?;
+    COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await
+        .map_err(|e| anyhow::anyhow!("Failed to update tree: {}", e))?;
+    COORDINATOR
+        .execute_waiting(AlbumSelfUpdateTask::new(album_id))
+        .await??;
 
     Ok(())
 }

@@ -46,7 +46,10 @@ pub async fn delete_data(
     let album_futures = all_affected_album_ids
         .into_iter()
         .map(|album_id| async move {
-            if let Err(e) = COORDINATOR.execute_waiting(AlbumSelfUpdateTask::new(album_id)).await {
+            if let Err(e) = COORDINATOR
+                .execute_waiting(AlbumSelfUpdateTask::new(album_id))
+                .await
+            {
                 error!("Failed to process album: {}", e);
             }
         });

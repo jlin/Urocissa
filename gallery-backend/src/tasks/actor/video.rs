@@ -45,6 +45,7 @@ pub fn video_task(mut database: Database) -> Result<()> {
             database.pending = false;
             let abstract_data = AbstractData::Database(database.clone());
             COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+            
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(

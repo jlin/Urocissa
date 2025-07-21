@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use tokio_rayon::spawn;
 
 use crate::public::structure::abstract_data::AbstractData;
+use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use crate::{
     process::info::{process_image_info, process_video_info},
     public::{
@@ -74,6 +75,7 @@ fn index_task(mut database: Database) -> Result<Database> {
     let abstract_data = AbstractData::Database(database.clone());
 
     COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+
     DASHBOARD.advance_task_state(&hash);
 
     Ok(database)
