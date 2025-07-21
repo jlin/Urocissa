@@ -72,6 +72,18 @@ pub fn hash_to_database(
     }
 }
 
+pub fn hash_to_album(
+    album_table: &ReadOnlyTable<&'static str, Album>,
+    hash: ArrayString<64>,
+) -> Result<Album> {
+    if let Some(album) = album_table.get(&*hash)? {
+        let album = album.value();
+        Ok(album)
+    } else {
+        Err(anyhow::anyhow!("No album found for hash: {}", hash))
+    }
+}
+
 pub fn hash_to_abstract_data(
     data_table: &ReadOnlyTable<&'static str, Database>,
     album_table: &ReadOnlyTable<&'static str, Album>,

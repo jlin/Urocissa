@@ -11,7 +11,7 @@ use std::time::Instant;
 
 use crate::operations::hash::generate_random_hash;
 use crate::operations::open_db::open_data_table;
-use crate::operations::transitor::{hash_to_database, index_to_hash};
+use crate::process::transitor::index_to_abstract_database;
 use crate::public::constant::redb::ALBUM_TABLE;
 
 use crate::public::structure::abstract_data::AbstractData;
@@ -58,13 +58,8 @@ pub async fn create_non_empty_album(
             .elements_index
             .into_par_iter()
             .try_for_each(|index| -> Result<()> {
-                let hash = index_to_hash(&tree_snapshot, index)
-                    .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
-
-                let data = hash_to_database(&data_table, hash)
-                    .map_err(|e| anyhow!("Failed to read abstract data by hash {}: {}", hash, e))?;
-
-                let abstract_data = AbstractData::Database(data);
+                let abstract_data = index_to_abstract_database(&tree_snapshot, &data_table, index)
+                    .map_err(|e| anyhow!("Failed to convert index to abstract data: {}", e))?;
 
                 COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
 
