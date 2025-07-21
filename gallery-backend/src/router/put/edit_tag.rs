@@ -34,11 +34,7 @@ pub async fn edit_tag(
 
         for &index in &json_data.index_array {
             let mut abstract_data =
-                index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index).map_err(
-                    |e| {
-                        anyhow::anyhow!("Failed to convert index {} to abstract data: {}", index, e)
-                    },
-                )?;
+                index_to_abstract_data(&tree_snapshot, &data_table, &album_table, index)?;
 
             let tag_set = abstract_data.tag_mut();
 

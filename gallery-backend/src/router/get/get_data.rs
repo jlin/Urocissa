@@ -23,7 +23,7 @@ pub async fn get_data(
     start: usize,
     mut end: usize,
 ) -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
-    tokio::task::spawn_blocking(move || -> AppResult<Json<Vec<DataBaseTimestampReturn>>> {
+    tokio::task::spawn_blocking(move || {
         let start_time = Instant::now();
 
         let resolved_share_opt = guard_timestamp.claims.resolved_share_opt;
@@ -37,7 +37,7 @@ pub async fn get_data(
             return Ok(Json(vec![]));
         }
 
-        let database_timestamp_return_list: Result<Vec<DataBaseTimestampReturn>> = (start..end)
+        let database_timestamp_return_list: Result<_> = (start..end)
             .into_par_iter()
             .map(|index| {
                 let hash = index_to_hash(&tree_snapshot, index)
@@ -59,10 +59,9 @@ pub async fn get_data(
 
         let duration = format!("{:?}", start_time.elapsed());
         info!(duration = &*duration; "Get data: {} ~ {}", start, end);
-        database_timestamp_return_list.map(Json).map_err(Into::into)
+        Ok(Json(database_timestamp_return_list?))
     })
-    .await
-    .unwrap()
+    .await?
 }
 
 #[get("/get/get-rows?<index>&<timestamp>")]
@@ -76,10 +75,9 @@ pub async fn get_rows(
         let filtered_rows = TREE_SNAPSHOT.read_row(index, timestamp)?;
         let duration = format!("{:?}", start_time.elapsed());
         info!(duration = &*duration; "Read rows: index = {}", index);
-        return Ok(Json(filtered_rows));
+        Ok(Json(filtered_rows))
     })
-    .await
-    .unwrap()
+    .await?
 }
 
 #[get("/get/get-scroll-bar?<timestamp>")]

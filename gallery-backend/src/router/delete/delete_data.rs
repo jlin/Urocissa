@@ -10,8 +10,7 @@ use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use anyhow::Result;
 use arrayvec::ArrayString;
-use futures::future::join_all;
-use log::error;
+use futures::future::try_join_all;
 use rocket::serde::{Deserialize, json::Json};
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -30,31 +29,24 @@ pub async fn delete_data(
         let timestamp = json_data.timestamp;
         move || process_deletes(delete_list, timestamp)
     })
-    .await
-    .map_err(|e| anyhow::anyhow!("Blocking task failed: {}", e))??;
+    .await??;
 
     COORDINATOR
         .execute_batch_waiting(FlushTreeTask::remove(abstract_data_to_remove))
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to flush tree: {}", e))?;
+        .await?;
 
-    COORDINATOR
-        .execute_batch_waiting(UpdateTreeTask)
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to update tree: {}", e))?;
+    COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
 
-    let album_futures = all_affected_album_ids
-        .into_iter()
-        .map(|album_id| async move {
-            if let Err(e) = COORDINATOR
-                .execute_waiting(AlbumSelfUpdateTask::new(album_id))
-                .await
-            {
-                error!("Failed to process album: {}", e);
-            }
-        });
-
-    join_all(album_futures).await;
+    try_join_all(
+        all_affected_album_ids
+            .into_iter()
+            .map(|album_id| async move {
+                COORDINATOR
+                    .execute_waiting(AlbumSelfUpdateTask::new(album_id))
+                    .await
+            }),
+    )
+    .await?;
     Ok(())
 }
 

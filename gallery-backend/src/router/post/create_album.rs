@@ -94,10 +94,7 @@ async fn create_album_elements(
     COORDINATOR
         .execute_batch_waiting(FlushTreeTask::insert(element_batch))
         .await?;
-    COORDINATOR
-        .execute_batch_waiting(UpdateTreeTask)
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to update tree: {}", e))?;
+    COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
     COORDINATOR
         .execute_waiting(AlbumSelfUpdateTask::new(album_id))
         .await??;
