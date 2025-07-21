@@ -13,7 +13,6 @@ use crate::tasks::COORDINATOR;
 use crate::tasks::batcher::flush_query_snapshot::FlushQuerySnapshotTask;
 use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
-use anyhow::Context;
 use anyhow::{Result, anyhow};
 use bitcode::{Decode, Encode};
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
@@ -105,35 +104,33 @@ fn execute_prefetch_logic(
 
     // Collect data based on share or edit mode
     let tree_guard = TREE.in_memory.read().map_err(|err| anyhow!("{:?}", err))?;
-    let reduced_data_vector: Vec<ReducedData> =
-        match (expression_option.as_ref(), &resolved_share_option) {
-            // If we have a resolved share then it must have a filter expression
-            (Some(expr), Some(resolved_share)) => {
-                let filter_fn = if resolved_share.share.show_metadata {
-                    expr.clone().generate_filter()
-                } else {
-                    expr.clone()
-                        .generate_filter_hide_metadata(resolved_share.album_id)
-                };
-                tree_guard
-                    .par_iter()
-                    .filter(|db_ts| filter_fn(&db_ts.abstract_data))
-                    .map(|db_ts| db_ts.into())
-                    .collect()
-            }
-            (Some(expr), None) => {
-                let filter_fn = expr.clone().generate_filter();
-                tree_guard
-                    .par_iter()
-                    .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
-                    .map(|database_timestamp| database_timestamp.into())
-                    .collect()
-            }
-            (None, _) => tree_guard
+    let reduced_data_vector: Vec<ReducedData> = match (expression_option, &resolved_share_option) {
+        // If we have a resolved share then it must have a filter expression
+        (Some(expr), Some(resolved_share)) => {
+            let filter_fn = if resolved_share.share.show_metadata {
+                expr.generate_filter()
+            } else {
+                expr.generate_filter_hide_metadata(resolved_share.album_id)
+            };
+            tree_guard
                 .par_iter()
+                .filter(|db_ts| filter_fn(&db_ts.abstract_data))
+                .map(|db_ts| db_ts.into())
+                .collect()
+        }
+        (Some(expr), None) => {
+            let filter_fn = expr.generate_filter();
+            tree_guard
+                .par_iter()
+                .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
                 .map(|database_timestamp| database_timestamp.into())
-                .collect(),
-        };
+                .collect()
+        }
+        (None, _) => tree_guard
+            .par_iter()
+            .map(|database_timestamp| database_timestamp.into())
+            .collect(),
+    };
 
     // Find locate index if requested
     let locate_to_index = locate_option.as_ref().and_then(|hash| {
