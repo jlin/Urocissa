@@ -10,7 +10,7 @@ use crate::public::structure::row::{Row, ScrollBarData};
 
 use crate::router::AppResult;
 use crate::router::fairing::guard_timestamp::GuardTimestamp;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use log::info;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rocket::serde::json::Json;
@@ -40,11 +40,9 @@ pub async fn get_data(
         let database_timestamp_return_list: Result<_> = (start..end)
             .into_par_iter()
             .map(|index| {
-                let hash = index_to_hash(&tree_snapshot, index)
-                    .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
+                let hash = index_to_hash(&tree_snapshot, index)?;
 
-                let mut abstract_data = hash_to_abstract_data(&data_table, &album_table, hash)
-                    .map_err(|e| anyhow!("Failed to read abstract data by hash {}: {}", hash, e))?;
+                let mut abstract_data = hash_to_abstract_data(&data_table, &album_table, hash)?;
 
                 clear_abstract_data_metadata(&mut abstract_data, show_metadata);
 
