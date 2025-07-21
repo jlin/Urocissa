@@ -54,7 +54,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 let file_path = format!("./object/compressed/{}/{}.jpg", &hash[0..2], hash);
 
                 if let Err(err) = file.move_copy_to(file_path).await {
-                    eprintln!("Failed to save file: {:#?}", err);
+                    error!("Failed to save file: {:#?}", err);
                     return Err(Status::InternalServerError);
                 }
                 tokio::task::spawn_blocking(move || {
