@@ -4,17 +4,10 @@ use crate::public::{
         tree::TREE,
         tree_snapshot::{TREE_SNAPSHOT, read_tree_snapshot::MyCow},
     },
-    structure::{
-        abstract_data::AbstractData,
-        album::Album,
-        database_struct::{
-            database::definition::Database, database_timestamp::DataBaseTimestampReturn,
-        },
-    },
+    structure::{album::Album, database_struct::database::definition::Database},
 };
 use anyhow::Context;
 use anyhow::Result;
-use arrayvec::ArrayString;
 use redb::ReadOnlyTable;
 
 pub fn open_data_table() -> ReadOnlyTable<&'static str, Database> {
