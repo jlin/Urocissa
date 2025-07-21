@@ -2,7 +2,10 @@ use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
     public::{
         error_data::handle_error,
-        structure::{database_struct::database::definition::Database, guard::PendingGuard},
+        structure::{
+            abstract_data::AbstractData, database_struct::database::definition::Database,
+            guard::PendingGuard,
+        },
         tui::DASHBOARD,
     },
     tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
@@ -40,7 +43,8 @@ pub fn video_task(mut database: Database) -> Result<()> {
     match generate_compressed_video(&mut database) {
         Ok(_) => {
             database.pending = false;
-            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database]));
+            let abstract_data = AbstractData::Database(database.clone());
+            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
             DASHBOARD.advance_task_state(&hash);
         }
         Err(err) => Err(err).context(format!(

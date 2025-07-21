@@ -1,3 +1,4 @@
+use crate::public::structure::abstract_data::AbstractData;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::COORDINATOR;
@@ -13,9 +14,10 @@ pub async fn generate_random_data(
     _read_only_mode: GuardReadOnlyMode,
     number: usize,
 ) {
-    let database_list: Vec<Database> = (0..number)
+    let database_list: Vec<AbstractData> = (0..number)
         .into_par_iter()
         .map(|_| Database::generate_random_data())
+        .map(|database| AbstractData::Database(database))
         .collect();
     COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
     info!("Insert random data complete")

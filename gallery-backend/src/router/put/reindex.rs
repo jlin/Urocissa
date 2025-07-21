@@ -5,6 +5,7 @@ use rocket::http::Status;
 use crate::process::info::regenerate_metadata_for_image;
 use crate::process::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
+use crate::public::structure::abstract_data::AbstractData;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
@@ -55,12 +56,12 @@ pub async fn reindex(
                             let mut database = guard.value();
                             if database.ext_type == "image" {
                                 match regenerate_metadata_for_image(&mut database) {
-                                    Ok(_) => Some(database),
+                                    Ok(_) => Some(AbstractData::Database(database)),
                                     Err(_) => None,
                                 }
                             } else if database.ext_type == "video" {
                                 match regenerate_metadata_for_video(&mut database) {
-                                    Ok(_) => Some(database),
+                                    Ok(_) => Some(AbstractData::Database(database)),
                                     Err(_) => None,
                                 }
                             } else {

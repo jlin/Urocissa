@@ -1,7 +1,8 @@
 use crate::{
     public::{
-        db::tree::TREE, error_data::handle_error,
-        structure::database_struct::database::definition::Database,
+        db::tree::TREE,
+        error_data::handle_error,
+        structure::{abstract_data::AbstractData, database_struct::database::definition::Database},
     },
     tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
 };
@@ -46,7 +47,8 @@ pub fn deduplicate_task(task: DeduplicateTask) -> Result<Option<Database>> {
         let mut database_exist = guard.value();
         let file_modify = mem::take(&mut database.alias[0]);
         database_exist.alias.push(file_modify);
-        COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database_exist]));
+        let abstract_data = AbstractData::Database(database_exist);
+        COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
         warn!("File already exists in the database:\n{:#?}", database);
 
         Ok(None)

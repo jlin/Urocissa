@@ -60,6 +60,18 @@ pub fn index_to_hash(tree_snapshot: &MyCow, index: usize) -> Result<ArrayString<
     Ok(hash)
 }
 
+pub fn hash_to_database(
+    data_table: &ReadOnlyTable<&'static str, Database>,
+    hash: ArrayString<64>,
+) -> Result<Database> {
+    if let Some(database) = data_table.get(&*hash)? {
+        let database = database.value();
+        Ok(database)
+    } else {
+        Err(anyhow::anyhow!("No data found for hash: {}", hash))
+    }
+}
+
 pub fn hash_to_abstract_data(
     data_table: &ReadOnlyTable<&'static str, Database>,
     album_table: &ReadOnlyTable<&'static str, Album>,
