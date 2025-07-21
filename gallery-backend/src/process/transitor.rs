@@ -56,7 +56,7 @@ pub fn index_to_abstract_album(
         .map_err(|e| anyhow!("Failed to read hash by index {}: {}", index, e))?;
     let album = hash_to_album(album_table, hash)
         .map_err(|e| anyhow!("Failed to read album by hash {}: {}", hash, e))?;
-    Ok(AbstractData::Album((album)))
+    Ok(AbstractData::Album(album))
 }
 
 pub fn index_to_abstract_data(
