@@ -41,9 +41,12 @@ impl<'r> Responder<'r, 'static> for AppError {
 }
 
 // 仍然保留自動 From<anyhow::Error>
-impl From<anyhow::Error> for AppError {
-    fn from(err: anyhow::Error) -> Self {
-        AppError(err)
+impl<E> From<E> for AppError
+where
+    anyhow::Error: From<E>,
+{
+    fn from(err: E) -> Self {
+        AppError(anyhow::Error::from(err))
     }
 }
 
