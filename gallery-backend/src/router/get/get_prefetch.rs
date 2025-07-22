@@ -15,6 +15,7 @@ use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
 use anyhow::{Result, anyhow};
 use bitcode::{Decode, Encode};
+use log::info;
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
@@ -23,7 +24,6 @@ use std::hash::{DefaultHasher, Hash};
 use std::sync::atomic::Ordering;
 use std::time::SystemTime;
 use std::time::{Instant, UNIX_EPOCH};
-use log::info;
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, Decode, Encode)]
 #[serde(rename_all = "camelCase")]
@@ -76,18 +76,14 @@ impl From<&DatabaseTimestamp> for ReducedData {
 }
 
 // -----------------------------------------------------------------------------
-// ── Single prefetch function ─────────────────────────────────────────────────
+// ── Helper functions for each step ──────────────────────────────────────────
 // -----------------------------------------------------------------------------
 
-fn execute_prefetch_logic(
-    expression_option: Option<Expression>,
-    locate_option: Option<String>,
+fn check_query_cache(
+    expression_option: &Option<Expression>,
+    locate_option: &Option<String>,
     resolved_share_option: Option<ResolvedShare>,
-) -> Result<Json<PrefetchReturn>> {
-    // Start timer
-    let start_time = Instant::now();
-
-    // Step 1: Check if query cache is available
+) -> Option<Json<PrefetchReturn>> {
     let find_cache_start_time = Instant::now();
 
     // Build cache key
@@ -104,7 +100,7 @@ fn execute_prefetch_logic(
         let duration = format!("{:?}", find_cache_start_time.elapsed());
         info!(duration = &*duration; "Query cache found");
         let claims = ClaimsTimestamp::new(resolved_share_option, prefetch.timestamp);
-        return Ok(Json(PrefetchReturn::new(
+        return Some(Json(PrefetchReturn::new(
             prefetch,
             claims.encode(),
             claims.resolved_share_opt,
@@ -113,18 +109,29 @@ fn execute_prefetch_logic(
 
     let duration = format!("{:?}", find_cache_start_time.elapsed());
     info!(duration = &*duration; "Query cache not found. Generate a new one.");
+    None
+}
 
-    // Step 2: Filter items
+fn filter_items(
+    expression_option: Option<Expression>,
+    resolved_share_option: &Option<ResolvedShare>,
+) -> Result<Vec<ReducedData>> {
     let filter_items_start_time = Instant::now();
 
     // Collect data based on share or edit mode
     let reduced_data_vector =
-        generate_reduced_data_vector(expression_option, &resolved_share_option)?;
+        generate_reduced_data_vector(expression_option, resolved_share_option)?;
 
     let duration = format!("{:?}", filter_items_start_time.elapsed());
     info!(duration = &*duration; "Filter items");
 
-    // Step 3: Compute layout
+    Ok(reduced_data_vector)
+}
+
+fn compute_layout(
+    reduced_data_vector: &[ReducedData],
+    locate_option: &Option<String>,
+) -> Option<usize> {
     let layout_start_time = Instant::now();
 
     // Find locate index if requested
@@ -137,12 +144,16 @@ fn execute_prefetch_logic(
     let duration = format!("{:?}", layout_start_time.elapsed());
     info!(duration = &*duration; "Compute layout");
 
-    // Step 4: Locate hash
+    locate_to_index
+}
+
+fn locate_hash() {
     let locate_start_time = Instant::now();
     let duration = format!("{:?}", locate_start_time.elapsed());
     info!(duration = &*duration; "Locate data");
+}
 
-    // Step 5: Insert data into TREE_SNAPSHOT
+fn insert_data_into_tree_snapshot(reduced_data_vector: Vec<ReducedData>) -> Result<(u128, usize)> {
     let db_start_time = Instant::now();
 
     // Persist to snapshot
@@ -156,7 +167,16 @@ fn execute_prefetch_logic(
     let duration = format!("{:?}", db_start_time.elapsed());
     info!(duration = &*duration; "Write cache into memory");
 
-    // Step 6: Create and return JSON response
+    Ok((timestamp_millis, reduced_data_vector_length))
+}
+
+fn create_json_response(
+    timestamp_millis: u128,
+    locate_to_index: Option<usize>,
+    reduced_data_vector_length: usize,
+    query_hash: u64,
+    resolved_share_option: Option<ResolvedShare>,
+) -> Json<PrefetchReturn> {
     let json_start_time = Instant::now();
 
     let prefetch = Prefetch::new(
@@ -179,6 +199,62 @@ fn execute_prefetch_logic(
 
     let duration = format!("{:?}", json_start_time.elapsed());
     info!(duration = &*duration; "Create JSON response");
+
+    json
+}
+
+// -----------------------------------------------------------------------------
+// ── Single prefetch function ─────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+
+fn execute_prefetch_logic(
+    expression_option: Option<Expression>,
+    locate_option: Option<String>,
+    resolved_share_option: Option<ResolvedShare>,
+) -> Result<Json<PrefetchReturn>> {
+    // Start timer
+    let start_time = Instant::now();
+
+    // Step 1: Check if query cache is available
+    if let Some(cached_response) = check_query_cache(
+        &expression_option,
+        &locate_option,
+        resolved_share_option.clone(),
+    ) {
+        return Ok(cached_response);
+    }
+
+    // Build cache key for response creation
+    let mut hasher = DefaultHasher::new();
+    expression_option.hash(&mut hasher);
+    VERSION_COUNT_TIMESTAMP
+        .load(Ordering::Relaxed)
+        .hash(&mut hasher);
+    locate_option.hash(&mut hasher);
+    let query_hash = hasher.finish();
+
+    // Step 2: Filter items
+    let reduced_data_vector = filter_items(expression_option, &resolved_share_option)?;
+
+    // Step 3: Compute layout
+    let locate_to_index = compute_layout(&reduced_data_vector, &locate_option);
+
+    // Step 4: Locate hash
+    locate_hash();
+
+    // Step 5: Insert data into TREE_SNAPSHOT
+    let (timestamp_millis, reduced_data_vector_length) =
+        insert_data_into_tree_snapshot(reduced_data_vector)?;
+
+    // Step 6: Create and return JSON response
+
+    let json = create_json_response(
+        timestamp_millis,
+        locate_to_index,
+        reduced_data_vector_length,
+        query_hash,
+        resolved_share_option,
+    );
 
     // Total elapsed time
     let duration = format!("{:?}", start_time.elapsed());
