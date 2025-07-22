@@ -31,7 +31,7 @@ impl Task for CopyTask {
     }
 }
 
-pub fn copy_task(database: Database) -> Result<Database> {
+fn copy_task(database: Database) -> Result<Database> {
     let source_path = database.source_path();
     let dest_path = database.imported_path();
 

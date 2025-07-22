@@ -15,12 +15,12 @@ pub struct ExpireCheckTask;
 impl BatchTask for ExpireCheckTask {
     fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
-            update_tree_task();
+            expire_check_task();
         }
     }
 }
 
-pub fn update_tree_task() {
+fn expire_check_task() {
     let write_txn = QUERY_SNAPSHOT.in_disk.begin_write().unwrap();
 
     write_txn

@@ -29,7 +29,7 @@ impl Task for RemoveTask {
     }
 }
 /// Removes a tree cache table by its timestamp.
-pub fn remove_task(timestamp: u128) -> Result<()> {
+fn remove_task(timestamp: u128) -> Result<()> {
     let write_txn = TREE_SNAPSHOT.in_disk.begin_write().unwrap();
     let binding = timestamp.to_string();
     let table_definition: TableDefinition<u64, ReducedData> = TableDefinition::new(&binding);

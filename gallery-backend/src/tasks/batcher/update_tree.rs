@@ -37,7 +37,7 @@ impl BatchTask for UpdateTreeTask {
     }
 }
 
-pub fn update_tree_task() {
+fn update_tree_task() {
     let start_time = Instant::now();
     let table = TREE.api_read_tree();
 

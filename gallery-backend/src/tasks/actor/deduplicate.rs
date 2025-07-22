@@ -37,7 +37,7 @@ impl Task for DeduplicateTask {
     }
 }
 
-pub fn deduplicate_task(task: DeduplicateTask) -> Result<Option<Database>> {
+fn deduplicate_task(task: DeduplicateTask) -> Result<Option<Database>> {
     let mut database = Database::new(&task.path, task.hash)?;
 
     let read_table = TREE.api_read_tree();

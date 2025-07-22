@@ -37,7 +37,7 @@ impl Task for DeleteTask {
         }
     }
 }
-pub fn delete_in_upload_task(path: PathBuf) -> Result<()> {
+fn delete_in_upload_task(path: PathBuf) -> Result<()> {
     // Skip if path is not under ./upload
     if !path_starts_with_upload(&path) {
         return Ok(());
