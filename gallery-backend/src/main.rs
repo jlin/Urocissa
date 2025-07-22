@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate rocket;
 use anyhow::Result;
-use rayon::ThreadPoolBuilder;
 // --- Make sure all your modules are declared ---
 
 mod operations;
@@ -29,7 +28,6 @@ use router::{
     delete::generate_delete_routes, get::generate_get_routes, post::generate_post_routes,
     put::generate_put_routes,
 };
-use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
 

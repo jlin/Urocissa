@@ -1,7 +1,6 @@
 use anyhow::Context;
 use anyhow::Result;
 use anyhow::anyhow;
-use tokio_rayon::spawn;
 use tokio_rayon::AsyncThreadPool;
 
 use crate::public::constant::runtime::WORKER_RAYON_POOL;
@@ -33,7 +32,8 @@ impl Task for IndexTask {
     fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             let _pending_guard = PendingGuard::new();
-            WORKER_RAYON_POOL.spawn_async(move || index_task(self.database))
+            WORKER_RAYON_POOL
+                .spawn_async(move || index_task(self.database))
                 .await
                 .map_err(|err| handle_error(err.context("Failed to run index task")))
         }

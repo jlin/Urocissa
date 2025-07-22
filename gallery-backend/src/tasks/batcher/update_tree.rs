@@ -1,7 +1,9 @@
-use crate::public::db::expire::EXPIRE;
+use crate::operations::utils::timestamp::get_current_timestamp_u64;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
+use crate::tasks::COORDINATOR;
+use crate::tasks::batcher::update_expire::UpdateExpireTask;
 use mini_executor::BatchTask;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use rayon::prelude::ParallelSliceMut;
@@ -76,5 +78,9 @@ fn update_tree_task() {
 
     *TREE.in_memory.write().unwrap() = data_vec;
 
-    EXPIRE.update_expire_time(start_time);
+    COORDINATOR.execute_batch_detached(UpdateExpireTask);
+
+    let current_timestamp = get_current_timestamp_u64();
+    let duration = format!("{:?}", start_time.elapsed());
+    info!(duration = &*duration; "In-memory cache updated ({}).", current_timestamp);
 }
