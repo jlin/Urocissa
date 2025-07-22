@@ -80,20 +80,10 @@ impl From<&DatabaseTimestamp> for ReducedData {
 // -----------------------------------------------------------------------------
 
 fn check_query_cache(
-    expression_option: &Option<Expression>,
-    locate_option: &Option<String>,
+    query_hash: u64,
     resolved_share_option: Option<ResolvedShare>,
 ) -> Option<Json<PrefetchReturn>> {
     let find_cache_start_time = Instant::now();
-
-    // Build cache key
-    let mut hasher = DefaultHasher::new();
-    expression_option.hash(&mut hasher);
-    VERSION_COUNT_TIMESTAMP
-        .load(Ordering::Relaxed)
-        .hash(&mut hasher);
-    locate_option.hash(&mut hasher);
-    let query_hash = hasher.finish();
 
     // Check cache first
     if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
@@ -118,9 +108,34 @@ fn filter_items(
 ) -> Result<Vec<ReducedData>> {
     let filter_items_start_time = Instant::now();
 
-    // Collect data based on share or edit mode
-    let reduced_data_vector =
-        generate_reduced_data_vector(expression_option, resolved_share_option)?;
+    let tree_guard = TREE.in_memory.read().map_err(|err| anyhow!("{:?}", err))?;
+    let reduced_data_vector: Vec<ReducedData> = match (expression_option, &resolved_share_option) {
+        // If we have a resolved share then it must have a filter expression
+        (Some(expr), Some(resolved_share)) => {
+            let filter_fn = if resolved_share.share.show_metadata {
+                expr.generate_filter()
+            } else {
+                expr.generate_filter_hide_metadata(resolved_share.album_id)
+            };
+            tree_guard
+                .par_iter()
+                .filter(|db_ts| filter_fn(&db_ts.abstract_data))
+                .map(|db_ts| db_ts.into())
+                .collect()
+        }
+        (Some(expr), None) => {
+            let filter_fn = expr.generate_filter();
+            tree_guard
+                .par_iter()
+                .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
+                .map(|database_timestamp| database_timestamp.into())
+                .collect()
+        }
+        (None, _) => tree_guard
+            .par_iter()
+            .map(|database_timestamp| database_timestamp.into())
+            .collect(),
+    };
 
     let duration = format!("{:?}", filter_items_start_time.elapsed());
     info!(duration = &*duration; "Filter items");
@@ -128,7 +143,7 @@ fn filter_items(
     Ok(reduced_data_vector)
 }
 
-fn compute_layout(
+fn compute_locate(
     reduced_data_vector: &[ReducedData],
     locate_option: &Option<String>,
 ) -> Option<usize> {
@@ -147,10 +162,21 @@ fn compute_layout(
     locate_to_index
 }
 
-fn locate_hash() {
-    let locate_start_time = Instant::now();
-    let duration = format!("{:?}", locate_start_time.elapsed());
-    info!(duration = &*duration; "Locate data");
+fn build_cache_key(expression_option: &Option<Expression>, locate_option: &Option<String>) -> u64 {
+    let cache_key_start_time = Instant::now();
+
+    let mut hasher = DefaultHasher::new();
+    expression_option.hash(&mut hasher);
+    VERSION_COUNT_TIMESTAMP
+        .load(Ordering::Relaxed)
+        .hash(&mut hasher);
+    locate_option.hash(&mut hasher);
+    let query_hash = hasher.finish();
+
+    let duration = format!("{:?}", cache_key_start_time.elapsed());
+    info!(duration = &*duration; "Build cache key");
+
+    query_hash
 }
 
 fn insert_data_into_tree_snapshot(reduced_data_vector: Vec<ReducedData>) -> Result<(u128, usize)> {
@@ -215,38 +241,25 @@ fn execute_prefetch_logic(
     // Start timer
     let start_time = Instant::now();
 
-    // Step 1: Check if query cache is available
-    if let Some(cached_response) = check_query_cache(
-        &expression_option,
-        &locate_option,
-        resolved_share_option.clone(),
-    ) {
+    // Step 1: Build cache key for response creation
+    let query_hash = build_cache_key(&expression_option, &locate_option);
+
+    // Step 2: Check if query cache is available
+    if let Some(cached_response) = check_query_cache(query_hash, resolved_share_option.clone()) {
         return Ok(cached_response);
     }
 
-    // Build cache key for response creation
-    let mut hasher = DefaultHasher::new();
-    expression_option.hash(&mut hasher);
-    VERSION_COUNT_TIMESTAMP
-        .load(Ordering::Relaxed)
-        .hash(&mut hasher);
-    locate_option.hash(&mut hasher);
-    let query_hash = hasher.finish();
-
-    // Step 2: Filter items
+    // Step 3: Filter items
     let reduced_data_vector = filter_items(expression_option, &resolved_share_option)?;
 
-    // Step 3: Compute layout
-    let locate_to_index = compute_layout(&reduced_data_vector, &locate_option);
+    // Step 4: Compute layout
+    let locate_to_index = compute_locate(&reduced_data_vector, &locate_option);
 
-    // Step 4: Locate hash
-    locate_hash();
-
-    // Step 5: Insert data into TREE_SNAPSHOT
+    // Step 6: Insert data into TREE_SNAPSHOT
     let (timestamp_millis, reduced_data_vector_length) =
         insert_data_into_tree_snapshot(reduced_data_vector)?;
 
-    // Step 6: Create and return JSON response
+    // Step 7: Create and return JSON response
 
     let json = create_json_response(
         timestamp_millis,
@@ -291,39 +304,4 @@ pub async fn prefetch(
     .await??;
 
     Ok(job_handle)
-}
-
-fn generate_reduced_data_vector(
-    expression_option: Option<Expression>,
-    resolved_share_option: &Option<ResolvedShare>,
-) -> Result<Vec<ReducedData>> {
-    let tree_guard = TREE.in_memory.read().map_err(|err| anyhow!("{:?}", err))?;
-    let reduced_data_vector: Vec<ReducedData> = match (expression_option, &resolved_share_option) {
-        // If we have a resolved share then it must have a filter expression
-        (Some(expr), Some(resolved_share)) => {
-            let filter_fn = if resolved_share.share.show_metadata {
-                expr.generate_filter()
-            } else {
-                expr.generate_filter_hide_metadata(resolved_share.album_id)
-            };
-            tree_guard
-                .par_iter()
-                .filter(|db_ts| filter_fn(&db_ts.abstract_data))
-                .map(|db_ts| db_ts.into())
-                .collect()
-        }
-        (Some(expr), None) => {
-            let filter_fn = expr.generate_filter();
-            tree_guard
-                .par_iter()
-                .filter(|database_timestamp| filter_fn(&database_timestamp.abstract_data))
-                .map(|database_timestamp| database_timestamp.into())
-                .collect()
-        }
-        (None, _) => tree_guard
-            .par_iter()
-            .map(|database_timestamp| database_timestamp.into())
-            .collect(),
-    };
-    Ok(reduced_data_vector)
 }
