@@ -4,11 +4,13 @@ use crate::router::get::get_prefetch::Prefetch;
 use crate::{public::db::expire::EXPIRE, tasks::COORDINATOR};
 
 use crate::tasks::actor::remove_tree_snapshot::RemoveTask;
+use crate::tasks::looper::reset_expire_check_timer;
 use mini_executor::BatchTask;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 
 use redb::{ReadableTable, TableDefinition, TableHandle};
 use std::sync::atomic::Ordering;
+use log::{info, error};
 
 pub struct ExpireCheckTask;
 
@@ -16,6 +18,8 @@ impl BatchTask for ExpireCheckTask {
     fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             expire_check_task();
+            // 任務執行完畢後重置倒數計時
+            reset_expire_check_timer().await;
         }
     }
 }
