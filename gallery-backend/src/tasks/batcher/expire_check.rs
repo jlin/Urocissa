@@ -8,9 +8,9 @@ use crate::tasks::looper::reset_expire_check_timer;
 use mini_executor::BatchTask;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 
+use log::{error, info};
 use redb::{ReadableTable, TableDefinition, TableHandle};
 use std::sync::atomic::Ordering;
-use log::{info, error};
 
 pub struct ExpireCheckTask;
 
@@ -18,7 +18,7 @@ impl BatchTask for ExpireCheckTask {
     fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             expire_check_task();
-            // 任務執行完畢後重置倒數計時
+            // Reset countdown timer after task execution
             reset_expire_check_timer().await;
         }
     }
