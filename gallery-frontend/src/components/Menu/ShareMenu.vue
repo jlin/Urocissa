@@ -5,7 +5,7 @@
     </template>
     <v-list>
       <ItemViewOriginalFile
-        :src="getSrc(database.hash, true, database.ext)"
+        :src="getSrcOriginal(database.hash, true, database.ext)"
         :hash="database.hash"
         :isolation-id="props.isolationId"
       />
@@ -15,7 +15,7 @@
 </template>
 <script setup lang="ts">
 import { Database, IsolationId } from '@type/types'
-import { getSrc } from '@utils/getter'
+import { getSrcOriginal } from '@utils/getter'
 import ItemViewOriginalFile from '@Menu/MenuItem/ItemViewOriginalFile.vue'
 import ItemDownload from '@Menu/MenuItem/ItemDownload.vue'
 const props = defineProps<{

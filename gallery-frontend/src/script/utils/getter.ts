@@ -3,6 +3,7 @@ import { inject } from 'vue'
 import { useDataStore } from '@/store/dataStore'
 import { escapeAndWrap } from '@utils/escape'
 import { navBarHeight } from '../../type/constants'
+import { useShareStore } from '@/store/shareStore'
 
 export function getIsolationIdByRoute(route: RouteLocationNormalizedLoaded) {
   const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
@@ -132,4 +133,16 @@ export function extractHashFromPath(path: string): string | null {
 export function getSrc(hash: string, original: boolean, ext: string) {
   const compressedOrImported = original ? 'imported' : 'compressed'
   return `/object/${compressedOrImported}/${hash.slice(0, 2)}/${hash}.${ext}`
+}
+
+export function getSrcOriginal(hash: string, original: boolean, ext: string) {
+  const shareStore = useShareStore('mainId')
+  const compressedOrImported = original ? 'imported' : 'compressed'
+  const basePath = `/object/${compressedOrImported}/${hash.slice(0, 2)}/${hash}.${ext}`
+
+  if (typeof shareStore.albumId === 'string' && typeof shareStore.shareId === 'string') {
+    return `${basePath}?albumId=${shareStore.albumId}&shareId=${shareStore.shareId}`
+  } else {
+    return basePath
+  }
 }

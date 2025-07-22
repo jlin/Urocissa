@@ -6,9 +6,9 @@ use rocket::request::{FromRequest, Outcome};
 
 use crate::public::constant::redb::ALBUM_TABLE;
 use crate::public::db::tree::TREE;
+use crate::public::structure::album::ResolvedShare;
 use crate::router::claims::claims::Claims;
 use crate::router::post::authenticate::JSON_WEB_TOKEN_SECRET_KEY;
-use crate::public::structure::album::ResolvedShare;
 
 use super::VALIDATION;
 
@@ -39,6 +39,26 @@ impl<'r> FromRequest<'r> for GuardShare {
                     );
                     let claims = Claims::new_share(resolved_share);
 
+                    return Outcome::Success(GuardShare { claims });
+                }
+            }
+        }
+
+        if let (Some(Ok(album_id)), Some(Ok(share_id))) = (
+            req.query_value::<&str>("albumId"),
+            req.query_value::<&str>("shareId"),
+        ) {
+            let read_txn = TREE.in_disk.begin_read().unwrap();
+            let table = read_txn.open_table(ALBUM_TABLE).unwrap();
+            if let Some(album_guard) = table.get(album_id).unwrap() {
+                let mut album = album_guard.value();
+                if let Some(share) = album.share_list.remove(share_id) {
+                    let resolved_share = ResolvedShare::new(
+                        ArrayString::<64>::from(album_id).unwrap(),
+                        album.title,
+                        share,
+                    );
+                    let claims = Claims::new_share(resolved_share);
                     return Outcome::Success(GuardShare { claims });
                 }
             }

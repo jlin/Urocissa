@@ -9,9 +9,8 @@ import { useDataStore } from '@/store/dataStore'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
 import { fetchDataInWorker } from '@/api/fetchData'
-import { getIsolationIdByRoute } from '@utils/getter'
+import { getIsolationIdByRoute, getSrcOriginal } from '@utils/getter'
 import { AbstractData } from '@type/types'
-import { getSrc } from '@utils/getter'
 import { useTokenStore } from '@/store/tokenStore'
 
 const props = defineProps<{
@@ -72,8 +71,9 @@ const downloadAllFiles = async () => {
 
         if (metadata.database) {
           const hash = metadata.database.hash
-          const url = getSrc(hash, true, metadata.database.ext)
 
+          const url = getSrcOriginal(hash, true, metadata.database.ext)
+          await tokenStore.tryRefreshAndStoreTokenToDb(hash)
           const hashToken = tokenStore.hashTokenMap.get(hash)
           if (hashToken === undefined) {
             console.error(`hashToken is undefined for hash: ${hash}`)
