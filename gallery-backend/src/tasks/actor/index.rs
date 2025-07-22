@@ -4,7 +4,6 @@ use anyhow::anyhow;
 use tokio_rayon::spawn;
 
 use crate::public::structure::abstract_data::AbstractData;
-use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use crate::{
     process::info::{process_image_info, process_video_info},
     public::{
