@@ -1,4 +1,4 @@
-use crate::public::constant::{SNAPSHOT_MAX_LIFETIME_MS, runtime::TOKIO_RUNTIME};
+use crate::public::constant::{SNAPSHOT_MAX_LIFETIME_MS, runtime::WORKER_RUNTIME};
 use crate::tasks::{COORDINATOR, batcher::expire_check::ExpireCheckTask};
 use std::sync::{Arc, LazyLock};
 use tokio::sync::mpsc;
@@ -8,7 +8,7 @@ static RESET_SENDER: LazyLock<Arc<tokio::sync::Mutex<Option<mpsc::UnboundedSende
     LazyLock::new(|| Arc::new(tokio::sync::Mutex::new(None)));
 
 pub fn start_expire_check_loop() {
-    TOKIO_RUNTIME.spawn(async {
+    WORKER_RUNTIME.spawn(async {
         let (tx, mut rx) = mpsc::unbounded_channel();
 
         // Store the sender for external reset usage

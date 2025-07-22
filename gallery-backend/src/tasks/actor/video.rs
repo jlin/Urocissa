@@ -1,19 +1,17 @@
 use crate::{
     operations::indexation::generate_compressed_video::generate_compressed_video,
     public::{
-        error_data::handle_error,
-        structure::{
+        constant::runtime::WORKER_RAYON_POOL, error_data::handle_error, structure::{
             abstract_data::AbstractData, database_struct::database::definition::Database,
             guard::PendingGuard,
-        },
-        tui::DASHBOARD,
+        }, tui::DASHBOARD
     },
-    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
+    tasks::{batcher::flush_tree::FlushTreeTask, COORDINATOR},
 };
 use anyhow::Context;
 use anyhow::Result;
 use mini_executor::Task;
-use tokio_rayon::spawn;
+use tokio_rayon::{spawn, AsyncThreadPool};
 
 pub struct VideoTask {
     database: Database,
@@ -31,7 +29,7 @@ impl Task for VideoTask {
     fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
             let _pending_guard = PendingGuard::new();
-            spawn(move || video_task(self.database))
+            WORKER_RAYON_POOL.spawn_async(move || video_task(self.database))
                 .await
                 .map_err(|err| handle_error(err.context("Failed to run video task")))
         }

@@ -1,9 +1,9 @@
-use crate::{operations::hash::blake3_hasher, public::error_data::handle_error};
+use crate::{operations::hash::blake3_hasher, public::{constant::runtime::WORKER_RAYON_POOL, error_data::handle_error}};
 use anyhow::Result;
 use arrayvec::ArrayString;
 use mini_executor::Task;
 use std::fs::File;
-use tokio_rayon::spawn;
+use tokio_rayon::{spawn, AsyncThreadPool};
 
 pub struct HashTask {
     pub file: File,
@@ -20,7 +20,7 @@ impl Task for HashTask {
 
     fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
-            spawn(move || hash_task(self.file))
+            WORKER_RAYON_POOL.spawn_async(move || hash_task(self.file))
                 .await
                 .map_err(|err| handle_error(err.context("Failed to run hash task")))
         }
