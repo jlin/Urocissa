@@ -21,6 +21,7 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 use std::hash::Hasher;
 use std::hash::{DefaultHasher, Hash};
+use std::mem;
 use std::sync::atomic::Ordering;
 use std::time::SystemTime;
 use std::time::{Instant, UNIX_EPOCH};
@@ -81,7 +82,7 @@ impl From<&DatabaseTimestamp> for ReducedData {
 
 fn check_query_cache(
     query_hash: u64,
-    resolved_share_option: Option<ResolvedShare>,
+    resolved_share_option: &mut Option<ResolvedShare>,
 ) -> Option<Json<PrefetchReturn>> {
     let find_cache_start_time = Instant::now();
 
@@ -89,7 +90,7 @@ fn check_query_cache(
     if let Ok(Some(prefetch)) = QUERY_SNAPSHOT.read_query_snapshot(query_hash) {
         let duration = format!("{:?}", find_cache_start_time.elapsed());
         info!(duration = &*duration; "Query cache found");
-        let claims = ClaimsTimestamp::new(resolved_share_option, prefetch.timestamp);
+        let claims = ClaimsTimestamp::new(mem::take(resolved_share_option), prefetch.timestamp);
         return Some(Json(PrefetchReturn::new(
             prefetch,
             claims.encode(),
@@ -236,7 +237,7 @@ fn create_json_response(
 fn execute_prefetch_logic(
     expression_option: Option<Expression>,
     locate_option: Option<String>,
-    resolved_share_option: Option<ResolvedShare>,
+    mut resolved_share_option: Option<ResolvedShare>,
 ) -> Result<Json<PrefetchReturn>> {
     // Start timer
     let start_time = Instant::now();
@@ -245,7 +246,7 @@ fn execute_prefetch_logic(
     let query_hash = build_cache_key(&expression_option, &locate_option);
 
     // Step 2: Check if query cache is available
-    if let Some(cached_response) = check_query_cache(query_hash, resolved_share_option.clone()) {
+    if let Some(cached_response) = check_query_cache(query_hash, &mut resolved_share_option) {
         return Ok(cached_response);
     }
 
@@ -260,7 +261,6 @@ fn execute_prefetch_logic(
         insert_data_into_tree_snapshot(reduced_data_vector)?;
 
     // Step 7: Create and return JSON response
-
     let json = create_json_response(
         timestamp_millis,
         locate_to_index,
