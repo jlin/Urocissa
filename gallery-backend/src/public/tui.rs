@@ -18,7 +18,7 @@ use terminal_size::{Width, terminal_size};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
-use crate::public::constant::runtime::MAX_NUM_WORKERS;
+use crate::public::constant::runtime::CURRENT_NUM_THREADS;
 
 /// ---------- async driver ----------
 pub async fn tui_task(
@@ -196,7 +196,7 @@ impl Dashboard {
     pub fn new() -> Self {
         Self {
             tasks: DashMap::new(),
-            completed: ArrayQueue::new(*MAX_NUM_WORKERS * 4),
+            completed: ArrayQueue::new(*CURRENT_NUM_THREADS * 4),
             handled: AtomicU64::new(0),
             pending: AtomicU64::new(0),
             total_duration: AtomicF64::new(0.0),
@@ -314,7 +314,7 @@ impl Component for Dashboard {
             v
         };
 
-        let max = *MAX_NUM_WORKERS;
+        let max = *CURRENT_NUM_THREADS;
         let running_len = running.len();
 
         if running_len >= max {

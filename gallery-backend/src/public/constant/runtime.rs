@@ -6,15 +6,6 @@ use tokio::runtime::{Builder, Runtime};
 
 pub static CURRENT_NUM_THREADS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
 
-pub static MAX_NUM_WORKERS: LazyLock<usize> = LazyLock::new(|| {
-    let n = *CURRENT_NUM_THREADS;
-    let mut workers = n / 2;
-    if n % 2 != 0 {
-        workers += 1;
-    }
-    workers.max(1)
-});
-
 // Rocket-specific Tokio Runtime
 // This runtime is dedicated to handling network requests, with thread names clearly labeled.
 pub static ROCKET_RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
@@ -51,7 +42,7 @@ pub static INDEX_RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
 // It does not create a global Rayon pool, so it does not interfere with other threads.
 pub static WORKER_RAYON_POOL: LazyLock<ThreadPool> = LazyLock::new(|| {
     ThreadPoolBuilder::new()
-        .num_threads(*MAX_NUM_WORKERS)
+        .num_threads(*CURRENT_NUM_THREADS)
         .thread_name(|i| format!("cpu-intensive-worker-{}", i))
         .build()
         .expect("Failed to build Worker Rayon pool")
