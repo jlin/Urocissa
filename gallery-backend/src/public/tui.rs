@@ -99,74 +99,72 @@ impl TaskRow {
         }
     }
     pub fn fmt(&self) -> String {
-        // Fixed column widths
-        const COL_STATUS: usize = 6;
+        const COL_STATUS: usize = 3; // Status column fixed to 3 characters
         const COL_HASH: usize = 5;
         const DEFAULT_COLS: usize = 120;
 
-        // Get custom terminal margin (default 4)
-        let margin = std::env::var("UROCISSA_TERM_MARGIN")
-            .ok()
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(4);
-
-        // Get terminal width or use default
-        let cols = terminal_size()
-            .map(|(Width(w), _)| w as usize)
-            .unwrap_or(DEFAULT_COLS);
-
-        // Determine status text based on task state
+        // Generate status content
         let status = match (&self.state, self.progress) {
-            (TaskState::Transcoding(_), Some(p)) => format!("{:>5.1}%", p.min(100.0)), // show percent
-            (TaskState::Done(_), _) => "✓".into(),                                     // done
-            _ => "•".into(), // in-progress or other state
+            // With progress: limit to 1–99, round to integer
+            (TaskState::Transcoding(_), Some(p)) => {
+                let pct = (p.clamp(1.0, 99.0)).round() as u8;
+                format!("{:>2}%", pct) // e.g. " 1%", "99%"
+            }
+            // Completed
+            (TaskState::Done(_), _) => " v ".to_string(),
+            // Not started/Indexing
+            _ => "   ".to_string(),
         };
-        let status_col = format!("{:<COL_STATUS$}", status); // left-align within status column
+        let status_col = format!("{:<COL_STATUS$}", status); // Pad to 3 characters
 
-        // Take first few chars of hash
+        // Take the first 5 characters of the hash, right-aligned
         let short_hash = &self.hash.as_str()[..COL_HASH.min(self.hash.len())];
-        let hash_col = format!("{:>COL_HASH$}", short_hash); // right-align hash column
+        let hash_col = format!("{:>COL_HASH$}", short_hash);
 
-        // Compute elapsed time in seconds based on state
+        // Calculate elapsed seconds
         let secs = match self.state {
             TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0.elapsed().as_secs_f64(),
             TaskState::Done(d) => d,
         };
-        let suffix = format!(" │ {:>6.1}s", secs); // right-align time suffix
+        let suffix = format!(" │ {:>6.1}s", secs);
 
-        // Compute available width for path display
+        // Get terminal width and margin
+        let margin = std::env::var("UROCISSA_TERM_MARGIN")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(4);
+        let cols = terminal_size()
+            .map(|(Width(w), _)| w as usize)
+            .unwrap_or(DEFAULT_COLS);
+
+        // Calculate path column width and truncate
         let prefix_w = COL_STATUS + 3 + COL_HASH + 3;
         let path_budget = cols
             .saturating_sub(prefix_w + UnicodeWidthStr::width(suffix.as_str()) + margin)
-            .max(5); // ensure minimum width of 5
-
-        // Truncate path with ellipsis if too long
+            .max(5);
         let short_path = Self::tail_ellipsis(&self.path, path_budget);
 
-        // Calculate padding to fill fixed width
-        let pad_width = path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str()));
-        let pad = " ".repeat(pad_width);
+        let pad =
+            " ".repeat(path_budget.saturating_sub(UnicodeWidthStr::width(short_path.as_str())));
 
-        // Final formatted output
         format!("{status_col} │ {hash_col} │ {short_path}{pad}{suffix}")
     }
-
-    // Truncate string to fit within max width by adding ellipsis at front if needed
+    // Truncate string to fit within max width by adding ellipsis at the front if needed
     fn tail_ellipsis(s: &str, max: usize) -> String {
         if UnicodeWidthStr::width(s) <= max {
-            return s.to_owned(); // no truncation needed
+            return s.to_owned(); // No truncation needed
         }
 
-        let tail_len = max.saturating_sub(1); // leave space for "…"
+        let tail_len = max.saturating_sub(1); // Leave space for "…"
         let mut acc_width = 0;
         let mut rev_chars = String::new();
 
-        // Collect characters from end until width limit
+        // Collect characters from the end until width limit
         for c in s.chars().rev() {
             let char_width = c.width().unwrap_or(0);
             if acc_width + char_width > tail_len {
                 if acc_width + 1 <= tail_len {
-                    rev_chars.push('…'); // optionally add ellipsis
+                    rev_chars.push('…'); // Optionally add ellipsis
                 }
                 break;
             }
@@ -290,7 +288,7 @@ impl Component for Dashboard {
         };
 
         let mut stats = format!(
-            "• Processed: {:<6} │ Pending: {:<6} │ Avg: {}",
+            " Processed: {:<6} │ Pending: {:<6} │ Avg: {}",
             self.handled(),
             self.pending(),
             avg_str
@@ -300,7 +298,7 @@ impl Component for Dashboard {
 
         lines.push(vec![sep.clone()].try_into()?);
 
-        /* snapshot rows */
+        /* Snapshot rows */
         let running: Vec<_> = self.tasks.iter().map(|kv| kv.value().clone()).collect();
         let completed: Vec<_> = {
             let mut v = Vec::with_capacity(self.completed.len());
