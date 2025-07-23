@@ -30,7 +30,7 @@ export const useTagStore = (isolationId: IsolationId) =>
           this.fetched = true
         } catch (error) {
           if (error instanceof ZodError) {
-            console.error('Validation errors:', error.errors)
+            console.error('Validation errors:', error.issues)
           } else {
             console.error('Failed to fetch tags:', error)
           }

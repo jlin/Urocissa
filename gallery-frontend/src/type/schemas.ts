@@ -94,8 +94,8 @@ export const AlbumParse = z.object({
   lastModifiedTime: z.number(),
   cover: z.string().nullable(),
   thumbhash: z.array(z.number()).nullable(),
-  userDefinedMetadata: z.record(z.array(z.string())),
-  shareList: z.record(ShareSchema).transform((obj) => new Map(Object.entries(obj))),
+  userDefinedMetadata: z.record(z.string(), z.array(z.string())),
+  shareList: z.record(z.string(), ShareSchema).transform((obj) => new Map(Object.entries(obj))),
   tag: z.array(z.string()),
   width: z.number(),
   height: z.number(),
@@ -134,7 +134,7 @@ export const albumInfoSchema = z
   .object({
     albumId: z.string(),
     albumName: z.string().nullable(),
-    shareList: z.record(ShareSchema)
+    shareList: z.record(z.string(), ShareSchema)
   })
   .transform((albumData) => ({
     albumId: albumData.albumId,

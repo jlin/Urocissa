@@ -1,6 +1,6 @@
 [package]
 name = "urocissa"
-version = "0.12.4"
+version = "0.13.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,7 +13,6 @@ inherits = "release"
 lto = false
 
 [dependencies]
-anstyle = "1.0.11"
 anyhow = "1.0.98"
 arrayvec = { version = "0.7.6", features = ["serde"] }
 atomic_float = "1.1.0"
@@ -31,7 +30,6 @@ filetime = "0.2.25"
 futures = "0.3.31"
 image = "0.25.6"
 image_hasher = "3.0.0"
-indicatif = "0.17.11"
 jsonwebtoken = "9.3.1"
 kamadak-exif = "0.6.1"
 log = { version = "0.4.27", features = ["kv"] }
@@ -39,7 +37,7 @@ mini_executor = "2.0.2"
 notify = "8.1.0"
 num_cpus = "1.17.0"
 path-clean = "1.0.1"
-rand = "0.9.1"
+rand = "0.9.2"
 rayon = "1.10.0"
 redb = "2.6.0"
 regex = "1.11.1"
@@ -47,9 +45,7 @@ reqwest = { version = "0.12.22", features = ["json", "blocking"] }
 rocket = { version = "0.5.1", features = ["json"] }
 rocket_seek_stream = "0.2.6"
 serde = { version = "1.0.219", features = ["derive", "rc"] }
-serde_json = "1.0.140"
-strum = "0.27.1"
-strum_macros = "0.27.1"
+serde_json = "1.0.141"
 superconsole = "0.2.0"
 terminal_size = "0.4.2"
 thumbhash = "0.1.0"
@@ -58,4 +54,3 @@ tokio-rayon = "2.1.0"
 unicode-width = "0.2.1"
 uuid = { version = "1.17.0", features = ["v4"] }
 walkdir = "2.5.0"
-zune-jpeg = "0.4.19"

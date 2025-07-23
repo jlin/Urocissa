@@ -132,6 +132,7 @@ import { useAlbumStore } from '@/store/albumStore'
 import { useModalStore } from '@/store/modalStore'
 import { useMessageStore } from '@/store/messageStore'
 import type { EditShareData } from '@/type/types'
+import { ShareSchema } from '@/type/schemas'
 
 const initializedStore = useInitializedStore('mainId')
 const albumStore = useAlbumStore('mainId')
@@ -168,7 +169,9 @@ const tableItems = computed<EditShareData[]>(() => {
   const arr: EditShareData[] = []
   for (const album of albumStore.albums.values()) {
     for (const [, share] of album.shareList) {
-      arr.push({ albumId: album.albumId, displayName: album.displayName, share })
+      // Validate the share object to ensure type safety
+      const validatedShare = ShareSchema.parse(share)
+      arr.push({ albumId: album.albumId, displayName: album.displayName, share: validatedShare })
     }
   }
   return arr

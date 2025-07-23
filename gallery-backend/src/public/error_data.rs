@@ -1,5 +1,6 @@
 use anyhow::Error;
 
+use reqwest::blocking::Client;
 use serde_json::json;
 
 use crate::public::config::PRIVATE_CONFIG;
@@ -12,7 +13,7 @@ pub fn handle_error(error: Error) -> Error {
     error
 }
 fn send_discord_webhook(webhook_url: &str, error: &Error) -> () {
-    let client = reqwest::blocking::Client::new();
+    let client = Client::new();
     let debug_string = format!("```rust\n{:?}\n```", error);
     let params = json!({ "content": debug_string });
     client.post(webhook_url).json(&params).send().unwrap();
