@@ -34,6 +34,7 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
     let file = COORDINATOR
         .execute_waiting(OpenFileTask::new(path.clone()))
         .await??;
+
     let hash = COORDINATOR.execute_waiting(HashTask::new(file)).await??;
 
     let _guard = match try_acquire(hash) {

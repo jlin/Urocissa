@@ -9,7 +9,7 @@ use crate::public::structure::reduced_data::ReducedData;
 use crate::router::AppResult;
 use crate::router::claims::claims_timestamp::ClaimsTimestamp;
 use crate::router::fairing::guard_share::GuardShare;
-use crate::tasks::COORDINATOR;
+use crate::tasks::ROCKET_COORDINATOR;
 use crate::tasks::batcher::flush_query_snapshot::FlushQuerySnapshotTask;
 use crate::tasks::batcher::flush_tree_snapshot::FlushTreeSnapshotTask;
 
@@ -189,7 +189,7 @@ fn insert_data_into_tree_snapshot(reduced_data_vector: Vec<ReducedData>) -> Resu
     TREE_SNAPSHOT
         .in_memory
         .insert(timestamp_millis, reduced_data_vector);
-    COORDINATOR.execute_batch_detached(FlushTreeSnapshotTask);
+    ROCKET_COORDINATOR.execute_batch_detached(FlushTreeSnapshotTask);
 
     let duration = format!("{:?}", db_start_time.elapsed());
     info!(duration = &*duration; "Write cache into memory");
@@ -214,7 +214,7 @@ fn create_json_response(
 
     // Cache the result
     QUERY_SNAPSHOT.in_memory.insert(query_hash, prefetch);
-    COORDINATOR.execute_batch_detached(FlushQuerySnapshotTask);
+    ROCKET_COORDINATOR.execute_batch_detached(FlushQuerySnapshotTask);
 
     // Build response
     let claims = ClaimsTimestamp::new(resolved_share_option, timestamp_millis);

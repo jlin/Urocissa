@@ -2,11 +2,15 @@ use anyhow::Context;
 use anyhow::Result;
 use mini_executor::Task;
 use std::fs;
+use std::sync::LazyLock;
+use tokio::sync::Semaphore;
 use tokio::task::spawn_blocking;
 
 use crate::process::io::copy_with_retry;
 use crate::public::error_data::handle_error;
 use crate::public::structure::database_struct::database::definition::Database;
+
+static COPY_LIMIT: LazyLock<Semaphore> = LazyLock::new(|| Semaphore::const_new(1));
 
 pub struct CopyTask {
     pub database: Database,
@@ -23,6 +27,7 @@ impl Task for CopyTask {
 
     fn run(self) -> impl Future<Output = Self::Output> + Send {
         async move {
+            let _permit = COPY_LIMIT.acquire().await?;
             spawn_blocking(move || copy_task(self.database))
                 .await
                 .expect("blocking task panicked")

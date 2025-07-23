@@ -18,6 +18,8 @@ use terminal_size::{Width, terminal_size};
 use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
+use crate::public::constant::runtime::MAX_NUM_WORKERS;
+
 /// ---------- async driver ----------
 pub async fn tui_task(
     mut sc: superconsole::SuperConsole,
@@ -187,7 +189,6 @@ pub struct Dashboard {
     total_duration: AtomicF64,
 }
 
-pub static MAX_ROWS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
 pub static LOGGER_TX: OnceLock<UnboundedSender<String>> = OnceLock::new();
 pub static DASHBOARD: LazyLock<Arc<Dashboard>> = LazyLock::new(|| Arc::new(Dashboard::new()));
 
@@ -195,7 +196,7 @@ impl Dashboard {
     pub fn new() -> Self {
         Self {
             tasks: DashMap::new(),
-            completed: ArrayQueue::new(*MAX_ROWS * 4),
+            completed: ArrayQueue::new(*MAX_NUM_WORKERS * 4),
             handled: AtomicU64::new(0),
             pending: AtomicU64::new(0),
             total_duration: AtomicF64::new(0.0),
@@ -313,7 +314,7 @@ impl Component for Dashboard {
             v
         };
 
-        let max = *MAX_ROWS;
+        let max = *MAX_NUM_WORKERS;
         let running_len = running.len();
 
         if running_len >= max {
