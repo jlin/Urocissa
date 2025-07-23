@@ -89,7 +89,6 @@ onMounted(() => {
     // Temporary workaround: VConfirmEdit internally uses structuredClone,
     // which cannot clone Vue reactive proxies directly.
     // We use toRaw() + structuredClone() here to ensure plain objects.
-    // This workaround is expected to be removed after Vuetify 3.9.0 fixes the issue.
 
     changedAlbums.value = initialAlbums
 
