@@ -22,7 +22,6 @@ use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
 use crate::tasks::BATCH_COORDINATOR;
-use crate::tasks::COORDINATOR;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
@@ -67,11 +66,13 @@ async fn create_album_internal(title: Option<String>) -> Result<ArrayString<64>>
 
     let album_id = generate_random_hash();
     let album = AbstractData::Album(Album::new(album_id, title));
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(FlushTreeTask::insert(vec![album]))
         .await?;
 
-    BATCH_COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
+    BATCH_COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await?;
 
     info!(duration = &*format!("{:?}", start_time.elapsed()); "Create album");
     Ok(album_id)
@@ -92,11 +93,13 @@ async fn create_album_elements(
     })
     .await??;
 
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(FlushTreeTask::insert(element_batch))
         .await?;
-    BATCH_COORDINATOR.execute_batch_waiting(UpdateTreeTask).await?;
-    COORDINATOR
+    BATCH_COORDINATOR
+        .execute_batch_waiting(UpdateTreeTask)
+        .await?;
+    BATCH_COORDINATOR
         .execute_waiting(AlbumSelfUpdateTask::new(album_id))
         .await??;
 

@@ -1,7 +1,7 @@
 use crate::public::db::query_snapshot::QUERY_SNAPSHOT;
 use crate::public::db::tree::VERSION_COUNT_TIMESTAMP;
 use crate::router::get::get_prefetch::Prefetch;
-use crate::{public::db::expire::EXPIRE, tasks::COORDINATOR};
+use crate::{public::db::expire::EXPIRE, tasks::INDEX_COORDINATOR};
 
 use crate::tasks::actor::remove_tree_snapshot::RemoveTask;
 use crate::tasks::looper::reset_expire_check_timer;
@@ -58,7 +58,7 @@ fn expire_check_task() {
                             .collect();
 
                         for timestamp in tree_snapshot_delete_queue {
-                            let _ = COORDINATOR.execute_detached(RemoveTask::new(timestamp));
+                            let _ = INDEX_COORDINATOR.execute_detached(RemoveTask::new(timestamp));
                         }
                     }
                     Ok(false) => {

@@ -1,4 +1,4 @@
-use crate::public::constant::runtime::WORKER_RUNTIME;
+use crate::public::constant::runtime::INDEX_RUNTIME;
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::{public::config::PRIVATE_CONFIG, workflow::index_for_watch};
 use log::{error, info};
@@ -81,7 +81,7 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     for path in path_list {
                         // Check if the path has a valid extension before submitting
                         if is_valid_media_file(&path) {
-                            WORKER_RUNTIME.spawn(index_for_watch(path));
+                            INDEX_RUNTIME.spawn(index_for_watch(path));
                         }
                     }
                 }
@@ -98,7 +98,7 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                     for path in path_list {
                         // Check if the path has a valid extension before submitting
                         if is_valid_media_file(&path) {
-                            WORKER_RUNTIME.spawn(index_for_watch(path));
+                            INDEX_RUNTIME.spawn(index_for_watch(path));
                         }
                     }
                 }

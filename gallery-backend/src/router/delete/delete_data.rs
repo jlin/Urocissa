@@ -4,7 +4,7 @@ use crate::public::structure::abstract_data::AbstractData;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
+use crate::tasks::{BATCH_COORDINATOR, INDEX_COORDINATOR};
 use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
@@ -31,7 +31,7 @@ pub async fn delete_data(
     })
     .await??;
 
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(FlushTreeTask::remove(abstract_data_to_remove))
         .await?;
 
@@ -41,7 +41,7 @@ pub async fn delete_data(
         all_affected_album_ids
             .into_iter()
             .map(|album_id| async move {
-                COORDINATOR
+                INDEX_COORDINATOR
                     .execute_waiting(AlbumSelfUpdateTask::new(album_id))
                     .await
             }),

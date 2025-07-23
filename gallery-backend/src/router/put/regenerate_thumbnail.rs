@@ -6,7 +6,7 @@ use crate::tasks::batcher::flush_tree::FlushTreeTask;
 
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::COORDINATOR;
+use crate::tasks::INDEX_COORDINATOR;
 use arrayvec::ArrayString;
 use rocket::form::Form;
 use rocket::form::{self, DataField, FromFormField, ValueField};
@@ -67,7 +67,7 @@ pub async fn regenerate_thumbnail_with_frame(
                 .await
                 .unwrap();
 
-                COORDINATOR
+                INDEX_COORDINATOR
                     .execute_batch_waiting(FlushTreeTask::insert(vec![abstract_data]))
                     .await
                     .unwrap();

@@ -1,5 +1,5 @@
 use crate::tasks::{
-    COORDINATOR,
+    INDEX_COORDINATOR,
     actor::{
         copy::CopyTask, deduplicate::DeduplicateTask, delete_in_update::DeleteTask, hash::HashTask,
         index::IndexTask, open_file::OpenFileTask, video::VideoTask,
@@ -31,11 +31,11 @@ fn try_acquire(hash: ArrayString<64>) -> Option<ProcessingGuard> {
 
 pub async fn index_for_watch(path: PathBuf) -> Result<()> {
     let path = path.clean();
-    let file = COORDINATOR
+    let file = INDEX_COORDINATOR
         .execute_waiting(OpenFileTask::new(path.clone()))
         .await??;
 
-    let hash = COORDINATOR.execute_waiting(HashTask::new(file)).await??;
+    let hash = INDEX_COORDINATOR.execute_waiting(HashTask::new(file)).await??;
 
     let _guard = match try_acquire(hash) {
         Some(g) => g,
@@ -52,7 +52,7 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
         }
     };
 
-    let database_opt = COORDINATOR
+    let database_opt = INDEX_COORDINATOR
         .execute_waiting(DeduplicateTask::new(path.clone(), hash))
         .await??;
 
@@ -60,21 +60,21 @@ pub async fn index_for_watch(path: PathBuf) -> Result<()> {
     let mut database = match database_opt {
         Some(db) => db,
         None => {
-            COORDINATOR.execute_detached(DeleteTask::new(path));
+            INDEX_COORDINATOR.execute_detached(DeleteTask::new(path));
             return Ok(());
         }
     };
 
-    database = COORDINATOR
+    database = INDEX_COORDINATOR
         .execute_waiting(CopyTask::new(database))
         .await??;
-    database = COORDINATOR
+    database = INDEX_COORDINATOR
         .execute_waiting(IndexTask::new(database))
         .await??;
 
-    COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&path)));
+    INDEX_COORDINATOR.execute_detached(DeleteTask::new(PathBuf::from(&path)));
     if database.ext_type == "video" {
-        COORDINATOR
+        INDEX_COORDINATOR
             .execute_waiting(VideoTask::new(database))
             .await??;
     }

@@ -1,6 +1,7 @@
+use crate::public::db::tree::TREE;
 use crate::public::structure::album::Share;
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
-use crate::{public::db::tree::TREE, tasks::COORDINATOR};
 
 use crate::public::constant::redb::ALBUM_TABLE;
 use crate::router::fairing::guard_auth::GuardAuth;
@@ -45,7 +46,7 @@ pub async fn edit_share(
     })
     .await
     .unwrap();
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();
@@ -85,7 +86,7 @@ pub async fn delete_share(
     })
     .await
     .unwrap();
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();

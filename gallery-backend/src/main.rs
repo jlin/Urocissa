@@ -11,7 +11,7 @@ mod tasks;
 mod workflow;
 
 use crate::process::initialization::initialize;
-use crate::public::constant::runtime::{ROCKET_RUNTIME, WORKER_RUNTIME};
+use crate::public::constant::runtime::{ROCKET_RUNTIME, INDEX_RUNTIME};
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::looper::start_expire_check_loop;
 use crate::tasks::BATCH_COORDINATOR;
@@ -49,8 +49,8 @@ fn main() -> Result<()> {
     // 建立並啟動 Worker 執行緒
     let worker_handle = thread::spawn(|| {
         info!("Worker thread starting.");
-        // 在此執行緒中使用 WORKER_RUNTIME
-        WORKER_RUNTIME.block_on(async {
+        // 在此執行緒中使用 INDEX_RUNTIME
+        INDEX_RUNTIME.block_on(async {
             // 所有背景任務都在這裡執行
             let rx = initialize();
             let start_time = Instant::now();
@@ -70,7 +70,7 @@ fn main() -> Result<()> {
             start_expire_check_loop();
 
             if let Some(sc) = superconsole::SuperConsole::new() {
-                WORKER_RUNTIME.spawn(async move {
+                INDEX_RUNTIME.spawn(async move {
                     if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {
                         error!("TUI error: {e}");
                     }

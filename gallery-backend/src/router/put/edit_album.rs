@@ -1,4 +1,4 @@
-use crate::tasks::COORDINATOR;
+use crate::tasks::{BATCH_COORDINATOR, INDEX_COORDINATOR};
 use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
@@ -76,13 +76,13 @@ pub async fn edit_album(
     .await
     .unwrap();
 
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();
     let futures = concact_result
         .into_iter()
-        .map(async |album_id| COORDINATOR.execute_waiting(AlbumSelfUpdateTask::new(album_id)).await);
+        .map(async |album_id| INDEX_COORDINATOR.execute_waiting(AlbumSelfUpdateTask::new(album_id)).await);
     join_all(futures).await;
 }
 
@@ -119,7 +119,7 @@ pub async fn set_album_cover(
     })
     .await
     .unwrap();
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();
@@ -156,7 +156,7 @@ pub async fn set_album_title(
     })
     .await
     .unwrap();
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();

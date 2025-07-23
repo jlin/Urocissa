@@ -6,7 +6,7 @@ use crate::public::db::tree::read_tags::TagInfo;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use anyhow::Result;
@@ -59,7 +59,7 @@ pub async fn edit_tag(
     .await
     .unwrap()?;
 
-    COORDINATOR
+    BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await
         .unwrap();
