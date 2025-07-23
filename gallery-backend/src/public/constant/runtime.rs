@@ -1,10 +1,8 @@
 use std::sync::LazyLock;
 
-use log::info;
 use rayon::{ThreadPool, ThreadPoolBuilder};
 use tokio::runtime::{Builder, Runtime};
 
-use crate::process::info;
 
 pub static CURRENT_NUM_THREADS: LazyLock<usize> = LazyLock::new(|| rayon::current_num_threads());
 

@@ -14,7 +14,7 @@ use crate::process::initialization::initialize;
 use crate::public::constant::runtime::{ROCKET_RUNTIME, WORKER_RUNTIME};
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::looper::start_expire_check_loop;
-use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::batcher::start_watcher::StartWatcherTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 

@@ -6,7 +6,7 @@ use crate::{
         db::tree::TREE,
         structure::abstract_data::AbstractData,
     },
-    tasks::{batcher::update_tree::UpdateTreeTask, BATCH_COORDINATOR, COORDINATOR},
+    tasks::{batcher::update_tree::UpdateTreeTask, BATCH_COORDINATOR},
 };
 
 pub struct FlushTreeTask {

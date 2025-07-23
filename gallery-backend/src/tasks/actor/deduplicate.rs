@@ -4,7 +4,7 @@ use crate::{
         error_data::handle_error,
         structure::{abstract_data::AbstractData, database_struct::database::definition::Database},
     },
-    tasks::{batcher::flush_tree::FlushTreeTask, BATCH_COORDINATOR, COORDINATOR},
+    tasks::{batcher::flush_tree::FlushTreeTask, BATCH_COORDINATOR},
 };
 use anyhow::Result;
 use arrayvec::ArrayString;

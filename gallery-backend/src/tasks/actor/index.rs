@@ -15,7 +15,7 @@ use crate::{
         structure::{database_struct::database::definition::Database, guard::PendingGuard},
         tui::{DASHBOARD, FileType},
     },
-    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
+    tasks::batcher::flush_tree::FlushTreeTask,
 };
 use mini_executor::Task;
 pub struct IndexTask {

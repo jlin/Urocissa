@@ -2,7 +2,7 @@ use crate::operations::utils::timestamp::get_current_timestamp_u64;
 use crate::public::db::tree::TREE;
 use crate::public::structure::abstract_data::AbstractData;
 use crate::public::structure::database_struct::database_timestamp::DatabaseTimestamp;
-use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::batcher::update_expire::UpdateExpireTask;
 use mini_executor::BatchTask;
 use rayon::iter::{ParallelBridge, ParallelIterator};
