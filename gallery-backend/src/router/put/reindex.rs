@@ -6,6 +6,7 @@ use crate::process::info::regenerate_metadata_for_image;
 use crate::process::info::regenerate_metadata_for_video;
 use crate::public::constant::PROCESS_BATCH_NUMBER;
 use crate::public::structure::abstract_data::AbstractData;
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::COORDINATOR;
 use crate::tasks::actor::album::AlbumSelfUpdateTask;
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
@@ -87,11 +88,11 @@ pub async fn reindex(
                     }
                 })
                 .collect();
-            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
+            BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
         }
     })
     .await
     .unwrap();
-    COORDINATOR.execute_batch_detached(UpdateTreeTask);
+    BATCH_COORDINATOR.execute_batch_detached(UpdateTreeTask);
     Status::Ok
 }

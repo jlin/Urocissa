@@ -6,7 +6,7 @@ use crate::{
         db::tree::TREE,
         structure::abstract_data::AbstractData,
     },
-    tasks::{COORDINATOR, batcher::update_tree::UpdateTreeTask},
+    tasks::{batcher::update_tree::UpdateTreeTask, BATCH_COORDINATOR, COORDINATOR},
 };
 
 pub struct FlushTreeTask {
@@ -70,5 +70,5 @@ fn flush_tree_task(insert_list: Vec<AbstractData>, remove_list: Vec<AbstractData
             });
     };
     write_txn.commit().unwrap();
-    COORDINATOR.execute_batch_detached(UpdateTreeTask);
+    BATCH_COORDINATOR.execute_batch_detached(UpdateTreeTask);
 }

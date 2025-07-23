@@ -1,4 +1,5 @@
 use crate::public::constant::{SNAPSHOT_MAX_LIFETIME_MS, runtime::WORKER_RUNTIME};
+use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::{COORDINATOR, batcher::expire_check::ExpireCheckTask};
 use std::sync::{Arc, LazyLock};
 use tokio::sync::mpsc;
@@ -25,7 +26,7 @@ pub fn start_expire_check_loop() {
                 _ = sleep_future => {
                     // Timeout reached, execute the check task
                     info!("Timeout reached, executing the check task");
-                    COORDINATOR.execute_batch_detached(ExpireCheckTask);
+                    BATCH_COORDINATOR.execute_batch_detached(ExpireCheckTask);
                 }
                 _ = rx.recv() => {
                     // Received reset signal, restart the timer

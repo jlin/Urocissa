@@ -14,7 +14,7 @@ use crate::process::initialization::initialize;
 use crate::public::constant::runtime::{ROCKET_RUNTIME, WORKER_RUNTIME};
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::looper::start_expire_check_loop;
-use crate::tasks::COORDINATOR;
+use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
 use crate::tasks::batcher::start_watcher::StartWatcherTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 
@@ -65,8 +65,8 @@ fn main() -> Result<()> {
             }
 
             txn.commit().unwrap();
-            COORDINATOR.execute_batch_detached(StartWatcherTask);
-            COORDINATOR.execute_batch_detached(UpdateTreeTask);
+            BATCH_COORDINATOR.execute_batch_detached(StartWatcherTask);
+            BATCH_COORDINATOR.execute_batch_detached(UpdateTreeTask);
             start_expire_check_loop();
 
             if let Some(sc) = superconsole::SuperConsole::new() {

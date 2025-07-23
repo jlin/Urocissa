@@ -5,6 +5,8 @@ use tokio_rayon::AsyncThreadPool;
 
 use crate::public::constant::runtime::WORKER_RAYON_POOL;
 use crate::public::structure::abstract_data::AbstractData;
+use crate::tasks::BATCH_COORDINATOR;
+
 use crate::{
     process::info::{process_image_info, process_video_info},
     public::{
@@ -75,7 +77,7 @@ fn index_task(mut database: Database) -> Result<Database> {
 
     let abstract_data = AbstractData::Database(database.clone());
 
-    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+    BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
 
     DASHBOARD.advance_task_state(&hash);
 

@@ -9,7 +9,7 @@ use crate::{
         },
         tui::DASHBOARD,
     },
-    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
+    tasks::{batcher::flush_tree::FlushTreeTask, BATCH_COORDINATOR, COORDINATOR},
 };
 use anyhow::Context;
 use anyhow::Result;
@@ -46,7 +46,7 @@ pub fn video_task(mut database: Database) -> Result<()> {
         Ok(_) => {
             database.pending = false;
             let abstract_data = AbstractData::Database(database.clone());
-            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+            BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
 
             DASHBOARD.advance_task_state(&hash);
         }

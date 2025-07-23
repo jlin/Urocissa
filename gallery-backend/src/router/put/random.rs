@@ -2,7 +2,7 @@ use crate::public::structure::abstract_data::AbstractData;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::COORDINATOR;
+use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use crate::{
     public::structure::database_struct::database::definition::Database,
@@ -21,7 +21,7 @@ pub async fn generate_random_data(
         .map(|_| Database::generate_random_data())
         .map(|database| AbstractData::Database(database))
         .collect();
-    COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
+    BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(database_list));
     COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await

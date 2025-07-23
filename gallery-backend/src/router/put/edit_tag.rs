@@ -6,7 +6,7 @@ use crate::public::db::tree::read_tags::TagInfo;
 use crate::router::AppResult;
 use crate::router::fairing::guard_auth::GuardAuth;
 use crate::router::fairing::guard_read_only_mode::GuardReadOnlyMode;
-use crate::tasks::COORDINATOR;
+use crate::tasks::{BATCH_COORDINATOR, COORDINATOR};
 use crate::tasks::batcher::flush_tree::FlushTreeTask;
 use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use anyhow::Result;
@@ -51,7 +51,7 @@ pub async fn edit_tag(
 
         // Batch flush all modified data at once for better efficiency
         if !modified_data.is_empty() {
-            COORDINATOR.execute_batch_detached(FlushTreeTask::insert(modified_data));
+            BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(modified_data));
         }
 
         Ok(TREE_SNAPSHOT.read_tags())

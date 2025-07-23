@@ -4,7 +4,7 @@ use crate::{
         error_data::handle_error,
         structure::{abstract_data::AbstractData, database_struct::database::definition::Database},
     },
-    tasks::{COORDINATOR, batcher::flush_tree::FlushTreeTask},
+    tasks::{batcher::flush_tree::FlushTreeTask, BATCH_COORDINATOR, COORDINATOR},
 };
 use anyhow::Result;
 use arrayvec::ArrayString;
@@ -48,7 +48,7 @@ fn deduplicate_task(task: DeduplicateTask) -> Result<Option<Database>> {
         let file_modify = mem::take(&mut database.alias[0]);
         database_exist.alias.push(file_modify);
         let abstract_data = AbstractData::Database(database_exist);
-        COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
+        BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
         warn!("File already exists in the database:\n{:#?}", database);
 
         Ok(None)

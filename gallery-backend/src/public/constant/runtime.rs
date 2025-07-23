@@ -28,6 +28,15 @@ pub static ROCKET_RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
         .expect("Failed to build Rocket Tokio runtime")
 });
 
+pub static BATCHER_RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
+    Builder::new_multi_thread()
+        .worker_threads(*CURRENT_NUM_THREADS)
+        .thread_name("tokio-core")
+        .enable_all()
+        .build()
+        .expect("Failed to build Core Tokio runtime")
+});
+
 // Background Worker-specific Tokio Runtime
 // This runtime handles all non-network asynchronous tasks, such as file monitoring, database initialization, TUI, etc.
 pub static WORKER_RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
