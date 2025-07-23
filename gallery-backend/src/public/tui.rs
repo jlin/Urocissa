@@ -26,14 +26,13 @@ pub async fn tui_task(
     dashboard: std::sync::Arc<Dashboard>,
     mut rx: UnboundedReceiver<String>,
 ) -> Result<()> {
-    let mut tick = tokio::time::interval(std::time::Duration::from_millis(200));
+    let mut tick = tokio::time::interval(std::time::Duration::from_millis(50));
 
     loop {
         tokio::select! {
             Some(line) = rx.recv() => {
-                // 官方推荐：从 ANSI 文本构建带样式的 Lines
                 let colored = Lines::from_colored_multiline_string(&line);
-                sc.emit(colored);   // 传播可能的错误
+                sc.emit(colored);
             }
             _ = tick.tick() => {
                 sc.render(&*dashboard)?;
