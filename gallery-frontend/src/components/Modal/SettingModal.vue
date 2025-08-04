@@ -35,7 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
+import { watchDebounced } from '@vueuse/core'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useConstStore } from '@/store/constStore'
@@ -44,26 +45,35 @@ const modalStore = useModalStore('mainId')
 const initializedStore = useInitializedStore('mainId')
 const constStore = useConstStore('mainId')
 
-// Computed property to handle v-model with persistence
-const subRowHeightScale = computed({
-  get: () => constStore.subRowHeightScale,
-  set: (value: number) => {
-    constStore.updateSubRowHeightScale(value).catch((error: unknown) => {
+// Local ref for immediate UI updates
+const subRowHeightScale = ref(constStore.subRowHeightScale)
+
+// Watch store changes to sync local ref
+watch(
+  () => constStore.subRowHeightScale,
+  (newValue) => {
+    subRowHeightScale.value = newValue
+  }
+)
+
+watchDebounced(
+  subRowHeightScale,
+  (newValue: number) => {
+    constStore.updateSubRowHeightScale(newValue).catch((error: unknown) => {
       console.error('Failed to update subRowHeightScale:', error)
     })
-  }
-})
+  },
+  { debounce: 50 }
+)
 
 // Function to adjust thumbnail size with icons
 const adjustThumbnailSize = (delta: number) => {
-  const currentValue = constStore.subRowHeightScale
+  const currentValue = subRowHeightScale.value
   const newValue = Math.max(250, Math.min(450, currentValue + delta))
 
   // Only update if the value would actually change
   if (newValue !== currentValue) {
-    constStore.updateSubRowHeightScale(newValue).catch((error: unknown) => {
-      console.error('Failed to update subRowHeightScale:', error)
-    })
+    subRowHeightScale.value = newValue
   }
 }
 </script>
