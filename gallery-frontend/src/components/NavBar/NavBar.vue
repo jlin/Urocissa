@@ -26,24 +26,12 @@
       <v-list-item slim to="/tags" prepend-icon="mdi-tag-multiple" title="Tags"></v-list-item>
       <v-list-item slim to="/links" prepend-icon="mdi-link" title="Links"></v-list-item>
       <v-divider></v-divider>
-      <v-slider
-        v-model="subRowHeightScale"
-        :min="250"
-        :max="450"
-        :step="1"
-        :disabled="!initializedStore.initialized"
-        density="compact"
-        hide-details
-        thumb-size="16"
-        class="my-2"
-      >
-        <template #prepend>
-          <v-icon icon="mdi-minus" size="x-small"></v-icon>
-        </template>
-        <template #append>
-          <v-icon icon="mdi-plus" size="x-small"></v-icon>
-        </template>
-      </v-slider>
+      <v-list-item
+        slim
+        @click="modalStore.showSettingModal = true"
+        prepend-icon="mdi-cog"
+        title="Setting"
+      ></v-list-item>
     </v-list>
   </v-navigation-drawer>
   <EditTagsModal v-if="modalStore.showEditTagsModal" />
@@ -51,6 +39,7 @@
   <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
   <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
   <UploadModal v-if="modalStore.showUploadModal" />
+  <SettingModal v-if="modalStore.showSettingModal" />
 </template>
 
 <script setup lang="ts">
@@ -60,27 +49,16 @@ import AppBar from '@/components/NavBar/AppBar.vue'
 import UploadModal from '@/components/Modal/UploadModal.vue'
 import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
 import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
+import SettingModal from '@/components/Modal/SettingModal.vue'
 import ProgessBar from './ProgessBar.vue'
 import { useRoute } from 'vue-router'
 import { useModalStore } from '@/store/modalStore'
-import { provide, ref, computed } from 'vue'
+import { provide, ref } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
-import { useConstStore } from '@/store/constStore'
 const showDrawer = ref(false)
 const route = useRoute()
 const modalStore = useModalStore('mainId')
 const initializedStore = useInitializedStore('mainId')
-const constStore = useConstStore('mainId')
-
-// Computed property to handle v-model with persistence
-const subRowHeightScale = computed({
-  get: () => constStore.subRowHeightScale,
-  set: (value: number) => {
-    constStore.updateSubRowHeightScale(value).catch((error: unknown) => {
-      console.error('Failed to update subRowHeightScale:', error)
-    })
-  }
-})
 
 provide('showDrawer', showDrawer)
 </script>
