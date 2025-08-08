@@ -59,19 +59,12 @@ impl TryFrom<&str> for FileType {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum TaskState {
     Indexing(Instant),
     Transcoding(Instant),
     Done(f64),
-}
-impl Clone for TaskState {
-    fn clone(&self) -> Self {
-        match self {
-            TaskState::Indexing(t) => TaskState::Indexing(*t),
-            TaskState::Transcoding(t) => TaskState::Transcoding(*t),
-            TaskState::Done(d) => TaskState::Done(*d),
-        }
-    }
+    Failed(f64),
 }
 
 #[derive(Clone)]
@@ -93,11 +86,13 @@ impl TaskRow {
             },
             TaskState::Transcoding(t0) => TaskState::Done(t0.elapsed().as_secs_f64()),
             TaskState::Done(d) => TaskState::Done(d),
+            TaskState::Failed(d) => TaskState::Failed(d),
         };
         if matches!(self.state, TaskState::Transcoding(_)) {
             self.progress = None;
         }
     }
+
     pub fn fmt(&self) -> String {
         const COL_STATUS: usize = 3; // Status column fixed to 3 characters
         const COL_HASH: usize = 5;
@@ -112,6 +107,7 @@ impl TaskRow {
             }
             // Completed
             (TaskState::Done(_), _) => " v ".to_string(),
+            (TaskState::Failed(_), _) => " x ".to_string(),
             // Not started/Indexing
             _ => "   ".to_string(),
         };
@@ -124,7 +120,7 @@ impl TaskRow {
         // Calculate elapsed seconds
         let secs = match self.state {
             TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0.elapsed().as_secs_f64(),
-            TaskState::Done(d) => d,
+            TaskState::Done(d) | TaskState::Failed(d) => d,
         };
         let suffix = format!(" │ {:>6.1}s", secs);
 
@@ -149,6 +145,7 @@ impl TaskRow {
 
         format!("{status_col} │ {hash_col} │ {short_path}{pad}{suffix}")
     }
+
     // Truncate string to fit within max width by adding ellipsis at the front if needed
     fn tail_ellipsis(s: &str, max: usize) -> String {
         if UnicodeWidthStr::width(s) <= max {
@@ -219,6 +216,7 @@ impl Dashboard {
             });
     }
 
+    /// Success: advance state; if it reaches Done, remove from `running`, put into `completed`, and update statistics
     pub fn advance_task_state(&self, hash: &ArrayString<64>) {
         if let Some(mut view) = self.tasks.get_mut(hash) {
             view.advance_state();
@@ -231,16 +229,34 @@ impl Dashboard {
         }
     }
 
+    /// Failure: mark the current row as Failed(elapsed) and move to `completed`
+    /// (does not update `handled` / `total_duration`)
+    pub fn mark_failed(&self, hash: &ArrayString<64>) {
+        if let Some(mut view) = self.tasks.get_mut(hash) {
+            let elapsed = match view.state {
+                TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0.elapsed().as_secs_f64(),
+                TaskState::Done(d) | TaskState::Failed(d) => d,
+            };
+            view.state = TaskState::Failed(elapsed);
+            let row_failed = view.clone();
+            drop(view);
+            self.tasks.remove(hash);
+            self.push_to_completed(row_failed);
+        }
+    }
+
+    /// Push into the ring buffer `completed`; if full, pop the oldest first
+    fn push_to_completed(&self, row: TaskRow) {
+        if let Err(r) = self.completed.push(row) {
+            let _ = self.completed.pop();
+            let _ = self.completed.push(r);
+        }
+    }
+
+    /// Move to `completed` and update statistics
     fn move_to_completed(&self, row: TaskRow, duration: f64) {
         self.total_duration.fetch_add(duration, Ordering::Relaxed);
-
-        match self.completed.push(row) {
-            Ok(()) => {}
-            Err(r) => {
-                let _ = self.completed.pop();
-                let _ = self.completed.push(r);
-            }
-        }
+        self.push_to_completed(row);
         self.handled.fetch_add(1, Ordering::Relaxed);
     }
 
@@ -318,7 +334,7 @@ impl Component for Dashboard {
             let mut slice = running;
             slice.sort_by_key(|r| match r.state {
                 TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0,
-                TaskState::Done(_) => Instant::now(),
+                TaskState::Done(_) | TaskState::Failed(_) => Instant::now(),
             });
             for t in slice.into_iter().rev().take(max).rev() {
                 lines.push(vec![t.fmt()].try_into()?);

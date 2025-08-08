@@ -18,6 +18,7 @@ use crate::{
     tasks::batcher::flush_tree::FlushTreeTask,
 };
 use mini_executor::Task;
+
 pub struct IndexTask {
     pub database: Database,
 }
@@ -35,13 +36,30 @@ impl Task for IndexTask {
         async move {
             let _pending_guard = PendingGuard::new();
             WORKER_RAYON_POOL
-                .spawn_async(move || index_task(self.database))
+                .spawn_async(move || index_task_match(self.database))
                 .await
                 .map_err(|err| handle_error(err.context("Failed to run index task")))
         }
     }
 }
 
+/// Outer layer: unify business result matching and update TUI  
+/// (success -> advance, failure -> mark_failed)
+fn index_task_match(database: Database) -> Result<Database> {
+    let hash = database.hash; // hash is Copy, no need to clone
+    match index_task(database) {
+        Ok(db) => {
+            DASHBOARD.advance_task_state(&hash);
+            Ok(db)
+        }
+        Err(e) => {
+            DASHBOARD.mark_failed(&hash);
+            Err(e)
+        }
+    }
+}
+
+/// Inner layer: only responsible for business logic, no TUI state updates
 fn index_task(mut database: Database) -> Result<Database> {
     let hash = database.hash;
     let newest_path = database
@@ -76,10 +94,7 @@ fn index_task(mut database: Database) -> Result<Database> {
     }
 
     let abstract_data = AbstractData::Database(database.clone());
-
     BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![abstract_data]));
-
-    DASHBOARD.advance_task_state(&hash);
 
     Ok(database)
 }
