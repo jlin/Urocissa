@@ -30,14 +30,14 @@ const waitForMetadata = (index: number, timeout = 5000, interval = 100): Promise
     const startTime = Date.now()
 
     const checkMetadata = () => {
-      const metadata = dataStore.data.get(index)
+      const abstractData = dataStore.data.get(index)
 
-      if (metadata) {
+      if (abstractData) {
         console.log(`index ${index} waiting done`)
-        resolve(metadata)
+        resolve(abstractData)
       } else if (Date.now() - startTime > timeout) {
         console.error(`index ${index} waiting timeout`)
-        reject(new Error(`Timeout waiting for metadata at index ${index}`))
+        reject(new Error(`Timeout waiting for abstractData at index ${index}`))
       } else {
         setTimeout(checkMetadata, interval)
       }
@@ -57,25 +57,25 @@ const downloadAllFiles = async () => {
     for (let i = 0; i < indexArray.length; i += concurrencyLimit) {
       const batchIndex = indexArray.slice(i, i + concurrencyLimit)
       const downloadPromises = batchIndex.map(async (index) => {
-        let metadata = dataStore.data.get(index)
-        if (!metadata) {
+        let abstractData = dataStore.data.get(index)
+        if (!abstractData) {
           // Initiate data fetch
           await fetchDataInWorker('single', index, isolationId)
 
-          // Wait for metadata to be available
-          metadata = await tryWithMessageStore(isolationId, async () => {
+          // Wait for abstractData to be available
+          abstractData = await tryWithMessageStore(isolationId, async () => {
             return await waitForMetadata(index)
           })
-          
-          if (!metadata) {
-            return // Skip this index if metadata isn't available
+
+          if (!abstractData) {
+            return // Skip this index if abstractData isn't available
           }
         }
 
-        if (metadata.database) {
-          const hash = metadata.database.hash
+        if (abstractData.database) {
+          const hash = abstractData.database.hash
 
-          const url = getSrcOriginal(hash, true, metadata.database.ext)
+          const url = getSrcOriginal(hash, true, abstractData.database.ext)
           await tokenStore.tryRefreshAndStoreTokenToDb(hash)
           const hashToken = tokenStore.hashTokenMap.get(hash)
           if (hashToken === undefined) {
@@ -91,13 +91,13 @@ const downloadAllFiles = async () => {
               }
             })
 
-            if (metadata.database) {
-              const fileName = `${hash}.${metadata.database.ext}`
+            if (abstractData.database) {
+              const fileName = `${hash}.${abstractData.database.ext}`
               saveAs(response.data, fileName)
             }
             return true
           })
-          
+
           if (downloadResult === undefined) {
             console.error(`Failed to download file for index ${index}`)
           }
