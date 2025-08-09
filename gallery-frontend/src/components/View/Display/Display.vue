@@ -3,7 +3,7 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    :class="{ 'show-info': infoStore.showInfo, 'not-show-info': !infoStore.showInfo }"
+  :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
@@ -52,7 +52,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import { VCol } from 'vuetify/components'
 import ViewBar from '@/components/NavBar/ViewBar.vue'
-import { useInfoStore } from '@/store/infoStore'
+import { useConstStore } from '@/store/constStore'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useImgStore } from '@/store/imgStore'
@@ -89,7 +89,7 @@ const imgStore = useImgStore(props.isolationId)
 const initializedStore = useInitializedStore(props.isolationId)
 const tokenStore = useTokenStore(props.isolationId)
 const modalStore = useModalStore('mainId')
-const infoStore = useInfoStore('mainId')
+const constStore = useConstStore('mainId')
 const shareStore = useShareStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()

@@ -14,7 +14,7 @@
         }"
       >
         <!-- Icon button with increased size -->
-        <v-btn icon @click="toggleInfo">
+  <v-btn icon @click="toggleInfo">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title class="text-h5">Info</v-toolbar-title>
@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { useInfoStore } from '@/store/infoStore'
+import { useConstStore } from '@/store/constStore'
 
 import { AbstractData, IsolationId } from '@type/types'
 
@@ -92,11 +92,11 @@ const props = defineProps<{
 const showMetadata = computed(() => {
   return route.meta.baseName !== 'share' || shareStore.resolvedShare?.share.showMetadata
 })
-const infoStore = useInfoStore('mainId')
+const constStore = useConstStore('mainId')
 const shareStore = useShareStore('mainId')
 
 function toggleInfo() {
-  infoStore.showInfo = !infoStore.showInfo
+  void constStore.updateShowInfo(!constStore.showInfo)
 }
 
 watch(

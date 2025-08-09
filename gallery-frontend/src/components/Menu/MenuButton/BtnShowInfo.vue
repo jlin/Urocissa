@@ -1,8 +1,13 @@
 <template>
-  <v-btn icon="mdi-information-outline" @click="infoStore.showInfo = !infoStore.showInfo"></v-btn>
+  <v-btn icon="mdi-information-outline" @click="toggle"></v-btn>
+  
 </template>
 <script setup lang="ts">
-import { useInfoStore } from '@/store/infoStore'
+import { useConstStore } from '@/store/constStore'
 
-const infoStore = useInfoStore('mainId')
+const constStore = useConstStore('mainId')
+
+async function toggle() {
+  await constStore.updateShowInfo(!constStore.showInfo)
+}
 </script>

@@ -99,3 +99,77 @@ export async function deleteSubRowHeightScale(): Promise<void> {
     }
   })
 }
+
+export async function storeShowInfo(value: boolean): Promise<void> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for storing showInfo')
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.put(value, 'showInfo')
+
+    request.onsuccess = () => {
+      resolve()
+    }
+
+    request.onerror = () => {
+      console.error('Error storing showInfo')
+      resolve()
+    }
+  })
+}
+
+export async function getShowInfo(): Promise<boolean | null> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for retrieving showInfo')
+    return null
+  }
+
+  return new Promise<boolean | null>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readonly')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.get('showInfo')
+
+    request.onsuccess = () => {
+      const rawResult: unknown = request.result
+      if (typeof rawResult === 'boolean') {
+        resolve(rawResult)
+      } else {
+        resolve(null)
+      }
+    }
+
+    request.onerror = () => {
+      console.error('Error retrieving showInfo')
+      resolve(null)
+    }
+  })
+}
+
+export async function deleteShowInfo(): Promise<void> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for deleting showInfo')
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.delete('showInfo')
+
+    request.onsuccess = () => {
+      resolve()
+    }
+
+    request.onerror = () => {
+      console.error('Error deleting showInfo')
+      resolve()
+    }
+  })
+}

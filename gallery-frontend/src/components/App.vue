@@ -44,5 +44,6 @@ const routeKey = computed(() => {
 onBeforeMount(async () => {
   // Load the subRowHeightScale from constStore when the app is mounted.
   await constStore.loadSubRowHeightScale()
+  await constStore.loadShowInfo()
 })
 </script>
