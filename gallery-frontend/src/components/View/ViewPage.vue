@@ -1,13 +1,19 @@
 <template>
   <v-overlay
     :model-value="true"
+    @update:model-value="
+      (val) => {
+        if (val === false) {
+          leave(router)
+        }
+      }
+    "
     :height="'100%'"
     :width="'100%'"
     class="d-flex"
     id="view-page"
     transition="false"
     :close-on-back="false"
-    persistent
   >
     <v-container
       v-if="index !== undefined"
@@ -46,18 +52,19 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/View/Display/Display.vue'
 import MetadataCol from '@/components/View/Metadata/ViewPageMetadata.vue'
 import { IsolationId } from '@type/types'
-
+import { leave } from '@/route/navigator'
 const props = defineProps<{
   isolationId: IsolationId
 }>()
 
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
+const router = useRouter()
 
 const hash = computed(() => {
   if (props.isolationId === 'mainId') {

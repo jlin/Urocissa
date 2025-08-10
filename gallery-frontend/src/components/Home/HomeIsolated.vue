@@ -1,13 +1,19 @@
 <template>
   <v-overlay
     :model-value="true"
+    @update:model-value="
+      (val) => {
+        if (val === false) {
+          leave(router)
+        }
+      }
+    "
     :height="'100%'"
     :width="'100%'"
     class="d-flex"
     id="view-page"
     transition="false"
     :close-on-back="false"
-    persistent
   >
     <Home
       v-if="album !== undefined && basicString !== null"
@@ -26,10 +32,11 @@ import Home from './Home.vue'
 import ReadingBar from '@/components/NavBar/ReadingBar.vue'
 import { Album } from '@type/types'
 import { onBeforeMount, Ref, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-
+import { leave } from '@/route/navigator'
 const route = useRoute()
+const router = useRouter()
 const dataStore = useDataStore('mainId')
 const album: Ref<Album | undefined> = ref(undefined)
 const basicString: Ref<string | null> = ref(null)
