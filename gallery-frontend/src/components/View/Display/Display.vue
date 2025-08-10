@@ -3,11 +3,16 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-  :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
+    :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100"
   >
     <v-row no-gutters class="h-100 position-relative">
-      <ViewBar :abstract-data="abstractData" :index="index" :hash="hash" :isolation-id="isolationId" />
+      <ViewBar
+        :abstract-data="abstractData"
+        :index="index"
+        :hash="hash"
+        :isolation-id="isolationId"
+      />
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
         :index="index"
@@ -30,6 +35,7 @@
         class="navigate-left h-100 d-flex align-center justify-center"
         style="position: absolute; left: 0"
         :to="previousPage"
+        replace
       >
         <v-icon>mdi-arrow-left</v-icon>
       </v-card>
@@ -39,6 +45,7 @@
         class="navigate-right h-100 d-flex align-center justify-center"
         style="position: absolute; right: 0"
         :to="nextPage"
+        replace
       >
         <v-icon>mdi-arrow-right</v-icon>
       </v-card>
@@ -285,14 +292,14 @@ const handleKeyDown = (event: KeyboardEvent) => {
     }
     if (event.key === 'ArrowRight' && nextPage.value) {
       router
-        .push(nextPage.value)
+        .replace(nextPage.value)
         .then(() => ({}))
         .catch((error: unknown) => {
           console.error('Navigation Error:', error)
         })
     } else if (event.key === 'ArrowLeft' && previousPage.value) {
       router
-        .push(previousPage.value)
+        .replace(previousPage.value)
         .then(() => ({}))
         .catch((error: unknown) => {
           console.error('Navigation Error:', error)
