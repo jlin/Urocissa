@@ -108,12 +108,10 @@ const stopScroll = ref(false)
 provide('imageContainerRef', imageContainerRef)
 provide('windowWidth', windowWidth)
 provide('windowHeight', windowHeight)
-provide('mobile', mobile)
 
 const throttledHandleScroll = handleScroll(
   imageContainerRef,
   lastScrollTop,
-  mobile,
   stopScroll,
   windowHeight,
   props.isolationId
