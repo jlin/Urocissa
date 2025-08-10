@@ -6,8 +6,7 @@
     :style="{
       backgroundColor: '#212121'
     }"
-  >
-  </v-toolbar>
+  />
   <v-toolbar
     v-if="!collectionStore.editModeOn"
     class="position-relative"

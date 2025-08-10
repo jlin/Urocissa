@@ -1,8 +1,9 @@
 <template>
-  <router-view v-slot="{ Component }">
-    <component :is="Component" />
-  </router-view>
+  <!-- Root is a single v-col so parent v-row receives a valid column child -->
   <v-col class="h-100 d-flex align-center justify-center">
+    <router-view v-slot="{ Component }">
+      <component :is="Component" />
+    </router-view>
     <v-row>
       <v-col
         :class="[

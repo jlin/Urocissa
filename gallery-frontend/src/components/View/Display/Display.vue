@@ -4,15 +4,39 @@
     ref="colRef"
     cols="auto"
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
-    class="h-100"
+    class="h-100 position-relative"
   >
-    <v-row no-gutters class="h-100 position-relative">
-      <ViewBar
-        :abstract-data="abstractData"
-        :index="index"
-        :hash="hash"
-        :isolation-id="isolationId"
-      />
+    <!-- Keep grid row strictly for column children -->
+
+    <!-- Overlay toolbar positioned absolutely within the column scope -->
+    <ViewBar
+      :abstract-data="abstractData"
+      :index="index"
+      :hash="hash"
+      :isolation-id="isolationId"
+    />
+    <!-- Navigation overlays (not grid children) -->
+    <v-card
+      v-if="previousHash !== undefined"
+      color="transparent"
+      class="navigate-left h-100 d-flex align-center justify-center"
+      style="position: absolute; left: 0"
+      :to="previousPage"
+      replace
+    >
+      <v-icon>mdi-arrow-left</v-icon>
+    </v-card>
+    <v-card
+      v-if="nextHash !== undefined"
+      color="transparent"
+      class="navigate-right h-100 d-flex align-center justify-center"
+      style="position: absolute; right: 0"
+      :to="nextPage"
+      replace
+    >
+      <v-icon>mdi-arrow-right</v-icon>
+    </v-card>
+    <v-row no-gutters class="h-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
         :index="index"
@@ -29,26 +53,6 @@
         :col-width="colWidth"
         :col-height="colHeight"
       />
-      <v-card
-        v-if="previousHash !== undefined"
-        color="transparent"
-        class="navigate-left h-100 d-flex align-center justify-center"
-        style="position: absolute; left: 0"
-        :to="previousPage"
-        replace
-      >
-        <v-icon>mdi-arrow-left</v-icon>
-      </v-card>
-      <v-card
-        v-if="nextHash !== undefined"
-        color="transparent"
-        class="navigate-right h-100 d-flex align-center justify-center"
-        style="position: absolute; right: 0"
-        :to="nextPage"
-        replace
-      >
-        <v-icon>mdi-arrow-right</v-icon>
-      </v-card>
     </v-row>
   </v-col>
 </template>
@@ -316,16 +320,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.my-toolbar {
-  z-index: 1;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.5) 0%,
-    rgba(0, 0, 0, 0.25) 50%,
-    rgba(0, 0, 0, 0) 100%
-  );
-}
-
 .show-info {
   width: calc(100% - 360px);
 }

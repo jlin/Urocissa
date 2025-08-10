@@ -7,19 +7,22 @@
     :style="{ backgroundColor: 'white' }"
   >
     <v-row no-gutters class="position-relative">
-      <v-toolbar
-        color="white"
-        :style="{
-          backgroundColor: '#212121'
-        }"
-      >
-        <!-- Icon button with increased size -->
-  <v-btn icon @click="toggleInfo">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title class="text-h5">Info</v-toolbar-title>
-      </v-toolbar>
-      <v-col v-if="abstractData.database" class="h-100 w-100" cols="auto">
+      <!-- Toolbars should not be direct children of v-row; wrap in a column -->
+      <v-col cols="12">
+        <v-toolbar
+          color="white"
+          :style="{
+            backgroundColor: '#212121'
+          }"
+        >
+          <!-- Icon button with increased size -->
+          <v-btn icon @click="toggleInfo">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+          <v-toolbar-title class="text-h5">Info</v-toolbar-title>
+        </v-toolbar>
+      </v-col>
+  <v-col v-if="abstractData.database" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="abstractData.database" />
           <ItemPath v-if="showMetadata" :database="abstractData.database" />

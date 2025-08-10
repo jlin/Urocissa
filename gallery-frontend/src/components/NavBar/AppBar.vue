@@ -6,8 +6,7 @@
     :style="{
       backgroundColor: '#212121'
     }"
-  >
-  </v-toolbar>
+  />
   <InfoBar v-if="!collectionStore.editModeOn" />
   <EditBar v-else />
 </template>

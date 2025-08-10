@@ -44,7 +44,9 @@
       :style="{ backgroundColor: 'black' }"
     >
       <v-row class="fill-height" align="center" justify="center">
-        <v-progress-circular indeterminate color="primary" size="64" />
+        <v-col cols="12" class="d-flex align-center justify-center">
+          <v-progress-circular indeterminate color="primary" size="64" />
+        </v-col>
       </v-row>
     </v-container>
   </v-overlay>
