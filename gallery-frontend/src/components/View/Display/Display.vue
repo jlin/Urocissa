@@ -6,8 +6,6 @@
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100 position-relative"
   >
-    <!-- Keep grid row strictly for column children -->
-
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
       :abstract-data="abstractData"
@@ -20,7 +18,7 @@
       v-if="previousHash !== undefined"
       color="transparent"
       class="navigate-left h-100 d-flex align-center justify-center"
-      style="position: absolute; left: 0"
+      style="position: absolute; left: 0; top: 0; bottom: 0; z-index: 1"
       :to="previousPage"
       replace
     >
@@ -30,7 +28,7 @@
       v-if="nextHash !== undefined"
       color="transparent"
       class="navigate-right h-100 d-flex align-center justify-center"
-      style="position: absolute; right: 0"
+      style="position: absolute; right: 0; top: 0; bottom: 0; z-index: 1"
       :to="nextPage"
       replace
     >

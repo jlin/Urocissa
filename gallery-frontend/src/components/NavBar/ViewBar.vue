@@ -80,7 +80,7 @@ defineProps<{
 </script>
 <style scoped>
 .my-toolbar {
-  z-index: 1;
+  z-index: 2;
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.5) 0%,
