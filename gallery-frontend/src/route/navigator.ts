@@ -9,7 +9,3 @@ export async function navigateToAlbum(albumId: string, router: Router) {
   }
   await router.push({ path: albumPath })
 }
-
-export function leave(router: Router) {
-  router.back()
-}

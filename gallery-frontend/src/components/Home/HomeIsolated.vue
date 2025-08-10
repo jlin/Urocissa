@@ -4,7 +4,7 @@
     @update:model-value="
       (val) => {
         if (val === false) {
-          leave(router)
+          router.back()
         }
       }
     "
@@ -34,7 +34,6 @@ import { Album } from '@type/types'
 import { onBeforeMount, Ref, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-import { leave } from '@/route/navigator'
 const route = useRoute()
 const router = useRouter()
 const dataStore = useDataStore('mainId')

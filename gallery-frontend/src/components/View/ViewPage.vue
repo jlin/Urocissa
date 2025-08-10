@@ -4,7 +4,7 @@
     @update:model-value="
       (val) => {
         if (val === false) {
-          leave(router)
+          router.back()
         }
       }
     "
@@ -57,7 +57,6 @@ import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/View/Display/Display.vue'
 import MetadataCol from '@/components/View/Metadata/ViewPageMetadata.vue'
 import { IsolationId } from '@type/types'
-import { leave } from '@/route/navigator'
 const props = defineProps<{
   isolationId: IsolationId
 }>()
