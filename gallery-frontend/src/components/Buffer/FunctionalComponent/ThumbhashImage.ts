@@ -7,7 +7,6 @@ interface ThumbhashImageProps {
 const ThumbhashImage: FunctionalComponent<ThumbhashImageProps> = (props) => {
   return h(Transition, { name: 'slide-fade', appear: true }, () =>
     h('img', {
-      draggable: false,
       style: {
         position: 'absolute',
         zIndex: 1

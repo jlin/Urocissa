@@ -1,5 +1,9 @@
 <template>
   <v-app
+    @dragstart.prevent
+    @dragover.prevent
+    @drop.prevent
+    @selectstart.prevent
     :style="{
       userSelect:
         scrollbarStore.isDragging || scrollbarStoreInsideAlbum.isDragging ? 'none' : 'auto' // Prevent accidental selection while scrolling.
@@ -49,3 +53,39 @@ onBeforeMount(async () => {
   constStore.isMobile = isMobile()
 })
 </script>
+
+<style>
+/* Disable native dragging on common elements across the app */
+img,
+a,
+svg,
+video,
+canvas {
+  -webkit-user-drag: none;
+}
+
+/* Disable text selection across the app */
+.v-application,
+.v-application * {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -webkit-touch-callout: none; /* iOS long-press menu */
+}
+
+/* Explicitly ensure images and common wrappers are not selectable */
+img,
+video {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+}
+
+/* Allow selection where it makes sense */
+input,
+textarea,
+[contenteditable='true'] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+</style>

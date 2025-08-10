@@ -8,7 +8,6 @@ interface DesktopSmallImageProps {
 
 const DesktopSmallImage: FunctionalComponent<DesktopSmallImageProps> = (props) => {
   return h('img', {
-    draggable: false,
     onClick: props.onClick,
     style: {
       zIndex: 2,

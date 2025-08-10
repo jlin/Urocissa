@@ -10,7 +10,6 @@ interface MobileSmallImageProps {
 
 const MobileSmallImage: FunctionalComponent<MobileSmallImageProps> = (props) => {
   return h('img', {
-    draggable: false,
     // Prevent the default context menu from appearing
     onContextmenu: (event: Event) => {
       event.preventDefault()
