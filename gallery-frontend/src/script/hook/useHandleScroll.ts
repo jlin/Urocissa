@@ -4,6 +4,7 @@ import { usePrefetchStore } from '@/store/prefetchStore'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { throttle } from 'lodash'
 import { Ref } from 'vue'
+import { useConstStore } from '@/store/constStore'
 
 /**
  * Throttled scroll handler for an image container that adjusts `scrollTop`, which is used to manage controlled scrolling.
@@ -22,7 +23,6 @@ import { Ref } from 'vue'
 export function handleScroll(
   imageContainerRef: Ref<HTMLElement | null>,
   lastScrollTop: Ref<number>,
-  mobile: boolean,
   stopScroll: Ref<boolean>,
   windowHeight: Ref<number>,
   isolationId: IsolationId
@@ -32,6 +32,7 @@ export function handleScroll(
       if (imageContainerRef.value !== null) {
         const scrollTopStore = useScrollTopStore(isolationId)
         const prefetchStore = usePrefetchStore(isolationId)
+        const mobile = useConstStore('mainId').isMobile
 
         const difference = imageContainerRef.value.scrollTop - lastScrollTop.value
 

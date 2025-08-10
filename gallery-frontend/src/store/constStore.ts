@@ -13,10 +13,12 @@ export const useConstStore = (isolationId: IsolationId) =>
       disableImg: boolean
       subRowHeightScale: number
       showInfo: boolean
+      isMobile: boolean
     } => ({
       disableImg: false,
       subRowHeightScale: 250,
-      showInfo: false
+      showInfo: false,
+      isMobile: false
     }),
     actions: {
       async updateSubRowHeightScale(value: number): Promise<void> {

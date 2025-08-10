@@ -19,7 +19,7 @@
     <!-- Navigation overlays (not grid children) -->
     <v-card
       width="100"
-      v-if="!isMobileDevice && previousHash !== undefined"
+      v-if="!constStore.isMobile && previousHash !== undefined"
       color="transparent"
       class="navigate-left d-flex align-center justify-center h-50"
       style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -30,7 +30,7 @@
     </v-card>
     <v-card
       width="100"
-      v-if="!isMobileDevice && nextHash !== undefined"
+      v-if="!constStore.isMobile && nextHash !== undefined"
       color="transparent"
       class="navigate-right d-flex align-center justify-center h-50"
       style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -84,7 +84,6 @@ import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
-import isMobile from 'is-mobile'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -109,11 +108,6 @@ const shareStore = useShareStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
-
-// Simple test switch: default uses isMobile; set to true to force mobile behavior
-const forceMobile = ref(false)
-const isMobileDevice = computed<boolean>(() => forceMobile.value || isMobile())
-
 const nextHash = computed(() => {
   const nextData = dataStore.data.get(props.index + 1)
   if (nextData?.database) {
@@ -335,7 +329,7 @@ const SWIPE_VERTICAL_TOLERANCE = 40 // px to avoid vertical scroll triggering
 
 function canHandleNav(): boolean {
   return (
-    isMobileDevice.value &&
+    constStore.isMobile &&
     ((!route.meta.isReadPage && props.isolationId === 'mainId') ||
       (route.meta.isReadPage && props.isolationId === 'subId')) &&
     !modalStore.showEditTagsModal
@@ -343,7 +337,7 @@ function canHandleNav(): boolean {
 }
 
 function onTouchStart(e: TouchEvent) {
-  if (!isMobileDevice.value) return
+  if (!constStore.isMobile) return
   if (!canHandleNav()) return
   if (e.changedTouches.length === 0) return
   const t = e.changedTouches[0]

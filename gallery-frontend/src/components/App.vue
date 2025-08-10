@@ -6,7 +6,7 @@
     }"
   >
     <v-main class="h-screen">
-      <DropZoneModal v-if="!isMobile()" />
+      <DropZoneModal v-if="!constStore.isMobile" />
       <router-view v-slot="{ Component }" :key="routeKey">
         <component :is="Component" />
       </router-view> </v-main
@@ -21,8 +21,8 @@ import { useScrollbarStore } from '@/store/scrollbarStore'
 import { useRerenderStore } from '@/store/rerenderStore'
 import { useMessageStore } from '@/store/messageStore'
 import DropZoneModal from './Modal/DropZoneModal.vue'
-import isMobile from 'is-mobile'
 import { useConstStore } from '@/store/constStore'
+import isMobile from 'is-mobile'
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 const rerenderStore = useRerenderStore('mainId')
@@ -41,9 +41,11 @@ const routeKey = computed(() => {
   const homeKey = rerenderStore.homeKey.toString()
   return `${currentPage}-${search}-${locate}-${priorityId}-${reverse}-${homeKey}`
 })
+
 onBeforeMount(async () => {
   // Load the subRowHeightScale from constStore when the app is mounted.
   await constStore.loadSubRowHeightScale()
   await constStore.loadShowInfo()
+  constStore.isMobile = isMobile()
 })
 </script>

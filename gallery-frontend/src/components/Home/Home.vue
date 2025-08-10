@@ -55,7 +55,6 @@ import { usePrefetch } from '@/script/hook/usePrefetch'
 import { handleScroll } from '@/script/hook/useHandleScroll'
 import { useInitializeScrollPosition } from '@/script/hook/useInitializeScrollPosition'
 import { useImgStore } from '@/store/imgStore'
-import isMobile from 'is-mobile'
 import Buffer from '@/components/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/HomeScrollBar.vue'
 import '@/style/HomePage.css'
@@ -97,7 +96,7 @@ const albumStore = useAlbumStore(props.isolationId)
 const rerenderStore = useRerenderStore('mainId')
 const tagStore = useTagStore('mainId')
 const constStore = useConstStore('mainId')
-const mobile = isMobile()
+
 const route = useRoute()
 const imageContainerRef = ref<HTMLElement | null>(null)
 const { width: windowWidth, height: windowHeight } = useElementSize(imageContainerRef)
