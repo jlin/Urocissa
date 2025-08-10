@@ -8,7 +8,7 @@
       width: `${database.width}px`,
       height: `${database.height}px`,
       maxWidth: '100%',
-      maxHeight: '100%'
+      maxHeight: '100%',
     }"
     inline
     ref="videoRef"

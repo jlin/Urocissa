@@ -15,20 +15,22 @@
     />
     <!-- Navigation overlays (not grid children) -->
     <v-card
+      width="100"
       v-if="previousHash !== undefined"
       color="transparent"
-      class="navigate-left h-100 d-flex align-center justify-center"
-      style="position: absolute; left: 0; top: 0; bottom: 0; z-index: 1"
+      class="navigate-left d-flex align-center justify-center h-50"
+      style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
       :to="previousPage"
       replace
     >
       <v-icon>mdi-arrow-left</v-icon>
     </v-card>
     <v-card
+      width="100"
       v-if="nextHash !== undefined"
       color="transparent"
-      class="navigate-right h-100 d-flex align-center justify-center"
-      style="position: absolute; right: 0; top: 0; bottom: 0; z-index: 1"
+      class="navigate-right d-flex align-center justify-center h-50"
+      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
       :to="nextPage"
       replace
     >
