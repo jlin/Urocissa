@@ -5,6 +5,9 @@
     cols="auto"
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100 position-relative"
+    @touchstart.passive="onTouchStart"
+    @touchmove.passive="onTouchMove"
+    @touchend.passive="onTouchEnd"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
@@ -16,7 +19,7 @@
     <!-- Navigation overlays (not grid children) -->
     <v-card
       width="100"
-      v-if="previousHash !== undefined"
+      v-if="!isMobileDevice && previousHash !== undefined"
       color="transparent"
       class="navigate-left d-flex align-center justify-center h-50"
       style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -27,7 +30,7 @@
     </v-card>
     <v-card
       width="100"
-      v-if="nextHash !== undefined"
+      v-if="!isMobileDevice && nextHash !== undefined"
       color="transparent"
       class="navigate-right d-flex align-center justify-center h-50"
       style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -81,6 +84,7 @@ import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
+import isMobile from 'is-mobile'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
@@ -105,6 +109,10 @@ const shareStore = useShareStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
+
+// Simple test switch: default uses isMobile; set to true to force mobile behavior
+const forceMobile = ref(false)
+const isMobileDevice = computed<boolean>(() => forceMobile.value || isMobile())
 
 const nextHash = computed(() => {
   const nextData = dataStore.data.get(props.index + 1)
@@ -317,6 +325,68 @@ window.addEventListener('keydown', handleKeyDown)
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
+
+// Swipe/drag navigation for mobile
+let touchStartX = 0
+let touchStartY = 0
+let touchActive = false
+const SWIPE_HORIZONTAL_THRESHOLD = 50 // px
+const SWIPE_VERTICAL_TOLERANCE = 40 // px to avoid vertical scroll triggering
+
+function canHandleNav(): boolean {
+  return (
+    isMobileDevice.value &&
+    ((!route.meta.isReadPage && props.isolationId === 'mainId') ||
+      (route.meta.isReadPage && props.isolationId === 'subId')) &&
+    !modalStore.showEditTagsModal
+  )
+}
+
+function onTouchStart(e: TouchEvent) {
+  if (!isMobileDevice.value) return
+  if (!canHandleNav()) return
+  if (e.changedTouches.length === 0) return
+  const t = e.changedTouches[0]
+  if (!t) return
+  touchStartX = t.clientX
+  touchStartY = t.clientY
+  touchActive = true
+}
+
+function onTouchMove() {
+  // Intentionally passive; we don't block scrolling
+}
+
+function onTouchEnd(e: TouchEvent) {
+  if (!touchActive) return
+  touchActive = false
+  if (!canHandleNav()) return
+  if (e.changedTouches.length === 0) return
+  const t = e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - touchStartX
+  const dy = t.clientY - touchStartY
+
+  if (Math.abs(dx) >= SWIPE_HORIZONTAL_THRESHOLD && Math.abs(dy) <= SWIPE_VERTICAL_TOLERANCE) {
+    if (dx < 0 && nextPage.value) {
+      // swipe left -> next
+      router
+        .replace(nextPage.value)
+        .then(() => ({}))
+        .catch((error: unknown) => {
+          console.error('Navigation Error:', error)
+        })
+    } else if (dx > 0 && previousPage.value) {
+      // swipe right -> previous
+      router
+        .replace(previousPage.value)
+        .then(() => ({}))
+        .catch((error: unknown) => {
+          console.error('Navigation Error:', error)
+        })
+    }
+  }
+}
 </script>
 
 <style scoped>
