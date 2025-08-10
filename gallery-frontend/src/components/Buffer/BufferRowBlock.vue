@@ -65,11 +65,12 @@ import { useHandleClick } from '@/script/hook/useHandleClick'
 import { useRouter, useRoute } from 'vue-router'
 import { useQueueStore } from '@/store/queueStore'
 import { useWorkerStore } from '@/store/workerStore'
-import { getArrayValue, getInjectValue } from '@utils/getter'
+import { getArrayValue } from '@utils/getter'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import MainBlock from './FunctionalComponent/MainBlock'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
+import { useConstStore } from '@/store/constStore'
 const props = defineProps<{
   row: Row
   isolationId: IsolationId
@@ -77,18 +78,19 @@ const props = defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const mobile = getInjectValue<boolean>('mobile')
+const constStore = useConstStore('mainId')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const workerStore = useWorkerStore(props.isolationId)
 const scorllTopStore = useScrollTopStore(props.isolationId)
 const timeInterval = ref(0)
-
 const isLongPress = ref(false)
 const pressTimer = ref<number | null>(null) // 定時器 ID
 const scrollingTimer = ref<number | null>(null)
 const isScrolling = ref(false)
+
+const mobile = constStore.isMobile
 
 // Prevent accidental touches while scrolling
 watch(
