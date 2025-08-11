@@ -58,7 +58,11 @@ pub async fn index_for_watch(
     };
 
     let database_opt = INDEX_COORDINATOR
-        .execute_waiting(DeduplicateTask::new(path.clone(), hash))
+        .execute_waiting(DeduplicateTask::new(
+            path.clone(),
+            hash,
+            presigned_album_id_opt,
+        ))
         .await??;
 
     // If the file is already in the database, we can skip further processing.
@@ -69,10 +73,6 @@ pub async fn index_for_watch(
             return Ok(());
         }
     };
-
-    if let Some(album_id) = presigned_album_id_opt {
-        database.album.insert(album_id);
-    }
 
     database = INDEX_COORDINATOR
         .execute_waiting(CopyTask::new(database))
