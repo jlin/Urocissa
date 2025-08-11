@@ -135,7 +135,7 @@ void router.isReady().then(async () => {
   const meta = to.meta
 
   // Only act on initial load for nested pages (read/view)
-  const isNested = meta.level > 1
+  const isNested = meta.level !== undefined && meta.level > 1
   if (isNested) {
     const routeName = typeof to.name === 'string' ? to.name : undefined
     const baseName = typeof meta.baseName === 'string' ? meta.baseName : undefined

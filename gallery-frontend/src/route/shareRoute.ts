@@ -13,10 +13,9 @@ export const shareRoute: RouteRecordRaw = {
   component: HomeShare,
   name: 'share',
   meta: {
-    isReadPage: false,
-    isViewPage: false,
     basicString: null,
     baseName: 'share',
+    level: 1,
     getParentPage: (route) => {
       return {
         name: 'share',
@@ -38,8 +37,7 @@ export const shareRoute: RouteRecordRaw = {
       component: ViewPageMain,
       name: `shareViewPage`,
       meta: {
-        isReadPage: false,
-        isViewPage: true,
+        level: 2,
         baseName: 'share',
         getParentPage: (route, albumId, shareId) => {
           console.log('123')

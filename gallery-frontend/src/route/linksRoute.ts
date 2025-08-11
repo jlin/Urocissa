@@ -10,8 +10,6 @@ export const linksRoute: RouteRecordRaw = {
   component: LinksPage,
   name: 'links',
   meta: {
-    isReadPage: false,
-    isViewPage: false,
     basicString: null,
     baseName: 'links',
     getParentPage: (route) => {

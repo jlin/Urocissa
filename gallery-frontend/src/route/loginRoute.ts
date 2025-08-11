@@ -10,8 +10,6 @@ export const loginRoute: RouteRecordRaw = {
   component: LoginPage,
   name: 'login',
   meta: {
-    isReadPage: false,
-    isViewPage: false,
     basicString: null,
     baseName: 'login',
     getParentPage: (route) => {
