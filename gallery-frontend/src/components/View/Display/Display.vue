@@ -3,11 +3,9 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
+    v-touch="touchHandlers"
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100 position-relative"
-    @touchstart.passive="onTouchStart"
-    @touchmove.passive="onTouchMove"
-    @touchend.passive="onTouchEnd"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
@@ -16,6 +14,7 @@
       :hash="hash"
       :isolation-id="isolationId"
     />
+
     <!-- Navigation overlays (not grid children) -->
     <v-card
       width="100"
@@ -39,6 +38,7 @@
     >
       <v-icon>mdi-arrow-right</v-icon>
     </v-card>
+
     <v-row no-gutters class="h-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
@@ -108,61 +108,46 @@ const shareStore = useShareStore('mainId')
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
+
 const nextHash = computed(() => {
   const nextData = dataStore.data.get(props.index + 1)
-  if (nextData?.database) {
-    return nextData.database.hash
-  } else if (nextData?.album) {
-    return nextData.album.id
-  } else {
-    return undefined
-  }
+  if (nextData?.database) return nextData.database.hash
+  if (nextData?.album) return nextData.album.id
+  return undefined
 })
 
 const previousHash = computed(() => {
   const previousData = dataStore.data.get(props.index - 1)
-  if (previousData?.database) {
-    return previousData.database.hash
-  } else if (previousData?.album) {
-    return previousData.album.id
-  } else {
-    return undefined
-  }
+  if (previousData?.database) return previousData.database.hash
+  if (previousData?.album) return previousData.album.id
+  return undefined
 })
 
 const nextPage = computed(() => {
-  if (nextHash.value === undefined) {
-    return undefined
-  }
+  if (nextHash.value === undefined) return undefined
   if (route.meta.level === 2) {
     const updatedParams = { ...route.params, hash: nextHash.value }
     return { ...route, params: updatedParams }
   } else if (route.meta.level === 4) {
     const updatedParams = { ...route.params, subhash: nextHash.value }
     return { ...route, params: updatedParams }
-  } else {
-    return undefined
   }
+  return undefined
 })
 
 const previousPage = computed(() => {
-  if (previousHash.value === undefined) {
-    return undefined
-  }
+  if (previousHash.value === undefined) return undefined
   if (route.meta.level === 2) {
     const updatedParams = { ...route.params, hash: previousHash.value }
     return { ...route, params: updatedParams }
   } else if (route.meta.level === 4) {
     const updatedParams = { ...route.params, subhash: previousHash.value }
     return { ...route, params: updatedParams }
-  } else {
-    return undefined
   }
+  return undefined
 })
 
-const workerIndex = computed(() => {
-  return props.index % workerStore.concurrencyNumber
-})
+const workerIndex = computed(() => props.index % workerStore.concurrencyNumber)
 
 const postToWorker = bindActionDispatch(toImgWorker, (action) => {
   const worker = workerStore.imgWorker[workerIndex.value]
@@ -174,33 +159,17 @@ const postToWorker = bindActionDispatch(toImgWorker, (action) => {
 })
 
 async function checkAndFetch(index: number): Promise<boolean> {
-  // If the image is already fetched, return true
-  if (imgStore.imgOriginal.has(index)) {
-    return true
-  }
+  if (imgStore.imgOriginal.has(index)) return true
+  if (queueStore.original.has(index)) return false
 
-  // If the image is already in the queue, fetching is not done
-  if (queueStore.original.has(index)) {
-    return false
-  }
-
-  // Retrieve the abstract data for the given index
   const abstractData = dataStore.data.get(index)
-  if (!abstractData) {
-    return false
-  }
+  if (!abstractData) return false
 
-  // Add the index to the fetch queue
   queueStore.original.add(index)
 
-  // Determine the hash from database or album cover
   const hash = abstractData.database?.hash ?? abstractData.album?.cover
+  if (hash == null) return false
 
-  if (hash == null) {
-    return false
-  }
-
-  // Refresh tokens before using them
   await tokenStore.refreshTimestampTokenIfExpired()
   await tokenStore.refreshHashTokenIfExpired(hash)
 
@@ -216,7 +185,6 @@ async function checkAndFetch(index: number): Promise<boolean> {
     return false
   }
 
-  // If a valid hash exists, initiate the image processing
   postToWorker.processImage({
     index,
     hash,
@@ -227,45 +195,27 @@ async function checkAndFetch(index: number): Promise<boolean> {
     hashToken
   })
 
-  // Fetching has been initiated but not completed
   return false
 }
 
 async function prefetch(index: number, isolationId: IsolationId) {
-  if (configStore.disableImg) {
-    return
-  }
+  if (configStore.disableImg) return
+
   for (let i = 1; i <= 10; i++) {
     const nextIndex = index + i
     const nextAbstractData = dataStore.data.get(nextIndex)
     if (nextAbstractData) {
-      if (nextAbstractData.database && nextAbstractData.database.ext_type === 'image') {
-        await checkAndFetch(nextIndex)
-      } else {
-        // is album
-        await checkAndFetch(nextIndex)
-      }
-    } else {
-      // dataStore.data.get(nextIndex) is undefined then fetch that data
-      if (nextIndex <= prefetchStore.dataLength - 1) {
-        await fetchDataInWorker('single', nextIndex, isolationId)
-      }
+      await checkAndFetch(nextIndex)
+    } else if (nextIndex <= prefetchStore.dataLength - 1) {
+      await fetchDataInWorker('single', nextIndex, isolationId)
     }
 
     const previousIndex = index - i
     const previousAbstractData = dataStore.data.get(previousIndex)
     if (previousAbstractData) {
-      if (previousAbstractData.database && previousAbstractData.database.ext_type === 'image') {
-        await checkAndFetch(previousIndex)
-      } else {
-        // is album
-        await checkAndFetch(previousIndex)
-      }
-    } else {
-      // dataStore.data.get(previousIndex) is undefined then fetch that data
-      if (previousIndex >= 0) {
-        await fetchDataInWorker('single', previousIndex, isolationId)
-      }
+      await checkAndFetch(previousIndex)
+    } else if (previousIndex >= 0) {
+      await fetchDataInWorker('single', previousIndex, isolationId)
     }
 
     await delay(100)
@@ -276,11 +226,8 @@ watch(
   [() => props.index, () => initializedStore.initialized],
   async () => {
     if (initializedStore.initialized) {
-      if (configStore.disableImg) {
-        return
-      }
+      if (configStore.disableImg) return
       await checkAndFetch(props.index)
-      // Prefetch next and previous 10 hashes if they exist
       await prefetch(props.index, props.isolationId)
     }
   },
@@ -291,25 +238,16 @@ const handleKeyDown = (event: KeyboardEvent) => {
   if (
     (route.meta.level === 2 && props.isolationId === 'mainId') ||
     (route.meta.level === 4 && props.isolationId === 'subId')
-    // prevent two ViewPageDisplay triggered simultaneously
   ) {
-    if (modalStore.showEditTagsModal) {
-      return
-    }
+    if (modalStore.showEditTagsModal) return
     if (event.key === 'ArrowRight' && nextPage.value) {
-      router
-        .replace(nextPage.value)
-        .then(() => ({}))
-        .catch((error: unknown) => {
-          console.error('Navigation Error:', error)
-        })
+      router.replace(nextPage.value).catch((error: unknown) => {
+        console.error('Navigation Error:', error)
+      })
     } else if (event.key === 'ArrowLeft' && previousPage.value) {
-      router
-        .replace(previousPage.value)
-        .then(() => ({}))
-        .catch((error: unknown) => {
-          console.error('Navigation Error:', error)
-        })
+      router.replace(previousPage.value).catch((error: unknown) => {
+        console.error('Navigation Error:', error)
+      })
     }
   }
 }
@@ -320,13 +258,10 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
 
-// Swipe/drag navigation for mobile
-let touchStartX = 0
-let touchStartY = 0
-let touchActive = false
-const SWIPE_HORIZONTAL_THRESHOLD = 50 // px
-const SWIPE_VERTICAL_TOLERANCE = 40 // px to avoid vertical scroll triggering
-
+/** -------------------------
+ *  Swipe navigation via v-touch
+ *  -------------------------
+ */
 function canHandleNav(): boolean {
   return (
     constStore.isMobile &&
@@ -336,50 +271,28 @@ function canHandleNav(): boolean {
   )
 }
 
-function onTouchStart(e: TouchEvent) {
-  if (!constStore.isMobile) return
+function onSwipeLeft() {
   if (!canHandleNav()) return
-  if (e.changedTouches.length === 0) return
-  const t = e.changedTouches[0]
-  if (!t) return
-  touchStartX = t.clientX
-  touchStartY = t.clientY
-  touchActive = true
-}
-
-function onTouchMove() {
-  // Intentionally passive; we don't block scrolling
-}
-
-function onTouchEnd(e: TouchEvent) {
-  if (!touchActive) return
-  touchActive = false
-  if (!canHandleNav()) return
-  if (e.changedTouches.length === 0) return
-  const t = e.changedTouches[0]
-  if (!t) return
-  const dx = t.clientX - touchStartX
-  const dy = t.clientY - touchStartY
-
-  if (Math.abs(dx) >= SWIPE_HORIZONTAL_THRESHOLD && Math.abs(dy) <= SWIPE_VERTICAL_TOLERANCE) {
-    if (dx < 0 && nextPage.value) {
-      // swipe left -> next
-      router
-        .replace(nextPage.value)
-        .then(() => ({}))
-        .catch((error: unknown) => {
-          console.error('Navigation Error:', error)
-        })
-    } else if (dx > 0 && previousPage.value) {
-      // swipe right -> previous
-      router
-        .replace(previousPage.value)
-        .then(() => ({}))
-        .catch((error: unknown) => {
-          console.error('Navigation Error:', error)
-        })
-    }
+  if (nextPage.value) {
+    router.replace(nextPage.value).catch((error: unknown) => {
+      console.error('Navigation Error:', error)
+    })
   }
+}
+
+function onSwipeRight() {
+  if (!canHandleNav()) return
+  if (previousPage.value) {
+    router.replace(previousPage.value).catch((error: unknown) => {
+      console.error('Navigation Error:', error)
+    })
+  }
+}
+
+// 綁定到 v-touch 的處理器物件
+const touchHandlers = {
+  left: onSwipeLeft,
+  right: onSwipeRight
 }
 </script>
 
