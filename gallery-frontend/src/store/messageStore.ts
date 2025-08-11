@@ -7,17 +7,17 @@ export const useMessageStore = (isolationId: IsolationId) =>
       queue: []
     }),
     actions: {
-      push(text: string, color: MessageColor) {
+      _push(text: string, color: MessageColor) {
         this.queue.push({ text, color })
       },
       error(text: string) {
-        this.push(text, 'error')
+        this._push(text, 'error')
       },
       success(text: string) {
-        this.push(text, 'success')
+        this._push(text, 'success')
       },
       info(text: string) {
-        this.push(text, 'info')
+        this._push(text, 'info')
       }
     }
   })()

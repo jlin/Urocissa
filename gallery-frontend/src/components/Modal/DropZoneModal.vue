@@ -43,6 +43,7 @@ SOFTWARE.
   </div>
 </template>
 <script setup lang="ts">
+import { useMessageStore } from '@/store/messageStore'
 import { useShareStore } from '@/store/shareStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { onMounted, onUnmounted, computed, ref } from 'vue'
@@ -50,6 +51,7 @@ import { useRoute } from 'vue-router'
 
 const uploadStore = useUploadStore('mainId')
 const shareStore = useShareStore('mainId')
+const messageStore = useMessageStore('mainId')
 const visible = ref(false)
 const lastTarget = ref<EventTarget | null>(null)
 const route = useRoute()
@@ -107,6 +109,11 @@ function onDrop(e: DragEvent) {
   // 4. Determine presignedAlbumId (guaranteed to be string | undefined)
   let presignedAlbumId: string | undefined
   if (isSharedAlbum) {
+    const sresolveShareAllowUpload = shareStore.resolvedShare?.share.showUpload
+    if (sresolveShareAllowUpload !== true) {
+      messageStore.error('Public uploads are not allowed for this album share setting.')
+      return
+    }
     presignedAlbumId = albumId
   } else if (isLevel3RouteWithHash) {
     presignedAlbumId = hashParam
