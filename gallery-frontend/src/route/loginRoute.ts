@@ -9,8 +9,10 @@ export const loginRoute: RouteRecordRaw = {
   path: '/login',
   component: LoginPage,
   name: 'login',
+
   meta: {
     basicString: null,
+    level: 1,
     baseName: 'login',
     getParentPage: (route) => {
       return {

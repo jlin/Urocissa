@@ -11,6 +11,7 @@ export const linksRoute: RouteRecordRaw = {
   name: 'links',
   meta: {
     basicString: null,
+    level: 1,
     baseName: 'links',
     getParentPage: (route) => {
       return {

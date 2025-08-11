@@ -14,6 +14,7 @@ export const tagsRoute: RouteRecordRaw = {
   component: TagsPage,
   name: 'tags',
   meta: {
+    level: 1,
     basicString: null,
     baseName: 'tags',
     getParentPage: (route) => {
