@@ -61,7 +61,7 @@
           </template>
         </v-list-item>
 
-        <v-list-item  density="compact" slim>
+        <v-list-item density="compact" slim>
           <template #prepend>
             <v-list-item-action start>
               <v-switch
@@ -190,6 +190,6 @@ const createLink = async () => {
 
 async function performCopy(text: string) {
   await copy(text)
-  messageStore.success('Url copied')
+  messageStore.success('Share URL copied to clipboard.')
 }
 </script>

@@ -189,7 +189,7 @@ function openDeleteConfirm(data: EditShareData) {
 
 async function performCopy(item: EditShareData) {
   await copy(`${locationOrigin}/share/${item.albumId}-${item.share.url}`)
-  messageStore.success('URL copied')
+  messageStore.success('Share URL copied to clipboard.')
 }
 
 watch(
