@@ -87,24 +87,36 @@ function onDragOver(e: DragEvent) {
 
 function onDrop(e: DragEvent) {
   e.preventDefault()
+
+  // 1. Check if upload is allowed
+  if (!isUploadAllowed(e)) return
   visible.value = false
 
-  if (!isUploadAllowed(e)) return
-
-  const files: File[] = Array.from(e.dataTransfer?.files ?? [])
+  // 2. Get files from drop event
+  const files = Array.from(e.dataTransfer?.files ?? [])
   if (files.length === 0) return
 
-  const albumId = shareStore.albumId
-  const shareId = shareStore.shareId
+  // 3. Semantic conditions
+  const albumId = shareStore.albumId ?? undefined
+  const shareId = shareStore.shareId ?? undefined
+  const isSharedAlbum = typeof albumId === 'string' && typeof shareId === 'string'
 
-  const presignedAlbumId =
-    typeof albumId === 'string' && typeof shareId === 'string' ? albumId : undefined
+  const hashParam = route.params.hash
+  const isLevel3RouteWithHash = route.meta.level === 3 && typeof hashParam === 'string'
 
-  uploadStore.fileUpload(files, presignedAlbumId).catch((error: unknown) => {
-    console.error('Error occurred:', error)
+  // 4. Determine presignedAlbumId (guaranteed to be string | undefined)
+  let presignedAlbumId: string | undefined
+  if (isSharedAlbum) {
+    presignedAlbumId = albumId
+  } else if (isLevel3RouteWithHash) {
+    presignedAlbumId = hashParam
+  }
+
+  // 5. Perform upload (catch uses unknown to satisfy ESLint rule)
+  uploadStore.fileUpload(files, presignedAlbumId).catch((err: unknown) => {
+    console.error('Error occurred:', err)
   })
 }
-
 onMounted(() => {
   window.addEventListener('dragenter', onDragEnter)
   window.addEventListener('dragleave', onDragLeave)
