@@ -134,10 +134,10 @@ const nextPage = computed(() => {
   if (nextHash.value === undefined) {
     return undefined
   }
-  if (!route.meta.isReadPage) {
+  if (route.meta.level === 2) {
     const updatedParams = { ...route.params, hash: nextHash.value }
     return { ...route, params: updatedParams }
-  } else if (props.isolationId === 'subId') {
+  } else if (route.meta.level === 4) {
     const updatedParams = { ...route.params, subhash: nextHash.value }
     return { ...route, params: updatedParams }
   } else {
@@ -149,10 +149,10 @@ const previousPage = computed(() => {
   if (previousHash.value === undefined) {
     return undefined
   }
-  if (!route.meta.isReadPage) {
+  if (route.meta.level === 2) {
     const updatedParams = { ...route.params, hash: previousHash.value }
     return { ...route, params: updatedParams }
-  } else if (props.isolationId === 'subId') {
+  } else if (route.meta.level === 4) {
     const updatedParams = { ...route.params, subhash: previousHash.value }
     return { ...route, params: updatedParams }
   } else {
@@ -289,8 +289,8 @@ watch(
 
 const handleKeyDown = (event: KeyboardEvent) => {
   if (
-    (!route.meta.isReadPage && props.isolationId === 'mainId') ||
-    (route.meta.isReadPage && props.isolationId === 'subId')
+    (route.meta.level === 2 && props.isolationId === 'mainId') ||
+    (route.meta.level === 4 && props.isolationId === 'subId')
     // prevent two ViewPageDisplay triggered simultaneously
   ) {
     if (modalStore.showEditTagsModal) {
@@ -330,8 +330,8 @@ const SWIPE_VERTICAL_TOLERANCE = 40 // px to avoid vertical scroll triggering
 function canHandleNav(): boolean {
   return (
     constStore.isMobile &&
-    ((!route.meta.isReadPage && props.isolationId === 'mainId') ||
-      (route.meta.isReadPage && props.isolationId === 'subId')) &&
+    ((route.meta.level === 2 && props.isolationId === 'mainId') ||
+      (route.meta.level === 4 && props.isolationId === 'subId')) &&
     !modalStore.showEditTagsModal
   )
 }

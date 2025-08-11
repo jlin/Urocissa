@@ -14,8 +14,7 @@ export interface PageReturnType {
 
 declare module 'vue-router' {
   interface RouteMeta {
-    isReadPage: boolean
-    isViewPage: boolean
+    level: number
     baseName: BaseName
     getParentPage: (
       router: RouteLocationNormalizedLoadedGeneric,

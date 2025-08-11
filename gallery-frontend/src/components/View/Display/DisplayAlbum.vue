@@ -86,10 +86,7 @@
           <!-- Use this div to take up remaining space -->
           <div class="flex-grow-1"></div>
 
-          <v-card-actions
-            class="justify-end"
-            v-if="route.meta.isViewPage && !route.meta.isReadPage"
-          >
+          <v-card-actions class="justify-end" v-if="route.meta.level === 2">
             <v-btn
               color="teal-accent-4"
               variant="flat"

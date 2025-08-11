@@ -32,8 +32,7 @@ export function usePrefetch(
         // add locate to query string if user enter view page directly
         if (
           isolationId === 'subId' &&
-          route.meta.isViewPage &&
-          route.meta.isReadPage &&
+          route.meta.level === 4 &&
           typeof route.params.subhash === 'string'
         ) {
           locate = route.params.subhash

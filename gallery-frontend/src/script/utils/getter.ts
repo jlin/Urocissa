@@ -6,12 +6,12 @@ import { navBarHeight } from '../../type/constants'
 import { useShareStore } from '@/store/shareStore'
 
 export function getIsolationIdByRoute(route: RouteLocationNormalizedLoaded) {
-  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
+  const isolationId = route.meta.level === 4 ? 'subId' : 'mainId'
   return isolationId
 }
 
 export function getHashIndexDataFromRoute(route: RouteLocationNormalizedLoaded) {
-  const isolationId = route.meta.isReadPage ? 'subId' : 'mainId'
+  const isolationId = route.meta.level === 4 ? 'subId' : 'mainId'
   const storeData = useDataStore(isolationId)
 
   let hash: string

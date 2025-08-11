@@ -4,16 +4,14 @@
       backgroundColor: '#212121'
     }"
   >
-    <v-btn v-if="!route.meta.isReadPage" @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
+    <v-btn v-if="route.meta.level === 1" @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
     <v-btn
       v-else
       icon="mdi mdi-arrow-left"
       :to="albumStore.leaveAlbumPath ? albumStore.leaveAlbumPath : '/'"
     ></v-btn>
     <v-card
-      v-if="
-        route.meta.isReadPage && !route.meta.isViewPage && typeof route.params.hash === 'string'
-      "
+      v-if="route.meta.level === 3 && typeof route.params.hash === 'string'"
       elevation="0"
       class="w-50"
     >
@@ -24,7 +22,7 @@
     <v-card
       elevation="0"
       :style="{
-        width: `${route.meta.isReadPage ? '50%' : '100%'}`
+        width: `${route.meta.level === 3 ? '50%' : '100%'}`
       }"
     >
       <v-card-text class="pa-0">
@@ -53,9 +51,9 @@
       </v-card-text>
     </v-card>
 
-    <BtnCreateAlbum v-if="!route.meta.isReadPage" v-model="loading" />
+    <BtnCreateAlbum v-if="route.meta.level === 1" v-model="loading" />
     <v-btn
-      v-if="!route.meta.isReadPage"
+      v-if="route.meta.level === 1"
       icon="mdi-upload"
       :loading="loading"
       @click="uploadStore.triggerFileInput"

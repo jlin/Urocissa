@@ -59,7 +59,7 @@ const classes = computed(() => ({
 }))
 
 function isUploadAllowed(e: DragEvent): boolean {
-  if (route.meta.isReadPage || route.meta.isViewPage) return false
+  if (route.meta.level === 2 || route.meta.level === 4) return false
 
   const items = e.dataTransfer?.items
   if (!items) return false

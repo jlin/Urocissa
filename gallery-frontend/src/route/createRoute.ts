@@ -40,8 +40,7 @@ export function createRoute(baseName: BaseName, component: Component): RouteReco
     component: component,
     name: baseName,
     meta: {
-      isReadPage: false,
-      isViewPage: false,
+      level: 1,
       baseName: baseName,
       getParentPage: (route) => {
         return {
@@ -64,8 +63,7 @@ export function createRoute(baseName: BaseName, component: Component): RouteReco
         component: ViewPageMain,
         name: `${baseName}ViewPage`,
         meta: {
-          isReadPage: false,
-          isViewPage: true,
+          level: 2,
           baseName: baseName,
           getParentPage: (route) => {
             return {
@@ -88,8 +86,7 @@ export function createRoute(baseName: BaseName, component: Component): RouteReco
             component: HomeIsolated,
             name: `${baseName}ReadPage`,
             meta: {
-              isReadPage: true,
-              isViewPage: false,
+              level: 3,
               baseName: baseName,
               getParentPage: (route) => {
                 return {
@@ -112,8 +109,7 @@ export function createRoute(baseName: BaseName, component: Component): RouteReco
                 name: `${baseName}ReadViewPage`,
                 component: ViewPageIsolated,
                 meta: {
-                  isReadPage: true,
-                  isViewPage: true,
+                  level: 4,
                   baseName: baseName,
                   getParentPage: (route) => {
                     return {

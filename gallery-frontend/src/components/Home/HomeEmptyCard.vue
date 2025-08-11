@@ -2,7 +2,7 @@
   <v-container class="d-flex align-center justify-center" fluid>
     <v-row v-if="!isSearching" justify="center">
       <v-col
-        v-if="route.meta.isReadPage && !collectionStore.editModeOn"
+        v-if="route.meta.level === 3 && !collectionStore.editModeOn"
         class="w-100"
         cols="12"
         md="6"
@@ -119,9 +119,10 @@ const computedHoverAndMessage = computed<HoverAndMessage>(() => {
   if (collectionStore.editModeOn) {
     return {
       hasHoverEffect: false,
-      message: route.meta.isReadPage
-        ? 'All photos are already added!' // Inside the component for adding photos
-        : 'Select from existing photos.'
+      message:
+        route.meta.level === 3
+          ? 'All photos are already added!' // Inside the component for adding photos
+          : 'Select from existing photos.'
     }
   }
 
@@ -154,7 +155,7 @@ const computedHoverAndMessage = computed<HoverAndMessage>(() => {
 const clickEmptyCard = async () => {
   const path = route.path
 
-  if (route.meta.isReadPage) {
+  if (route.meta.level === 3) {
     modalStore.showHomeTempModal = true
   } else if (path.startsWith('/albums')) {
     const newAlbumId = await createEmptyAlbum()
