@@ -3,7 +3,6 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    v-touch="touchHandlers"
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
     class="h-100 position-relative"
   >
@@ -39,7 +38,95 @@
       <v-icon>mdi-arrow-right</v-icon>
     </v-card>
 
-    <v-row no-gutters class="h-100">
+    <!-- Swiper container for mobile with preview -->
+    <div v-if="constStore.isMobile" class="swiper-container h-100">
+      <swiper
+        :modules="modules"
+        :slides-per-view="1"
+        :space-between="10"
+        :centered-slides="true"
+        :initial-slide="currentSlideIndex"
+        :resistance="true"
+        :resistance-ratio="0.3"
+        :allow-touch-move="canHandleNav()"
+        @slide-change="onSlideChange"
+        @swiper="onSwiper"
+        class="h-100"
+      >
+        <!-- Previous slide -->
+        <swiper-slide v-if="previousHash !== undefined">
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="
+                previousAbstractData && previousAbstractData.database && !configStore.disableImg
+              "
+              :index="index - 1"
+              :hash="previousAbstractData.database.hash"
+              :abstract-data="previousAbstractData"
+              :col-width="colWidth"
+              :col-height="colHeight"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
+              :index="index - 1"
+              :album="previousAbstractData.album"
+              :col-width="colWidth"
+              :col-height="colHeight"
+            />
+          </div>
+        </swiper-slide>
+
+        <!-- Current slide -->
+        <swiper-slide>
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="abstractData && abstractData.database && !configStore.disableImg"
+              :index="index"
+              :hash="hash"
+              :abstract-data="abstractData"
+              :col-width="colWidth"
+              :col-height="colHeight"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="abstractData && abstractData.album && !configStore.disableImg"
+              :index="index"
+              :album="abstractData.album"
+              :col-width="colWidth"
+              :col-height="colHeight"
+            />
+          </div>
+        </swiper-slide>
+
+        <!-- Next slide -->
+        <swiper-slide v-if="nextHash !== undefined">
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="nextAbstractData && nextAbstractData.database && !configStore.disableImg"
+              :index="index + 1"
+              :hash="nextAbstractData.database.hash"
+              :abstract-data="nextAbstractData"
+              :col-width="colWidth"
+              :col-height="colHeight"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"
+              :index="index + 1"
+              :album="nextAbstractData.album"
+              :col-width="colWidth"
+              :col-height="colHeight"
+            />
+          </div>
+        </swiper-slide>
+      </swiper>
+    </div>
+
+    <!-- Desktop version without swiper -->
+
+    <!-- Desktop version without swiper -->
+    <v-row v-if="!constStore.isMobile" no-gutters class="h-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
         :index="index"
@@ -84,9 +171,23 @@ import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Manipulation } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/manipulation'
+import type { Swiper as SwiperType } from 'swiper'
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
+
+// Swiper configuration
+const modules = [Manipulation]
+const swiperInstance = ref<SwiperType | null>(null)
+
+// Calculate current slide index based on available slides
+const currentSlideIndex = computed(() => {
+  return previousHash.value !== undefined ? 1 : 0
+})
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -121,6 +222,14 @@ const previousHash = computed(() => {
   if (previousData?.database) return previousData.database.hash
   if (previousData?.album) return previousData.album.id
   return undefined
+})
+
+const nextAbstractData = computed(() => {
+  return dataStore.data.get(props.index + 1)
+})
+
+const previousAbstractData = computed(() => {
+  return dataStore.data.get(props.index - 1)
 })
 
 const nextPage = computed(() => {
@@ -259,7 +368,7 @@ onUnmounted(() => {
 })
 
 /** -------------------------
- *  Swipe navigation via v-touch
+ *  Swiper navigation handlers
  *  -------------------------
  */
 function canHandleNav(): boolean {
@@ -271,29 +380,52 @@ function canHandleNav(): boolean {
   )
 }
 
-function onSwipeLeft() {
+function onSwiper(swiper: SwiperType) {
+  swiperInstance.value = swiper
+}
+
+function onSlideChange(swiper: SwiperType) {
   if (!canHandleNav()) return
-  if (nextPage.value) {
-    router.replace(nextPage.value).catch((error: unknown) => {
-      console.error('Navigation Error:', error)
-    })
+
+  const currentIndex = swiper.activeIndex
+  const hasPrevious = previousHash.value !== undefined
+  const hasNext = nextHash.value !== undefined
+
+  // Calculate expected indices based on available slides
+  if (hasPrevious) {
+    // Layout: [Previous, Current, Next?]
+    if (currentIndex === 0 && previousPage.value) {
+      // Moved to previous slide
+      router.replace(previousPage.value).catch((error: unknown) => {
+        console.error('Navigation Error:', error)
+      })
+    } else if (currentIndex === 2 && hasNext && nextPage.value) {
+      // Moved to next slide
+      router.replace(nextPage.value).catch((error: unknown) => {
+        console.error('Navigation Error:', error)
+      })
+    }
+  } else {
+    // Layout: [Current, Next?]
+    if (currentIndex === 1 && hasNext && nextPage.value) {
+      // Moved to next slide
+      router.replace(nextPage.value).catch((error: unknown) => {
+        console.error('Navigation Error:', error)
+      })
+    }
   }
 }
 
-function onSwipeRight() {
-  if (!canHandleNav()) return
-  if (previousPage.value) {
-    router.replace(previousPage.value).catch((error: unknown) => {
-      console.error('Navigation Error:', error)
-    })
+// Reset swiper to center when props.index changes
+watch(
+  () => props.index,
+  () => {
+    if (swiperInstance.value && constStore.isMobile) {
+      // Reset to center slide without animation
+      swiperInstance.value.slideTo(currentSlideIndex.value, 0)
+    }
   }
-}
-
-// 綁定到 v-touch 的處理器物件
-const touchHandlers = {
-  left: onSwipeLeft,
-  right: onSwipeRight
-}
+)
 </script>
 
 <style scoped>
@@ -309,5 +441,34 @@ const touchHandlers = {
 
 .not-show-info {
   width: 100%;
+}
+
+/* Swiper container styles */
+.swiper-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.slide-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Override swiper default styles for better integration */
+:deep(.swiper) {
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.swiper-slide) {
+  text-align: center;
+  font-size: 18px;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
