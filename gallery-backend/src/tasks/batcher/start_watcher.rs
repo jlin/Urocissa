@@ -3,12 +3,7 @@ use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
 use crate::{public::config::PRIVATE_CONFIG, workflow::index_for_watch};
 use log::{error, info};
 use mini_executor::BatchTask;
-
-use notify_debouncer_full::{
-    DebounceEventResult, DebouncedEvent, Debouncer, RecommendedCache, new_debouncer,
-    notify::{EventKind, RecommendedWatcher, RecursiveMode},
-};
-
+use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
@@ -16,47 +11,39 @@ use std::{
         LazyLock, Mutex,
         atomic::{AtomicBool, Ordering},
     },
-    time::Duration, // <-- needed
 };
 use walkdir::WalkDir;
 
 static IS_WATCHING: AtomicBool = AtomicBool::new(false);
 
-// Store the Debouncer to keep the watcher alive
-static WATCHER_HANDLE: LazyLock<Mutex<Option<Debouncer<RecommendedWatcher, RecommendedCache>>>> =
+static WATCHER_HANDLE: LazyLock<Mutex<Option<RecommendedWatcher>>> =
     LazyLock::new(|| Mutex::new(None));
 
 pub struct StartWatcherTask;
 
 impl BatchTask for StartWatcherTask {
-    fn batch_run(_: Vec<Self>) -> impl std::future::Future<Output = ()> + Send {
+    fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
             start_watcher_task();
         }
     }
 }
 
-fn start_watcher_task() {
+fn start_watcher_task() -> () {
     // Fast-path: already running.
     if IS_WATCHING.swap(true, Ordering::SeqCst) {
         return;
     }
 
-    let roots: Vec<PathBuf> = PRIVATE_CONFIG.sync_path.iter().cloned().collect();
-
-    match start_debounced_watcher(&roots) {
-        Ok(deb) => {
-            // Keep the debouncer alive
-            *WATCHER_HANDLE.lock().unwrap() = Some(deb);
-            for path in &PRIVATE_CONFIG.sync_path {
-                info!("Watching path {:?}", path);
-            }
-        }
-        Err(e) => {
-            IS_WATCHING.store(false, Ordering::SeqCst);
-            error!("Failed to start debounced watcher: {e:?}");
-        }
+    // Build the watcher.
+    let mut watcher = new_watcher().unwrap();
+    for path in &PRIVATE_CONFIG.sync_path {
+        watcher.watch(path, RecursiveMode::Recursive).unwrap();
+        info!("Watching path {:?}", path);
     }
+
+    // Store it globally to keep it alive.
+    *WATCHER_HANDLE.lock().unwrap() = Some(watcher);
 }
 
 fn is_valid_media_file(path: &Path) -> bool {
@@ -70,61 +57,55 @@ fn is_valid_media_file(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
-// Build and start the debounced watcher; keep its guard alive by storing it.
-pub fn start_debounced_watcher(
-    roots: &[PathBuf],
-) -> notify::Result<Debouncer<RecommendedWatcher, RecommendedCache>> {
-    // 1 second inactivity window
-    let mut debouncer = new_debouncer(
-        Duration::from_secs(1),
-        None,
-        move |res: DebounceEventResult| {
-            match res {
-                Ok(events) => {
-                    // Collect unique files to index after the quiet period
-                    let mut to_index: HashSet<PathBuf> = HashSet::new();
+fn new_watcher() -> notify::Result<RecommendedWatcher> {
+    notify::recommended_watcher(move |result: Result<Event, notify::Error>| match result {
+        Ok(event) => {
+            match event.kind {
+                EventKind::Create(_) => {
+                    let mut path_list: HashSet<PathBuf> = HashSet::new();
 
-                    for DebouncedEvent { event, .. } in events {
-                        for path in event.paths {
-                            if path.is_file() {
-                                if is_valid_media_file(&path) {
-                                    to_index.insert(path);
-                                }
-                            } else if path.is_dir() {
-                                // If a whole directory appeared/renamed, crawl it once
-                                if matches!(event.kind, EventKind::Create(_) | EventKind::Modify(_))
-                                {
-                                    for de in WalkDir::new(&path)
-                                        .into_iter()
-                                        .filter_map(Result::ok)
-                                        .filter(|e| e.file_type().is_file())
-                                    {
-                                        let p = de.into_path();
-                                        if is_valid_media_file(&p) {
-                                            to_index.insert(p);
-                                        }
-                                    }
-                                }
-                            }
+                    for path in event.paths {
+                        if path.is_file() {
+                            path_list.insert(path);
+                        } else if path.is_dir() {
+                            WalkDir::new(&path)
+                                .into_iter()
+                                .filter_map(|dir_entry| dir_entry.ok())
+                                .filter(|dir_entry| dir_entry.file_type().is_file())
+                                .for_each(|dir_entry| {
+                                    path_list.insert(dir_entry.into_path());
+                                });
                         }
                     }
 
-                    for path in to_index {
-                        INDEX_RUNTIME.spawn(index_for_watch(path, None));
+                    for path in path_list {
+                        // Check if the path has a valid extension before submitting
+                        if is_valid_media_file(&path) {
+                            INDEX_RUNTIME.spawn(index_for_watch(path, None));
+                        }
                     }
                 }
-                Err(errs) => {
-                    for e in errs {
-                        error!("Watch error: {e:?}");
+
+                EventKind::Modify(_) => {
+                    let mut path_list: HashSet<PathBuf> = HashSet::new();
+
+                    for path in event.paths {
+                        if path.is_file() {
+                            path_list.insert(path);
+                        }
+                    }
+
+                    for path in path_list {
+                        // Check if the path has a valid extension before submitting
+                        if is_valid_media_file(&path) {
+                            INDEX_RUNTIME.spawn(index_for_watch(path, None));
+                        }
                     }
                 }
+
+                _ => { /* ignore other kinds */ }
             }
-        },
-    )?;
-
-    for root in roots {
-        debouncer.watch(root, RecursiveMode::Recursive)?;
-    }
-
-    Ok(debouncer)
+        }
+        Err(err) => error!("Watch error: {:#?}", err),
+    })
 }
