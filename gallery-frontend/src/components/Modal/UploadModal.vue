@@ -3,7 +3,7 @@
     class="mx-auto position-fixed text-white"
     append-icon=""
     :title="`${uploadStore.status}`"
-    :subtitle="`${humanizeDuration(uploadStore.remainingTime() * 1000, {
+    :subtitle="`${humanizeDuration(uploadStore.remainingTime * 1000, {
       units: ['h', 'm', 's'],
       largest: 1,
       round: true
@@ -70,7 +70,7 @@ const modalStore = useModalStore('mainId')
 
 const circularValue = computed(() => {
   if (uploadStore.status === 'Uploading') {
-    return uploadStore.percentComplete()
+    return uploadStore.percentComplete
   } else if (uploadStore.status === 'Completed') {
     return 0
   } else {
