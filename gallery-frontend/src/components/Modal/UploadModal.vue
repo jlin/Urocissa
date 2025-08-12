@@ -14,7 +14,7 @@
     :style="{
       bottom: '50px',
       left: '50px',
-      zIndex: 5
+      zIndex: 50000
     }"
   >
     <template #prepend>
