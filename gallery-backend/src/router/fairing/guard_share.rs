@@ -18,14 +18,28 @@ impl<'r> FromRequest<'r> for GuardShare {
     type Error = GuardError;
 
     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // Try to resolve share from headers first
-        if let Some(claims) = try_resolve_share_from_headers(req) {
-            return Outcome::Success(GuardShare { claims });
+        // headers
+        match try_resolve_share_from_headers(req) {
+            Ok(Some(claims)) => return Outcome::Success(GuardShare { claims }),
+            Ok(None) => {}
+            Err(err) => {
+                return Outcome::Error((
+                    Status::InternalServerError,
+                    err.context("Header share resolution failed").into(),
+                ));
+            }
         }
 
-        // Try to resolve share from query parameters
-        if let Some(claims) = try_resolve_share_from_query(req) {
-            return Outcome::Success(GuardShare { claims });
+        // query
+        match try_resolve_share_from_query(req) {
+            Ok(Some(claims)) => return Outcome::Success(GuardShare { claims }),
+            Ok(None) => {}
+            Err(err) => {
+                return Outcome::Error((
+                    Status::InternalServerError,
+                    err.context("Query share resolution failed").into(),
+                ));
+            }
         }
 
         // Fall back to JWT cookie authentication

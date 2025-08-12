@@ -74,43 +74,97 @@ pub fn extract_hash_from_path(req: &Request<'_>) -> Result<String> {
 }
 
 /// Try to resolve album and share from headers
-pub fn try_resolve_share_from_headers(req: &Request<'_>) -> Option<Claims> {
-    let album_id = req.headers().get_one("x-album-id")?;
-    let share_id = req.headers().get_one("x-share-id")?;
+pub fn try_resolve_share_from_headers(req: &Request<'_>) -> Result<Option<Claims>> {
+    let album_id = req.headers().get_one("x-album-id");
+    let share_id = req.headers().get_one("x-share-id");
 
-    let read_txn = TREE.in_disk.begin_read().ok()?;
-    let table = read_txn.open_table(ALBUM_TABLE).ok()?;
+    match (album_id, share_id) {
+        (None, None) => Ok(None),
 
-    if let Some(album_guard) = table.get(album_id).ok()? {
-        let mut album = album_guard.value();
-        if let Some(share) = album.share_list.remove(share_id) {
-            let resolved_share =
-                ResolvedShare::new(ArrayString::<64>::from(album_id).ok()?, album.title, share);
+        (Some(_), None) | (None, Some(_)) => Err(anyhow!(
+            "Both x-album-id and x-share-id must be provided together"
+        )),
+
+        (Some(album_id), Some(share_id)) => {
+            // 只要帶了，就在這裡定生死：找不到或出錯都回 Err
+            let read_txn = TREE
+                .in_disk
+                .begin_read()
+                .map_err(|_| anyhow!("Failed to begin read transaction"))?;
+
+            let table = read_txn
+                .open_table(ALBUM_TABLE)
+                .map_err(|_| anyhow!("Failed to open album table"))?;
+
+            let album_guard = table
+                .get(album_id)
+                .map_err(|_| anyhow!("Failed to get album from table"))?
+                .ok_or_else(|| anyhow!("Album not found for id '{}'", album_id))?;
+
+            let mut album = album_guard.value();
+
+            let share = album
+                .share_list
+                .remove(share_id)
+                .ok_or_else(|| anyhow!("Share '{}' not found in album '{}'", share_id, album_id))?;
+
+            let resolved_share = ResolvedShare::new(
+                ArrayString::<64>::from(album_id)
+                    .map_err(|_| anyhow!("Failed to parse album_id"))?,
+                album.title,
+                share,
+            );
             let claims = Claims::new_share(resolved_share);
-            return Some(claims);
+            Ok(Some(claims))
         }
     }
-    None
 }
 
 /// Try to resolve album and share from query parameters
-pub fn try_resolve_share_from_query(req: &Request<'_>) -> Option<Claims> {
-    let album_id = req.query_value::<&str>("albumId").and_then(Result::ok)?;
-    let share_id = req.query_value::<&str>("shareId").and_then(Result::ok)?;
+pub fn try_resolve_share_from_query(req: &Request<'_>) -> Result<Option<Claims>> {
+    let album_id = req.query_value::<&str>("albumId").and_then(Result::ok);
+    let share_id = req.query_value::<&str>("shareId").and_then(Result::ok);
 
-    let read_txn = TREE.in_disk.begin_read().ok()?;
-    let table = read_txn.open_table(ALBUM_TABLE).ok()?;
+    match (album_id, share_id) {
+        (None, None) => Ok(None),
 
-    if let Some(album_guard) = table.get(album_id).ok()? {
-        let mut album = album_guard.value();
-        if let Some(share) = album.share_list.remove(share_id) {
-            let resolved_share =
-                ResolvedShare::new(ArrayString::<64>::from(album_id).ok()?, album.title, share);
+        (Some(_), None) | (None, Some(_)) => Err(anyhow!(
+            "Both albumId and shareId must be provided together"
+        )),
+
+        (Some(album_id), Some(share_id)) => {
+            // 只要帶了，就在這裡定生死：找不到或出錯都回 Err
+            let read_txn = TREE
+                .in_disk
+                .begin_read()
+                .map_err(|_| anyhow!("Failed to begin read transaction"))?;
+
+            let table = read_txn
+                .open_table(ALBUM_TABLE)
+                .map_err(|_| anyhow!("Failed to open album table"))?;
+
+            let album_guard = table
+                .get(album_id)
+                .map_err(|_| anyhow!("Failed to get album from table"))?
+                .ok_or_else(|| anyhow!("Album not found for id '{}'", album_id))?;
+
+            let mut album = album_guard.value();
+
+            let share = album
+                .share_list
+                .remove(share_id)
+                .ok_or_else(|| anyhow!("Share '{}' not found in album '{}'", share_id, album_id))?;
+
+            let resolved_share = ResolvedShare::new(
+                ArrayString::<64>::from(album_id)
+                    .map_err(|_| anyhow!("Failed to parse album_id"))?,
+                album.title,
+                share,
+            );
             let claims = Claims::new_share(resolved_share);
-            return Some(claims);
+            Ok(Some(claims))
         }
     }
-    None
 }
 
 /// Try to authorize upload via share headers with upload permission
