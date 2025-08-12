@@ -12,11 +12,10 @@ use crate::tasks::batcher::update_tree::UpdateTreeTask;
 use crate::tasks::{BATCH_COORDINATOR, INDEX_COORDINATOR};
 use anyhow::Result;
 use arrayvec::ArrayString;
-use futures::future::join_all;
+use futures::{StreamExt, TryStreamExt, stream};
 use redb::ReadableTable;
 use rocket::serde::{Deserialize, json::Json};
 use serde::Serialize;
-use std::collections::HashSet;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EditAlbumsData {
@@ -34,43 +33,60 @@ pub async fn edit_album(
 ) -> AppResult<()> {
     let _ = auth?;
     let _ = read_only_mode?;
-    let effected_album_vec = tokio::task::spawn_blocking(move || -> Result<_> {
-        let tree_snapshot = open_tree_snapshot_table(json_data.timestamp)?;
-        let data_table = open_data_table()?;
 
-        for &index in &json_data.index_array {
-            let mut database = index_to_database(&tree_snapshot, &data_table, index)?;
-            for album_id in &json_data.add_albums_array {
-                database.album.insert(album_id.clone());
-            }
-            for album_id in &json_data.remove_albums_array {
-                database.album.remove(album_id);
-            }
-            BATCH_COORDINATOR.execute_batch_detached(FlushTreeTask::insert(vec![database.into()]));
-        }
+    // 在 blocking 執行緒產生所有要寫入的 payload 與受影響相簿
+    let (to_flush, effected_album_vec) =
+        tokio::task::spawn_blocking(move || -> Result<(Vec<_>, Vec<ArrayString<64>>)> {
+            let tree_snapshot = open_tree_snapshot_table(json_data.timestamp)?;
+            let data_table = open_data_table()?;
 
-        let effected_album_vec: Vec<ArrayString<64>> = json_data
-            .add_albums_array
-            .iter()
-            .chain(json_data.remove_albums_array.iter())
-            .cloned()
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
-        Ok(effected_album_vec)
-    })
-    .await
-    .unwrap()?;
+            let mut to_flush = Vec::with_capacity(json_data.index_array.len());
+            for &index in &json_data.index_array {
+                let mut database = index_to_database(&tree_snapshot, &data_table, index)?;
+                for album_id in &json_data.add_albums_array {
+                    database.album.insert(album_id.clone());
+                }
+                for album_id in &json_data.remove_albums_array {
+                    database.album.remove(album_id);
+                }
+                to_flush.push(database.into());
+            }
+
+            let effected_album_vec = json_data
+                .add_albums_array
+                .iter()
+                .chain(json_data.remove_albums_array.iter())
+                .cloned()
+                .collect::<std::collections::HashSet<_>>()
+                .into_iter()
+                .collect();
+
+            Ok((to_flush, effected_album_vec))
+        })
+        .await
+        .map_err(|e| anyhow::anyhow!("join error: {e}"))??;
+
+    // 單次等待版本（取代 detached 逐筆呼叫）
+    BATCH_COORDINATOR
+        .execute_batch_waiting(FlushTreeTask::insert(to_flush))
+        .await?;
 
     BATCH_COORDINATOR
         .execute_batch_waiting(UpdateTreeTask)
         .await?;
-    let futures = effected_album_vec.into_iter().map(async |album_id| {
-        INDEX_COORDINATOR
-            .execute_waiting(AlbumSelfUpdateTask::new(album_id))
-            .await
-    });
-    join_all(futures).await;
+
+    // 受影響相簿：全部等待（有界並行）
+    const ALBUM_CONC: usize = 8;
+    stream::iter(effected_album_vec)
+        .map(|album_id| async move {
+            INDEX_COORDINATOR
+                .execute_waiting(AlbumSelfUpdateTask::new(album_id))
+                .await
+        })
+        .buffer_unordered(ALBUM_CONC)
+        .try_collect::<Vec<_>>()
+        .await?;
+
     Ok(())
 }
 
