@@ -30,7 +30,7 @@ jobs:
 
   # Job for building arm64 image on self-hosted runner
   build-arm64:
-    runs-on: self-hosted
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
