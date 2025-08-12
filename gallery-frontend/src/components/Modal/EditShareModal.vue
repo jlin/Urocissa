@@ -52,20 +52,6 @@
                 </v-list-item-action>
               </template>
             </v-list-item>
-
-            <v-list-item density="compact">
-              <template #prepend>
-                <v-list-item-action start>
-                  <v-switch
-                    v-model="proxyModel.value.showMetadata"
-                    color="primary"
-                    :label="`Show metadata`"
-                    hide-details
-                  />
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-
             <v-list-item density="compact">
               <template #prepend>
                 <v-list-item-action start>
@@ -73,6 +59,18 @@
                     v-model="proxyModel.value.showUpload"
                     color="primary"
                     :label="`Allow public user to upload`"
+                    hide-details
+                  />
+                </v-list-item-action>
+              </template>
+            </v-list-item>
+            <v-list-item density="compact">
+              <template #prepend>
+                <v-list-item-action start>
+                  <v-switch
+                    v-model="proxyModel.value.showMetadata"
+                    color="primary"
+                    :label="`Show metadata`"
                     hide-details
                   />
                 </v-list-item-action>

@@ -51,6 +51,11 @@
               {{ item.share.showDownload }}
             </template>
 
+            <!-- Allow Upload -->
+            <template #[`item.share.showUpload`]="{ item }">
+              {{ item.share.showUpload }}
+            </template>
+
             <!-- Actions -->
             <template #[`item.actions`]="{ item }">
               <div class="d-flex flex-row justify-center ga-1">
@@ -157,6 +162,10 @@ const headers = [
   {
     title: 'Allow Download',
     key: 'share.showDownload'
+  },
+  {
+    title: 'Allow Upload',
+    key: 'share.showUpload'
   },
   {
     title: 'Show Metadata',
