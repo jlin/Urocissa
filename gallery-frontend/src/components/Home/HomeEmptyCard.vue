@@ -116,13 +116,16 @@ interface HoverAndMessage {
 }
 
 const computedHoverAndMessage = computed<HoverAndMessage>(() => {
-  if (collectionStore.editModeOn) {
+  if (route.meta.level === 3) {
+    if (collectionStore.editModeOn) {
+      return {
+        hasHoverEffect: false,
+        message: 'All photos are already added!' // Inside the component for adding photos
+      }
+    }
     return {
-      hasHoverEffect: false,
-      message:
-        route.meta.level === 3
-          ? 'All photos are already added!' // Inside the component for adding photos
-          : 'Select from existing photos.'
+      hasHoverEffect: true,
+      message: 'Select from existing photos.'
     }
   }
 
