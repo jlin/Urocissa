@@ -1,6 +1,6 @@
 // constants.ts
 
-export const batchNumber = 100
+export const batchNumber = 20
 export const scrollBarWidth = 50
 export const paddingPixel = 4
 export const fixedBigRowHeight = 2400
