@@ -10,8 +10,10 @@ export const useConfigStore = (isolationId: IsolationId) =>
   defineStore('configStore' + isolationId, {
     state: (): {
       disableImg: boolean
+      isMobile: boolean
     } => ({
-      disableImg: false
+      disableImg: false,
+      isMobile: false
     }),
     actions: {}
   })()

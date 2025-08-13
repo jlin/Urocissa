@@ -10,11 +10,17 @@
     }"
   >
     <v-main class="h-screen">
-      <DropZoneModal v-if="!constStore.isMobile" />
+      <DropZoneModal v-if="!configStore.isMobile" />
       <router-view v-slot="{ Component }" :key="routeKey">
         <component :is="Component" />
       </router-view> </v-main
     ><v-snackbar-queue v-model="messageStore.queue" timeout="2500" />
+    <EditTagsModal v-if="modalStore.showEditTagsModal" />
+    <EditAlbumsModal v-if="modalStore.showEditAlbumsModal" />
+    <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
+    <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
+    <UploadModal v-if="modalStore.showUploadModal" />
+    <SettingModal v-if="modalStore.showSettingModal" />
   </v-app>
 </template>
 
@@ -27,11 +33,22 @@ import { useMessageStore } from '@/store/messageStore'
 import DropZoneModal from './Modal/DropZoneModal.vue'
 import { useConstStore } from '@/store/constStore'
 import isMobile from 'is-mobile'
+import { useConfigStore } from '@/store/configStore'
+import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
+import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
+import UploadModal from '@/components/Modal/UploadModal.vue'
+import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
+import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
+import SettingModal from '@/components/Modal/SettingModal.vue'
+import { useModalStore } from '@/store/modalStore'
+
+const modalStore = useModalStore('mainId')
 const scrollbarStore = useScrollbarStore('mainId')
 const scrollbarStoreInsideAlbum = useScrollbarStore('subId')
 const rerenderStore = useRerenderStore('mainId')
 const messageStore = useMessageStore('mainId')
 const constStore = useConstStore('mainId')
+const configStore = useConfigStore('mainId')
 const route = useRoute()
 
 // The routeKey is used to ensure that the router-view reloads the Home.vue component properly.
@@ -42,15 +59,17 @@ const routeKey = computed(() => {
   const locate = typeof route.query.locate === 'string' ? route.query.locate : ''
   const priorityId = typeof route.query.priority_id === 'string' ? route.query.priority_id : ''
   const reverse = typeof route.query.reverse === 'string' ? route.query.reverse : ''
+  const concurrencyNumber = constStore.concurrencyNumber
   const homeKey = rerenderStore.homeKey.toString()
-  return `${currentPage}-${search}-${locate}-${priorityId}-${reverse}-${homeKey}`
+  return `${currentPage}-${search}-${locate}-${priorityId}-${reverse}-${concurrencyNumber}-${homeKey}`
 })
 
 onBeforeMount(async () => {
-  // Load the subRowHeightScale from constStore when the app is mounted.
+  // Load the subRowHeightScale / showInfo / concurrencyNumber from constStore when the app is mounted.
   await constStore.loadSubRowHeightScale()
   await constStore.loadShowInfo()
-  constStore.isMobile = isMobile()
+  await constStore.loadConcurrencyNumber() // ← 新增
+  configStore.isMobile = isMobile()
 })
 </script>
 

@@ -8,6 +8,7 @@ import { useWorkerStore } from '@/store/workerStore'
 import { getArrayValue } from '@utils/getter'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
+import { useConstStore } from '@/store/constStore'
 
 interface SmallImageContainerProps {
   abstractData: AbstractData
@@ -118,7 +119,8 @@ async function checkAndFetch(
   const workerStore = useWorkerStore(isolationId)
   const tokenStore = useTokenStore(isolationId)
   const shareStore = useShareStore('mainId')
-  const workerIndex = index % workerStore.concurrencyNumber
+  const constStore = useConstStore('mainId')
+  const workerIndex = index % constStore.concurrencyNumber
 
   await tokenStore.refreshTimestampTokenIfExpired()
   const timestampToken = tokenStore.timestampToken

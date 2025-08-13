@@ -17,7 +17,7 @@
     <!-- Navigation overlays (not grid children) -->
     <v-card
       width="100"
-      v-if="!constStore.isMobile && previousHash !== undefined"
+      v-if="!configStore.isMobile && previousHash !== undefined"
       color="transparent"
       class="navigate-left d-flex align-center justify-center h-50"
       style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -28,7 +28,7 @@
     </v-card>
     <v-card
       width="100"
-      v-if="!constStore.isMobile && nextHash !== undefined"
+      v-if="!configStore.isMobile && nextHash !== undefined"
       color="transparent"
       class="navigate-right d-flex align-center justify-center h-50"
       style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
@@ -39,7 +39,7 @@
     </v-card>
 
     <!-- Swiper container for mobile with preview -->
-    <div v-if="constStore.isMobile" class="swiper-container h-100">
+    <div v-if="configStore.isMobile" class="swiper-container h-100">
       <swiper
         :modules="modules"
         :slides-per-view="1"
@@ -126,7 +126,7 @@
     <!-- Desktop version without swiper -->
 
     <!-- Desktop version without swiper -->
-    <v-row v-if="!constStore.isMobile" no-gutters class="h-100">
+    <v-row v-if="!configStore.isMobile" no-gutters class="h-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
         :index="index"
@@ -256,7 +256,7 @@ const previousPage = computed(() => {
   return undefined
 })
 
-const workerIndex = computed(() => props.index % workerStore.concurrencyNumber)
+const workerIndex = computed(() => props.index % constStore.concurrencyNumber)
 
 const postToWorker = bindActionDispatch(toImgWorker, (action) => {
   const worker = workerStore.imgWorker[workerIndex.value]
@@ -373,7 +373,7 @@ onUnmounted(() => {
  */
 function canHandleNav(): boolean {
   return (
-    constStore.isMobile &&
+    configStore.isMobile &&
     ((route.meta.level === 2 && props.isolationId === 'mainId') ||
       (route.meta.level === 4 && props.isolationId === 'subId')) &&
     !modalStore.showEditTagsModal
@@ -420,7 +420,7 @@ function onSlideChange(swiper: SwiperType) {
 watch(
   () => props.index,
   () => {
-    if (swiperInstance.value && constStore.isMobile) {
+    if (swiperInstance.value && configStore.isMobile) {
       // Reset to center slide without animation
       swiperInstance.value.slideTo(currentSlideIndex.value, 0)
     }

@@ -4,17 +4,16 @@ import { handleImgWorker, removeHandleImgWorkerReturn } from '@/worker/fromImgWo
 import { PostToDataWorker, PostToImgWorker, toDataWorker, toImgWorker } from '@/worker/workerApi'
 import { defineStore } from 'pinia'
 import { bindActionDispatch } from 'typesafe-agent-events'
+import { useConstStore } from './constStore'
 
 export const useWorkerStore = (isolationId: IsolationId) =>
   defineStore('workerStore' + isolationId, {
     state: (): {
-      concurrencyNumber: number
       worker: null | Worker
       imgWorker: Worker[]
       postToDataWorker: PostToDataWorker | undefined
       postToImgWorkerList: PostToImgWorker[] | undefined
     } => ({
-      concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1),
       worker: null,
       imgWorker: [],
       postToDataWorker: undefined,
@@ -35,8 +34,9 @@ export const useWorkerStore = (isolationId: IsolationId) =>
         }
 
         if (this.imgWorker.length === 0) {
+          const constStore = useConstStore('mainId')
           this.postToImgWorkerList = []
-          for (let i = 0; i <= this.concurrencyNumber; i++) {
+          for (let i = 0; i <= constStore.concurrencyNumber; i++) {
             const worker = new Worker(new URL('../worker/toImgWorker.ts', import.meta.url), {
               type: 'module'
             })

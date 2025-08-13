@@ -70,6 +70,7 @@ import { useScrollTopStore } from '@/store/scrollTopStore'
 import MainBlock from './FunctionalComponent/MainBlock'
 import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
+import { useConfigStore } from '@/store/configStore'
 import { useConstStore } from '@/store/constStore'
 const props = defineProps<{
   row: Row
@@ -79,6 +80,7 @@ const props = defineProps<{
 const router = useRouter()
 const route = useRoute()
 const constStore = useConstStore('mainId')
+const configStore = useConfigStore('mainId')
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
@@ -90,7 +92,7 @@ const pressTimer = ref<number | null>(null) // 定時器 ID
 const scrollingTimer = ref<number | null>(null)
 const isScrolling = ref(false)
 
-const mobile = constStore.isMobile
+const mobile = configStore.isMobile
 
 // Prevent accidental touches while scrolling
 watch(
@@ -175,7 +177,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   for (let abortIndex = props.row.start; abortIndex <= props.row.end; abortIndex++) {
-    const workerIndex = abortIndex % workerStore.concurrencyNumber
+    const workerIndex = abortIndex % constStore.concurrencyNumber
     if (workerStore.postToImgWorkerList !== undefined) {
       getArrayValue(workerStore.postToImgWorkerList, workerIndex).processAbort({
         index: abortIndex

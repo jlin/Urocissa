@@ -34,27 +34,15 @@
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>
-  <EditTagsModal v-if="modalStore.showEditTagsModal" />
-  <EditAlbumsModal v-if="modalStore.showEditAlbumsModal" />
-  <EditBatchTagsModal v-if="modalStore.showBatchEditTagsModal" />
-  <EditBatchAlbumsModal v-if="modalStore.showBatchEditAlbumsModal" />
-  <UploadModal v-if="modalStore.showUploadModal" />
-  <SettingModal v-if="modalStore.showSettingModal" />
 </template>
 
 <script setup lang="ts">
-import EditTagsModal from '@/components/Modal/EditTagsModal.vue'
-import EditBatchTagsModal from '@/components/Modal/EditBatchTagsModal.vue'
 import AppBar from '@/components/NavBar/AppBar.vue'
-import UploadModal from '@/components/Modal/UploadModal.vue'
-import EditAlbumsModal from '@/components/Modal/EditAlbumsModal.vue'
-import EditBatchAlbumsModal from '@/components/Modal/EditBatchAlbumsModal.vue'
-import SettingModal from '@/components/Modal/SettingModal.vue'
 import ProgessBar from './ProgessBar.vue'
 import { useRoute } from 'vue-router'
-import { useModalStore } from '@/store/modalStore'
 import { provide, ref } from 'vue'
 import { useInitializedStore } from '@/store/initializedStore'
+import { useModalStore } from '@/store/modalStore'
 const showDrawer = ref(false)
 const route = useRoute()
 const modalStore = useModalStore('mainId')

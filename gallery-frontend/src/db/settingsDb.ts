@@ -173,3 +173,74 @@ export async function deleteShowInfo(): Promise<void> {
     }
   })
 }
+export async function storeConcurrencyNumber(value: number): Promise<void> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for storing concurrencyNumber')
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.put(value, 'concurrencyNumber')
+
+    request.onsuccess = () => {
+      resolve()
+    }
+    request.onerror = () => {
+      console.error('Error storing concurrencyNumber')
+      resolve()
+    }
+  })
+}
+
+export async function getConcurrencyNumber(): Promise<number | null> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for retrieving concurrencyNumber')
+    return null
+  }
+
+  return new Promise<number | null>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readonly')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.get('concurrencyNumber')
+
+    request.onsuccess = () => {
+      const rawResult: unknown = request.result
+      if (typeof rawResult === 'number') {
+        resolve(rawResult)
+      } else {
+        resolve(null)
+      }
+    }
+
+    request.onerror = () => {
+      console.error('Error retrieving concurrencyNumber')
+      resolve(null)
+    }
+  })
+}
+
+export async function deleteConcurrencyNumber(): Promise<void> {
+  const db = await openSettingsDB()
+  if (!db) {
+    console.error('Failed to open database for deleting concurrencyNumber')
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const transaction = db.transaction(SETTINGS_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(SETTINGS_STORE_NAME)
+    const request = store.delete('concurrencyNumber')
+
+    request.onsuccess = () => {
+      resolve()
+    }
+    request.onerror = () => {
+      console.error('Error deleting concurrencyNumber')
+      resolve()
+    }
+  })
+}
