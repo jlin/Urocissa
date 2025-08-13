@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    # Ignore commits that only change README files (any level, any extension)
+    paths-ignore:
+      - '**/README*'
+      - '**/readme*'
+    # Ignore all tag pushes/updates
+    tags-ignore:
+      - '**'
 
 jobs:
   # Job for building amd64 image on ubuntu-latest
