@@ -19,31 +19,36 @@ export const useFilterStore = (isolationId: IsolationId) =>
         const searchStringStr = typeof this.searchString === 'string' ? this.searchString : null
         const hasSearchString = searchStringStr !== null
 
-        // No valid input
-        if (!hasBasicString && !hasSearchString) {
+        try {
+          // No valid input
+          if (!hasBasicString && !hasSearchString) {
+            return null
+          }
+
+          // Only basicString
+          if (hasBasicString && !hasSearchString) {
+            return generateJsonString(basicString)
+          }
+
+          // Only searchString
+          if (!hasBasicString && hasSearchString) {
+            try {
+              return generateJsonString(searchStringStr)
+            } catch {
+              return generateJsonString(`any: "${searchStringStr}"`)
+            }
+          }
+
+          // Both strings
+          try {
+            return generateJsonString(`and(${basicString},${searchStringStr})`)
+          } catch {
+            return generateJsonString(`and(${basicString}, any: "${searchStringStr}")`)
+          }
+        } catch (err) {
+          console.error(err)
           return null
         }
-
-        // Only basicString
-        if (hasBasicString && !hasSearchString) {
-          return generateJsonString(basicString) || null
-        }
-
-        // Only searchString
-        if (!hasBasicString && hasSearchString) {
-          return (
-            generateJsonString(searchStringStr) ||
-            generateJsonString(`any: "${searchStringStr}"`) ||
-            null
-          )
-        }
-
-        // Both strings
-        return (
-          generateJsonString(`and(${basicString},${searchStringStr})`) ||
-          generateJsonString(`and(${basicString}, any: "${searchStringStr}")`) ||
-          null
-        )
       }
     }
   })()
