@@ -65,7 +65,7 @@ fn main() -> Result<()> {
             if let Some(sc) = superconsole::SuperConsole::new() {
                 INDEX_RUNTIME.spawn(async move {
                     if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {
-                        error!("TUI error: {e}");
+                        panic!("TUI error: {e}");
                     }
                 });
             } else {
