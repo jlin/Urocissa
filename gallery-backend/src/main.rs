@@ -12,6 +12,7 @@ mod workflow;
 
 use crate::process::initialization::initialize;
 use crate::public::constant::runtime::{INDEX_RUNTIME, ROCKET_RUNTIME};
+use crate::public::error_data::handle_error;
 use crate::public::tui::{DASHBOARD, tui_task};
 use crate::tasks::BATCH_COORDINATOR;
 use crate::tasks::batcher::start_watcher::StartWatcherTask;
@@ -64,8 +65,11 @@ fn main() -> Result<()> {
 
             if let Some(sc) = superconsole::SuperConsole::new() {
                 INDEX_RUNTIME.spawn(async move {
-                    if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx).await {
-                        panic!("TUI error: {e}");
+                    if let Err(e) = tui_task(sc, DASHBOARD.clone(), rx)
+                        .await
+                        .map_err(|error|handle_error(error.context("TUI error.")))
+                    {
+                        panic!("TUI error: {e:?}");
                     }
                 });
             } else {
