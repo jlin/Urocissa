@@ -289,32 +289,38 @@ impl Dashboard {
 /// ---------- renderer ----------
 impl Component for Dashboard {
     fn draw_unchecked(&self, _: Dimensions, _: DrawMode) -> Result<Lines> {
+        // Determine terminal width, defaulting to 120 columns if unavailable
         let cols = terminal_size()
             .map(|(Width(w), _)| w as usize)
             .unwrap_or(120);
         let sep = "─".repeat(cols);
         let mut lines: Vec<Line> = Vec::new();
 
-        lines.push(vec![sep.clone()].try_into()?);
+        // Top separator line
+        lines.push(Line::sanitized(&sep));
 
+        // Compute average duration or fallback to "n/a"
         let avg_str = if self.handled() > 0 {
             format!("{:.2}s", self.total_duration() / self.handled() as f64)
         } else {
             "n/a".into()
         };
 
+        // Build stats line showing processed, pending, and average values
         let mut stats = format!(
             " Processed: {:<6} │ Pending: {:<6} │ Avg: {}",
             self.handled(),
             self.pending(),
             avg_str
         );
+        // Pad right to fill the terminal width
         stats.push_str(&" ".repeat(cols.saturating_sub(UnicodeWidthStr::width(stats.as_str()))));
-        lines.push(vec![stats].try_into()?);
+        lines.push(Line::sanitized(&stats));
 
-        lines.push(vec![sep.clone()].try_into()?);
+        // Middle separator line
+        lines.push(Line::sanitized(&sep));
 
-        /* Snapshot rows */
+        // Snapshot current tasks
         let running: Vec<_> = self.tasks.iter().map(|kv| kv.value().clone()).collect();
         let completed: Vec<_> = {
             let mut v = Vec::with_capacity(self.completed.len());
@@ -331,27 +337,31 @@ impl Component for Dashboard {
         let running_len = running.len();
 
         if running_len >= max {
+            // If running tasks exceed or equal max threads, sort by start time and take latest `max` tasks
             let mut slice = running;
             slice.sort_by_key(|r| match r.state {
                 TaskState::Indexing(t0) | TaskState::Transcoding(t0) => t0,
                 TaskState::Done(_) | TaskState::Failed(_) => Instant::now(),
             });
             for t in slice.into_iter().rev().take(max).rev() {
-                lines.push(vec![t.fmt()].try_into()?);
+                lines.push(Line::sanitized(&t.fmt()));
             }
         } else {
+            // Otherwise, fill with completed tasks first, then running tasks
             let need = max - running_len;
             let start = completed.len().saturating_sub(need);
             for t in completed.iter().skip(start) {
-                lines.push(vec![t.fmt()].try_into()?);
+                lines.push(Line::sanitized(&t.fmt()));
             }
             for t in running {
-                lines.push(vec![t.fmt()].try_into()?);
+                lines.push(Line::sanitized(&t.fmt()));
             }
         }
 
+        // Fill remaining lines with blank spaces to maintain dashboard height
         while lines.len() < max + 3 {
-            lines.push(vec![" ".repeat(cols)].try_into()?);
+            let blank = " ".repeat(cols);
+            lines.push(Line::sanitized(&blank));
         }
         lines.truncate(max + 3);
 
