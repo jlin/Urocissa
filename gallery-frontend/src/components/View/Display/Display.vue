@@ -126,7 +126,7 @@
     <!-- Desktop version without swiper -->
 
     <!-- Desktop version without swiper -->
-    <v-row v-if="!configStore.isMobile" no-gutters class="h-100">
+    <div v-if="!configStore.isMobile" no-gutters class="h-100 w-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
         :index="index"
@@ -143,7 +143,7 @@
         :col-width="colWidth"
         :col-height="colHeight"
       />
-    </v-row>
+    </div>
   </div>
 </template>
 
@@ -429,20 +429,6 @@ watch(
 </script>
 
 <style scoped>
-.show-info {
-  width: calc(100% - 360px);
-}
-
-@media (width <= 720px) {
-  .show-info {
-    display: none;
-  }
-}
-
-.not-show-info {
-  width: 100%;
-}
-
 /* Swiper container styles */
 .swiper-container {
   width: 100%;

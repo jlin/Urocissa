@@ -1,5 +1,5 @@
 <template>
-  <v-col
+  <div
     v-if="abstractData && abstractData.database"
     id="col-ref"
     class="h-100 d-flex align-center justify-center"
@@ -30,21 +30,20 @@
       outlined
       style="padding: 16px"
     >
-      <v-row align="center" no-gutters>
-        <v-col cols="auto" class="d-flex align-center">
+      <div align="center" no-gutters>
+        <div cols="auto" class="d-flex align-center">
           <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
-        </v-col>
-        <v-col class="text-left pl-4">
+        </div>
+        <div class="text-left pl-4">
           <div>This video is currently being processed.</div>
           <div>Please check back later.</div>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
     </v-card>
-  </v-col>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { VCol } from 'vuetify/components'
 import { useImgStore } from '@/store/imgStore'
 
 import { AbstractData, IsolationId } from '@type/types'

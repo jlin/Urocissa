@@ -2,17 +2,16 @@
   <div
     id="abstractData-col"
     v-if="abstractData"
-    class="h-100 abstractData-css flex-grow-0"
+    class="h-100 abstractData-css flex-grow-0 flex-shrink-0"
     cols="auto"
     :style="{
       backgroundColor: 'white',
-      width: constStore.showInfo ? '360px' : '0',
-      minHeight: '0'
+      width: constStore.showInfo ? '360px' : '0'
     }"
   >
-    <v-row no-gutters class="position-relative">
-      <!-- Toolbars should not be direct children of v-row; wrap in a column -->
-      <v-col cols="12">
+    <div no-gutters class="position-relative">
+      <!-- Toolbars should not be direct children of div; wrap in a column -->
+      <div cols="12">
         <v-toolbar
           color="white"
           :style="{
@@ -25,8 +24,8 @@
           </v-btn>
           <v-toolbar-title class="text-h5">Info</v-toolbar-title>
         </v-toolbar>
-      </v-col>
-      <v-col v-if="abstractData.database" class="h-100 w-100" cols="auto">
+      </div>
+      <div v-if="abstractData.database" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="abstractData.database" />
           <ItemPath v-if="showMetadata" :database="abstractData.database" />
@@ -52,8 +51,8 @@
             :albums="abstractData.database.album"
           />
         </v-list>
-      </v-col>
-      <v-col v-if="abstractData.album" class="h-100 w-100" cols="auto">
+      </div>
+      <div v-if="abstractData.album" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemTitle :title="abstractData.album.title" />
           <ItemCount :album="abstractData.album" />
@@ -65,8 +64,8 @@
             :tags="abstractData.album.tag"
           />
         </v-list>
-      </v-col>
-    </v-row>
+      </div>
+    </div>
   </div>
 </template>
 
