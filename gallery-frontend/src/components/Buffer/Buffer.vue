@@ -1,6 +1,7 @@
 <template>
   <div
-    class="buffer position-relative w-100 overflow-y-hidden"
+    id="buffer"
+    class="position-relative w-100 overflow-y-hidden"
     :style="{
       height: `${Math.max(bufferHeight, prefetchStore.totalHeight)}px`
     }"
@@ -23,7 +24,7 @@
         top: `${row.topPixelAccumulated! - scrollTopStore.scrollTop + bufferHeight / 3 + row.offset}px`,
         height: `${row.rowHeight}px`
       }"
-      :start="`${row.start}`"
+      :start="row.start"
     >
       <RowBlock :row="row" :isolation-id="isolationId" />
     </div>
