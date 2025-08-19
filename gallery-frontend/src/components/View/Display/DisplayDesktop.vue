@@ -113,6 +113,3 @@ const previousPage = computed(() => {
   return undefined
 })
 </script>
-
-<style scoped>
-</style>

@@ -39,7 +39,3 @@ const props = defineProps<{
 // `show` is guaranteed by withDefaults to be boolean
 const show = computed(() => props.show)
 </script>
-
-<style scoped>
-/* styles kept inline in the component to match original layout */
-</style>
