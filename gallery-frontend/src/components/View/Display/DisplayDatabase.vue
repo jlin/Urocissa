@@ -4,17 +4,12 @@
     id="col-ref"
     class="h-100 d-flex align-center justify-center"
   >
-    <img
+    <DisplayDatabaseImage
       :key="index"
-      v-if="abstractData.database.ext_type === 'image' && imgStore.imgOriginal.get(index)"
-      :src="imgStore.imgOriginal.get(index)"
-      :style="{
-        width: `${abstractData.database.width}px`,
-        height: `${abstractData.database.height}px`,
-        maxWidth: '100%',
-        maxHeight: '100%',
-        objectFit: 'scale-down'
-      }"
+      v-if="abstractData.database.ext_type === 'image'"
+      :isolation-id="isolationId"
+      :index="index"
+      :abstract-data="abstractData"
     />
 
     <DisplayDatabaseVideo
@@ -44,13 +39,12 @@
 </template>
 
 <script setup lang="ts">
-import { useImgStore } from '@/store/imgStore'
-
 import { AbstractData, IsolationId } from '@type/types'
 
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
 import { ref, watch } from 'vue'
 import DisplayDatabaseVideo from './DisplayDatabaseVideo.vue'
+import DisplayDatabaseImage from './DisplayDatabaseImage.vue'
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -61,7 +55,6 @@ const props = defineProps<{
   colHeight: number
 }>()
 
-const imgStore = useImgStore(props.isolationId)
 const currentFrameStore = useCurrentFrameStore(props.isolationId)
 const videoRef = ref<HTMLVideoElement | null>(null)
 
