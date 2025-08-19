@@ -27,7 +27,7 @@
             />
           </div>
         </div>
-        <div class="flex-grow-0">
+        <div class="flex-grow-0" style="background-color: #424242">
           <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
         </div>
       </div>

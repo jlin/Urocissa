@@ -8,7 +8,6 @@
       width: `${scrollBarWidth}px`,
       zIndex: `3`,
       cursor: `vertical-text`,
-      backgroundColor: `#424242`,
       marginTop: '8px'
     }"
     @click="handleClick"
