@@ -239,43 +239,4 @@ window.addEventListener('keydown', handleKeyDown)
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
-
-/** -------------------------
- *  Swiper navigation handlers
- *  -------------------------
- */
-// mobile navigation handlers moved into DisplayMobile.vue
-
-// mobile swiper logic moved into DisplayMobile.vue
 </script>
-
-<style scoped>
-/* Swiper container styles */
-.swiper-container {
-  width: 100%;
-  overflow: hidden;
-}
-
-.slide-content {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Override swiper default styles for better integration */
-:deep(.swiper) {
-  width: 100%;
-  height: 100%;
-}
-
-:deep(.swiper-slide) {
-  text-align: center;
-  font-size: 18px;
-  background: transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>
