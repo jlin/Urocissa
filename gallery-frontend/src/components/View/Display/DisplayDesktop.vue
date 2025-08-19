@@ -53,9 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useDataStore } from '@/store/dataStore'
 import { useConfigStore } from '@/store/configStore'
 import ViewPageDisplayDatabase from './DisplayDatabase.vue'
 import ViewPageDisplayAlbum from './DisplayAlbum.vue'
@@ -69,47 +66,11 @@ const props = defineProps<{
   abstractData: AbstractData | undefined
   colWidth: number | undefined
   colHeight: number | undefined
+  previousHash: string | undefined
+  nextHash: string | undefined
+  previousPage: Record<string, unknown> | undefined
+  nextPage: Record<string, unknown> | undefined
 }>()
 
 const configStore = useConfigStore(props.isolationId)
-const dataStore = useDataStore(props.isolationId)
-const route = useRoute()
-
-const nextHash = computed(() => {
-  const nextData = dataStore.data.get(props.index + 1)
-  if (nextData?.database) return nextData.database.hash
-  if (nextData?.album) return nextData.album.id
-  return undefined
-})
-
-const previousHash = computed(() => {
-  const previousData = dataStore.data.get(props.index - 1)
-  if (previousData?.database) return previousData.database.hash
-  if (previousData?.album) return previousData.album.id
-  return undefined
-})
-
-const nextPage = computed(() => {
-  if (nextHash.value === undefined) return undefined
-  if (route.meta.level === 2) {
-    const updatedParams = { ...route.params, hash: nextHash.value }
-    return { ...route, params: updatedParams }
-  } else if (route.meta.level === 4) {
-    const updatedParams = { ...route.params, subhash: nextHash.value }
-    return { ...route, params: updatedParams }
-  }
-  return undefined
-})
-
-const previousPage = computed(() => {
-  if (previousHash.value === undefined) return undefined
-  if (route.meta.level === 2) {
-    const updatedParams = { ...route.params, hash: previousHash.value }
-    return { ...route, params: updatedParams }
-  } else if (route.meta.level === 4) {
-    const updatedParams = { ...route.params, subhash: previousHash.value }
-    return { ...route, params: updatedParams }
-  }
-  return undefined
-})
 </script>

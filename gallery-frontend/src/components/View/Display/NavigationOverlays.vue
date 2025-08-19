@@ -26,16 +26,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { RouteLocationRaw } from 'vue-router'
-const props = defineProps<{
+defineProps<{
   previousHash: string | undefined
   nextHash: string | undefined
   previousPage: RouteLocationRaw | undefined
   nextPage: RouteLocationRaw | undefined
   show: boolean
 }>()
-
-// `show` is guaranteed by withDefaults to be boolean
-const show = computed(() => props.show)
 </script>

@@ -20,6 +20,10 @@
       :hash="hash"
       :index="index"
       :abstract-data="abstractData"
+      :previous-hash="previousHash"
+      :next-hash="nextHash"
+      :previous-page="previousPage"
+      :next-page="nextPage"
       :col-width="colWidth"
       :col-height="colHeight"
     />
@@ -30,6 +34,10 @@
       :hash="hash"
       :index="index"
       :abstract-data="abstractData"
+      :previous-hash="previousHash"
+      :next-hash="nextHash"
+      :previous-page="previousPage"
+      :next-page="nextPage"
       :col-width="colWidth"
       :col-height="colHeight"
     />

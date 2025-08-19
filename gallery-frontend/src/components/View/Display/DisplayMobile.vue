@@ -100,6 +100,10 @@ const props = defineProps<{
   abstractData: AbstractData | undefined
   colWidth: number | undefined
   colHeight: number | undefined
+  previousHash: string | undefined
+  nextHash: string | undefined
+  previousPage: Record<string, unknown> | undefined
+  nextPage: Record<string, unknown> | undefined
 }>()
 
 const configStore = useConfigStore(props.isolationId)
@@ -110,24 +114,10 @@ const router = useRouter()
 const modules = [Manipulation]
 const swiperInstance = ref<SwiperType | null>(null)
 
-const nextHash = computed(() => {
-  const nextData = dataStore.data.get(props.index + 1)
-  if (nextData?.database) return nextData.database.hash
-  if (nextData?.album) return nextData.album.id
-  return undefined
-})
-
-const previousHash = computed(() => {
-  const previousData = dataStore.data.get(props.index - 1)
-  if (previousData?.database) return previousData.database.hash
-  if (previousData?.album) return previousData.album.id
-  return undefined
-})
-
 const nextAbstractData = computed(() => dataStore.data.get(props.index + 1))
 const previousAbstractData = computed(() => dataStore.data.get(props.index - 1))
 
-const currentSlideIndex = computed(() => (previousHash.value !== undefined ? 1 : 0))
+const currentSlideIndex = computed(() => (props.previousHash !== undefined ? 1 : 0))
 
 function canHandleNav(): boolean {
   const modalStore = useModalStore('mainId')
@@ -147,51 +137,29 @@ function onSlideChange(swiper: SwiperType) {
   if (!canHandleNav()) return
 
   const currentIndex = swiper.activeIndex
-  const hasPrevious = previousHash.value !== undefined
-  const hasNext = nextHash.value !== undefined
+  const hasPrevious = props.previousHash !== undefined
+  const hasNext = props.nextHash !== undefined
 
   if (hasPrevious) {
-    if (currentIndex === 0 && previousPage.value) {
-      router.replace(previousPage.value).catch((error: unknown) => {
+    if (currentIndex === 0 && props.previousPage) {
+      router.replace(props.previousPage).catch((error: unknown) => {
         console.error('Navigation Error:', error)
       })
-    } else if (currentIndex === 2 && hasNext && nextPage.value) {
-      router.replace(nextPage.value).catch((error: unknown) => {
+    } else if (currentIndex === 2 && hasNext && props.nextPage) {
+      router.replace(props.nextPage).catch((error: unknown) => {
         console.error('Navigation Error:', error)
       })
     }
   } else {
-    if (currentIndex === 1 && hasNext && nextPage.value) {
-      router.replace(nextPage.value).catch((error: unknown) => {
+    if (currentIndex === 1 && hasNext && props.nextPage) {
+      router.replace(props.nextPage).catch((error: unknown) => {
         console.error('Navigation Error:', error)
       })
     }
   }
 }
 
-const nextPage = computed(() => {
-  if (nextHash.value === undefined) return undefined
-  if (route.meta.level === 2) {
-    const updatedParams = { ...route.params, hash: nextHash.value }
-    return { ...route, params: updatedParams }
-  } else if (route.meta.level === 4) {
-    const updatedParams = { ...route.params, subhash: nextHash.value }
-    return { ...route, params: updatedParams }
-  }
-  return undefined
-})
-
-const previousPage = computed(() => {
-  if (previousHash.value === undefined) return undefined
-  if (route.meta.level === 2) {
-    const updatedParams = { ...route.params, hash: previousHash.value }
-    return { ...route, params: updatedParams }
-  } else if (route.meta.level === 4) {
-    const updatedParams = { ...route.params, subhash: previousHash.value }
-    return { ...route, params: updatedParams }
-  }
-  return undefined
-})
+// next/previous page are provided via props from the parent
 
 watch(
   () => props.index,
