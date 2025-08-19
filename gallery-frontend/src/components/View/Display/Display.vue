@@ -3,8 +3,7 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
-    class="h-100 position-relative flex-grow-1"
+    class="h-100 position-relative flex-grow-1 show-info"
     style="min-width: 0"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
