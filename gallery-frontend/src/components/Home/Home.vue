@@ -1,31 +1,34 @@
 <template>
-  <!-- This bar is used inside album reading page -->
-  <slot name="reading-bar"> </slot>
   <!-- This router-view contains the ViewPage.vue -->
   <router-view :key="albumHomeIsolatedKey"></router-view>
-  <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
-  <div
-    id="image-container"
-    ref="imageContainerRef"
-    class="d-flex flex-wrap position-relative pa-1 pb-2 h-100 bg-grey-darken-3"
-    :style="{
-      width: `calc(100% - ${scrollBarWidth}px)`
-    }"
-    :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
-    @scroll="
-      // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
-      prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
-    "
-  >
-    <Buffer
-      v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
-      :buffer-height="bufferHeight"
-      :isolation-id="props.isolationId"
-    />
-    <HomeEmptyCard
-      v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-      :isolation-id="props.isolationId"
-    />
+  <div class="w-100 h-100 d-flex flex-column">
+    <div class="w-100 flex-grow-0"><slot name="reading-bar"> </slot></div>
+    <div class="w-100 flex-grow-1" style="min-height: 0">
+      <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
+      <div
+        id="image-container"
+        ref="imageContainerRef"
+        class="d-flex flex-wrap position-relative h-100 pa-1 pb-2 bg-grey-darken-3"
+        :style="{
+          width: `calc(100% - ${scrollBarWidth}px)`
+        }"
+        :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
+        @scroll="
+          // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
+          prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
+        "
+      >
+        <Buffer
+          v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
+          :buffer-height="bufferHeight"
+          :isolation-id="props.isolationId"
+        />
+        <HomeEmptyCard
+          v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
+          :isolation-id="props.isolationId"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
