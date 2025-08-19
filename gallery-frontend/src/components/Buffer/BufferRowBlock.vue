@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 d-flex flex-wrap row-flex-container no-select">
+  <div class="w-100 d-flex flex-wrap no-select">
     <div
       v-for="(data, subIndex) in row.displayElements"
       :key="`${row.start}-${subIndex}-${prefetchStore.timestamp}`"
