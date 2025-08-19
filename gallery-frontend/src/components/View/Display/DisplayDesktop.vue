@@ -24,29 +24,13 @@
     </v-card>
 
     <!-- Navigation overlays (not grid children) -->
-    <v-card
-      width="100"
-      v-if="!configStore.isMobile && previousHash !== undefined"
-      color="transparent"
-      class="navigate-left d-flex align-center justify-center h-50"
-      style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
-      :to="previousPage"
-      replace
-    >
-      <v-icon>mdi-arrow-left</v-icon>
-    </v-card>
-    <v-card
-      width="100"
-      v-if="!configStore.isMobile && nextHash !== undefined"
-      color="transparent"
-      class="navigate-right d-flex align-center justify-center h-50"
-      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
-      :to="nextPage"
-      replace
-    >
-      <v-icon>mdi-arrow-right</v-icon>
-    </v-card>
-
+    <NavigationOverlays
+      :previous-hash="previousHash"
+      :next-hash="nextHash"
+      :previous-page="previousPage"
+      :next-page="nextPage"
+      :show="!configStore.isMobile"
+    />
     <div class="h-100 w-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && !configStore.disableImg"
@@ -75,6 +59,7 @@ import { useDataStore } from '@/store/dataStore'
 import { useConfigStore } from '@/store/configStore'
 import ViewPageDisplayDatabase from './DisplayDatabase.vue'
 import ViewPageDisplayAlbum from './DisplayAlbum.vue'
+import NavigationOverlays from './NavigationOverlays.vue'
 import { AbstractData, IsolationId } from '@type/types'
 
 const props = defineProps<{
@@ -130,5 +115,4 @@ const previousPage = computed(() => {
 </script>
 
 <style scoped>
-/* No extra styles; positioning is inline to match original layout */
 </style>
