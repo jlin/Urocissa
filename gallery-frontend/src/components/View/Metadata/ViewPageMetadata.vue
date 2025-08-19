@@ -1,10 +1,14 @@
 <template>
-  <v-col
+  <div
     id="abstractData-col"
     v-if="abstractData"
-    class="h-100 abstractData-css"
+    class="h-100 abstractData-css flex-grow-0"
     cols="auto"
-    :style="{ backgroundColor: 'white' }"
+    :style="{
+      backgroundColor: 'white',
+      width: constStore.showInfo ? '360px' : '0',
+      minHeight: '0'
+    }"
   >
     <v-row no-gutters class="position-relative">
       <!-- Toolbars should not be direct children of v-row; wrap in a column -->
@@ -22,7 +26,7 @@
           <v-toolbar-title class="text-h5">Info</v-toolbar-title>
         </v-toolbar>
       </v-col>
-  <v-col v-if="abstractData.database" class="h-100 w-100" cols="auto">
+      <v-col v-if="abstractData.database" class="h-100 w-100" cols="auto">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="abstractData.database" />
           <ItemPath v-if="showMetadata" :database="abstractData.database" />
@@ -63,7 +67,7 @@
         </v-list>
       </v-col>
     </v-row>
-  </v-col>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -109,14 +113,13 @@ watch(
   }
 )
 </script>
-<style scoped>
-.abstractData-css {
-  width: 360px;
-}
 
-@media (max-width: 720px) {
-  .abstractData-css {
-    width: 100%;
+<style scoped>
+@media (width <= 720px) {
+  /* On small screens, make the info pane full width.
+     Use !important to override the inline :style binding for width. */
+  #abstractData-col {
+    width: 100% !important;
   }
 }
 </style>

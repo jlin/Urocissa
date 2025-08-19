@@ -15,40 +15,35 @@
     transition="false"
     :close-on-back="false"
   >
-    <v-container
+    <div
       v-if="index !== undefined"
-      fluid
-      class="pa-0 h-100 overflow-hidden position-relative"
+      class="pa-0 h-100 w-100 d-flex position-relative"
       :style="{ backgroundColor: 'black' }"
     >
-      <v-row no-gutters class="w-100 h-100 flex-nowrap">
-        <ViewPageDisplay
-          :abstract-data="abstractData"
-          :index="index"
-          :hash="hash"
-          :isolation-id="isolationId"
-        />
-        <MetadataCol
-          v-if="abstractData"
-          :abstract-data="abstractData"
-          :index="index"
-          :hash="hash"
-          :isolation-id="isolationId"
-        />
-      </v-row>
-    </v-container>
-    <v-container
+      <ViewPageDisplay
+        :abstract-data="abstractData"
+        :index="index"
+        :hash="hash"
+        :isolation-id="isolationId"
+      />
+      <MetadataCol
+        v-if="abstractData && constStore.showInfo"
+        :abstract-data="abstractData"
+        :index="index"
+        :hash="hash"
+        :isolation-id="isolationId"
+      />
+    </div>
+    <div
       v-else
       fluid
       class="pa-0 h-100 overflow-hidden position-relative"
       :style="{ backgroundColor: 'black' }"
     >
-      <v-row class="fill-height" align="center" justify="center">
-        <v-col cols="12" class="d-flex align-center justify-center">
-          <v-progress-circular indeterminate color="primary" size="64" />
-        </v-col>
-      </v-row>
-    </v-container>
+      <div class="d-flex align-center justify-center w-100 h-100">
+        <v-progress-circular indeterminate color="primary" size="64" />
+      </div>
+    </div>
   </v-overlay>
 </template>
 
@@ -59,6 +54,7 @@ import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/View/Display/Display.vue'
 import MetadataCol from '@/components/View/Metadata/ViewPageMetadata.vue'
 import { IsolationId } from '@type/types'
+import { useConstStore } from '@/store/constStore'
 const props = defineProps<{
   isolationId: IsolationId
 }>()
@@ -66,6 +62,7 @@ const props = defineProps<{
 const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
+const constStore = useConstStore('mainId')
 
 const hash = computed(() => {
   if (props.isolationId === 'mainId') {

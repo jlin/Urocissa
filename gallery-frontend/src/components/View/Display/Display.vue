@@ -1,10 +1,11 @@
 <template>
-  <v-col
+  <div
     id="image-display-col"
     ref="colRef"
     cols="auto"
     :class="{ 'show-info': constStore.showInfo, 'not-show-info': !constStore.showInfo }"
-    class="h-100 position-relative"
+    class="h-100 position-relative flex-grow-1"
+    style="min-width: 0"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
@@ -144,7 +145,7 @@
         :col-height="colHeight"
       />
     </v-row>
-  </v-col>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -433,7 +434,7 @@ watch(
   width: calc(100% - 360px);
 }
 
-@media (max-width: 720px) {
+@media (width <= 720px) {
   .show-info {
     display: none;
   }
