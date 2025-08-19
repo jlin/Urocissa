@@ -1,83 +1,79 @@
 <template>
-  <v-sheet class="position-fixed w-100 h-100" :style="{ backgroundColor: `#424242` }">
+  <v-sheet
+    v-if="imageContainerRef"
+    class="h-100"
+    ref="scrollbarRef"
+    id="scroll-bar"
+    :style="{
+      width: `${scrollBarWidth}px`,
+      zIndex: `3`,
+      cursor: `vertical-text`,
+      backgroundColor: `#424242`,
+      marginTop: '8px'
+    }"
+    @click="handleClick"
+    @mousedown="handleMouseDown"
+    @mouseup="handleMouseUp"
+    @mousemove="handleHover"
+    @mouseleave="handleMouseLeave"
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd"
+    @touchmove="handleMove"
+  >
     <v-sheet
-      v-if="imageContainerRef"
-      ref="scrollbarRef"
-      class="position-fixed"
-      id="scroll-bar"
+      class="position-relative w-100 h-100"
       :style="{
-        width: `${scrollBarWidth}px`,
-        height: `calc(100% - 100px)`,
-        right: `${0}`,
-        zIndex: `3`,
-        cursor: `vertical-text`,
-        backgroundColor: `#424242`,
-        marginTop: '8px'
+        pointerEvents: 'none'
       }"
-      @click="handleClick"
-      @mousedown="handleMouseDown"
-      @mouseup="handleMouseUp"
-      @mousemove="handleHover"
-      @mouseleave="handleMouseLeave"
-      @touchstart="handleTouchStart"
-      @touchend="handleTouchEnd"
-      @touchmove="handleMove"
     >
+      <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
       <v-sheet
-        class="position-relative w-100 h-100"
+        v-if="scrollbarStore.initialized"
+        id="current-date-chip"
+        class="w-100 position-absolute"
         :style="{
-          pointerEvents: 'none'
+          height: `calc(${(currentDateChipIndex / rowLength) * 100}% + 1px)`,
+          borderBottom: '1px solid deepskyblue'
+        }"
+      ></v-sheet>
+      <!-- Chips to show the all year labels. -->
+      <v-chip
+        v-for="scrollbarData in displayScrollbarDataArrayYear"
+        :key="scrollbarData.index"
+        size="x-small"
+        variant="text"
+        class="w-100 position-absolute text-grey-lighten-2 pa-0 ma-0 d-flex align-center justify-center"
+        :style="{
+          top: `${(Math.floor(scrollbarData.index / layoutBatchNumber) / rowLength) * 100}%`,
+          userSelect: 'none'
         }"
       >
-        <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
+        {{ scrollbarData.year }}
+      </v-chip>
+      <!-- This sheet's height is adjusted to visually indicate the size of the current row block. -->
+      <v-sheet
+        v-if="scrollbarRef"
+        id="block-chip"
+        class="w-100 position-absolute bg-grey-darken-2"
+        :style="{
+          height: `${scrollbarHeight / rowLength}px`,
+          top: `${(hoverLabelRowIndex / rowLength) * 100}%`
+        }"
+      >
+        <!-- Chip to show the current view year and month label. -->
         <v-sheet
-          v-if="scrollbarStore.initialized"
-          id="current-date-chip"
-          class="w-100 position-absolute"
+          id="day-chip"
+          class="position-absolte w-100 d-flex align-center justify-center text-caption"
           :style="{
-            height: `calc(${(currentDateChipIndex / rowLength) * 100}% + 1px)`,
-            borderBottom: '1px solid deepskyblue'
-          }"
-        ></v-sheet>
-        <!-- Chips to show the all year labels. -->
-        <v-chip
-          v-for="scrollbarData in displayScrollbarDataArrayYear"
-          :key="scrollbarData.index"
-          size="x-small"
-          variant="text"
-          class="w-100 position-absolute text-grey-lighten-2 pa-0 ma-0 d-flex align-center justify-center"
-          :style="{
-            top: `${(Math.floor(scrollbarData.index / layoutBatchNumber) / rowLength) * 100}%`,
+            backgroundColor: '#3a3a3a',
+            borderTop: '1px solid deepskyblue',
+            height: `25px`,
+            zIndex: 2,
             userSelect: 'none'
           }"
         >
-          {{ scrollbarData.year }}
-        </v-chip>
-        <!-- This sheet's height is adjusted to visually indicate the size of the current row block. -->
-        <v-sheet
-          v-if="scrollbarRef"
-          id="block-chip"
-          class="w-100 position-absolute bg-grey-darken-2"
-          :style="{
-            height: `${scrollbarHeight / rowLength}px`,
-            top: `${(hoverLabelRowIndex / rowLength) * 100}%`
-          }"
+          {{ hoverLabelDate }}</v-sheet
         >
-          <!-- Chip to show the current view year and month label. -->
-          <v-sheet
-            id="day-chip"
-            class="position-absolte w-100 d-flex align-center justify-center text-caption"
-            :style="{
-              backgroundColor: '#3a3a3a',
-              borderTop: '1px solid deepskyblue',
-              height: `25px`,
-              zIndex: 2,
-              userSelect: 'none'
-            }"
-          >
-            {{ hoverLabelDate }}</v-sheet
-          >
-        </v-sheet>
       </v-sheet>
     </v-sheet>
   </v-sheet>

@@ -4,29 +4,32 @@
   <div class="w-100 h-100 d-flex flex-column">
     <div class="w-100 flex-grow-0"><slot name="reading-bar"> </slot></div>
     <div class="w-100 flex-grow-1" style="min-height: 0">
-      <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
-      <div
-        id="image-container"
-        ref="imageContainerRef"
-        class="d-flex flex-wrap position-relative h-100 pa-1 pb-2 bg-grey-darken-3"
-        :style="{
-          width: `calc(100% - ${scrollBarWidth}px)`
-        }"
-        :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
-        @scroll="
-          // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
-          prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
-        "
-      >
-        <Buffer
-          v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
-          :buffer-height="bufferHeight"
-          :isolation-id="props.isolationId"
-        />
-        <HomeEmptyCard
-          v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-          :isolation-id="props.isolationId"
-        />
+      <div class="w-100 h-100 d-flex">
+        <div class="flex-grow-1" style="min-height: 0">
+          <div
+            id="image-container"
+            ref="imageContainerRef"
+            class="d-flex flex-wrap position-relative h-100 pa-1 pb-2 bg-grey-darken-3"
+            :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
+            @scroll="
+              // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
+              prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
+            "
+          >
+            <Buffer
+              v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
+              :buffer-height="bufferHeight"
+              :isolation-id="props.isolationId"
+            />
+            <HomeEmptyCard
+              v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
+              :isolation-id="props.isolationId"
+            />
+          </div>
+        </div>
+        <div class="flex-grow-0">
+          <ScrollBar v-if="imageContainerRef" :isolation-id="props.isolationId" />
+        </div>
       </div>
     </div>
   </div>
@@ -61,7 +64,7 @@ import { useImgStore } from '@/store/imgStore'
 import Buffer from '@/components/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/HomeScrollBar.vue'
 import '@/style/HomePage.css'
-import { layoutBatchNumber, scrollBarWidth } from '@/type/constants'
+import { layoutBatchNumber } from '@/type/constants'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useRowStore } from '@/store/rowStore'
 import { useLocationStore } from '@/store/locationStore'
