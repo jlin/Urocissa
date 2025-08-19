@@ -38,112 +38,25 @@
       <v-icon>mdi-arrow-right</v-icon>
     </v-card>
 
-    <!-- Swiper container for mobile with preview -->
-    <div v-if="configStore.isMobile" class="swiper-container h-100">
-      <swiper
-        :modules="modules"
-        :slides-per-view="1"
-        :space-between="10"
-        :centered-slides="true"
-        :initial-slide="currentSlideIndex"
-        :resistance="true"
-        :resistance-ratio="0.3"
-        :allow-touch-move="canHandleNav()"
-        @slide-change="onSlideChange"
-        @swiper="onSwiper"
-        class="h-100"
-      >
-        <!-- Previous slide -->
-        <swiper-slide v-if="previousHash !== undefined">
-          <div class="slide-content">
-            <ViewPageDisplayDatabase
-              v-if="
-                previousAbstractData && previousAbstractData.database && !configStore.disableImg
-              "
-              :index="index - 1"
-              :hash="previousAbstractData.database.hash"
-              :abstract-data="previousAbstractData"
-              :col-width="colWidth"
-              :col-height="colHeight"
-              :isolation-id="isolationId"
-            />
-            <ViewPageDisplayAlbum
-              v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
-              :index="index - 1"
-              :album="previousAbstractData.album"
-              :col-width="colWidth"
-              :col-height="colHeight"
-            />
-          </div>
-        </swiper-slide>
+    <DisplayMobile
+      v-if="configStore.isMobile"
+      :isolation-id="isolationId"
+      :hash="hash"
+      :index="index"
+      :abstract-data="abstractData"
+      :col-width="colWidth"
+      :col-height="colHeight"
+    />
 
-        <!-- Current slide -->
-        <swiper-slide>
-          <div class="slide-content">
-            <ViewPageDisplayDatabase
-              v-if="abstractData && abstractData.database && !configStore.disableImg"
-              :index="index"
-              :hash="hash"
-              :abstract-data="abstractData"
-              :col-width="colWidth"
-              :col-height="colHeight"
-              :isolation-id="isolationId"
-            />
-            <ViewPageDisplayAlbum
-              v-if="abstractData && abstractData.album && !configStore.disableImg"
-              :index="index"
-              :album="abstractData.album"
-              :col-width="colWidth"
-              :col-height="colHeight"
-            />
-          </div>
-        </swiper-slide>
-
-        <!-- Next slide -->
-        <swiper-slide v-if="nextHash !== undefined">
-          <div class="slide-content">
-            <ViewPageDisplayDatabase
-              v-if="nextAbstractData && nextAbstractData.database && !configStore.disableImg"
-              :index="index + 1"
-              :hash="nextAbstractData.database.hash"
-              :abstract-data="nextAbstractData"
-              :col-width="colWidth"
-              :col-height="colHeight"
-              :isolation-id="isolationId"
-            />
-            <ViewPageDisplayAlbum
-              v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"
-              :index="index + 1"
-              :album="nextAbstractData.album"
-              :col-width="colWidth"
-              :col-height="colHeight"
-            />
-          </div>
-        </swiper-slide>
-      </swiper>
-    </div>
-
-    <!-- Desktop version without swiper -->
-
-    <!-- Desktop version without swiper -->
-    <div v-if="!configStore.isMobile" no-gutters class="h-100 w-100">
-      <ViewPageDisplayDatabase
-        v-if="abstractData && !configStore.disableImg"
-        :index="index"
-        :hash="hash"
-        :abstract-data="abstractData"
-        :col-width="colWidth"
-        :col-height="colHeight"
-        :isolation-id="isolationId"
-      />
-      <ViewPageDisplayAlbum
-        v-if="abstractData && abstractData.album && !configStore.disableImg"
-        :index="index"
-        :album="abstractData.album"
-        :col-width="colWidth"
-        :col-height="colHeight"
-      />
-    </div>
+    <DisplayDesktop
+      v-if="!configStore.isMobile"
+      :isolation-id="isolationId"
+      :hash="hash"
+      :index="index"
+      :abstract-data="abstractData"
+      :col-width="colWidth"
+      :col-height="colHeight"
+    />
   </div>
 </template>
 
@@ -165,29 +78,19 @@ import { fetchDataInWorker } from '@/api/fetchData'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { AbstractData, IsolationId } from '@type/types'
 import { useElementSize } from '@vueuse/core'
-import ViewPageDisplayDatabase from './DisplayDatabase.vue'
-import ViewPageDisplayAlbum from './DisplayAlbum.vue'
+// child display components moved to DisplayMobile / DisplayDesktop
+import DisplayMobile from './DisplayMobile.vue'
+import DisplayDesktop from './DisplayDesktop.vue'
 import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import { Manipulation } from 'swiper/modules'
-import 'swiper/css'
-import 'swiper/css/manipulation'
-import type { Swiper as SwiperType } from 'swiper'
+// Mobile/desktop display extracted to separate components
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
 const { width: colWidth, height: colHeight } = useElementSize(colRef)
 
-// Swiper configuration
-const modules = [Manipulation]
-const swiperInstance = ref<SwiperType | null>(null)
-
-// Calculate current slide index based on available slides
-const currentSlideIndex = computed(() => {
-  return previousHash.value !== undefined ? 1 : 0
-})
+// mobile/desktop branches extracted to child components
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -224,13 +127,7 @@ const previousHash = computed(() => {
   return undefined
 })
 
-const nextAbstractData = computed(() => {
-  return dataStore.data.get(props.index + 1)
-})
-
-const previousAbstractData = computed(() => {
-  return dataStore.data.get(props.index - 1)
-})
+// next/previous abstract data handled in mobile/desktop child components
 
 const nextPage = computed(() => {
   if (nextHash.value === undefined) return undefined
@@ -371,61 +268,9 @@ onUnmounted(() => {
  *  Swiper navigation handlers
  *  -------------------------
  */
-function canHandleNav(): boolean {
-  return (
-    configStore.isMobile &&
-    ((route.meta.level === 2 && props.isolationId === 'mainId') ||
-      (route.meta.level === 4 && props.isolationId === 'subId')) &&
-    !modalStore.showEditTagsModal
-  )
-}
+// mobile navigation handlers moved into DisplayMobile.vue
 
-function onSwiper(swiper: SwiperType) {
-  swiperInstance.value = swiper
-}
-
-function onSlideChange(swiper: SwiperType) {
-  if (!canHandleNav()) return
-
-  const currentIndex = swiper.activeIndex
-  const hasPrevious = previousHash.value !== undefined
-  const hasNext = nextHash.value !== undefined
-
-  // Calculate expected indices based on available slides
-  if (hasPrevious) {
-    // Layout: [Previous, Current, Next?]
-    if (currentIndex === 0 && previousPage.value) {
-      // Moved to previous slide
-      router.replace(previousPage.value).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
-      })
-    } else if (currentIndex === 2 && hasNext && nextPage.value) {
-      // Moved to next slide
-      router.replace(nextPage.value).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
-      })
-    }
-  } else {
-    // Layout: [Current, Next?]
-    if (currentIndex === 1 && hasNext && nextPage.value) {
-      // Moved to next slide
-      router.replace(nextPage.value).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
-      })
-    }
-  }
-}
-
-// Reset swiper to center when props.index changes
-watch(
-  () => props.index,
-  () => {
-    if (swiperInstance.value && configStore.isMobile) {
-      // Reset to center slide without animation
-      swiperInstance.value.slideTo(currentSlideIndex.value, 0)
-    }
-  }
-)
+// mobile swiper logic moved into DisplayMobile.vue
 </script>
 
 <style scoped>
