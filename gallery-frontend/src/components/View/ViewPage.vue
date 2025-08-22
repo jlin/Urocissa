@@ -18,7 +18,7 @@
     <div
       v-if="index !== undefined"
       class="pa-0 h-100 w-100 d-flex position-relative"
-      :style="{ backgroundColor: 'black' }"
+      style="background-color: black"
     >
       <ViewPageDisplay
         :abstract-data="abstractData"
@@ -38,7 +38,7 @@
       v-else
       fluid
       class="pa-0 h-100 overflow-hidden position-relative"
-      :style="{ backgroundColor: 'black' }"
+      style="background-color: black"
     >
       <div class="d-flex align-center justify-center w-100 h-100">
         <v-progress-circular indeterminate color="primary" size="64" />

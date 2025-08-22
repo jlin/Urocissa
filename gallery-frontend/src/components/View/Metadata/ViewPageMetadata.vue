@@ -10,7 +10,6 @@
     }"
   >
     <div no-gutters class="position-relative">
-      <!-- Toolbars should not be direct children of div; wrap in a column -->
       <div cols="12">
         <v-toolbar
           color="white"
@@ -18,7 +17,6 @@
             backgroundColor: '#212121'
           }"
         >
-          <!-- Icon button with increased size -->
           <v-btn icon @click="toggleInfo">
             <v-icon>mdi-close</v-icon>
           </v-btn>
