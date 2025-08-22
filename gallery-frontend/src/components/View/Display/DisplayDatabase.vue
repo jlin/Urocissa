@@ -26,7 +26,7 @@
       style="padding: 16px"
     >
       <div align="center">
-        <div cols="auto" class="d-flex align-center">
+        <div class="d-flex align-center">
           <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
         </div>
         <div class="text-left pl-4">

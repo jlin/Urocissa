@@ -3,7 +3,6 @@
     id="abstractData-col"
     v-if="abstractData"
     class="h-100 flex-grow-0 flex-shrink-0"
-    cols="auto"
     :style="{
       backgroundColor: 'white',
       width: constStore.showInfo ? '360px' : '0',
@@ -11,7 +10,7 @@
     }"
   >
     <div class="position-relative">
-      <div cols="12">
+      <div>
         <v-toolbar
           color="white"
           :style="{
@@ -24,7 +23,7 @@
           <v-toolbar-title class="text-h5">Info</v-toolbar-title>
         </v-toolbar>
       </div>
-      <div v-if="abstractData.database" class="h-100 w-100" cols="auto">
+      <div v-if="abstractData.database" class="h-100 w-100">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemSize :database="abstractData.database" />
           <ItemPath v-if="showMetadata" :database="abstractData.database" />
@@ -51,7 +50,7 @@
           />
         </v-list>
       </div>
-      <div v-if="abstractData.album" class="h-100 w-100" cols="auto">
+      <div v-if="abstractData.album" class="h-100 w-100">
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemTitle :title="abstractData.album.title" />
           <ItemCount :album="abstractData.album" />
