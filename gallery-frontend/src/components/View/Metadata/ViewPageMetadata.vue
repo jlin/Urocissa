@@ -6,7 +6,8 @@
     cols="auto"
     :style="{
       backgroundColor: 'white',
-      width: constStore.showInfo ? '360px' : '0'
+      width: constStore.showInfo ? '360px' : '0',
+      zIndex: 1
     }"
   >
     <div no-gutters class="position-relative">
