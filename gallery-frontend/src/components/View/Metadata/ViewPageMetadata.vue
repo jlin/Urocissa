@@ -56,7 +56,6 @@
         <v-list bg-color="white" class="pa-0" height="100%" lines="two">
           <ItemTitle :title="abstractData.album.title" />
           <ItemCount :album="abstractData.album" />
-
           <v-divider></v-divider>
           <ItemTag
             :isolation-id="props.isolationId"
