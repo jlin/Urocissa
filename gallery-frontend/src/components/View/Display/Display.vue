@@ -3,8 +3,7 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    class="h-100 position-relative flex-grow-1 show-info image-col"
-    style="min-width: 0"
+    class="h-100 position-relative flex-grow-1 show-info image-col min-w-0"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
