@@ -26,7 +26,7 @@
         :hash="hash"
         :isolation-id="isolationId"
       />
-      <MetadataCol
+      <ViewPageMetadata
         v-if="abstractData && constStore.showInfo"
         :abstract-data="abstractData"
         :index="index"
@@ -52,7 +52,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
 import ViewPageDisplay from '@/components/View/Display/Display.vue'
-import MetadataCol from '@/components/View/Metadata/ViewPageMetadata.vue'
+import ViewPageMetadata from '@/components/View/Metadata/ViewPageMetadata.vue'
 import { IsolationId } from '@type/types'
 import { useConstStore } from '@/store/constStore'
 const props = defineProps<{
