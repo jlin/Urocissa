@@ -21,7 +21,7 @@
       :basic-string="basicString"
       :search-string="null"
     >
-      <template #reading-bar>
+      <template #home-toolbar>
         <ReadingBar :album="album" />
       </template>
     </Home>

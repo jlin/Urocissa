@@ -2,7 +2,7 @@
   <!-- This router-view contains the ViewPage.vue -->
   <router-view :key="albumHomeIsolatedKey"></router-view>
   <div class="w-100 h-100 d-flex flex-column">
-    <div class="w-100 flex-grow-0 flex-shrink-0"><slot name="reading-bar"> </slot></div>
+    <div class="w-100 flex-grow-0 flex-shrink-0"><slot name="home-toolbar"> </slot></div>
     <div class="w-100 flex-grow-1" style="min-height: 0">
       <div class="w-100 h-100 d-flex">
         <div class="flex-grow-1" style="min-height: 0">

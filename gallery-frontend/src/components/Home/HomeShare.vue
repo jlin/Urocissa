@@ -5,7 +5,7 @@
     :basic-string="basicString"
     :search-string="searchString"
   >
-    <template #reading-bar> <ShareBar /> </template
+    <template #home-toolbar> <ShareBar /> </template
   ></Home>
 </template>
 <script setup lang="ts">

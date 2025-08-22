@@ -1,6 +1,6 @@
 <template>
   <Home isolation-id="mainId" :basic-string="props.basicString" :search-string="searchString">
-    <template #reading-bar>
+    <template #home-toolbar>
       <NavBar />
     </template>
   </Home>
