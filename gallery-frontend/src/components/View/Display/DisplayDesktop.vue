@@ -1,29 +1,6 @@
 <template>
-  <div class="h-100 w-100">
-    <v-card
-      width="100"
-      v-if="previousHash !== undefined"
-      color="transparent"
-      class="navigate-left d-flex align-center justify-center h-50"
-      style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1"
-      :to="previousPage"
-      replace
-    >
-      <v-icon>mdi-arrow-left</v-icon>
-    </v-card>
-    <v-card
-      width="100"
-      v-if="nextHash !== undefined"
-      color="transparent"
-      class="navigate-right d-flex align-center justify-center h-50"
-      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1"
-      :to="nextPage"
-      replace
-    >
-      <v-icon>mdi-arrow-right</v-icon>
-    </v-card>
-
-    <!-- Navigation overlays (not grid children) -->
+  <div class="h-100 w-100 position-relative">
+    <!-- 其他覆蓋層（鍵盤提示等） -->
     <NavigationOverlays
       :previous-hash="previousHash"
       :next-hash="nextHash"
@@ -31,22 +8,20 @@
       :next-page="nextPage"
       :show="!configStore.isMobile"
     />
+
+    <!-- 主要內容：不再傳 colWidth/colHeight -->
     <div class="h-100 w-100">
       <ViewPageDisplayDatabase
-        v-if="abstractData && !configStore.disableImg"
+        v-if="abstractData && abstractData.database && !configStore.disableImg"
         :index="index"
         :hash="hash"
         :abstract-data="abstractData"
-        :col-width="colWidth ?? 0"
-        :col-height="colHeight ?? 0"
         :isolation-id="isolationId"
       />
       <ViewPageDisplayAlbum
         v-if="abstractData && abstractData.album && !configStore.disableImg"
         :index="index"
         :album="abstractData.album"
-        :col-width="colWidth ?? 0"
-        :col-height="colHeight ?? 0"
       />
     </div>
   </div>
@@ -57,15 +32,13 @@ import { useConfigStore } from '@/store/configStore'
 import ViewPageDisplayDatabase from './DisplayDatabase.vue'
 import ViewPageDisplayAlbum from './DisplayAlbum.vue'
 import NavigationOverlays from './NavigationOverlays.vue'
-import { AbstractData, IsolationId } from '@type/types'
+import type { AbstractData, IsolationId } from '@type/types'
 
 const props = defineProps<{
   isolationId: IsolationId
   hash: string
   index: number
   abstractData: AbstractData | undefined
-  colWidth: number | undefined
-  colHeight: number | undefined
   previousHash: string | undefined
   nextHash: string | undefined
   previousPage: Record<string, unknown> | undefined
@@ -74,3 +47,32 @@ const props = defineProps<{
 
 const configStore = useConfigStore(props.isolationId)
 </script>
+
+<style scoped>
+/* 以容器（#image-display-col）為查詢上下文 */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  /* 觸控/滑鼠友善的點擊面積 */
+  inline-size: 48px;
+  block-size: 50%;
+  /* 去除卡片背景/陰影干擾（Vuetify 可按需調整） */
+  box-shadow: none;
+}
+
+.nav-left {
+  left: 0;
+}
+.nav-right {
+  right: 0;
+}
+
+/* 窄容器時，縮小導覽按鈕的高度 */
+@container image-col (max-width: 600px) {
+  .nav-btn {
+    block-size: 40%;
+  }
+}
+</style>

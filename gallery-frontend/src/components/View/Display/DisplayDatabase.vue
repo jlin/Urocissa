@@ -51,8 +51,6 @@ const props = defineProps<{
   hash: string
   index: number
   abstractData: AbstractData
-  colWidth: number
-  colHeight: number
 }>()
 
 const currentFrameStore = useCurrentFrameStore(props.isolationId)

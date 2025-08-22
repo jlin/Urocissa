@@ -3,7 +3,7 @@
     id="image-display-col"
     ref="colRef"
     cols="auto"
-    class="h-100 position-relative flex-grow-1 show-info"
+    class="h-100 position-relative flex-grow-1 show-info image-col"
     style="min-width: 0"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
@@ -24,8 +24,6 @@
       :next-hash="nextHash"
       :previous-page="previousPage"
       :next-page="nextPage"
-      :col-width="colWidth"
-      :col-height="colHeight"
     />
 
     <DisplayDesktop
@@ -38,8 +36,6 @@
       :next-hash="nextHash"
       :previous-page="previousPage"
       :next-page="nextPage"
-      :col-width="colWidth"
-      :col-height="colHeight"
     />
   </div>
 </template>
@@ -61,7 +57,6 @@ import { useQueueStore } from '@/store/queueStore'
 import { fetchDataInWorker } from '@/api/fetchData'
 import { usePrefetchStore } from '@/store/prefetchStore'
 import { AbstractData, IsolationId } from '@type/types'
-import { useElementSize } from '@vueuse/core'
 // child display components moved to DisplayMobile / DisplayDesktop
 import DisplayMobile from './DisplayMobile.vue'
 import DisplayDesktop from './DisplayDesktop.vue'
@@ -69,12 +64,8 @@ import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
-// Mobile/desktop display extracted to separate components
 
 const colRef = ref<InstanceType<typeof VCol> | null>(null)
-const { width: colWidth, height: colHeight } = useElementSize(colRef)
-
-// mobile/desktop branches extracted to child components
 
 const props = defineProps<{
   isolationId: IsolationId
@@ -110,8 +101,6 @@ const previousHash = computed(() => {
   if (previousData?.album) return previousData.album.id
   return undefined
 })
-
-// next/previous abstract data handled in mobile/desktop child components
 
 const nextPage = computed(() => {
   if (nextHash.value === undefined) return undefined
@@ -248,3 +237,10 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
+
+<style scoped>
+#image-display-col {
+  container-type: size;
+  container-name: image-col;
+}
+</style>

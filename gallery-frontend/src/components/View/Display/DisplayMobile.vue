@@ -13,6 +13,7 @@
       @swiper="onSwiper"
       class="h-100"
     >
+      <!-- 前一張 -->
       <swiper-slide v-if="previousHash !== undefined">
         <div class="slide-content">
           <ViewPageDisplayDatabase
@@ -20,20 +21,17 @@
             :index="index - 1"
             :hash="previousAbstractData.database.hash"
             :abstract-data="previousAbstractData"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
             :isolation-id="isolationId"
           />
           <ViewPageDisplayAlbum
             v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
             :index="index - 1"
             :album="previousAbstractData.album"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
           />
         </div>
       </swiper-slide>
 
+      <!-- 目前這張 -->
       <swiper-slide>
         <div class="slide-content">
           <ViewPageDisplayDatabase
@@ -41,20 +39,17 @@
             :index="index"
             :hash="hash"
             :abstract-data="abstractData"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
             :isolation-id="isolationId"
           />
           <ViewPageDisplayAlbum
             v-if="abstractData && abstractData.album && !configStore.disableImg"
             :index="index"
             :album="abstractData.album"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
           />
         </div>
       </swiper-slide>
 
+      <!-- 下一張 -->
       <swiper-slide v-if="nextHash !== undefined">
         <div class="slide-content">
           <ViewPageDisplayDatabase
@@ -62,16 +57,12 @@
             :index="index + 1"
             :hash="nextAbstractData.database.hash"
             :abstract-data="nextAbstractData"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
             :isolation-id="isolationId"
           />
           <ViewPageDisplayAlbum
             v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"
             :index="index + 1"
             :album="nextAbstractData.album"
-            :col-width="colWidth ?? 0"
-            :col-height="colHeight ?? 0"
           />
         </div>
       </swiper-slide>
@@ -91,15 +82,14 @@ import { Manipulation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/manipulation'
 import type { Swiper as SwiperType } from 'swiper'
-import { AbstractData, IsolationId } from '@type/types'
+import type { AbstractData, IsolationId } from '@type/types'
 import { Swiper, SwiperSlide } from 'swiper/vue'
+
 const props = defineProps<{
   isolationId: IsolationId
   hash: string
   index: number
   abstractData: AbstractData | undefined
-  colWidth: number | undefined
-  colHeight: number | undefined
   previousHash: string | undefined
   nextHash: string | undefined
   previousPage: Record<string, unknown> | undefined
@@ -159,8 +149,6 @@ function onSlideChange(swiper: SwiperType) {
   }
 }
 
-// next/previous page are provided via props from the parent
-
 watch(
   () => props.index,
   () => {
@@ -185,6 +173,7 @@ watch(
   justify-content: center;
 }
 
+/* Swiper 容器填滿父層 */
 :deep(.swiper) {
   width: 100%;
   height: 100%;
