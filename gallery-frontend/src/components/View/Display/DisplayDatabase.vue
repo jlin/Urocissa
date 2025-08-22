@@ -25,7 +25,7 @@
       outlined
       style="padding: 16px"
     >
-      <div align="center" no-gutters>
+      <div align="center">
         <div cols="auto" class="d-flex align-center">
           <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
         </div>

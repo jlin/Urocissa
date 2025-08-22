@@ -2,7 +2,7 @@
   <div
     id="abstractData-col"
     v-if="abstractData"
-    class="h-100 abstractData-css flex-grow-0 flex-shrink-0"
+    class="h-100 flex-grow-0 flex-shrink-0"
     cols="auto"
     :style="{
       backgroundColor: 'white',
@@ -10,7 +10,7 @@
       zIndex: 1
     }"
   >
-    <div no-gutters class="position-relative">
+    <div class="position-relative">
       <div cols="12">
         <v-toolbar
           color="white"
