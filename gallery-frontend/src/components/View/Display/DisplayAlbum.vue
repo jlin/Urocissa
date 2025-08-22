@@ -5,17 +5,17 @@
     </router-view>
 
     <div class="card-pair">
-      <v-card class="square">
+      <v-card class="square rounded-0" style="object-fit: cover; border: 8px solid #fff">
         <img
           v-if="imgStore.imgOriginal.get(index)"
           id="album-img"
           :key="index"
           :src="imgStore.imgOriginal.get(index)"
-          class="media"
+          class="w-100 h-100"
         />
       </v-card>
 
-      <v-card class="square d-flex flex-column">
+      <v-card class="square d-flex flex-column pa-4 rounded-0">
         <v-card-item>
           <v-text-field
             v-model="titleModel"
@@ -105,14 +105,6 @@ watch(
   inline-size: min(500px, max(min(100cqh, 50cqw), min(100cqw, 50cqh)));
   max-inline-size: 500px;
   max-block-size: 500px;
-}
-
-.media {
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
-  border: 8px solid #fff;
-  border-radius: 12px;
 }
 
 @supports not (container-type: size) {
