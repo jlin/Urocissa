@@ -11,9 +11,10 @@
     >
       <div class="position-relative w-100 h-100 parent">
         <div
+          id="click-handler"
+          class="w-100 h-100 position-absolute"
           :style="{
             pointerEvents: 'none',
-            position: 'absolute',
             zIndex: 100,
             border:
               collectionStore.editModeOn &&
@@ -22,7 +23,6 @@
                 : '4px solid transparent'
           }"
           @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
-          class="w-100 h-100"
         ></div>
         <DesktopHoverIcon
           class="icon-hover child"
@@ -43,12 +43,11 @@
         />
         <div
           id="grey-background-placeholder"
+          class="w-100 h-100 bg-grey-darken-2 position-absolute"
           :style="{
-            position: 'absolute',
             zIndex: 0
           }"
           @click="(event: MouseEvent) => handleClick(event, row.start + subIndex)"
-          class="w-100 h-100 bg-grey-darken-2"
         ></div>
       </div>
     </div>

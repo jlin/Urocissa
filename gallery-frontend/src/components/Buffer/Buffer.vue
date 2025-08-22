@@ -20,7 +20,6 @@
       :key="`${row.start}-${prefetchStore.timestamp}`"
       class="position-absolute w-100"
       :style="{
-        position: 'absolute',
         top: `${row.topPixelAccumulated! - scrollTopStore.scrollTop + bufferHeight / 3 + row.offset}px`,
         height: `${row.rowHeight}px`
       }"
