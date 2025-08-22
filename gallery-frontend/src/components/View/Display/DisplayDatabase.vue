@@ -25,14 +25,12 @@
       outlined
       style="padding: 16px"
     >
-      <div align="center">
-        <div class="d-flex align-center">
-          <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
-        </div>
-        <div class="text-left pl-4">
-          <div>This video is currently being processed.</div>
-          <div>Please check back later.</div>
-        </div>
+      <div class="d-flex align-center">
+        <v-icon size="48" color="warning">mdi-alert-circle-outline</v-icon>
+      </div>
+      <div class="text-left pl-4">
+        <div>This video is currently being processed.</div>
+        <div>Please check back later.</div>
       </div>
     </v-card>
   </div>
