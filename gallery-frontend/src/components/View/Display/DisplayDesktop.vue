@@ -1,6 +1,5 @@
 <template>
   <div class="h-100 w-100 position-relative">
-    <!-- 其他覆蓋層（鍵盤提示等） -->
     <NavigationOverlays
       :previous-hash="previousHash"
       :next-hash="nextHash"
@@ -8,8 +7,6 @@
       :next-page="nextPage"
       :show="!configStore.isMobile"
     />
-
-    <!-- 主要內容：不再傳 colWidth/colHeight -->
     <div class="h-100 w-100">
       <ViewPageDisplayDatabase
         v-if="abstractData && abstractData.database && !configStore.disableImg"

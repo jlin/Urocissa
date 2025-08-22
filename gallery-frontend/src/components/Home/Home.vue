@@ -3,33 +3,29 @@
   <router-view :key="albumHomeIsolatedKey"></router-view>
   <div class="w-100 h-100 d-flex flex-column">
     <div class="w-100 flex-grow-0 flex-shrink-0"><slot name="home-toolbar"> </slot></div>
-    <div class="w-100 flex-grow-1 min-h-0">
-      <div class="w-100 h-100 d-flex">
-        <div class="flex-grow-1 min-h-0">
-          <div
-            id="image-container"
-            ref="imageContainerRef"
-            class="d-flex flex-wrap position-relative h-100 pa-1 pb-2 bg-grey-darken-3"
-            :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
-            @scroll="
-              // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
-              prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
-            "
-          >
-            <Buffer
-              v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
-              :buffer-height="bufferHeight"
-              :isolation-id="props.isolationId"
-            />
-            <HomeEmptyCard
-              v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
-              :isolation-id="props.isolationId"
-            />
-          </div>
-        </div>
-        <div class="flex-grow-0 flex-shrink-0" style="background-color: #424242">
-          <ScrollBar :isolation-id="props.isolationId" />
-        </div>
+    <div class="w-100 flex-grow-1 min-h-0 d-flex">
+      <div
+        id="image-container"
+        ref="imageContainerRef"
+        class="d-flex flex-wrap position-relative flex-grow-1 min-h-0 h-100 pa-1 pb-2 bg-grey-darken-3"
+        :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
+        @scroll="
+          // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
+          prefetchStore.locateTo === null ? throttledHandleScroll() : () => {}
+        "
+      >
+        <Buffer
+          v-if="initializedStore.initialized && prefetchStore.dataLength > 0"
+          :buffer-height="bufferHeight"
+          :isolation-id="props.isolationId"
+        />
+        <HomeEmptyCard
+          v-if="initializedStore.initialized && prefetchStore.dataLength === 0"
+          :isolation-id="props.isolationId"
+        />
+      </div>
+      <div class="flex-grow-0 flex-shrink-0" style="background-color: #424242">
+        <ScrollBar :isolation-id="props.isolationId" />
       </div>
     </div>
   </div>
