@@ -1,7 +1,6 @@
 <template>
   <div
     id="image-display-col"
-    ref="colRef"
     cols="auto"
     class="h-100 position-relative flex-grow-1 show-info image-col min-w-0"
   >
@@ -40,10 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted, computed, watch } from 'vue'
+import { onUnmounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDataStore } from '@/store/dataStore'
-import { VCol } from 'vuetify/components'
 import ViewBar from '@/components/NavBar/ViewBar.vue'
 import { useConstStore } from '@/store/constStore'
 import { useModalStore } from '@/store/modalStore'
@@ -63,8 +61,6 @@ import delay from 'delay'
 import { useConfigStore } from '@/store/configStore'
 import { useShareStore } from '@/store/shareStore'
 import { useTokenStore } from '@/store/tokenStore'
-
-const colRef = ref<InstanceType<typeof VCol> | null>(null)
 
 const props = defineProps<{
   isolationId: IsolationId
