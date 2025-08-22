@@ -63,7 +63,6 @@ import { useInitializeScrollPosition } from '@/script/hook/useInitializeScrollPo
 import { useImgStore } from '@/store/imgStore'
 import Buffer from '@/components/Buffer/Buffer.vue'
 import ScrollBar from '@/components/Home/HomeScrollBar.vue'
-import '@/style/HomePage.css'
 import { layoutBatchNumber } from '@/type/constants'
 import { useOffsetStore } from '@/store/offsetStore'
 import { useRowStore } from '@/store/rowStore'
