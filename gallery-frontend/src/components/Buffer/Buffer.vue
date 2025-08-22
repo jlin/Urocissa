@@ -18,7 +18,7 @@
     <div
       v-for="row in visibleRows"
       :key="`${row.start}-${prefetchStore.timestamp}`"
-      class="positioned-element position-absolute w-100 row-div"
+      class="position-absolute w-100"
       :style="{
         position: 'absolute',
         top: `${row.topPixelAccumulated! - scrollTopStore.scrollTop + bufferHeight / 3 + row.offset}px`,
