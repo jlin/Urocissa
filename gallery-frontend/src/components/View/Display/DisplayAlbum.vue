@@ -12,19 +12,7 @@
         colWidth < colHeight ? 'flex-column' : 'flex-row'
       ]"
     >
-      <v-card
-        :style="{
-          width: `${Math.round(
-            Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-          )}px`,
-          height: `${Math.round(
-            Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-          )}px`,
-          maxWidth: '500px',
-          maxHeight: '500px',
-          border: '8px solid white'
-        }"
-      >
+      <v-card class="album-card">
         <img
           v-if="imgStore.imgOriginal.get(index)"
           id="album-img"
@@ -33,34 +21,10 @@
           aspect-ratio="1"
           cover
           :src="imgStore.imgOriginal.get(index)"
-          :style="{
-            width: `${Math.round(
-              Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-            )}px`,
-            height: `${Math.round(
-              Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-            )}px`,
-            maxWidth: '500px',
-            maxHeight: '500px',
-            objectFit: 'cover'
-          }"
+          class="album-card__img"
         />
       </v-card>
-      <v-card
-        :style="{
-          width: `${Math.round(
-            Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-          )}px`,
-          height: `${Math.round(
-            Math.max(Math.min(colHeight, colWidth / 2), Math.min(colWidth, colHeight / 2))
-          )}px`,
-          maxWidth: '500px',
-          maxHeight: '500px'
-        }"
-        outlined
-        style="padding: 16px"
-        class="d-flex flex-column"
-      >
+      <v-card class="album-card album-card__side d-flex flex-column" outlined style="padding: 16px">
         <v-card-item>
           <v-text-field
             v-model="titleModel"
@@ -143,5 +107,50 @@ watch(
   font-weight: 400;
   line-height: 1.175;
   letter-spacing: 0.0073529412em;
+}
+
+/* Album card responsive sizing using media queries instead of inline JS styles */
+.album-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 8px solid white;
+  max-width: 500px;
+  max-height: 500px;
+  width: min(80vw, 500px);
+  height: min(80vw, 500px);
+}
+
+.album-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.album-card__side {
+  border: none; /* separate side card doesn't need the photo border */
+  max-width: 500px;
+  max-height: 500px;
+  width: min(80vw, 500px);
+  height: min(80vw, 500px);
+}
+
+/* On wider viewports use roughly half the column width (similar to previous colWidth/2 behavior) */
+@media (min-width: 600px) {
+  .album-card,
+  .album-card__side {
+    width: min(40vw, 500px);
+    height: min(40vw, 500px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .album-card,
+  .album-card__side {
+    width: min(30vw, 500px);
+    height: min(30vw, 500px);
+  }
 }
 </style>
