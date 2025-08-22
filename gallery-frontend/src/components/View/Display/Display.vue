@@ -2,7 +2,7 @@
   <div
     id="image-display-col"
     cols="auto"
-    class="h-100 position-relative flex-grow-1 show-info image-col min-w-0"
+    class="h-100 position-relative flex-grow-1 min-w-0 image-col"
   >
     <!-- Overlay toolbar positioned absolutely within the column scope -->
     <ViewBar
