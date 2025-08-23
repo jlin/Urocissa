@@ -33,6 +33,7 @@
                   :rules="[addTagsRule]"
                   closable-chips
                   :menu-props="{ maxWidth: 0 }"
+                  autocomplete="off"
                 />
               </v-container>
 
@@ -46,6 +47,7 @@
                   :rules="[removeTagsRule]"
                   closable-chips
                   :menu-props="{ maxWidth: 0 }"
+                  autocomplete="off"
                 />
               </v-container>
             </v-form>

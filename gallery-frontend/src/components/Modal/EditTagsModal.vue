@@ -27,6 +27,7 @@
                 label="Tags"
                 closable-chips
                 variant="outlined"
+                autocomplete="off"
               />
             </v-form>
           </template>
