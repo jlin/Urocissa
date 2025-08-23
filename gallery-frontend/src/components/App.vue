@@ -1,5 +1,6 @@
 <template>
   <v-app
+    :class="{ 'no-select': scrollbarStore.isDragging || scrollbarStoreInsideAlbum.isDragging }"
     @dragstart.prevent
     @dragover.prevent
     @drop.prevent
@@ -68,7 +69,7 @@ onBeforeMount(async () => {
   // Load the subRowHeightScale / showInfo / concurrencyNumber from constStore when the app is mounted.
   await constStore.loadSubRowHeightScale()
   await constStore.loadShowInfo()
-  await constStore.loadConcurrencyNumber() // ← 新增
+  await constStore.loadConcurrencyNumber()
   configStore.isMobile = isMobile()
 })
 </script>

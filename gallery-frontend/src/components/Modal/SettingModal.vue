@@ -10,7 +10,7 @@
           <v-col>
             <v-slider
               show-ticks="always"
-              v-model="subRowHeightScale"
+              v-model="subRowHeightScaleValue"
               :min="250"
               :max="450"
               :step="10"
@@ -20,9 +20,35 @@
               thumb-size="16"
               prepend-icon="mdi-minus"
               append-icon="mdi-plus"
-              @click:prepend="adjustThumbnailSize(-10)"
-              @click:append="adjustThumbnailSize(10)"
+              @click:prepend="onSubRowHeightScaleUpdate(-10)"
+              @click:append="onSubRowHeightScaleUpdate(10)"
             ></v-slider>
+          </v-col>
+        </v-row>
+        <v-row align="center" no-gutters class="mt-4">
+          <v-col cols="auto">
+            <v-chip variant="text"> Limit Ratio </v-chip>
+          </v-col>
+          <v-col>
+            <v-switch
+              :model-value="limitRatioValue"
+              @update:model-value="onLimitRatioUpdate"
+              :disabled="!initializedStore.initialized"
+              hide-details
+            ></v-switch>
+          </v-col>
+        </v-row>
+        <v-row align="center" no-gutters class="mt-4">
+          <v-col cols="auto">
+            <v-chip variant="text"> Theme </v-chip>
+          </v-col>
+          <v-col>
+            <v-switch
+              :model-value="themeIsLight"
+              @update:model-value="onThemeUpdate"
+              :disabled="!initializedStore.initialized"
+              hide-details
+            ></v-switch>
           </v-col>
         </v-row>
       </v-card-text>
@@ -35,45 +61,85 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { watchDebounced } from '@vueuse/core'
+import { computed } from 'vue'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useConstStore } from '@/store/constStore'
+import { useTheme } from 'vuetify'
 
 const modalStore = useModalStore('mainId')
 const initializedStore = useInitializedStore('mainId')
 const constStore = useConstStore('mainId')
+const vuetifyTheme = useTheme()
 
-// Local ref for immediate UI updates
-const subRowHeightScale = ref(constStore.subRowHeightScale)
-
-// Watch store changes to sync local ref
-watch(
-  () => constStore.subRowHeightScale,
-  (newValue) => {
-    subRowHeightScale.value = newValue
-  }
-)
-
-watchDebounced(
-  subRowHeightScale,
-  (newValue: number) => {
-    constStore.updateSubRowHeightScale(newValue).catch((error: unknown) => {
-      console.error('Failed to update subRowHeightScale:', error)
+// Read/write computed for subRowHeightScale (source of truth is constStore)
+const subRowHeightScaleValue = computed<number>({
+  get: () => constStore.subRowHeightScale,
+  set: (newVal: number | null) => {
+    const value = newVal ?? constStore.subRowHeightScale
+    const clamped = Math.max(250, Math.min(450, Number(value)))
+    constStore.updateSubRowHeightScale(clamped).catch((error: unknown) => {
+      console.error('Failed to update subRowHeightScale (via setter):', error)
     })
-  },
-  { debounce: 50 }
-)
+  }
+})
 
-// Function to adjust thumbnail size with icons
-const adjustThumbnailSize = (delta: number) => {
-  const currentValue = subRowHeightScale.value
-  const newValue = Math.max(250, Math.min(450, currentValue + delta))
+// Read/write computed for limitRatio (source of truth is constStore)
+const limitRatioValue = computed<boolean>({
+  get: () => constStore.limitRatio,
+  set: (newVal: boolean | null) => {
+    const value = !!newVal
+    constStore.updateLimitRation(value).catch((error: unknown) => {
+      console.error('Failed to update limitRatio (via setter):', error)
+    })
+  }
+})
 
-  // Only update if the value would actually change
-  if (newValue !== currentValue) {
-    subRowHeightScale.value = newValue
+// computed boolean for light theme switch (read/write)
+const themeIsLight = computed<boolean>({
+  get: () => constStore.theme === 'light',
+  set: async (newVal: boolean | null) => {
+    const wantLight = !!newVal
+    const newTheme = wantLight ? 'light' : 'dark'
+    try {
+      await constStore.updateTheme(newTheme)
+
+      if (vuetifyTheme && typeof vuetifyTheme.change === 'function') {
+        vuetifyTheme.change(newTheme)
+      }
+    } catch (err) {
+      console.error('Failed to update theme (via setter):', err)
+    }
+  }
+})
+
+// Handler invoked when the slider updates its model value
+const onSubRowHeightScaleUpdate = (newValue: number | null) => {
+  const value = newValue ?? constStore.subRowHeightScale
+  const clamped = Math.max(250, Math.min(450, value))
+  constStore.updateSubRowHeightScale(clamped).catch((error: unknown) => {
+    console.error('Failed to update subRowHeightScale:', error)
+  })
+}
+
+const onLimitRatioUpdate = (newValue: boolean | null) => {
+  const value = !!newValue
+  constStore.updateLimitRation(value).catch((error: unknown) => {
+    console.error('Failed to update limitRatio:', error)
+  })
+}
+
+const onThemeUpdate = async (newValue: boolean | null) => {
+  const wantLight = !!newValue
+  const newTheme = wantLight ? 'light' : 'dark'
+  try {
+    await constStore.updateTheme(newTheme)
+
+    if (vuetifyTheme && typeof vuetifyTheme.change === 'function') {
+      vuetifyTheme.change(newTheme)
+    }
+  } catch (err) {
+    console.error('Failed to update theme:', err)
   }
 }
 </script>

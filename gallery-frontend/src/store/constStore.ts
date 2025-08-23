@@ -5,9 +5,12 @@ import {
   getSubRowHeightScale,
   storeShowInfo,
   getShowInfo,
-  // 新增：
   storeConcurrencyNumber,
-  getConcurrencyNumber
+  getConcurrencyNumber,
+  storeLimitRation,
+  getLimitRation,
+  storeTheme,
+  getTheme
 } from '@/db/settingsDb'
 
 export const useConstStore = (isolationId: IsolationId) =>
@@ -16,10 +19,16 @@ export const useConstStore = (isolationId: IsolationId) =>
       subRowHeightScale: number
       showInfo: boolean
       concurrencyNumber: number
+      limitRatio: boolean
+      theme: 'dark' | 'light'
     } => ({
       subRowHeightScale: 250,
       showInfo: false,
-      concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1)
+      concurrencyNumber: Math.max(Math.floor(navigator.hardwareConcurrency / 2), 1),
+      // default: false
+      limitRatio: false,
+      // default theme: dark
+      theme: 'dark'
     }),
     actions: {
       async updateSubRowHeightScale(value: number): Promise<void> {
@@ -58,6 +67,28 @@ export const useConstStore = (isolationId: IsolationId) =>
         const stored = await getConcurrencyNumber()
         if (typeof stored === 'number' && Number.isFinite(stored) && stored > 0) {
           this.concurrencyNumber = Math.floor(stored)
+        }
+      },
+      async updateLimitRation(value: boolean): Promise<void> {
+        this.limitRatio = value
+        await storeLimitRation(this.limitRatio)
+      },
+
+      async loadLimitRation(): Promise<void> {
+        const stored = await getLimitRation()
+        if (typeof stored === 'boolean') {
+          this.limitRatio = stored
+        }
+      },
+      async updateTheme(value: 'dark' | 'light'): Promise<void> {
+        this.theme = value
+        await storeTheme(value)
+      },
+
+      async loadTheme(): Promise<void> {
+        const stored = await getTheme()
+        if (stored === 'dark' || stored === 'light') {
+          this.theme = stored
         }
       }
     }
