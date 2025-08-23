@@ -18,7 +18,7 @@ const ProcessingChip: FunctionalComponent = () => {
         zIndex: 4
       }
     },
-    'Processing'
+    () => 'Processing'
   )
 }
 
