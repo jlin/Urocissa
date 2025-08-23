@@ -20,6 +20,7 @@
     @touchmove="handleMove"
   >
     <v-sheet
+      id="main-sheet"
       class="position-relative w-100 h-100"
       :style="{
         pointerEvents: 'none'
@@ -28,11 +29,11 @@
       <!-- Sheet to used as a visual indicator (a dash line) representing the timestamp of the currentscroll position within the view. -->
       <v-sheet
         v-if="scrollbarStore.initialized"
-        id="current-date-chip"
+        id="extending-sheet"
         class="w-100 position-absolute"
         :style="{
           height: `calc(${(currentDateChipIndex / rowLength) * 100}% + 1px)`,
-          borderBottom: '1px solid deepskyblue'
+          borderBottom: '1px solid rgb(var(--v-theme-primary))'
         }"
       ></v-sheet>
       <!-- Chips to show the all year labels. -->
@@ -41,7 +42,7 @@
         :key="scrollbarData.index"
         size="x-small"
         variant="text"
-        class="w-100 position-absolute text-grey-lighten-2 pa-0 ma-0 d-flex align-center justify-center"
+        class="w-100 position-absolute pa-0 ma-0 d-flex align-center justify-center"
         :style="{
           top: `${(Math.floor(scrollbarData.index / layoutBatchNumber) / rowLength) * 100}%`,
           userSelect: 'none'
@@ -52,8 +53,8 @@
       <!-- This sheet's height is adjusted to visually indicate the size of the current row block. -->
       <v-sheet
         v-if="scrollbarRef"
-        id="block-chip"
-        class="w-100 position-absolute bg-grey-darken-2"
+        id="current-block-sheet"
+        class="w-100 position-absolute bg-surface-light"
         :style="{
           height: `${scrollbarHeight / rowLength}px`,
           top: `${(hoverLabelRowIndex / rowLength) * 100}%`
@@ -61,11 +62,10 @@
       >
         <!-- Chip to show the current view year and month label. -->
         <v-sheet
-          id="day-chip"
-          class="position-absolte w-100 d-flex align-center justify-center text-caption"
+          id="current-month-sheet"
+          class="position-absolte w-100 d-flex align-center justify-center text-caption bg-surface-light"
           :style="{
-            backgroundColor: '#3a3a3a',
-            borderTop: '1px solid deepskyblue',
+            borderTop: '1px solid rgb(var(--v-theme-primary))',
             height: `25px`,
             zIndex: 2,
             userSelect: 'none'
