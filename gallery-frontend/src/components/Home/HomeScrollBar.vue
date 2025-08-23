@@ -8,7 +8,7 @@
       width: `${scrollBarWidth}px`,
       zIndex: `3`,
       cursor: `vertical-text`,
-      marginTop: '8px'
+      paddingTop: '8px'
     }"
     @click="handleClick"
     @mousedown="handleMouseDown"
