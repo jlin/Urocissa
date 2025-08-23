@@ -1,6 +1,85 @@
 <template>
   <div class="swiper-container h-100 w-100">
     <swiper
+      v-if="abstractData && abstractData.database && abstractData.database.ext_type === 'image'"
+      :modules="modules"
+      :slides-per-view="1"
+      :space-between="10"
+      :centered-slides="true"
+      :initial-slide="currentSlideIndex"
+      :resistance="true"
+      :resistance-ratio="0.3"
+      :allow-touch-move="canHandleNav()"
+      :zoom="true"
+      @slide-change="onSlideChange"
+      @swiper="onSwiper"
+      @slider-first-move="onDragStart"
+      @touch-end="onTouchEnd"
+      @transition-end="onTransitionEnd"
+      @zoom-change="onZoomChange"
+      class="h-100"
+    >
+      <swiper-slide v-if="previousHash !== undefined">
+        <div class="swiper-zoom-container">
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="
+                previousAbstractData && previousAbstractData.database && !configStore.disableImg
+              "
+              :index="index - 1"
+              :hash="previousAbstractData.database.hash"
+              :abstract-data="previousAbstractData"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
+              :index="index - 1"
+              :album="previousAbstractData.album"
+            />
+          </div>
+        </div>
+      </swiper-slide>
+
+      <swiper-slide>
+        <div class="swiper-zoom-container">
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="abstractData && abstractData.database && !configStore.disableImg"
+              :index="index"
+              :hash="hash"
+              :abstract-data="abstractData"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="abstractData && abstractData.album && !configStore.disableImg"
+              :index="index"
+              :album="abstractData.album"
+            />
+          </div>
+        </div>
+      </swiper-slide>
+
+      <swiper-slide v-if="nextHash !== undefined">
+        <div class="swiper-zoom-container">
+          <div class="slide-content">
+            <ViewPageDisplayDatabase
+              v-if="nextAbstractData && nextAbstractData.database && !configStore.disableImg"
+              :index="index + 1"
+              :hash="nextAbstractData.database.hash"
+              :abstract-data="nextAbstractData"
+              :isolation-id="isolationId"
+            />
+            <ViewPageDisplayAlbum
+              v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"
+              :index="index + 1"
+              :album="nextAbstractData.album"
+            />
+          </div>
+        </div>
+      </swiper-slide>
+    </swiper>
+    <swiper
+      v-else
       :modules="modules"
       :slides-per-view="1"
       :space-between="10"
@@ -78,9 +157,10 @@ import ViewPageDisplayDatabase from './DisplayDatabase.vue'
 import ViewPageDisplayAlbum from './DisplayAlbum.vue'
 import { useConfigStore } from '@/store/configStore'
 import { useModalStore } from '@/store/modalStore'
-import { Manipulation } from 'swiper/modules'
+import { Manipulation, Zoom } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/manipulation'
+import 'swiper/css/zoom'
 import type { Swiper as SwiperType } from 'swiper'
 import type { AbstractData, IsolationId } from '@type/types'
 import { Swiper, SwiperSlide } from 'swiper/vue'
@@ -101,7 +181,7 @@ const dataStore = useDataStore(props.isolationId)
 const route = useRoute()
 const router = useRouter()
 
-const modules = [Manipulation]
+const modules = [Manipulation, Zoom]
 const swiperInstance = ref<SwiperType | null>(null)
 
 const nextAbstractData = computed(() => dataStore.data.get(props.index + 1))
@@ -123,7 +203,26 @@ function onSwiper(swiper: SwiperType) {
   swiperInstance.value = swiper
 }
 
+function onDragStart(swiper: SwiperType) {
+  if (swiper.zoom.enabled) swiper.zoom.disable()
+}
+
+function onTouchEnd(swiper: SwiperType) {
+  if (!swiper.zoom.enabled) swiper.zoom.enable()
+}
+
+function onTransitionEnd(swiper: SwiperType) {
+  if (!swiper.zoom.enabled) swiper.zoom.enable()
+}
+
+function onZoomChange(swiper: SwiperType, scale: number) {
+  swiper.allowTouchMove = scale === 1
+}
+
 function onSlideChange(swiper: SwiperType) {
+  if (swiper.zoom.scale !== 1) swiper.disable()
+  else swiper.enable()
+
   if (!canHandleNav()) return
 
   const currentIndex = swiper.activeIndex
@@ -132,18 +231,18 @@ function onSlideChange(swiper: SwiperType) {
 
   if (hasPrevious) {
     if (currentIndex === 0 && props.previousPage) {
-      router.replace(props.previousPage).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
+      router.replace(props.previousPage).catch((err: unknown) => {
+        console.error(err)
       })
     } else if (currentIndex === 2 && hasNext && props.nextPage) {
-      router.replace(props.nextPage).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
+      router.replace(props.nextPage).catch((err: unknown) => {
+        console.error(err)
       })
     }
   } else {
     if (currentIndex === 1 && hasNext && props.nextPage) {
-      router.replace(props.nextPage).catch((error: unknown) => {
-        console.error('Navigation Error:', error)
+      router.replace(props.nextPage).catch((err: unknown) => {
+        console.error(err)
       })
     }
   }
@@ -163,8 +262,8 @@ watch(
 .swiper-container {
   width: 100%;
   overflow: hidden;
+  touch-action: none;
 }
-
 .slide-content {
   width: 100%;
   height: 100%;
@@ -172,17 +271,21 @@ watch(
   align-items: center;
   justify-content: center;
 }
-
-/* Swiper 容器填滿父層 */
 :deep(.swiper) {
   width: 100%;
   height: 100%;
 }
-
 :deep(.swiper-slide) {
   text-align: center;
   font-size: 18px;
   background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+:deep(.swiper-zoom-container) {
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
