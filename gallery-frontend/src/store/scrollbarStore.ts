@@ -7,11 +7,13 @@ export const useScrollbarStore = (isolationId: IsolationId) =>
       scrollbarDataArrayYear: ScrollbarData[]
       initialized: boolean
       isDragging: boolean
+      isHovering: boolean
     } => ({
       scrollbarDataArray: [],
       scrollbarDataArrayYear: [],
       initialized: false,
-      isDragging: false
+      isDragging: false,
+      isHovering: false
     }),
     actions: {
       initialize(scrollbarDataArray: ScrollbarData[]) {

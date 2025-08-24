@@ -29,10 +29,11 @@
       >
         <v-sheet
           v-if="scrollbarRef"
-          class="w-100 position-absolute bg-grey"
+          class="w-100 position-absolute bg-transparent"
           :style="{
             height: `${scrollbarHeight / rowLength}px`,
-            top: `${(currentDateChipIndex / rowLength) * 100}%`
+            top: `${(currentDateChipIndex / rowLength) * 100}%`,
+            borderBottom: '1px solid rgb(var(--v-theme-primary))'
           }"
         >
         </v-sheet>
@@ -55,21 +56,25 @@
         <v-sheet
           v-if="scrollbarRef"
           id="current-block-sheet"
-          class="w-100 position-absolute bg-grey"
+          :class="[
+            'w-100 position-absolute',
+            scrollbarStore.isHovering ? 'bg-surface-light' : 'bg-surface'
+          ]"
           :style="{
             height: `${scrollbarHeight / rowLength}px`,
-            top: `${(hoverLabelRowIndex / rowLength) * 100}%`
+            top: `${(hoverLabelRowIndex / rowLength) * 100}%`,
+            borderBottom: '1px solid rgb(var(--v-theme-primary))'
           }"
         >
           <!-- Chip to show the current view year and month label. Only render while mouse is over the scrollbar. -->
-          <!-- Disabled for now. -->
+
           <v-sheet
-            v-if="scrollbarRef && scrollbarStore.isDragging && false"
+            v-if="scrollbarRef"
             id="current-month-sheet"
             class="position-absolute w-100 d-flex align-center justify-center text-caption bg-surface-variant"
             :style="{
               height: `25px`,
-              top: `-25px`,
+              bottom: `0`,
               zIndex: 4,
               userSelect: 'none'
             }"
@@ -237,6 +242,7 @@ const handleHover = () => {
   if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
     hoverLabelRowIndex.value = targetRowIndex
   }
+  scrollbarStore.isHovering = true
 }
 
 const handleMouseDown = () => {
@@ -256,6 +262,7 @@ const handleMouseLeave = () => {
   } else {
     hoverLabelRowIndex.value = currentBatchIndex.value
   }
+  scrollbarStore.isHovering = false
 }
 
 const handleTouchStart = () => {
