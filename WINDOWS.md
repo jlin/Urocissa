@@ -18,15 +18,25 @@ This will create a folder called `./Urocissa`.
 
 Make sure the following software is installed on your system:
 
-- **ffmpeg**: Download FFmpeg from the official [FFmpeg website](https://ffmpeg.org/download.html). Extract the downloaded folder, and add the `bin` directory to your system's PATH environment variable.
+* **ffmpeg**: Download FFmpeg from the official [FFmpeg website](https://ffmpeg.org/download.html). Extract the downloaded folder, and add the `bin` directory to your system's PATH environment variable.
 
-- **Rust**: Install Rust using the [official installer](https://www.rust-lang.org/tools/install) for Windows.
+* **Rust**: Install Rust using the [official installer](https://www.rust-lang.org/tools/install) for Windows.
 
-- **Node.js (with npm)**: Download and install Node.js from the official [Node.js website](https://nodejs.org). Make sure npm is included in the installation.
+* **Node.js (with npm)**: Download and install Node.js from the official [Node.js website](https://nodejs.org). Make sure npm is included in the installation.
 
 ---
 
-### 3. Configure Backend Settings
+### 3. Build the Frontend
+
+In the `gallery-frontend` directory, run:
+
+```bash
+npm run build
+```
+
+---
+
+### 4. Configure Backend Settings
 
 1. Navigate to the backend directory:
 
@@ -45,43 +55,23 @@ Make sure the following software is installed on your system:
 
    ```env
    PASSWORD=password
-   SYNC_PATH=./upload
+   SYNC_PATH=
    DISCORD_HOOK_URL=
    ```
 
-   _Explanation:_
+   *Explanation:*
 
-   - `PASSWORD`: Your password for the app.
-   - `SYNC_PATH`: List of directories that the app will watch for new or modified photos.
-   - `DISCORD_HOOK_URL`: (Optional) Fill in your Discord webhook URL to receive error notifications.
+   * `PASSWORD`: Your password for the app.
+   * `SYNC_PATH`: A comma-separated list of directories that the app will monitor for new or modified photos. For example: `SYNC_PATH=./some/relative/path,/some/absolute/path`.
+   * `DISCORD_HOOK_URL`: (Optional) Fill in your Discord webhook URL to receive error notifications.
 
    **Rocket.toml:**
 
-   - `port`: Default is `5673`. You can change this to your desired port number.
+   * `port`: Default is `5673`. You can change this to your desired port number.
 
 ---
 
-### 4. Build the Backend
-
-Navigate to `gallery-backend` and build the backend using Cargo:
-
-```bash
-cargo build --release
-```
-
----
-
-### 5. Build the Frontend
-
-In the `gallery-frontend` directory, run:
-
-```bash
-npm run build
-```
-
----
-
-### 6. Run the Application
+### 5. Run the Application
 
 Navigate to the `gallery-backend` directory and run the following command to start the app:
 
@@ -89,7 +79,9 @@ Navigate to the `gallery-backend` directory and run the following command to sta
 cargo run --release
 ```
 
-You can now access the app via [http://127.0.0.1:5673](http://127.0.0.1:5673) or [http://127.0.0.1:<your_port>](http://127.0.0.1:<your_port>) if you configured a custom port in `Rocket.toml`.
+You can now access the app via [http://127.0.0.1:5673](http://127.0.0.1:5673) or [http://127.0.0.1](http://127.0.0.1):\<your\_port> if you configured a custom port in Rocket.toml.
+
+---
 
 ## Update
 
@@ -116,7 +108,10 @@ If using Docker, follow these steps:
    ```bash
    bash run_urocissa_docker.sh
    ```
+
 This will update and start the updated app.
+
+---
 
 If you are not using Docker and prefer to build from source, follow these manual steps to update:
 
