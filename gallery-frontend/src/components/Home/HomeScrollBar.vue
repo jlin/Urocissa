@@ -69,12 +69,13 @@
           <!-- Chip to show the current view year and month label. Only render while mouse is over the scrollbar. -->
 
           <v-sheet
-            v-if="scrollbarRef"
+            v-if="scrollbarRef && (scrollbarStore.isHovering || scrollbarStore.isDragging)"
             id="current-month-sheet"
-            class="position-absolute w-100 d-flex align-center justify-center text-caption bg-surface-variant"
+            class="position-absolute w-100 d-flex align-center justify-center text-caption bg-surface"
             :style="{
               height: `25px`,
               bottom: `0`,
+              left: `-${scrollBarWidth + 8}px`,
               zIndex: 4,
               userSelect: 'none'
             }"
