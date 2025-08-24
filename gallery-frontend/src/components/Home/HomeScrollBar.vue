@@ -7,7 +7,9 @@
       id="scroll-bar"
       :style="{
         zIndex: `3`,
-        cursor: `vertical-text`
+        cursor: `vertical-text`,
+        touchAction: 'none',
+        overscrollBehavior: 'contain'
       }"
       @click="handleClick"
       @mousedown="handleMouseDown"
