@@ -25,7 +25,7 @@
             ></v-slider>
           </v-col>
         </v-row>
-        <v-row align="center" no-gutters class="mt-4">
+        <v-row align="center" no-gutters class="mt-4" v-if="false">
           <v-col cols="auto">
             <v-chip variant="text"> Limit Ratio </v-chip>
           </v-col>
@@ -38,7 +38,7 @@
             ></v-switch>
           </v-col>
         </v-row>
-        <v-row align="center" no-gutters class="mt-4">
+        <v-row align="center" no-gutters class="mt-4" v-if="false">
           <v-col cols="auto">
             <v-chip variant="text"> Theme </v-chip>
           </v-col>
