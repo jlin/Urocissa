@@ -217,6 +217,7 @@ const handleClick = () => {
   prefetchStore.clearForResize()
   rowStore.clearForResize()
   scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
+  hoverLabelRowIndex.value = targetRowIndex
   debouncedFetchRow(targetRowIndex)
 }
 
