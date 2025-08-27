@@ -211,13 +211,14 @@ const handleClick = () => {
     return
   }
 
-  currentDateChipIndex.value = targetRowIndex
   locationStore.anchor = targetRowIndex
+
   offsetStore.clearAll()
   queueStore.clearAll()
   prefetchStore.clearForResize()
   rowStore.clearForResize()
   scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
+  currentDateChipIndex.value = targetRowIndex
   hoverLabelRowIndex.value = targetRowIndex
   debouncedFetchRow(targetRowIndex)
 }
