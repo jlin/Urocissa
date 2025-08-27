@@ -54,7 +54,7 @@
         </v-chip>
         <!-- This sheet's height is adjusted to visually indicate the size of the current row block. -->
         <v-sheet
-          v-if="scrollbarRef"
+          v-if="scrollbarRef && hoverLabelRowIndex !== undefined"
           id="current-block-sheet"
           :class="[
             'w-100 position-absolute',
@@ -69,7 +69,11 @@
           <!-- Chip to show the current view year and month label. Only render while mouse is over the scrollbar. -->
 
           <v-sheet
-            v-if="scrollbarRef && (scrollbarStore.isHovering || scrollbarStore.isDragging)"
+            v-if="
+              hoverLabelDate !== undefined &&
+              scrollbarRef &&
+              (scrollbarStore.isHovering || scrollbarStore.isDragging)
+            "
             id="current-month-sheet"
             class="position-absolute w-100 d-flex align-center justify-center text-caption bg-surface"
             :style="{
@@ -104,7 +108,7 @@ import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/type/con
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getInjectValue, getScrollUpperBound } from '@utils/getter'
 const isScrolling = ref(false)
-const hoverLabelRowIndex = ref(0)
+const hoverLabelRowIndex: Ref<number | undefined> = ref(undefined)
 const currentDateChipIndex = ref(0)
 const chipSize = 25
 
@@ -156,16 +160,18 @@ const currentBatchIndex = computed(() =>
  * Get the hover label's corresponding date based on the row index.
  */
 const hoverLabelDate = computed(() => {
-  let returnedString = ''
+  if (hoverLabelRowIndex.value === undefined) {
+    return undefined
+  }
   for (let scrollbarData of scrollbarStore.scrollbarDataArray) {
     const scrollbarDataRowIndex = Math.floor(scrollbarData.index / layoutBatchNumber)
     if (hoverLabelRowIndex.value >= scrollbarDataRowIndex) {
-      returnedString = `${scrollbarData.year}.${scrollbarData.month}`
+      return `${scrollbarData.year}.${scrollbarData.month}`
     } else {
       break
     }
   }
-  return returnedString
+  return undefined
 })
 
 const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
@@ -219,7 +225,6 @@ const handleClick = () => {
   rowStore.clearForResize()
   scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
   currentDateChipIndex.value = targetRowIndex
-  hoverLabelRowIndex.value = targetRowIndex
   debouncedFetchRow(targetRowIndex)
 }
 
@@ -233,7 +238,6 @@ const handleMove = () => {
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
       handleClick()
-      hoverLabelRowIndex.value = targetRowIndex
     }
   }
 }
@@ -260,11 +264,7 @@ const handleMouseUp = () => {
 const handleMouseLeave = () => {
   // Hide hover label when cursor leaves the scrollbar
 
-  if (reachBottom.value) {
-    hoverLabelRowIndex.value = rowLength.value - 1
-  } else {
-    hoverLabelRowIndex.value = currentBatchIndex.value
-  }
+  hoverLabelRowIndex.value = undefined
   scrollbarStore.isHovering = false
 }
 
@@ -306,10 +306,8 @@ watchEffect(() => {
 watch([() => locationStore.locationIndex, reachBottom], () => {
   isScrolling.value = true
   if (reachBottom.value) {
-    hoverLabelRowIndex.value = rowLength.value - 1
     currentDateChipIndex.value = rowLength.value - 1
   } else {
-    hoverLabelRowIndex.value = currentBatchIndex.value
     currentDateChipIndex.value = currentBatchIndex.value
   }
 })
