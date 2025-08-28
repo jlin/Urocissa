@@ -1,7 +1,10 @@
 use crate::public::constant::runtime::INDEX_RUNTIME;
 use crate::public::constant::{VALID_IMAGE_EXTENSIONS, VALID_VIDEO_EXTENSIONS};
-use crate::{public::config::PRIVATE_CONFIG, workflow::index_for_watch};
-use log::{error, info};
+use crate::{
+    public::config::PRIVATE_CONFIG, public::error_data::handle_error, workflow::index_for_watch,
+};
+use anyhow::Result;
+use log::info;
 use mini_executor::BatchTask;
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
@@ -30,26 +33,31 @@ pub struct StartWatcherTask;
 impl BatchTask for StartWatcherTask {
     fn batch_run(_: Vec<Self>) -> impl Future<Output = ()> + Send {
         async move {
-            start_watcher_task();
+            if let Err(e) = start_watcher_task() {
+                handle_error(e);
+            }
         }
     }
 }
 
-fn start_watcher_task() -> () {
+fn start_watcher_task() -> Result<()> {
     // Fast-path: already running.
     if IS_WATCHING.swap(true, Ordering::SeqCst) {
-        return;
+        return Ok(());
     }
 
     // Build the watcher.
-    let mut watcher = new_watcher().unwrap();
+    let mut watcher = new_watcher()?;
     for path in &PRIVATE_CONFIG.sync_path {
-        watcher.watch(path, RecursiveMode::Recursive).unwrap();
+        watcher
+            .watch(path, RecursiveMode::Recursive)
+            .map_err(|e| anyhow::anyhow!("Failed to watch path {:?}: {}", path, e))?;
         info!("Watching path {:?}", path);
     }
 
     // Store it globally to keep it alive.
     *WATCHER_HANDLE.lock().unwrap() = Some(watcher);
+    Ok(())
 }
 
 fn is_valid_media_file(path: &Path) -> bool {
@@ -91,12 +99,14 @@ fn submit_to_debounce_pool(path: PathBuf) {
 
         if should_run && is_valid_media_file(&path) {
             // Really need to do indexing
-            index_for_watch(path, None).await;
+            if let Err(e) = index_for_watch(path, None).await {
+                handle_error(e);
+            }
         }
     });
 }
 
-fn new_watcher() -> notify::Result<RecommendedWatcher> {
+fn new_watcher() -> Result<RecommendedWatcher> {
     notify::recommended_watcher(move |result: Result<Event, notify::Error>| match result {
         Ok(event) => {
             match event.kind {
@@ -143,6 +153,9 @@ fn new_watcher() -> notify::Result<RecommendedWatcher> {
                 _ => { /* ignore other kinds */ }
             }
         }
-        Err(err) => error!("Watch error: {:#?}", err),
+        Err(err) => {
+            handle_error(anyhow::anyhow!("Watch error: {:#?}", err));
+        }
     })
+    .map_err(|e| anyhow::anyhow!("Failed to create watcher: {}", e))
 }
