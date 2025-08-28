@@ -49,11 +49,7 @@ pub async fn index_for_watch(
                 "Processing already in progress for path: {:?}, hash: {}",
                 path, hash
             );
-            bail!(
-                "Processing already in progress for path: {:?}, hash: {}",
-                path,
-                hash
-            );
+            return Ok(());
         }
     };
 
