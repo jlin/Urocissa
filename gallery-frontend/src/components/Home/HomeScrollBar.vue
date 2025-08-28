@@ -176,10 +176,6 @@ const hoverLabelDate = computed(() => {
   return label
 })
 
-watchEffect(() => {
-  console.log('hoverLabelDate is', hoverLabelDate.value)
-})
-
 const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
 
 const getTargetRowIndex = (percentage: number) => {
