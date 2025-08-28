@@ -37,7 +37,10 @@ fn flush_tree_snapshot_task() {
             let txn = match TREE_SNAPSHOT.in_disk.begin_write() {
                 Ok(t) => t,
                 Err(e) => {
-                    handle_error(anyhow::anyhow!("Failed to begin write transaction: {}", e));
+                    handle_error(anyhow::anyhow!(
+                        "FlushTreeSnapshotTask: Failed to begin write transaction: {}",
+                        e
+                    ));
                     break;
                 }
             };
@@ -49,7 +52,7 @@ fn flush_tree_snapshot_task() {
                     Ok(t) => t,
                     Err(e) => {
                         handle_error(anyhow::anyhow!(
-                            "Failed to open table {}: {}",
+                            "FlushTreeSnapshotTask: Failed to open table {}: {}",
                             timestamp_str,
                             e
                         ));
@@ -59,7 +62,7 @@ fn flush_tree_snapshot_task() {
                 for (index, data) in entry_ref.iter().enumerate() {
                     if let Err(e) = table.insert(index as u64, data) {
                         handle_error(anyhow::anyhow!(
-                            "Failed to insert data at index {} for timestamp {}: {}",
+                            "FlushTreeSnapshotTask: Failed to insert data at index {} for timestamp {}: {}",
                             index,
                             timestamp,
                             e
@@ -70,7 +73,7 @@ fn flush_tree_snapshot_task() {
 
             if let Err(e) = txn.commit() {
                 handle_error(anyhow::anyhow!(
-                    "Failed to commit transaction for timestamp {}: {}",
+                    "FlushTreeSnapshotTask: Failed to commit transaction for timestamp {}: {}",
                     timestamp,
                     e
                 ));
