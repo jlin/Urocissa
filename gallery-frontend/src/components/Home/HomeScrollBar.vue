@@ -58,7 +58,9 @@
           id="current-block-sheet"
           :class="[
             'w-100 position-absolute',
-            scrollbarStore.isHovering ? 'bg-surface-light' : 'bg-surface'
+            scrollbarStore.isHovering || scrollbarStore.isDragging
+              ? 'bg-surface-light'
+              : 'bg-surface'
           ]"
           :style="{
             height: `${scrollbarHeight / rowLength}px`,
@@ -174,6 +176,10 @@ const hoverLabelDate = computed(() => {
   return undefined
 })
 
+watchEffect(() => {
+  console.log('hoverLabelDate is', hoverLabelDate.value)
+})
+
 const displayScrollbarDataArrayYear: Ref<ScrollbarData[]> = ref([])
 
 const getTargetRowIndex = (percentage: number) => {
@@ -225,6 +231,7 @@ const handleClick = () => {
   rowStore.clearForResize()
   scrollTopStore.scrollTop = targetRowIndex * fixedBigRowHeight
   currentDateChipIndex.value = targetRowIndex
+  hoverLabelRowIndex.value = targetRowIndex
   debouncedFetchRow(targetRowIndex)
 }
 
