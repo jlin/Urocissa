@@ -16,5 +16,7 @@ fn send_discord_webhook(webhook_url: &str, error: &Error) -> () {
     let client = Client::new();
     let debug_string = format!("```rust\n{:?}\n```", error);
     let params = json!({ "content": debug_string });
-    client.post(webhook_url).json(&params).send().unwrap();
+    if let Err(e) = client.post(webhook_url).json(&params).send() {
+        error!("Failed to send discord webhook: {}", e);
+    }
 }
