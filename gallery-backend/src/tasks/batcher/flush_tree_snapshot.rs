@@ -4,6 +4,9 @@ use mini_executor::BatchTask;
 use redb::TableDefinition;
 use std::time::Instant;
 
+use crate::public::error_data::handle_error;
+use anyhow;
+
 pub struct FlushTreeSnapshotTask;
 
 impl BatchTask for FlushTreeSnapshotTask {
@@ -31,18 +34,48 @@ fn flush_tree_snapshot_task() {
             let timestamp_str = timestamp.to_string();
 
             let timer_start = Instant::now();
-            let txn = TREE_SNAPSHOT.in_disk.begin_write().unwrap();
+            let txn = match TREE_SNAPSHOT.in_disk.begin_write() {
+                Ok(t) => t,
+                Err(e) => {
+                    handle_error(anyhow::anyhow!("Failed to begin write transaction: {}", e));
+                    break;
+                }
+            };
             let table_definition: TableDefinition<u64, ReducedData> =
                 TableDefinition::new(&timestamp_str);
 
             {
-                let mut table = txn.open_table(table_definition).unwrap();
+                let mut table = match txn.open_table(table_definition) {
+                    Ok(t) => t,
+                    Err(e) => {
+                        handle_error(anyhow::anyhow!(
+                            "Failed to open table {}: {}",
+                            timestamp_str,
+                            e
+                        ));
+                        break;
+                    }
+                };
                 for (index, data) in entry_ref.iter().enumerate() {
-                    table.insert(index as u64, data).unwrap();
+                    if let Err(e) = table.insert(index as u64, data) {
+                        handle_error(anyhow::anyhow!(
+                            "Failed to insert data at index {} for timestamp {}: {}",
+                            index,
+                            timestamp,
+                            e
+                        ));
+                    }
                 }
             }
 
-            txn.commit().unwrap();
+            if let Err(e) = txn.commit() {
+                handle_error(anyhow::anyhow!(
+                    "Failed to commit transaction for timestamp {}: {}",
+                    timestamp,
+                    e
+                ));
+                break;
+            }
 
             info!(
                 duration = &*format!("{:?}", timer_start.elapsed());
