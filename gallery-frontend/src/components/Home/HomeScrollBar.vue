@@ -162,18 +162,18 @@ const currentBatchIndex = computed(() =>
  * Get the hover label's corresponding date based on the row index.
  */
 const hoverLabelDate = computed(() => {
-  if (hoverLabelRowIndex.value === undefined) {
-    return undefined
-  }
-  for (let scrollbarData of scrollbarStore.scrollbarDataArray) {
-    const scrollbarDataRowIndex = Math.floor(scrollbarData.index / layoutBatchNumber)
-    if (hoverLabelRowIndex.value >= scrollbarDataRowIndex) {
-      return `${scrollbarData.year}.${scrollbarData.month}`
+  const h = hoverLabelRowIndex.value
+  if (h === undefined) return undefined
+  let label: string | undefined
+  for (const d of scrollbarStore.scrollbarDataArray) {
+    const rowIdx = Math.floor(d.index / layoutBatchNumber)
+    if (h >= rowIdx) {
+      label = `${d.year}.${d.month}`
     } else {
       break
     }
   }
-  return undefined
+  return label
 })
 
 watchEffect(() => {
