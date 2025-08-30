@@ -12,6 +12,7 @@
           :key="index"
           :src="imgStore.imgOriginal.get(index)"
           class="w-100 h-100"
+          style="object-fit: cover"
         />
       </v-card>
 
