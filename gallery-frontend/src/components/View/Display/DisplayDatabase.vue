@@ -39,22 +39,13 @@
 <script setup lang="ts">
 import { AbstractData, IsolationId } from '@type/types'
 
-import { useCurrentFrameStore } from '@/store/currentFrameStore'
-import { ref, watch } from 'vue'
 import DisplayDatabaseVideo from './DisplayDatabaseVideo.vue'
 import DisplayDatabaseImage from './DisplayDatabaseImage.vue'
 
-const props = defineProps<{
+defineProps<{
   isolationId: IsolationId
   hash: string
   index: number
   abstractData: AbstractData
 }>()
-
-const currentFrameStore = useCurrentFrameStore(props.isolationId)
-const videoRef = ref<HTMLVideoElement | null>(null)
-
-watch(videoRef, () => {
-  currentFrameStore.video = videoRef.value
-})
 </script>
