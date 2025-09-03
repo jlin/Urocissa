@@ -2,13 +2,13 @@
   <video
     v-if="tokenReady"
     controls
-    autoplay
+    :autoplay="enableWatch !== false"
     :src="getSrc(hash, false, 'mp4')"
     :style="{
       width: `${database.width}px`,
       height: `${database.height}px`,
       maxWidth: '100%',
-      maxHeight: '100%',
+      maxHeight: '100%'
     }"
     inline
     ref="videoRef"
@@ -21,13 +21,14 @@
 <script setup lang="ts">
 import { Database, IsolationId } from '@type/types'
 import { useCurrentFrameStore } from '@/store/currentFrameStore'
-import { onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { getSrc } from '@utils/getter'
 import { useTokenStore } from '@/store/tokenStore'
 const props = defineProps<{
   isolationId: IsolationId
   hash: string
   database: Database
+  enableWatch: boolean
 }>()
 
 const tokenReady = ref(false)
@@ -37,9 +38,18 @@ const currentFrameStore = useCurrentFrameStore(props.isolationId)
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 
-watch(videoRef, () => {
-  currentFrameStore.video = videoRef.value
+if (props.enableWatch) {
+  watch(videoRef, () => {
+    currentFrameStore.video = videoRef.value
+  })
+}
+
+onBeforeUnmount(() => {
+  if (currentFrameStore.video === videoRef.value) {
+    currentFrameStore.video = null
+  }
 })
+
 onMounted(async () => {
   await tokenStore.tryRefreshAndStoreTokenToDb(props.database.hash)
   tokenReady.value = true

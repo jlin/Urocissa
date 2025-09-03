@@ -30,6 +30,7 @@
               :hash="previousAbstractData.database.hash"
               :abstract-data="previousAbstractData"
               :isolation-id="isolationId"
+              :enable-watch="false"
             />
             <ViewPageDisplayAlbum
               v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
@@ -49,6 +50,7 @@
               :hash="hash"
               :abstract-data="abstractData"
               :isolation-id="isolationId"
+              :enable-watch="false"
             />
             <ViewPageDisplayAlbum
               v-if="abstractData && abstractData.album && !configStore.disableImg"
@@ -68,6 +70,7 @@
               :hash="nextAbstractData.database.hash"
               :abstract-data="nextAbstractData"
               :isolation-id="isolationId"
+              :enable-watch="false"
             />
             <ViewPageDisplayAlbum
               v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"
@@ -101,6 +104,7 @@
             :hash="previousAbstractData.database.hash"
             :abstract-data="previousAbstractData"
             :isolation-id="isolationId"
+            :enable-watch="false"
           />
           <ViewPageDisplayAlbum
             v-if="previousAbstractData && previousAbstractData.album && !configStore.disableImg"
@@ -119,6 +123,7 @@
             :hash="hash"
             :abstract-data="abstractData"
             :isolation-id="isolationId"
+            :enable-watch="true"
           />
           <ViewPageDisplayAlbum
             v-if="abstractData && abstractData.album && !configStore.disableImg"
@@ -137,6 +142,7 @@
             :hash="nextAbstractData.database.hash"
             :abstract-data="nextAbstractData"
             :isolation-id="isolationId"
+            :enable-watch="false"
           />
           <ViewPageDisplayAlbum
             v-if="nextAbstractData && nextAbstractData.album && !configStore.disableImg"

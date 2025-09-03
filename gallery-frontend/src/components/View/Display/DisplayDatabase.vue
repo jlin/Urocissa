@@ -18,6 +18,7 @@
       :database="abstractData.database"
       :hash="abstractData.database.hash"
       :isolation-id="isolationId"
+      :enable-watch="enableWatch"
     />
     <v-card
       v-if="abstractData.database.ext_type === 'video' && abstractData.database.pending"
@@ -47,5 +48,6 @@ defineProps<{
   hash: string
   index: number
   abstractData: AbstractData
+  enableWatch: boolean
 }>()
 </script>
