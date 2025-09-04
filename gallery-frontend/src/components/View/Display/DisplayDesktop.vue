@@ -14,6 +14,7 @@
         :hash="hash"
         :abstract-data="abstractData"
         :isolation-id="isolationId"
+        :enable-watch="true"
       />
       <ViewPageDisplayAlbum
         v-if="abstractData && abstractData.album && !configStore.disableImg"
