@@ -213,10 +213,55 @@ const debouncedFetchRow = debounce((index: number) => {
 }, 100)
 
 /**
+ * Get relative Y position from event and scrollbar element
+ */
+const getRelativePosition = (event: MouseEvent | TouchEvent): number => {
+  const refValue = scrollbarRef.value
+  if (!refValue) return 0
+  
+  // Handle both direct DOM element refs and component refs
+  let element: HTMLElement
+  if ('$el' in refValue) {
+    // It's a Vue component instance
+    element = (refValue as { $el: HTMLElement }).$el
+  } else {
+    // It's a direct DOM element
+    element = refValue
+  }
+  
+  const rect = element.getBoundingClientRect()
+  let clientY: number
+  
+  if ('touches' in event && event.touches.length > 0) {
+    // Touch event
+    const touch = event.touches[0]
+    if (!touch) return 0
+    clientY = touch.clientY
+  } else if ('clientY' in event) {
+    // Mouse event
+    clientY = event.clientY
+  } else {
+    return 0
+  }
+  
+  const relativeY = clientY - rect.top
+  return Math.max(0, Math.min(relativeY, rect.height))
+}
+
+/**
  * Handle a click event on the scrollbar.
  */
-const handleClick = () => {
-  const clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+const handleClick = (event?: MouseEvent | TouchEvent) => {
+  let clickPositionRelative: number
+  
+  if (event) {
+    // Use event position for immediate response
+    clickPositionRelative = getRelativePosition(event)
+  } else {
+    // Fallback to mouse tracking (for legacy click handler)
+    clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  }
+  
   const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
 
   if (targetRowIndex === currentDateChipIndex.value) {
@@ -238,19 +283,37 @@ const handleClick = () => {
 /**
  * Handle movement over the scrollbar.
  */
-const handleMove = () => {
+const handleMove = (event?: MouseEvent | TouchEvent) => {
   if (scrollbarStore.isDragging) {
-    const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+    let hoverPositionRelative: number
+    
+    if (event) {
+      // Use event position for immediate response
+      hoverPositionRelative = getRelativePosition(event)
+    } else {
+      // Fallback to mouse tracking
+      hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+    }
+    
     const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
-      handleClick()
+      handleClick(event)
     }
   }
 }
 
-const handleHover = () => {
-  const hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+const handleHover = (event?: MouseEvent) => {
+  let hoverPositionRelative: number
+  
+  if (event) {
+    // Use event position for immediate response
+    hoverPositionRelative = getRelativePosition(event)
+  } else {
+    // Fallback to mouse tracking
+    hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
+  }
+  
   const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
   if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
@@ -259,10 +322,10 @@ const handleHover = () => {
   scrollbarStore.isHovering = true
 }
 
-const handleMouseDown = () => {
+const handleMouseDown = (event: MouseEvent) => {
   isScrolling.value = true
   scrollbarStore.isDragging = true
-  handleClick()
+  handleClick(event)
 }
 
 const handleMouseUp = () => {
@@ -276,10 +339,10 @@ const handleMouseLeave = () => {
   scrollbarStore.isHovering = false
 }
 
-const handleTouchStart = () => {
+const handleTouchStart = (event: TouchEvent) => {
   isScrolling.value = true
   scrollbarStore.isDragging = true
-  handleClick()
+  handleClick(event)
 }
 
 const handleTouchEnd = () => {
@@ -321,12 +384,16 @@ watch([() => locationStore.locationIndex, reachBottom], () => {
 })
 
 onMounted(() => {
+  const handleGlobalMouseMove = (event: MouseEvent) => {
+    handleMove(event)
+  }
+  
   window.addEventListener('mouseup', handleMouseUp)
-  window.addEventListener('mousemove', handleMove)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('mouseup', handleMouseUp)
-  window.removeEventListener('mousemove', handleMove)
+  window.addEventListener('mousemove', handleGlobalMouseMove)
+  
+  onBeforeUnmount(() => {
+    window.removeEventListener('mouseup', handleMouseUp)
+    window.removeEventListener('mousemove', handleGlobalMouseMove)
+  })
 })
 </script>
