@@ -4,7 +4,7 @@
     v-if="abstractData"
     class="h-100 flex-grow-0 flex-shrink-0"
     :style="{
-      backgroundColor: 'white',
+      backgroundColor: '#121212',
       width: constStore.showInfo ? '360px' : '0',
       zIndex: 1
     }"
@@ -12,19 +12,17 @@
     <div class="position-relative">
       <div>
         <v-toolbar
-          color="white"
-          :style="{
-            backgroundColor: '#212121'
-          }"
+          color="#121212"
+          theme="dark"
         >
           <v-btn icon @click="toggleInfo">
-            <v-icon>mdi-close</v-icon>
+            <v-icon color="#e0e0e0">mdi-close</v-icon>
           </v-btn>
-          <v-toolbar-title class="text-h5">Info</v-toolbar-title>
+          <v-toolbar-title class="text-h5" style="color: #e0e0e0;">Info</v-toolbar-title>
         </v-toolbar>
       </div>
       <div v-if="abstractData.database" class="h-100 w-100">
-        <v-list bg-color="white" class="pa-0" height="100%" lines="two">
+        <v-list bg-color="#121212" theme="dark" class="pa-0" height="100%" lines="two">
           <ItemSize :database="abstractData.database" />
           <ItemPath v-if="showMetadata" :database="abstractData.database" />
           <ItemDate :database="abstractData.database" />
@@ -51,7 +49,7 @@
         </v-list>
       </div>
       <div v-if="abstractData.album" class="h-100 w-100">
-        <v-list bg-color="white" class="pa-0" height="100%" lines="two">
+        <v-list bg-color="#121212" theme="dark" class="pa-0" height="100%" lines="two">
           <ItemTitle :title="abstractData.album.title" />
           <ItemCount :album="abstractData.album" />
           <v-divider></v-divider>

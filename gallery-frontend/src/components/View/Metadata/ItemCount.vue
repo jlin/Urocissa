@@ -2,7 +2,7 @@
   <v-list-item>
     <template #prepend>
       <v-avatar>
-        <v-icon color="black">mdi-image</v-icon>
+        <v-icon color="#e0e0e0">mdi-image</v-icon>
       </v-avatar>
     </template>
     <v-list-item-title class="text-wrap">{{ `${props.album.itemCount} items` }}</v-list-item-title>

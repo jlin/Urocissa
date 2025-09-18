@@ -2,13 +2,13 @@
   <v-list-item>
     <template #prepend>
       <v-avatar>
-        <v-icon color="black">mdi-image-album</v-icon>
+        <v-icon color="#e0e0e0">mdi-image-album</v-icon>
       </v-avatar>
     </template>
     <v-list-item-subtitle class="text-wrap">
       <v-chip
         variant="flat"
-        color="black"
+        color="primary"
         v-for="albumId in props.albums"
         :key="albumId"
         link
@@ -21,7 +21,7 @@
     <v-list-item-subtitle>
       <v-chip
         prepend-icon="mdi-pencil"
-        color="black"
+        color="surface-variant"
         variant="outlined"
         class="ma-1"
         link
