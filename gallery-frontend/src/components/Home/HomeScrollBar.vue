@@ -1,8 +1,8 @@
 <template>
   <div class="h-100 py-2" :style="{ width: `${scrollBarWidth}px` }">
-    <v-sheet
+    <div
       v-if="imageContainerRef"
-      class="h-100"
+      class="h-100 v-sheet"
       ref="scrollbarRef"
       id="scroll-bar"
       :style="{
@@ -92,7 +92,7 @@
           </v-sheet>
         </v-sheet>
       </v-sheet>
-    </v-sheet>
+    </div>
   </div>
 </template>
 
@@ -216,22 +216,12 @@ const debouncedFetchRow = debounce((index: number) => {
  * Get relative Y position from event and scrollbar element
  */
 const getRelativePosition = (event: MouseEvent | TouchEvent): number => {
-  const refValue = scrollbarRef.value
-  if (!refValue) return 0
-  
-  // Handle both direct DOM element refs and component refs
-  let element: HTMLElement
-  if ('$el' in refValue) {
-    // It's a Vue component instance
-    element = (refValue as { $el: HTMLElement }).$el
-  } else {
-    // It's a direct DOM element
-    element = refValue
-  }
-  
+  const element = scrollbarRef.value
+  if (!element) return 0
+
   const rect = element.getBoundingClientRect()
   let clientY: number
-  
+
   if ('touches' in event && event.touches.length > 0) {
     // Touch event
     const touch = event.touches[0]
@@ -243,7 +233,7 @@ const getRelativePosition = (event: MouseEvent | TouchEvent): number => {
   } else {
     return 0
   }
-  
+
   const relativeY = clientY - rect.top
   return Math.max(0, Math.min(relativeY, rect.height))
 }
@@ -253,7 +243,7 @@ const getRelativePosition = (event: MouseEvent | TouchEvent): number => {
  */
 const handleClick = (event?: MouseEvent | TouchEvent) => {
   let clickPositionRelative: number
-  
+
   if (event) {
     // Use event position for immediate response
     clickPositionRelative = getRelativePosition(event)
@@ -261,7 +251,7 @@ const handleClick = (event?: MouseEvent | TouchEvent) => {
     // Fallback to mouse tracking (for legacy click handler)
     clickPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
   }
-  
+
   const targetRowIndex = getTargetRowIndex(clickPositionRelative / scrollbarHeight.value)
 
   if (targetRowIndex === currentDateChipIndex.value) {
@@ -286,7 +276,7 @@ const handleClick = (event?: MouseEvent | TouchEvent) => {
 const handleMove = (event?: MouseEvent | TouchEvent) => {
   if (scrollbarStore.isDragging) {
     let hoverPositionRelative: number
-    
+
     if (event) {
       // Use event position for immediate response
       hoverPositionRelative = getRelativePosition(event)
@@ -294,7 +284,7 @@ const handleMove = (event?: MouseEvent | TouchEvent) => {
       // Fallback to mouse tracking
       hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
     }
-    
+
     const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
     if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
@@ -305,7 +295,7 @@ const handleMove = (event?: MouseEvent | TouchEvent) => {
 
 const handleHover = (event?: MouseEvent) => {
   let hoverPositionRelative: number
-  
+
   if (event) {
     // Use event position for immediate response
     hoverPositionRelative = getRelativePosition(event)
@@ -313,7 +303,7 @@ const handleHover = (event?: MouseEvent) => {
     // Fallback to mouse tracking
     hoverPositionRelative = Math.max(0, scrollbarMouse.elementY.value)
   }
-  
+
   const targetRowIndex = getTargetRowIndex(hoverPositionRelative / scrollbarHeight.value)
 
   if (targetRowIndex >= 0 && targetRowIndex <= rowLength.value - 1) {
@@ -387,10 +377,10 @@ onMounted(() => {
   const handleGlobalMouseMove = (event: MouseEvent) => {
     handleMove(event)
   }
-  
+
   window.addEventListener('mouseup', handleMouseUp)
   window.addEventListener('mousemove', handleGlobalMouseMove)
-  
+
   onBeforeUnmount(() => {
     window.removeEventListener('mouseup', handleMouseUp)
     window.removeEventListener('mousemove', handleGlobalMouseMove)
