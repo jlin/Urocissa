@@ -262,6 +262,7 @@ const handleHover = () => {
 const handleMouseDown = () => {
   isScrolling.value = true
   scrollbarStore.isDragging = true
+  handleClick()
 }
 
 const handleMouseUp = () => {
