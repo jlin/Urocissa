@@ -74,7 +74,9 @@
             v-if="
               hoverLabelDate !== undefined &&
               scrollbarRef &&
-              (scrollbarStore.isHovering || scrollbarStore.isDragging)
+              (configStore.isMobile
+                ? scrollbarStore.isDragging
+                : scrollbarStore.isHovering || scrollbarStore.isDragging)
             "
             id="current-month-sheet"
             class="position-absolute w-100 d-flex align-center justify-center text-caption bg-surface"
@@ -109,6 +111,7 @@ import { IsolationId, ScrollbarData } from '@type/types'
 import { fixedBigRowHeight, layoutBatchNumber, scrollBarWidth } from '@/type/constants'
 import { useScrollTopStore } from '@/store/scrollTopStore'
 import { getInjectValue, getScrollUpperBound } from '@utils/getter'
+import { useConfigStore } from '@/store/configStore'
 const isScrolling = ref(false)
 const hoverLabelRowIndex: Ref<number | undefined> = ref(undefined)
 const currentDateChipIndex = ref(0)
@@ -126,6 +129,7 @@ const rowStore = useRowStore(props.isolationId)
 const offsetStore = useOffsetStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)
 const windowHeight = getInjectValue<Ref<number>>('windowHeight')
+const configStore = useConfigStore('mainId')
 
 const reachBottom = computed(() => {
   return (
