@@ -1,9 +1,5 @@
 <template>
-  <v-toolbar
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
+  <v-toolbar class="bg-surface">
     <v-btn v-if="route.meta.level === 1" @click="showDrawer = !showDrawer" icon="mdi-menu"> </v-btn>
     <v-btn
       v-else
@@ -25,13 +21,13 @@
         width: `${route.meta.level === 3 ? '50%' : '100%'}`
       }"
     >
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-0 bg-surface">
         <v-text-field
           id="nav-search-input"
           rounded
           class="ma-0"
           v-model="searchQuery"
-          bg-color="grey-darken-2"
+          bg-color="surface-light"
           @click:prepend-inner="handleSearch"
           @click:clear="handleSearch"
           @keyup.enter="handleSearch"
