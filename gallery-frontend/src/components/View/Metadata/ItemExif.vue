@@ -2,7 +2,7 @@
   <v-list-item>
     <template #prepend>
       <v-avatar>
-        <v-icon color="#e0e0e0">mdi-camera-iris</v-icon>
+        <v-icon >mdi-camera-iris</v-icon>
       </v-avatar>
     </template>
     <v-list-item-title class="text-wrap">{{

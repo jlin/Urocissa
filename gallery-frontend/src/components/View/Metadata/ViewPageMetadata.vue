@@ -10,7 +10,7 @@
   >
     <div class="position-relative">
       <div>
-        <v-toolbar>
+        <v-toolbar class="bg-surface">
           <v-btn icon @click="toggleInfo">
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -45,7 +45,7 @@
         </v-list>
       </div>
       <div v-if="abstractData.album" class="h-100 w-100">
-        <v-list theme="dark" class="pa-0" height="100%" lines="two">
+        <v-list class="pa-0" height="100%" lines="two">
           <ItemTitle :title="abstractData.album.title" />
           <ItemCount :album="abstractData.album" />
           <v-divider></v-divider>

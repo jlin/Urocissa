@@ -2,14 +2,14 @@
   <v-list-item>
     <template #prepend>
       <v-avatar>
-        <v-icon color="#e0e0e0">mdi-tag</v-icon>
+        <v-icon >mdi-tag</v-icon>
       </v-avatar>
     </template>
     <v-list-item-title v-if="route.meta.baseName !== 'share'">
       <v-chip
         v-if="tags.includes('_favorite')"
         prepend-icon="mdi-star"
-        color="amber"
+        color="warning"
         variant="tonal"
         class="ma-1"
         link
@@ -29,7 +29,7 @@
       <v-chip
         v-if="tags.includes('_archived')"
         prepend-icon="mdi-archive-arrow-down"
-        color="blue"
+        color="primary"
         variant="tonal"
         class="ma-1"
         link
