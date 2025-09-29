@@ -14,7 +14,7 @@
   <v-container
     v-if="albumStore.fetched"
     id="table-container"
-    class="pa-1 bg-grey-darken-3 d-flex align-start"
+    class="pa-1 bg-surface-light d-flex align-start"
     :style="{ height: `calc(100% - ${navBarHeight}px)` }"
     fluid
   >
