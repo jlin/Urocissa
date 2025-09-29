@@ -7,7 +7,7 @@
       <div
         id="image-container"
         ref="imageContainerRef"
-        class="d-flex flex-wrap position-relative flex-grow-1 min-h-0 h-100 pa-1 pb-2 bg-grey-darken-3"
+        class="d-flex flex-wrap position-relative flex-grow-1 min-h-0 h-100 pa-1 pb-2 bg-surface-light"
         :class="stopScroll ? 'overflow-y-hidden' : 'overflow-y-scroll'"
         @scroll="
           // If prefetchStore.locateTo triggers initializeScrollPosition, prevent the user from triggering the scrolling function.
@@ -24,7 +24,7 @@
           :isolation-id="props.isolationId"
         />
       </div>
-      <div class="flex-grow-0 flex-shrink-0" style="background-color: #424242">
+      <div class="flex-grow-0 flex-shrink-0 bg-surface-light">
         <ScrollBar :isolation-id="props.isolationId" />
       </div>
     </div>
