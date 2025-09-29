@@ -17,8 +17,8 @@
   >
     <div
       v-if="index !== undefined"
-      class="pa-0 h-100 w-100 d-flex position-relative"
-      style="background-color: black"
+      class="pa-0 h-100 w-100 d-flex position-relative bg-background"
+
     >
       <ViewPageDisplay
         :abstract-data="abstractData"
