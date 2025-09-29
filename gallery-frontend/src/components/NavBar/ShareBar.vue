@@ -1,19 +1,6 @@
 <template>
-  <v-toolbar
-    flat
-    height="2"
-    class="no-select"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
-  </v-toolbar>
-  <v-toolbar
-    class="position-relative"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
+  <v-toolbar flat height="2" class="no-select bg-surface"> </v-toolbar>
+  <v-toolbar class="position-relative bg-surface">
     <v-card elevation="0" class="w-50">
       <v-card-title> {{ shareStore.resolvedShare?.albumTitle }} </v-card-title>
     </v-card>

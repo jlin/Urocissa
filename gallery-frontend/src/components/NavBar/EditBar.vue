@@ -1,9 +1,5 @@
 <template>
-  <v-toolbar
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
+  <v-toolbar class="bg-surface">
     <LeaveEdit />
     <v-card
       variant="flat"

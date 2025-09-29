@@ -1,20 +1,13 @@
 <template>
-  <v-toolbar
-    flat
-    height="2"
-    class="no-select"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
+  <v-toolbar flat height="2" class="no-select bg-surface">
     <v-progress-linear
+      class="bg-surface"
       v-if="!initializedStore.initialized"
       indeterminate
       color="primary"
       height="2"
       :style="{
-        border: 0,
-        backgroundColor: '#212121'
+        border: 0
       }"
     >
     </v-progress-linear>

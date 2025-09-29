@@ -1,19 +1,6 @@
 <template>
-  <v-toolbar
-    flat
-    height="2"
-    class="no-select"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  />
-  <v-toolbar
-    v-if="!collectionStore.editModeOn"
-    class="position-relative"
-    :style="{
-      backgroundColor: '#212121'
-    }"
-  >
+  <v-toolbar flat height="2" class="no-select bg-surface" />
+  <v-toolbar v-if="!collectionStore.editModeOn" class="position-relative bg-surface">
     <LeaveView />
     <v-card elevation="0" class="w-100">
       <v-card-title>
