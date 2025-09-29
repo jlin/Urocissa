@@ -9,7 +9,7 @@
     <div class="d-flex flex-wrap" v-for="index in placeholderRowNumScaled" :key="`extra-${index}`">
       <div
         v-for="subindex in placeholderColNum"
-        class="bg-grey-darken-2 ma-1"
+        :class="`${placeholderBgClass} ma-1`"
         ref="placeholderRowRef"
         :key="`extra-${subindex}`"
         :style="{
@@ -32,8 +32,10 @@ import { useConstStore } from '@/store/constStore'
 import { paddingPixel } from '@/type/constants'
 import { getInjectValue } from '@utils/getter'
 import { computed, onMounted, Ref, ref, watchEffect } from 'vue'
+import { useThemeClasses } from '@/style/useThemeClasses'
 
 const constStore = useConstStore('mainId')
+const { placeholderBgClass } = useThemeClasses()
 
 const placeholderRef = ref<HTMLElement>()
 const windowWidth = getInjectValue<Ref<number>>('windowWidth')

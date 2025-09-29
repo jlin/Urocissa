@@ -16,7 +16,7 @@
           rounded
           class="ma-0"
           v-model="searchQuery"
-          bg-color="grey-darken-2"
+          bg-color="surface-light"
           @click:prepend-inner="handleSearch"
           @click:clear="handleSearch"
           @keyup.enter="handleSearch"

@@ -43,7 +43,7 @@
         />
         <div
           id="grey-background-placeholder"
-          class="w-100 h-100 bg-grey-darken-2 position-absolute"
+          :class="`w-100 h-100 ${placeholderBgClass} position-absolute`"
           :style="{
             zIndex: 0
           }"
@@ -71,6 +71,7 @@ import DesktopHoverIcon from './FunctionalComponent/DesktopHoverIcon'
 import HoverGradientDiv from './FunctionalComponent/HoverGradientDiv'
 import { useConfigStore } from '@/store/configStore'
 import { useConstStore } from '@/store/constStore'
+import { useThemeClasses } from '@/style/useThemeClasses'
 const props = defineProps<{
   row: Row
   isolationId: IsolationId
@@ -80,6 +81,7 @@ const router = useRouter()
 const route = useRoute()
 const constStore = useConstStore('mainId')
 const configStore = useConfigStore('mainId')
+const { placeholderBgClass } = useThemeClasses()
 const prefetchStore = usePrefetchStore(props.isolationId)
 const collectionStore = useCollectionStore(props.isolationId)
 const queueStore = useQueueStore(props.isolationId)

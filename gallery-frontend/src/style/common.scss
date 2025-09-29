@@ -13,3 +13,18 @@ html {
 .min-w-0 {
   min-width: 0 !important;
 }
+
+// Theme-aware placeholder background
+.bg-placeholder {
+  background-color: rgb(var(--v-theme-surface-variant)) !important;
+}
+
+// Alternative: More explicit theme-aware placeholder using CSS custom properties
+.bg-placeholder-grey {
+  .v-theme--light & {
+    background-color: rgb(var(--v-theme-grey-lighten-2)) !important;
+  }
+  .v-theme--dark & {
+    background-color: rgb(var(--v-theme-grey-darken-2)) !important;
+  }
+}
