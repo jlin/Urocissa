@@ -1,6 +1,6 @@
 <template>
   <v-card
-    class="mx-auto position-fixed text-white"
+    class="mx-auto position-fixed"
     append-icon=""
     :title="`${uploadStore.status}`"
     :subtitle="`${humanizeDuration(uploadStore.remainingTime * 1000, {
@@ -28,7 +28,7 @@
             class="ma-4"
           >
             <Transition name="fade-scale" mode="out-in">
-              <v-icon :key="uploadStore.status" color="white" :icon="circularIcon" />
+              <v-icon :key="uploadStore.status" :icon="circularIcon" />
             </Transition>
           </v-progress-circular>
         </Transition>
@@ -50,7 +50,6 @@
         class="ma-4"
         style="width: 100px"
         @click="uploadStore.cancelUpload()"
-        color="'blue-lighten-4'"
       >
         Cancel
       </v-btn>
