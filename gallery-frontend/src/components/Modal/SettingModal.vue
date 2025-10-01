@@ -77,7 +77,7 @@ const subRowHeightScaleValue = computed<number>({
   get: () => constStore.subRowHeightScale,
   set: (newVal: number | null) => {
     const value = newVal ?? constStore.subRowHeightScale
-    const clamped = Math.max(250, Math.min(450, Number(value)))
+    const clamped = Math.max(250, Math.min(450, value))
     constStore.updateSubRowHeightScale(clamped).catch((error: unknown) => {
       console.error('Failed to update subRowHeightScale (via setter):', error)
     })
@@ -88,7 +88,7 @@ const subRowHeightScaleValue = computed<number>({
 const limitRatioValue = computed<boolean>({
   get: () => constStore.limitRatio,
   set: (newVal: boolean | null) => {
-    const value = !!newVal
+    const value = newVal ?? false
     constStore.updateLimitRation(value).catch((error: unknown) => {
       console.error('Failed to update limitRatio (via setter):', error)
     })
@@ -98,18 +98,16 @@ const limitRatioValue = computed<boolean>({
 // computed boolean for light theme switch (read/write)
 const themeIsLight = computed<boolean>({
   get: () => constStore.theme === 'light',
-  set: async (newVal: boolean | null) => {
-    const wantLight = !!newVal
+  set: (newVal: boolean | null) => {
+    const wantLight = newVal ?? false
     const newTheme = wantLight ? 'light' : 'dark'
-    try {
-      await constStore.updateTheme(newTheme)
-
-      if (vuetifyTheme && typeof vuetifyTheme.change === 'function') {
-        vuetifyTheme.change(newTheme)
-      }
-    } catch (err) {
-      console.error('Failed to update theme (via setter):', err)
-    }
+    constStore.updateTheme(newTheme)
+      .then(() => {
+        vuetifyTheme.global.name.value = newTheme
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to update theme (via setter):', err)
+      })
   }
 })
 
@@ -123,21 +121,18 @@ const onSubRowHeightScaleUpdate = (newValue: number | null) => {
 }
 
 const onLimitRatioUpdate = (newValue: boolean | null) => {
-  const value = !!newValue
+  const value = newValue ?? false
   constStore.updateLimitRation(value).catch((error: unknown) => {
     console.error('Failed to update limitRatio:', error)
   })
 }
 
 const onThemeUpdate = async (newValue: boolean | null) => {
-  const wantLight = !!newValue
+  const wantLight = newValue ?? false
   const newTheme = wantLight ? 'light' : 'dark'
   try {
     await constStore.updateTheme(newTheme)
-
-    if (vuetifyTheme && typeof vuetifyTheme.change === 'function') {
-      vuetifyTheme.change(newTheme)
-    }
+    vuetifyTheme.global.name.value = newTheme
   } catch (err) {
     console.error('Failed to update theme:', err)
   }
