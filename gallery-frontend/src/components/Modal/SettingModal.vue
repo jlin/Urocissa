@@ -38,19 +38,6 @@
             ></v-switch>
           </v-col>
         </v-row>
-        <v-row align="center" no-gutters class="mt-4" >
-          <v-col cols="auto">
-            <v-chip variant="text"> Theme </v-chip>
-          </v-col>
-          <v-col>
-            <v-switch
-              :model-value="themeIsLight"
-              @update:model-value="onThemeUpdate"
-              :disabled="!initializedStore.initialized"
-              hide-details
-            ></v-switch>
-          </v-col>
-        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -65,12 +52,10 @@ import { computed } from 'vue'
 import { useModalStore } from '@/store/modalStore'
 import { useInitializedStore } from '@/store/initializedStore'
 import { useConstStore } from '@/store/constStore'
-import { useTheme } from 'vuetify'
 
 const modalStore = useModalStore('mainId')
 const initializedStore = useInitializedStore('mainId')
 const constStore = useConstStore('mainId')
-const vuetifyTheme = useTheme()
 
 // Read/write computed for subRowHeightScale (source of truth is constStore)
 const subRowHeightScaleValue = computed<number>({
@@ -95,22 +80,6 @@ const limitRatioValue = computed<boolean>({
   }
 })
 
-// computed boolean for light theme switch (read/write)
-const themeIsLight = computed<boolean>({
-  get: () => constStore.theme === 'light',
-  set: (newVal: boolean | null) => {
-    const wantLight = newVal ?? false
-    const newTheme = wantLight ? 'light' : 'dark'
-    constStore.updateTheme(newTheme)
-      .then(() => {
-        vuetifyTheme.global.name.value = newTheme
-      })
-      .catch((err: unknown) => {
-        console.error('Failed to update theme (via setter):', err)
-      })
-  }
-})
-
 // Handler invoked when the slider updates its model value
 const onSubRowHeightScaleUpdate = (newValue: number | null) => {
   const value = newValue ?? constStore.subRowHeightScale
@@ -127,14 +96,4 @@ const onLimitRatioUpdate = (newValue: boolean | null) => {
   })
 }
 
-const onThemeUpdate = async (newValue: boolean | null) => {
-  const wantLight = newValue ?? false
-  const newTheme = wantLight ? 'light' : 'dark'
-  try {
-    await constStore.updateTheme(newTheme)
-    vuetifyTheme.global.name.value = newTheme
-  } catch (err) {
-    console.error('Failed to update theme:', err)
-  }
-}
 </script>

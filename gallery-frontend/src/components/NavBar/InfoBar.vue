@@ -47,6 +47,13 @@
       </v-card-text>
     </v-card>
 
+    <v-btn
+      v-if="route.meta.level === 1"
+      :icon="themeIsLight ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+      class="mr-2"
+      :disabled="!initializedStore.initialized"
+      @click="themeIsLight = !themeIsLight"
+    />
     <BtnCreateAlbum v-if="route.meta.level === 1" v-model="loading" />
     <v-btn
       v-if="route.meta.level === 1"
@@ -58,18 +65,39 @@
 </template>
 
 <script setup lang="ts">
-import { inject, Ref, ref, watchEffect } from 'vue'
+import { computed, inject, Ref, ref, watchEffect } from 'vue'
 import { LocationQueryValue, useRoute, useRouter } from 'vue-router'
 import { useFilterStore } from '@/store/filterStore'
 import { useUploadStore } from '@/store/uploadStore'
 import { useAlbumStore } from '@/store/albumStore'
+import { useInitializedStore } from '@/store/initializedStore'
+import { useConstStore } from '@/store/constStore'
 import BtnCreateAlbum from '@Menu/MenuButton/BtnCreateAlbum.vue'
+import { useTheme } from 'vuetify'
 
 const showDrawer = inject('showDrawer')
 
 const albumStore = useAlbumStore('mainId')
 const uploadStore = useUploadStore('mainId')
 const filterStore = useFilterStore('mainId')
+const initializedStore = useInitializedStore('mainId')
+const constStore = useConstStore('mainId')
+const vuetifyTheme = useTheme()
+
+const themeIsLight = computed<boolean>({
+  get: () => constStore.theme === 'light',
+  set: (newVal: boolean | null) => {
+    const wantLight = newVal ?? false
+    const newTheme = wantLight ? 'light' : 'dark'
+    constStore.updateTheme(newTheme)
+      .then(() => {
+        vuetifyTheme.global.name.value = newTheme
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to update theme (via InfoBar):', err)
+      })
+  }
+})
 
 const route = useRoute()
 const router = useRouter()
