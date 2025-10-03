@@ -50,7 +50,6 @@
     <v-btn
       v-if="route.meta.level === 1"
       :icon="themeIsLight ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-      class="mr-2"
       :disabled="!initializedStore.initialized"
       @click="themeIsLight = !themeIsLight"
     />
