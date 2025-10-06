@@ -31,6 +31,17 @@ export const useConstStore = (isolationId: IsolationId) =>
       theme: 'dark'
     }),
     actions: {
+      async toggleTheme(vuetifyTheme?: { global: { name: { value: string } } }): Promise<void> {
+        const newTheme = this.theme === 'light' ? 'dark' : 'light'
+        this.theme = newTheme
+        await storeTheme(newTheme)
+        
+        // Update Vuetify theme if provided
+        if (vuetifyTheme) {
+          vuetifyTheme.global.name.value = newTheme
+        }
+      },
+
       async updateSubRowHeightScale(value: number): Promise<void> {
         this.subRowHeightScale = value
         await storeSubRowHeightScale(value)

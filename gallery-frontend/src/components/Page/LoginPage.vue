@@ -74,19 +74,12 @@ const redirectionStore = useRedirectionStore('mainId')
 const constStore = useConstStore('mainId')
 const vuetifyTheme = useTheme()
 
-// Theme toggle logic (copied from InfoBar.vue)
 const themeIsLight = computed<boolean>({
   get: () => constStore.theme === 'light',
-  set: (newVal: boolean | null) => {
-    const wantLight = newVal ?? false
-    const newTheme = wantLight ? 'light' : 'dark'
-    constStore.updateTheme(newTheme)
-      .then(() => {
-        vuetifyTheme.global.name.value = newTheme
-      })
-      .catch((err: unknown) => {
-        console.error('Failed to update theme (via LoginPage):', err)
-      })
+  set: () => {
+    constStore.toggleTheme(vuetifyTheme).catch((err: unknown) => {
+      console.error('Failed to update theme (via LoginPage):', err)
+    })
   }
 })
 
