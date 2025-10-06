@@ -1,5 +1,14 @@
 <template>
   <v-container fluid class="fill-height">
+    <!-- Theme toggle button positioned at top right -->
+    <v-btn
+      class="theme-toggle-btn"
+      :icon="themeIsLight ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+      @click="themeIsLight = !themeIsLight"
+      size="large"
+      variant="text"
+    />
+    
     <v-row class="fill-height justify-center align-center">
       <v-col cols="12" sm="8" md="6" lg="4">
         <v-card
@@ -45,13 +54,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { z } from 'zod'
 import { useRedirectionStore } from '@/store/redirectionStore'
 import { tryWithMessageStore } from '@/script/utils/try_catch'
+import { useConstStore } from '@/store/constStore'
+import { useTheme } from 'vuetify'
 
 const password = ref('')
 const showPassword = ref(false)
@@ -60,6 +71,24 @@ const form = ref()
 
 const router = useRouter()
 const redirectionStore = useRedirectionStore('mainId')
+const constStore = useConstStore('mainId')
+const vuetifyTheme = useTheme()
+
+// Theme toggle logic (copied from InfoBar.vue)
+const themeIsLight = computed<boolean>({
+  get: () => constStore.theme === 'light',
+  set: (newVal: boolean | null) => {
+    const wantLight = newVal ?? false
+    const newTheme = wantLight ? 'light' : 'dark'
+    constStore.updateTheme(newTheme)
+      .then(() => {
+        vuetifyTheme.global.name.value = newTheme
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to update theme (via LoginPage):', err)
+      })
+  }
+})
 
 // Form validation rules
 const rules = {
@@ -107,6 +136,13 @@ const handleLogin = async () => {
 
 .login-card {
   max-width: 400px;
+}
+
+.theme-toggle-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
 }
 
 /* Responsive adjustments */
